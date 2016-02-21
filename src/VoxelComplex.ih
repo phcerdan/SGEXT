@@ -1,0 +1,56 @@
+#include <iostream>
+template <typename TKSpace, typename TCellContainer>
+bool DGtal::VoxelComplex< TKSpace, TCellContainer >::isReducible(
+    bool verbose )
+{
+  size_t voxel_dim = TKSpace::dimension ;
+  // Single Voxel is the end condition of the recursive definition.
+  if(verbose) trace.info() << "nbCells" <<
+      " Dim: " << voxel_dim << " " << this->nbCells(voxel_dim) <<
+      " Dim: " << voxel_dim -1 << " " << this->nbCells(voxel_dim -1) << std::endl;
+  if ( this->nbCells(voxel_dim) == 1) return true;
+  // It must be non-empty and connected.
+  if ( this->size() == 0) return false;
+  //TODO:
+  //if (this->isConnected == false) return false;
+  // Recursion.
+  auto first = this->myKSpace->lowerCell();
+  auto last  = this->myKSpace->upperCell();
+  auto p = first;
+  bool reducible_status = false;
+  return reducible_status;
+  // do
+  // {
+  //   auto neighbors  = this->myKSpace->uProperNeighborhood(p);
+  //   reducible_status = is_reducible(neighbors); // && is_reducible(rest_of_the_space);
+  // } while( K.uNext(p, first, last) && reducible_status != true);
+
+}
+// template <typename TKSpace, typename TCells>
+// bool DGtal::functions::is_reducible(TCells & set_of_cells)
+// {
+//   // Create a CubicalComplex K from the set of cells.
+//   // Apply the other is_reducible to it.
+// }
+//
+// template <typename TKSpace, typename TCellContainer, typename TCell >
+// bool DGtal::functions::voxel_is_simple( CubicalComplex< TKSpace, TCellContainer > & K,
+//                    TCell& c,
+//                    bool verbose )
+// {
+//
+//   // auto neighbors = K.uProperNeighborhood(c);
+//   // return is_reducible(neighbors);
+// }
+//
+template <typename TKSpace, typename TCellContainer>
+bool DGtal::VoxelComplex< TKSpace, TCellContainer >::voxelIsSimple(
+    DGtal::VoxelComplex<TKSpace, TCellContainer>::Cell& input_cell,
+    bool verbose ) const
+{
+  // auto nb = getNeighbors(input_cell);
+  // auto cc = CellsToComplex(nb);
+  // input_cell.isReducible();
+
+
+}
