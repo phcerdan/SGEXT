@@ -8,6 +8,10 @@ endif()
 project(dgtal-play)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+find_package(Boost COMPONENTS
+        program_options
+        REQUIRED)
+include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 find_package(DGtal REQUIRED)
 include_directories(SYSTEM ${DGTAL_INCLUDE_DIRS})
 find_package(ITK REQUIRED)
@@ -18,12 +22,8 @@ find_package(Qt5 REQUIRED
     Xml
     OpenGL)
 
-add_executable(main main.cpp)
-target_link_libraries(main ${ITK_LIBRARIES} )
-target_link_libraries(main ${DGTAL_LIBRARIES} )
-target_link_libraries(main Qt5::Widgets Qt5::Xml )
-
-add_executable(testVoxelThin testVoxelComplexThinning.cpp )
-target_link_libraries(testVoxelThin ${ITK_LIBRARIES} )
-target_link_libraries(testVoxelThin ${DGTAL_LIBRARIES} )
-target_link_libraries(testVoxelThin Qt5::Widgets Qt5::Xml )
+add_executable(thin thin.cpp)
+target_link_libraries(thin ${Boost_LIBRARIES} )
+target_link_libraries(thin ${ITK_LIBRARIES} )
+target_link_libraries(thin ${DGTAL_LIBRARIES} )
+target_link_libraries(thin Qt5::Widgets Qt5::Xml )
