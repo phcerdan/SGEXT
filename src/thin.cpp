@@ -1,4 +1,5 @@
 #include <iostream>
+#include <chrono>
 #include <DGtal/base/Common.h>
 #include <DGtal/helpers/StdDefs.h>
 #include <DGtal/io/readers/ITKReader.h>
@@ -33,19 +34,20 @@ int main(int argc, char* const argv[]){
   po::options_description general_opt ( "Allowed options are: " );
   general_opt.add_options()
     ( "help,h", "display this message." )
-    ( "input,i", po::value<std::string>()->required(), "Input vol file." )
-    ( "skel,s",  po::value<std::string>()->required(), "type of skeletonization" )
-    ( "foreground,f",  po::value<std::string>()->default_value("black"), "foreground color in binary image" )
+    ( "input,i", po::value<string>()->required(), "Input vol file." )
+    ( "skel,s",  po::value<string>()->required(), "type of skeletonization" )
+    ( "foreground,f",  po::value<string>()->default_value("black"), "foreground color in binary image" )
     ( "thresholdMin,m",  po::value<int>()->default_value(0), "threshold min (excluded) to define binary shape" )
     ( "thresholdMax,M",  po::value<int>()->default_value(255), "threshold max (included) to define binary shape" )
-    ( "persistence,p",  po::value<int>()->default_value(0), "persistence value, implies use of persistence algorithm" )
+    ( "persistence,p",  po::value<int>()->default_value(0), "persistence value, implies use of persistence algorithm if p>=1" )
+    ( "profile",  po::bool_switch()->default_value(false), "profile algorithm" )
     ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output" );
   bool parseOK=true;
   po::variables_map vm;
 
   try {
     po::store(po::parse_command_line(argc, argv, general_opt), vm);
-  } catch(const std::exception& ex) {
+  } catch(const exception& ex) {
     parseOK=false;
     trace.info()<< "Error checking program options: "<< ex.what()<< endl;
   }
@@ -53,33 +55,34 @@ int main(int argc, char* const argv[]){
   if (!parseOK || vm.count ( "help" ) || argc<=1 )
   {
     trace.info() <<
-      "Compute the Euleur Characteristic of  a vol to a 8-bit raw file."
-      " The vol file is first binarized using interval"
-      " [m,M[ thresholds and the Eucler characteristic is given from the cubical complex"<<std::endl
-      << std::endl << "Basic usage: "<<std::endl
-      << "asymThin -i <volFileName> -s <skel_string> [ -f <white> -m <minlevel> -M <maxlevel> -v ] "<<std::endl
-      << "options for skel_string = null, end, 1is, is" << std::endl
-      << general_opt << "\n";
+    "Compute the thinning of a volume using an AsymetricThinningScheme"<< endl
+    << endl << "Basic usage: "<< endl
+    << "asymThin -i <volFileName> -s <ulti,end,1is,is>"
+    " [ -f <white,black> -m <minlevel> -M <maxlevel> -v ] "
+    " [-p <value>" << endl
+    << "options for skel_string = ulti, end, 1is, is" << endl
+    << general_opt << "\n";
     return 0;
   }
   //Parse options
-  std::string filename = vm["input"].as<std::string>();
+  string filename = vm["input"].as<string>();
   bool verbose = vm["verbose"].as<bool>();
+  bool profile = vm["profile"].as<bool>();
   int thresholdMin = vm["thresholdMin"].as<int>();
   int thresholdMax = vm["thresholdMax"].as<int>();
   int persistence = vm["persistence"].as<int>();
   if (vm.count("persistence") && persistence < 0 )
-        throw po::validation_error(po::validation_error::invalid_option_value, "persitence");
-  std::string foreground = vm["foreground"].as<std::string>();
+    throw po::validation_error(po::validation_error::invalid_option_value, "persitence");
+  string foreground = vm["foreground"].as<string>();
   if (vm.count("foreground") && (!(foreground == "white" || foreground == "black")))
-        throw po::validation_error(po::validation_error::invalid_option_value, "foreground");
+    throw po::validation_error(po::validation_error::invalid_option_value, "foreground");
   bool invert_image = (foreground == "black") ? true : false ;
 
-  std::string sk_string = vm["skel"].as<std::string>();
+  string sk_string = vm["skel"].as<string>();
   if (vm.count("skel") &&
-      (!( sk_string == "null" || sk_string == "end" ||
+     (!( sk_string == "ulti" || sk_string == "end" ||
          sk_string == "1is" || sk_string == "is")))
-        throw po::validation_error(po::validation_error::invalid_option_value, "skel");
+     throw po::validation_error(po::validation_error::invalid_option_value, "skel");
   /*-------------- End of parse -----------------------------*/
 
   using Domain = Domain ;
@@ -151,17 +154,23 @@ int main(int argc, char* const argv[]){
 
   std::function< bool(const Complex&, const Cell&) > Skel ;
   auto & sk = sk_string;
-  if (sk == "null") Skel = skelNull<Complex>;
+  if (sk == "ulti") Skel = skelUltimate<Complex>;
   else if (sk == "end") Skel = skelEnd<Complex>;
   else if (sk == "1is") Skel = oneIshtmus<Complex>;
   else if (sk == "is") Skel = skelIshtmus<Complex>;
   else throw std::runtime_error("Invalid skel string");
+  auto start = std::chrono::system_clock::now();
   Complex vc_new(ks);
   if (persistence == 0)
-    vc_new = asymetricThinningScheme< Complex >(vc, selectRandom<Complex>,  Skel, verbose);
+    vc_new = asymetricThinningScheme< Complex >(
+        vc, selectRandom<Complex>,  Skel, verbose);
   else
-    vc_new = persistenceAsymetricThinningScheme< Complex >(vc, selectRandom<Complex>,  Skel, persistence, verbose);
+    vc_new = persistenceAsymetricThinningScheme< Complex >(
+        vc, selectRandom<Complex>,  Skel, persistence, verbose);
 
+  auto end = std::chrono::system_clock::now();
+  auto elapsed = std::chrono::duration_cast<std::chrono::seconds> (end - start) ;
+  if (profile) std::cout <<"Time elapsed: " << elapsed.count() << std::endl;
   // THEN( "visualize the cells" )
   {
     int argc(1);
