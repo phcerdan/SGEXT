@@ -14,8 +14,8 @@
 
 #include <DGtal/topology/VoxelComplex.h>
 #include <DGtal/topology/VoxelComplexFunctions.h>
-#include <DGtal/topology/tables/LookUpTableFunctions.h>
-#include <DGtal/topology/tables/ConfigTables.h>
+#include "DGtal/topology/NeighborhoodConfigurations.h"
+#include "DGtal/topology/tables/NeighborhoodTables.h"
 // Invert
 #include "itkInvertIntensityImageFilter.h"
 #include <DGtal/io/viewers/Viewer3D.h>
@@ -168,13 +168,14 @@ int main(int argc, char* const argv[]){
   trace.beginBlock("construct with table");
   Complex vc(ks);
   // vc.construct(obj);
-  vc.construct(obj.pointSet(), lut::tableSimple26_6);
+  vc.construct(obj.pointSet(), functions::loadTable(simplicity::tableSimple26_6 ));
   trace.endBlock();
   trace.beginBlock("load isthmus table");
   boost::dynamic_bitset<> isthmus_table;
-  if (sk == "isthmus") isthmus_table = *lut::loadTable(lut::tableIsthmus);
-  else if (sk == "1isthmus") isthmus_table = *lut::loadTable(lut::tableOneIsthmus);
-  auto pointMap = *lut::mapPointToBitMask<Point>();
+  if (sk == "isthmus") isthmus_table = *functions::loadTable(isthmusicity::tableIsthmus);
+  else if (sk == "1isthmus") isthmus_table = *functions::loadTable(isthmusicity::tableOneIsthmus);
+  auto pointMap = *functions::mapZeroPointNeighborhoodToConfigurationMask<Point>();
+
   trace.endBlock();
   using namespace DGtal::functions ;
   // SKEL FUNCTION:
