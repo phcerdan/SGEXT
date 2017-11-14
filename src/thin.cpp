@@ -3,9 +3,11 @@
 #include <unordered_map>
 #include <DGtal/base/Common.h>
 #include <DGtal/helpers/StdDefs.h>
-#include <DGtal/io/readers/ITKReader.h>
+#include <DGtal/io/readers/GenericReader.h>
 #include <DGtal/images/ImageContainerByITKImage.h>
-#include <DGtal/images/imagesSetsUtils/SetFromImage.h>
+#include "DGtal/images/imagesSetsUtils/SetFromImage.h"
+// #include "DGtal/images/SimpleThresholdForegroundPredicate.h"
+#include "DGtal/images/ImageSelector.h"
 
 #include <DGtal/topology/SurfelAdjacency.h>
 #include <DGtal/io/boards/Board2D.h>
@@ -102,10 +104,13 @@ int main(int argc, char* const argv[]){
      throw po::validation_error(po::validation_error::invalid_option_value, "select");
   /*-------------- End of parse -----------------------------*/
 
-  using Domain = Domain ;
-  using Image = ImageContainerByITKImage<Domain, unsigned char> ;
+  using Domain = Z3i::Domain ;
+  // using Image = ImageContainerByITKImage<Domain, unsigned char> ;
 
-  Image imageReader = ITKReader<Image>::importITK(filename);
+  using Image = ImageSelector < Z3i::Domain, unsigned char>::Type ;
+  Image imageReader = GenericReader<Image>::import( filename );
+
+  // Image imageReader = ITKReader<Image>::importITK(filename);
   const unsigned int Dim = 3;
   using PixelType = unsigned char ;
   using ItkImageType = itk::Image<PixelType, Dim> ;
