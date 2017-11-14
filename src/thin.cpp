@@ -4,6 +4,7 @@
 #include <DGtal/base/Common.h>
 #include <DGtal/helpers/StdDefs.h>
 #include <DGtal/io/readers/GenericReader.h>
+#include <DGtal/io/readers/ITKReader.h>
 #include <DGtal/images/ImageContainerByITKImage.h>
 #include "DGtal/images/imagesSetsUtils/SetFromImage.h"
 // #include "DGtal/images/SimpleThresholdForegroundPredicate.h"
@@ -52,7 +53,8 @@ int main(int argc, char* const argv[]){
     ( "thresholdMax,M",  po::value<int>()->default_value(255), "threshold max (included) to define binary shape" )
     ( "persistence,p",  po::value<int>()->default_value(0), "persistence value, implies use of persistence algorithm if p>=1" )
     ( "profile",  po::bool_switch()->default_value(false), "profile algorithm" )
-    ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output" );
+    ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output" )
+    ( "exportSDP,e", po::value<std::string>(), "Export the resulting set of points in a simple (sequence of discrete point (sdp)).");
   bool parseOK=true;
   po::variables_map vm;
 
@@ -105,12 +107,8 @@ int main(int argc, char* const argv[]){
   /*-------------- End of parse -----------------------------*/
 
   using Domain = Z3i::Domain ;
-  // using Image = ImageContainerByITKImage<Domain, unsigned char> ;
-
-  using Image = ImageSelector < Z3i::Domain, unsigned char>::Type ;
-  Image imageReader = GenericReader<Image>::import( filename );
-
-  // Image imageReader = ITKReader<Image>::importITK(filename);
+  using Image = ImageContainerByITKImage<Domain, unsigned char> ;
+  Image imageReader = ITKReader<Image>::importITK(filename);
   const unsigned int Dim = 3;
   using PixelType = unsigned char ;
   using ItkImageType = itk::Image<PixelType, Dim> ;
@@ -244,18 +242,28 @@ int main(int argc, char* const argv[]){
     QApplication app(argc, argv);
     Viewer3D<> viewer(ks);
     viewer.show();
+    const auto & thin_set = vc_new.objectSet();
+    const auto & all_set = obj.pointSet();
 
     viewer.setFillColor(Color(255, 255, 255, 255));
-    for ( auto it = vc_new.begin(3); it!= vc_new.end(3); ++it )
-      viewer << it->first;
-    // viewer << image_set;
+    viewer << thin_set;
 
     // All kspace voxels
     viewer.setFillColor(Color(40, 200, 55, 10));
-    for ( auto it = vc.begin(3); it!= vc.end(3); ++it )
-      viewer << it->first;
+    viewer << all_set;
 
     viewer << Viewer3D<>::updateDisplay;
+
+    // Export it
+    if (vm.count("exportSDP"))
+    {
+      std::ofstream out;
+      out.open(vm["exportSDP"].as<std::string>().c_str());
+      for (auto &p : thin_set)
+      {
+        out << p[0] << " " << p[1] << " " << p[2] << std::endl;
+      }
+    }
     app.exec();
   }
 }

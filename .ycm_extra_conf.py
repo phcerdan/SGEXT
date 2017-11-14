@@ -61,7 +61,7 @@ flags = [
 '-DUNIX',
 '-DWITH_QT5',
 '-DvtkRenderingCore_AUTOINIT=3(vtkInteractionStyle,vtkRenderingFreeType,vtkRenderingOpenGL)',
-'-I/home/phc/Software/DGtal/fork-build/ITKIOFactoryRegistration',
+'-I/home/phc/Software/DGtal/fork/ITKIOFactoryRegistration',
 '-I/usr/include/freetype2',
 '-I/usr/include/vtk',
 '-I/opt/cuda/include/CL',
@@ -71,11 +71,11 @@ flags = [
 '-I/usr/include/cairo',
 '-I/usr/local/include',
 '-isystem', '/usr/include/eigen3',
-'-I/home/phc/Software/DGtal/fork-build',
 '-I/home/phc/Software/DGtal/src-fork/src',
-'-I/home/phc/Software/DGtal/fork-build/src',
 '-I/home/phc/Software/DGtal/src-fork/tests',
-'-I/home/phc/Software/DGtal/fork-build/tests',
+'-I/home/phc/Software/DGtal/build',
+'-I/home/phc/Software/DGtal/build/src',
+'-I/home/phc/Software/DGtal/build/tests',
 '-isystem', '/usr/include/qt',
 '-isystem', '/usr/include/qt/QtWidgets',
 '-isystem', '/usr/include/qt/QtGui',
@@ -100,6 +100,8 @@ def GetIncludeTemplateDeclaration( filename ):
 
 def FlagsForFile( filename, **kwargs ):
     flags.extend( GetIncludeTemplateDeclaration( filename ) )
+    #Prepend: (no changes)
+    #flags[:0] = GetIncludeTemplateDeclaration( filename )
 
     return {
         'flags': flags,
