@@ -36,7 +36,7 @@ import ycm_core
 flags = [
 '-x',
 'c++',
-'-std=c++11',
+'-std=c++14',
 '-Wall',
 '-Wextra',
 '-pedantic',
@@ -61,11 +61,11 @@ flags = [
 '-DUNIX',
 '-DWITH_QT5',
 '-DvtkRenderingCore_AUTOINIT=3(vtkInteractionStyle,vtkRenderingFreeType,vtkRenderingOpenGL)',
-'-I/home/phc/Software/DGtal/fork/ITKIOFactoryRegistration',
+'-I/home/phc/Software/DGtal/build/ITKIOFactoryRegistration',
 '-I/usr/include/freetype2',
 '-I/usr/include/vtk',
 '-I/opt/cuda/include/CL',
-'-I/home/phc/devtoolset/release/ITK/include/ITK-4.9',
+'-I/home/phc/devtoolset/release/ITK/include/ITK-4.10',
 '-isystem', '/home/phc/devtoolset/release/include',
 '-I/usr/include/GraphicsMagick',
 '-I/usr/include/cairo',
@@ -114,8 +114,8 @@ def FlagsForFile( filename, **kwargs ):
 #
 # Most projects will NOT need to set this to anything; you can just change the
 # 'flags' list of compilation flags. Notice that YCM itself uses that approach.
-# compilation_database_folder = '/home/phc/Software/DGtal/fork-build'
-compilation_database_folder = ''
+compilation_database_folder = '/home/phc/repository_local/dgtal-play/build/'
+# compilation_database_folder = ''
 
 if os.path.exists( compilation_database_folder ):
   database = ycm_core.CompilationDatabase( compilation_database_folder )
