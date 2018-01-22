@@ -6,8 +6,8 @@
 #include <DGtal/topology/Object.h>
 #include <iostream>
 
-// #include <boost/graph/depth_first_search.hpp>
 #include "reduce_dfs_visitor.hpp"
+#include "spatial_graph_from_object.hpp"
 
 struct spatial_graph {
     using GraphType = SG::GraphAL;
@@ -17,29 +17,27 @@ struct spatial_graph {
     using edge_iterator =
         typename boost::graph_traits<GraphType>::edge_iterator;
 };
-void print_pos(std::ostream & out, const SG::SpatialNode::Point & pos)
-{
+void print_pos(std::ostream &out, const SG::SpatialNode::Point &pos) {
     out << "{";
-    for (auto & p : pos) {
-        if ( p >= 0 )
+    for (auto &p : pos) {
+        if (p >= 0)
             out << " ";
         out << p << ",";
     }
     out << "}";
 }
 
-void print_degrees(const spatial_graph::GraphType & graph)
-{
+void print_degrees(const spatial_graph::GraphType &graph) {
     std::cout << "Print degrees spatial_graph:" << std::endl;
     std::cout << "Num Vertices: " << boost::num_vertices(graph) << std::endl;
     spatial_graph::vertex_iterator vi, vi_end;
     std::tie(vi, vi_end) = boost::vertices(graph);
     for (; vi != vi_end; ++vi) {
-        std::cout << *vi << ": " << boost::out_degree(*vi, graph) << std::endl;
+        std::cout << *vi << ": " << ArrayUtilities::to_string(graph[*vi].pos) <<
+            ". Degree: " << boost::out_degree(*vi, graph) << std::endl;
     }
 }
-void print_edges(const spatial_graph::GraphType & graph)
-{
+void print_edges(const spatial_graph::GraphType &graph) {
     std::cout << "Print edges spatial_graph:" << std::endl;
     std::cout << "Num Edges: " << boost::num_edges(graph) << std::endl;
     spatial_graph::edge_iterator ei, ei_end;
@@ -53,38 +51,90 @@ void print_edges(const spatial_graph::GraphType & graph)
         std::cout << std::endl;
     }
 }
+/**
+ * Spatial Graph
+ *
+ * o-o
+ * | |
+ * o-o
+ */
+struct sg_square : public spatial_graph {
+    sg_square() {
+        using boost::add_edge;
+        this->g = GraphType(4);
+        g[0].pos = {{0, 0, 0}};
+        g[1].pos = {{1, 0, 0}};
+        g[2].pos = {{1, 1, 0}};
+        g[3].pos = {{0, 1, 0}};
+        add_edge(0, 1, g);
+        add_edge(1, 2, g);
+        add_edge(2, 3, g);
+        add_edge(3, 0, g);
+    }
+};
+
+struct sg_square_expected : public spatial_graph {
+    sg_square_expected() {
+        using boost::add_edge;
+        this->g = GraphType(2);
+        g[0].pos = {{0, 0, 0}};
+        g[1].pos = {{1, 1, 0}};
+
+        SG::SpatialEdge se01_1;
+        se01_1.edge_points.insert(std::end(se01_1.edge_points),
+                                {{1,0,0}});
+        add_edge(0, 1, se01_1, g);
+        SG::SpatialEdge se01_2;
+        se01_2.edge_points.insert(std::end(se01_2.edge_points),
+                                {{0,1,0}});
+        add_edge(0, 1, se01_2, g);
+    }
+};
 
 /**
  * Spatial Graph
- *     o
- *   o |  o
- *    \| /
- *     o
- *    / \
- *   o   o
+ *
+ * o-o
+ * | |
+ * o-o
+ * |
+ * o
  */
-struct sg_star : public spatial_graph {
-    sg_star() {
+struct sg_square_plus_one : public spatial_graph {
+    sg_square_plus_one() {
         using boost::add_edge;
-        this->g = GraphType(6);
-        // Add edge with an associated SpatialEdge at construction.
-        SG::SpatialEdge se01;
-        se01.edge_points.push_back({{0, 0.5, 0}});
-        add_edge(0, 1, se01, g);
-        add_edge(0, 2, g);
-        add_edge(0, 3, g);
-        add_edge(0, 4, g);
-        add_edge(0, 5, g);
-        // boost graph is constructed, populate now the spatial graph.
+        this->g = GraphType(5);
         g[0].pos = {{0, 0, 0}};
-        g[1].pos = {{0, 1, 0}};
-        g[2].pos = {{0.5, 0.5, 0}};
-        g[3].pos = {{0.5, -0.5, 0}};
-        g[4].pos = {{-0.5, -0.5, 0}};
-        g[5].pos = {{-0.5, 0.5, 0}};
-        // Get the edge_descriptor and use it to access the SpatialEdge.
-        auto se02_p = edge(0, 2, g);
-        g[se02_p.first].edge_points.push_back({{0.25, 0.25, 0}});
+        g[1].pos = {{1, 0, 0}};
+        g[2].pos = {{1, 1, 0}};
+        g[3].pos = {{0, 1, 0}};
+        g[4].pos = {{0, -1, 0}};
+        add_edge(0, 1, g);
+        add_edge(1, 2, g);
+        add_edge(2, 3, g);
+        add_edge(3, 0, g);
+        add_edge(4, 0, g);
+    }
+};
+
+struct sg_square_plus_one_expected : public spatial_graph {
+    sg_square_plus_one_expected() {
+        using boost::add_edge;
+        this->g = GraphType(3);
+        g[0].pos = {{0, 0, 0}};
+        g[1].pos = {{1, 1, 0}};
+        g[2].pos = {{0, -1, 0}};
+
+        SG::SpatialEdge se01_1;
+        se01_1.edge_points.insert(std::end(se01_1.edge_points),
+                                {{1,0,0}});
+        add_edge(0, 1, se01_1, g);
+        SG::SpatialEdge se01_2;
+        se01_2.edge_points.insert(std::end(se01_2.edge_points),
+                                {{0,1,0}});
+        add_edge(0, 1, se01_2, g);
+
+        add_edge(0,2, g);
     }
 };
 
@@ -145,16 +195,13 @@ struct sg_easy : public spatial_graph {
         g[3].pos = e2;
 
         SG::SpatialEdge se01;
-        se01.edge_points.insert(std::end(se01.edge_points),
-                                {n1, n2});
+        se01.edge_points.insert(std::end(se01.edge_points), {n1, n2});
         add_edge(0, 1, se01, g);
         SG::SpatialEdge se12;
-        se12.edge_points.insert(std::end(se12.edge_points),
-                                {s1, s2});
+        se12.edge_points.insert(std::end(se12.edge_points), {s1, s2});
         add_edge(1, 2, se12, g);
         SG::SpatialEdge se13;
-        se13.edge_points.insert(std::end(se13.edge_points),
-                                {e1});
+        se13.edge_points.insert(std::end(se13.edge_points), {e1});
         add_edge(1, 3, se13, g);
     }
 };
@@ -189,16 +236,13 @@ struct sg_easy_centered : public spatial_graph {
         g[3].pos = e2;
 
         SG::SpatialEdge se01;
-        se01.edge_points.insert(std::end(se01.edge_points),
-                                {n1, n2});
+        se01.edge_points.insert(std::end(se01.edge_points), {n1, n2});
         add_edge(0, 1, se01, g);
         SG::SpatialEdge se12;
-        se12.edge_points.insert(std::end(se12.edge_points),
-                                {s1, s2});
+        se12.edge_points.insert(std::end(se12.edge_points), {s1, s2});
         add_edge(1, 2, se12, g);
         SG::SpatialEdge se13;
-        se13.edge_points.insert(std::end(se13.edge_points),
-                                {e1});
+        se13.edge_points.insert(std::end(se13.edge_points), {e1});
         add_edge(1, 3, se13, g);
     }
 };
@@ -216,8 +260,8 @@ struct sg_easy_centered : public spatial_graph {
  * o
  * Ideally we want to remove the diagonal edges in the sg and its nodes.
  * We want to keep the center node, and remove all the other 3,
- * which are really not nodes, but edge_points of the edges going to the center node.
- * All 5 sg_edges have no edge points.
+ * which are really not nodes, but edge_points of the edges going to the center
+ * node. All 5 sg_edges have no edge points.
  */
 struct sg_extra_connected_junctions : public spatial_graph {
     sg_extra_connected_junctions() {
@@ -242,15 +286,13 @@ struct sg_extra_connected_junctions : public spatial_graph {
         g[5].pos = e1;
         g[6].pos = e2;
 
-        //North
+        // North
         SG::SpatialEdge se01;
-        se01.edge_points.insert(std::end(se01.edge_points),
-                                {n2});
+        se01.edge_points.insert(std::end(se01.edge_points), {n2});
         add_edge(0, 1, se01, g);
-        //South
+        // South
         SG::SpatialEdge se34;
-        se34.edge_points.insert(std::end(se34.edge_points),
-                                {s2});
+        se34.edge_points.insert(std::end(se34.edge_points), {s2});
         add_edge(3, 4, se34, g);
         // East
         SG::SpatialEdge se56;
@@ -286,15 +328,15 @@ struct object_graph {
     Object obj;
     using vertex_iterator =
         typename boost::graph_traits<Object>::vertex_iterator;
-    using edge_iterator =
-        typename boost::graph_traits<Object>::edge_iterator;
+    using edge_iterator = typename boost::graph_traits<Object>::edge_iterator;
     void print_degrees() {
         std::cout << "Print degrees obj:" << std::endl;
         std::cout << "Num Vertices: " << boost::num_vertices(obj) << std::endl;
         vertex_iterator vi, vi_end;
         std::tie(vi, vi_end) = boost::vertices(obj);
         for (; vi != vi_end; ++vi) {
-            std::cout << *vi << ": " << boost::out_degree(*vi, obj) << std::endl;
+            std::cout << *vi << ": " << boost::out_degree(*vi, obj)
+                      << std::endl;
         }
     }
     void print_edges() {
@@ -303,7 +345,8 @@ struct object_graph {
         edge_iterator ei, ei_end;
         std::tie(ei, ei_end) = boost::edges(obj);
         for (; ei != ei_end; ++ei) {
-            std::cout << boost::source(*ei, obj) << "---" << boost::target(*ei, obj) << std::endl;
+            std::cout << boost::source(*ei, obj) << "---"
+                      << boost::target(*ei, obj) << std::endl;
         }
     }
 };
@@ -361,15 +404,15 @@ struct easy : public object_graph {
         Domain::Point b2(10, 10, 10);
         Domain domain(b1, b2);
         DigitalSet obj_set(domain);
-        Domain::Point n3 ( 0,  3, 0);
-        Domain::Point n2 ( 0,  2, 0);
-        Domain::Point n1 ( 0,  1, 0);
-        Domain::Point p0 ( 1,  0, 0);
-        Domain::Point e1 ( 2,  0, 0);
-        Domain::Point e2 ( 3,  0, 0);
-        Domain::Point s1 ( 0, -1, 0);
-        Domain::Point s2 ( 0, -2, 0);
-        Domain::Point s3 ( 0, -3, 0);
+        Domain::Point n3(0, 3, 0);
+        Domain::Point n2(0, 2, 0);
+        Domain::Point n1(0, 1, 0);
+        Domain::Point p0(1, 0, 0);
+        Domain::Point e1(2, 0, 0);
+        Domain::Point e2(3, 0, 0);
+        Domain::Point s1(0, -1, 0);
+        Domain::Point s2(0, -2, 0);
+        Domain::Point s3(0, -3, 0);
         obj_set.insertNew(n3);
         obj_set.insertNew(n2);
         obj_set.insertNew(n1);
@@ -413,15 +456,15 @@ struct extra_connected_junctions : public object_graph {
         Domain::Point b2(10, 10, 10);
         Domain domain(b1, b2);
         DigitalSet obj_set(domain);
-        Domain::Point n3 ( 0,  3, 0);
-        Domain::Point n2 ( 0,  2, 0);
-        Domain::Point n1 ( 0,  1, 0);
-        Domain::Point p0 ( 0,  0, 0);
-        Domain::Point e1 ( 1,  0, 0);
-        Domain::Point e2 ( 2,  0, 0);
-        Domain::Point s1 ( 0, -1, 0);
-        Domain::Point s2 ( 0, -2, 0);
-        Domain::Point s3 ( 0, -3, 0);
+        Domain::Point n3(0, 3, 0);
+        Domain::Point n2(0, 2, 0);
+        Domain::Point n1(0, 1, 0);
+        Domain::Point p0(0, 0, 0);
+        Domain::Point e1(1, 0, 0);
+        Domain::Point e2(2, 0, 0);
+        Domain::Point s1(0, -1, 0);
+        Domain::Point s2(0, -2, 0);
+        Domain::Point s3(0, -3, 0);
         obj_set.insertNew(n3);
         obj_set.insertNew(n2);
         obj_set.insertNew(n1);
@@ -479,12 +522,11 @@ bool equal_edge_points(const spatial_graph::GraphType &lhs_g,
     return lhs_edge_points == rhs_edge_points;
 }
 
-TEST_CASE_METHOD(one_edge,
-                 "Convert one_edge obj to spatial graph",
+TEST_CASE_METHOD(one_edge, "Convert one_edge obj to spatial graph",
                  "[convert]") {
     std::cout << "Convert one_edge" << std::endl;
     using SpatialGraph = sg_one_edge::GraphType;
-    SpatialGraph sg = spatial_graph_from_object<Object, SpatialGraph>(obj);
+    SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
     CHECK(boost::num_vertices(sg) == boost::num_vertices(obj));
     CHECK(boost::num_edges(sg) == boost::num_edges(obj) / 2.0);
     // Dev code:
@@ -504,7 +546,7 @@ TEST_CASE_METHOD(extra_connected_junctions,
                  "[convert]") {
     std::cout << "Convert extra" << std::endl;
     using SpatialGraph = sg_extra_connected_junctions::GraphType;
-    SpatialGraph sg = spatial_graph_from_object<Object, SpatialGraph>(obj);
+    SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
     CHECK(boost::num_vertices(sg) == boost::num_vertices(obj));
     CHECK(boost::num_edges(sg) == boost::num_edges(obj) / 2.0);
     // Dev code:
@@ -530,8 +572,8 @@ TEST_CASE_METHOD(one_edge, "Reduce graph with degrees <=2 to one edge",
     CHECK(nedges == 12); // Because object has oriented edges
 
     using SpatialGraph = sg_one_edge::GraphType;
-    SpatialGraph sg = spatial_graph_from_object<Object, SpatialGraph>(obj);
-    SpatialGraph reduced_g = reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
+    SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
+    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
     SpatialGraph expected_g = sg_one_edge().g;
     CHECK(num_vertices(reduced_g) == num_vertices(expected_g));
     CHECK(num_edges(reduced_g) == num_edges(expected_g));
@@ -549,8 +591,8 @@ TEST_CASE_METHOD(easy, "Reduce graph with no pitfalls", "[easy]") {
     CHECK(nedges == 16);
     // print_degrees();
     using SpatialGraph = sg_easy::GraphType;
-    SpatialGraph sg = spatial_graph_from_object<Object, SpatialGraph>(obj);
-    SpatialGraph reduced_g = reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
+    SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
+    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
     SpatialGraph expected_g = sg_easy().g;
 
     CHECK(num_vertices(reduced_g) == num_vertices(expected_g));
@@ -579,8 +621,8 @@ TEST_CASE_METHOD(extra_connected_junctions,
     CHECK(nedges == 20);
     // print_degrees();
     using SpatialGraph = sg_extra_connected_junctions::GraphType;
-    SpatialGraph sg = spatial_graph_from_object<Object, SpatialGraph>(obj);
-    SpatialGraph reduced_g = reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
+    SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
+    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
     SpatialGraph expected_g = sg_extra_connected_junctions().g;
 
     CHECK(num_vertices(reduced_g) == num_vertices(expected_g));
@@ -599,14 +641,14 @@ TEST_CASE_METHOD(extra_connected_junctions,
     // ::print_edges(reduced_g);
 }
 
-
 TEST_CASE_METHOD(extra_connected_junctions,
                  "Graph has more junctions than needed",
                  "[remove_extra_edges]") {
+    std::cout << "Remove extra edges" << std::endl;
     using SpatialGraph = sg_extra_connected_junctions::GraphType;
-    SpatialGraph sg = spatial_graph_from_object<Object, SpatialGraph>(obj);
+    SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
     remove_extra_edges(sg);
-    SpatialGraph reduced_g = reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
+    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
     sg_extra_connected_junctions::GraphType expected_g = sg_easy_centered().g;
     CHECK(num_vertices(reduced_g) == num_vertices(expected_g));
     CHECK(num_edges(reduced_g) == num_edges(expected_g));
@@ -614,3 +656,72 @@ TEST_CASE_METHOD(extra_connected_junctions,
     CHECK(equal_edge_points(reduced_g, expected_g) == true);
 }
 
+TEST_CASE("split_loop", "[split_loop]") {
+    std::cout << "Split loop" << std::endl;
+    using SpatialGraph = spatial_graph::GraphType;
+    using vertex_descriptor =
+        typename boost::graph_traits<SpatialGraph>::vertex_descriptor;
+    using SpatialEdge = typename boost::edge_bundle_type<SpatialGraph>::type;
+    using SpatialNode = typename boost::vertex_bundle_type<SpatialGraph>::type;
+    SG::Point p0{{0, 0, 0}};
+    SG::Point n1{{0, 1, 0}};
+    SG::Point n2{{0, 2, 0}};
+    SG::Point e1n2{{1, 2, 0}};
+    SG::Point e2n2{{2, 2, 0}};
+    SG::Point e2n1{{2, 1, 0}};
+    SG::Point e2{{2, 0, 0}};
+    SG::Point e1{{1, 0, 0}};
+    auto sg = SpatialGraph(1);
+    vertex_descriptor vertex_id = 0;
+    sg[vertex_id].pos = p0;
+    SpatialEdge sg_edge;
+    sg_edge.edge_points.insert(std::end(sg_edge.edge_points),
+                               {n1, n2, e1n2, e2n2, e2n1, e2, e1});
+    SG::split_loop(vertex_id, sg_edge, sg);
+    CHECK(num_vertices(sg) == 2);
+    CHECK(num_edges(sg) == 2);
+    CHECK(sg[1].pos == e2n2);
+    SpatialEdge::PointContainer expected1 = {{n1, n2, e1n2}};
+    std::sort(expected1.begin(), expected1.end());
+    SpatialEdge::PointContainer expected2 = {{e1, e2, e2n1}};
+    std::sort(expected2.begin(), expected2.end());
+    auto edges = boost::edges(sg);
+    for (; edges.first != edges.second; ++edges.first) {
+        auto &created_sg_edge = sg[*edges.first];
+        auto &points = created_sg_edge.edge_points;
+        std::sort(points.begin(), points.end());
+        bool equal_edge_points = (points == expected1 || points == expected2);
+        CHECK(equal_edge_points == true);
+    }
+}
+
+TEST_CASE_METHOD(sg_square, "Reduce sg_square", "[reduce_graph]") {
+    std::cout << "Reduce graph - square" << std::endl;
+    using SpatialGraph = spatial_graph::GraphType;
+    auto &sg = g;
+    auto reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
+    CHECK(num_vertices(reduced_g) == 2);
+    CHECK(num_edges(reduced_g) == 2);
+    ::print_degrees(reduced_g);
+    ::print_edges(reduced_g);
+    // Expected:
+    SpatialGraph expected_g = sg_square_expected().g;
+    CHECK(equal_vertex_positions(reduced_g, expected_g) == true);
+    CHECK(equal_edge_points(reduced_g, expected_g) == true);
+}
+
+TEST_CASE_METHOD(sg_square_plus_one, "Reduce sg_square_plus_one",
+                 "[reduce_graph]") {
+    std::cout << "Reduce graph - square plus one" << std::endl;
+    using SpatialGraph = spatial_graph::GraphType;
+    auto &sg = g;
+    auto reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
+    CHECK(num_vertices(reduced_g) == 3);
+    CHECK(num_edges(reduced_g) == 3);
+    ::print_degrees(reduced_g);
+    ::print_edges(reduced_g);
+    // Expected:
+    SpatialGraph expected_g = sg_square_plus_one_expected().g;
+    CHECK(equal_vertex_positions(reduced_g, expected_g) == true);
+    CHECK(equal_edge_points(reduced_g, expected_g) == true);
+}
