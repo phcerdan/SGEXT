@@ -26,6 +26,7 @@ compile_commands.json
 ##########
 #Project#
 /build*
+/data*
 #EDITORS#
 *.swp
 *.swo

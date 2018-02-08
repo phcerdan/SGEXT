@@ -21,6 +21,9 @@ find_package(Qt5 REQUIRED
     Widgets
     Xml
     OpenGL)
+find_package(VTK REQUIRED)
+include(${VTK_USE_FILE})
+include_directories(SYSTEM ${VTK_INCLUDE_DIRS})
 
 include_directories("./include")
 
@@ -29,6 +32,7 @@ target_link_libraries(thin ${Boost_LIBRARIES} )
 target_link_libraries(thin ${ITK_LIBRARIES} )
 target_link_libraries(thin ${DGTAL_LIBRARIES} )
 target_link_libraries(thin Qt5::Widgets Qt5::Xml )
+target_link_libraries(thin ${VTK_LIBRARIES} )
 
 enable_testing()
 add_subdirectory(test)

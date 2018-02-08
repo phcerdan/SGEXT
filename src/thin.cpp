@@ -7,6 +7,7 @@
 #include <DGtal/io/readers/ITKReader.h>
 #include <DGtal/images/ImageContainerByITKImage.h>
 #include "DGtal/images/imagesSetsUtils/SetFromImage.h"
+#include "DGtal/images/imagesSetsUtils/ImageFromSet.h"
 // #include "DGtal/images/SimpleThresholdForegroundPredicate.h"
 #include "DGtal/images/ImageSelector.h"
 
@@ -19,9 +20,11 @@
 #include <DGtal/topology/VoxelComplexFunctions.h>
 #include "DGtal/topology/NeighborhoodConfigurations.h"
 #include "DGtal/topology/tables/NeighborhoodTables.h"
+// ITKWriter
+#include <itkImageFileWriter.h>
+
 // Invert
 #include "itkInvertIntensityImageFilter.h"
-#include <itkConstantPadImageFilter.h>
 #include <itkNumericTraits.h>
 // boost::program_options
 #include <boost/program_options/options_description.hpp>
@@ -46,6 +49,12 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/filtered_graph.hpp>
 
+// Reduce graph via dfs:
+#include "spatial_graph.hpp"
+#include "reduce_dfs_visitor.hpp"
+#include "spatial_graph_from_object.hpp"
+#include "visualize_spatial_graph.hpp"
+
 using namespace DGtal;
 using namespace std;
 using namespace DGtal::Z3i;
@@ -66,9 +75,10 @@ int main(int argc, char* const argv[]){
     ( "persistence,p",  po::value<int>()->default_value(0), "persistence value, implies use of persistence algorithm if p>=1" )
     ( "profile",  po::bool_switch()->default_value(false), "profile algorithm" )
     ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output" )
-    ( "perfect,t",  po::bool_switch()->default_value(false), "Double thinning" )
+    ( "reduceGraph,r", po::bool_switch()->default_value(false), "Reduce obj graph into a new SpatialGraph, converting chain nodes (degree=2) into edge_points.")
     ( "exportSDP,e", po::value<std::string>(), "Export the resulting set of points in a simple (sequence of discrete point (sdp)).")
-    ( "exportGraph,g", po::value<std::string>(), "Export the resulting set of points as a graph. It saves a list of nodes (.nod) and a list of edges (.edg)");
+    ( "exportGraph,g", po::value<std::string>(), "Export the resulting set of points as a graph. It saves a list of nodes (.nod) and a list of edges (.edg)")
+    ( "exportImage,k", po::value<std::string>(), "Export the resulting set of points as an ITK Image.");
   bool parseOK=true;
   po::variables_map vm;
 
@@ -86,8 +96,11 @@ int main(int argc, char* const argv[]){
     << endl << "Basic usage: "<< endl
     << "asymThin -i <volFileName> -s <ulti,end,1is,is>"
     " [ -f <white,black> -m <minlevel> -M <maxlevel> -v ] "
-    " [-e <export result as sdp file> "
-    " [-p <value>" << endl
+    " [-e <filename, export result as sdp file> "
+    " [-g <filename, export result as a list of nodes (.nod) and edges (.edg)> "
+    " [-k <filename, export result as an image> "
+    " [-r <bool, reduce graph, converting chain nodes (edge=2) into edge_points> "
+    " [-p <value, persistence (trimming)>" << endl
     << "options for skel_string = ulti, end, 1is, is" << endl
     << general_opt << "\n";
     return 0;
@@ -95,13 +108,12 @@ int main(int argc, char* const argv[]){
   //Parse options
   string filename = vm["input"].as<string>();
   bool verbose = vm["verbose"].as<bool>();
-  bool perfect = vm["perfect"].as<bool>();
   bool profile = vm["profile"].as<bool>();
   int thresholdMin = vm["thresholdMin"].as<int>();
   int thresholdMax = vm["thresholdMax"].as<int>();
   int persistence = vm["persistence"].as<int>();
   if (vm.count("persistence") && persistence < 0 )
-    throw po::validation_error(po::validation_error::invalid_option_value, "persitence");
+    throw po::validation_error(po::validation_error::invalid_option_value, "persistence");
   string foreground = vm["foreground"].as<string>();
   if (vm.count("foreground") && (!(foreground == "white" || foreground == "black")))
     throw po::validation_error(po::validation_error::invalid_option_value, "foreground");
@@ -128,33 +140,19 @@ int main(int argc, char* const argv[]){
   const unsigned int Dim = 3;
   using PixelType = unsigned char ;
   using ItkImageType = itk::Image<PixelType, Dim> ;
-  // Pad image:
-  using PadType = itk::ConstantPadImageFilter<ItkImageType, ItkImageType> ;
-  auto padder = PadType::New();
-  ItkImageType::PixelType constantValue;
-  constantValue =(invert_image == true) ?
-    itk::NumericTraits<PixelType>::max() : itk::NumericTraits<PixelType>::min();
-  ItkImageType::SizeType padRegion;
-  for( unsigned int i = 0 ; i<Dim ; ++i)
-    padRegion[i] = 1;
-  padder->SetInput(imageReader.getITKImagePointer());
-  padder->SetPadLowerBound(padRegion);
-  padder->SetPadUpperBound(padRegion);
-  padder->SetConstant(constantValue);
-  padder->Update();
   /*----------------*/
 
   // Invert Filter using ITK.
   using InverterType =
     itk::InvertIntensityImageFilter<ItkImageType, ItkImageType> ;
   auto inverter = InverterType::New();
-  inverter->SetInput(padder->GetOutput());
+  inverter->SetInput(imageReader.getITKImagePointer());
   inverter->Update();
   /*----------------*/
   // Apply filters if neccesary
   Image::ITKImagePointer handle_out = (invert_image) ?
     Image::ITKImagePointer(inverter->GetOutput()) :
-    Image::ITKImagePointer(padder->GetOutput());
+    Image::ITKImagePointer(imageReader.getITKImagePointer());
   Image image(handle_out);
 
   DigitalSet image_set (image.domain());
@@ -175,9 +173,10 @@ int main(int argc, char* const argv[]){
 
   auto & sk = sk_string;
   KSpace ks;
-  ks.init(image.domain().lowerBound() ,
-      image.domain().upperBound() , true);
-
+  // Domain of kspace must be padded.
+  KSpace::Point d1( KSpace::Point::diagonal( 1 ) );
+  ks.init(image.domain().lowerBound() - d1 ,
+              image.domain().upperBound() + d1 , true);
   DigitalTopology::ForegroundAdjacency adjF;
   DigitalTopology::BackgroundAdjacency adjB;
   DigitalTopology topo(adjF, adjB, DGtal::DigitalTopologyProperties::JORDAN_DT);
@@ -220,23 +219,23 @@ int main(int argc, char* const argv[]){
    * to calculate for every image....
    */
 
-  trace.beginBlock("Create Distance Map");
-  using Predicate = Z3i::DigitalSet;
-  using L3Metric = ExactPredicateLpSeparableMetric<Z3i::Space, 3>;
-  using DT       = DistanceTransformation<Z3i::Space, Predicate, L3Metric>;
-  L3Metric l3;
-  DT dt(obj.domain(),obj.pointSet(), l3);
-  trace.endBlock();
+  // trace.beginBlock("Create Distance Map");
+  // using Predicate = Z3i::DigitalSet;
+  // using L3Metric = ExactPredicateLpSeparableMetric<Z3i::Space, 3>;
+  // using DT       = DistanceTransformation<Z3i::Space, Predicate, L3Metric>;
+  // L3Metric l3;
+  // DT dt(obj.domain(),obj.pointSet(), l3);
+  // trace.endBlock();
 
   std::function< std::pair<typename Complex::Cell, typename Complex::Data>(const Complex::Clique&) > Select ;
   auto & sel = select_string;
   if (sel == "random") Select = selectRandom<Complex>;
   else if (sel == "first") Select = selectFirst<Complex>;
   else if (sel == "dmax"){
-    Select =
-      [&dt](const Complex::Clique & clique){
-        return selectMaxValue<DT, Complex>(dt,clique);
-      };
+    // Select =
+    //   [&dt](const Complex::Clique & clique){
+    //     return selectMaxValue<DT, Complex>(dt,clique);
+    //   };
   } else throw std::runtime_error("Invalid skel string");
 
   Complex vc_new(ks);
@@ -250,71 +249,66 @@ int main(int argc, char* const argv[]){
   auto end = std::chrono::system_clock::now();
   auto elapsed = std::chrono::duration_cast<std::chrono::seconds> (end - start) ;
   if (profile) std::cout <<"Time elapsed: " << elapsed.count() << std::endl;
+  const auto & thin_set = vc_new.objectSet();
+  const auto & all_set = obj.pointSet();
 
-  Object perfect_thin = vc_new.object();
-  if (perfect)
+  // Export it as a simple list point
+  if (vm.count("exportSDP"))
   {
-    trace.beginBlock("Computing DistanceMap of first thin");
-
-    using Predicate = Z3i::DigitalSet;
-    using L3Metric = ExactPredicateLpSeparableMetric<Z3i::Space, 3>;
-    using DT       = DistanceTransformation<Z3i::Space, Predicate, L3Metric>;
-    L3Metric l3;
-    const auto & domain = perfect_thin.domain();
-    const auto & point_set = perfect_thin.pointSet();
-    DT dist_map(domain, point_set, l3);
-    // Visualize the DT Map
+    std::ofstream out;
+    out.open(vm["exportSDP"].as<std::string>().c_str());
+    for (auto &p : thin_set)
     {
-      trace.beginBlock("Visualize DT of first thin");
-      int argc(1);
-      char** argv(nullptr);
-      QApplication app(argc, argv);
-      Viewer3D<> viewer;
-      viewer.setWindowTitle("DistanceMap");
-      viewer.show();
-
-      GradientColorMap<long> gradient(0,2);
-      gradient.addColor(Color::Red);
-      gradient.addColor(Color::Yellow);
-      gradient.addColor(Color::Green);
-      gradient.addColor(Color::Blue);
-
-      viewer << SetMode3D( (*(domain.begin())).className(), "Paving" );
-      std::vector<Object::Point> not_thin_set;
-      for( auto it = domain.begin(), itend = domain.end();
-          it!=itend; ++it) {
-        auto valDist = dist_map(*it);
-        if(valDist > 0) {
-          trace.info() << *it << " DM: " << valDist << std::endl;
-          Color c = gradient(valDist);
-          viewer << CustomColors3D(Color((float)(c.red()),
-                (float)(c.green()),
-                (float)(c.blue(),30)),
-              Color((float)(c.red()),
-                (float)(c.green()),
-                (float)(c.blue()),30));
-          if(valDist > 1) {
-            not_thin_set.push_back(*it);
-            viewer << CustomColors3D(Color((float)(c.red()),
-                  (float)(c.green()),
-                  (float)(c.blue(),255)),
-                Color((float)(c.red()),
-                  (float)(c.green()),
-                  (float)(c.blue()),255));
-          }
-          viewer << *it ;
-        }
-      }
-      viewer << Viewer3D<>::updateDisplay;
-      for(const auto & p : not_thin_set){
-        auto degree = boost::out_degree(p, perfect_thin);
-        trace.info() << "Degree of " << p << " : " << degree << std::endl;
-      }
-      app.exec();
-      trace.endBlock();
+      out << p[0] << " " << p[1] << " " << p[2] << std::endl;
     }
-    trace.endBlock();
-  } // if perfect
+  }
+  if (vm.count("exportImage"))
+  {
+    unsigned int foreground_value = 255;
+    auto thin_image = ImageFromSet<Image>::create(thin_set, foreground_value);
+    typedef itk::ImageFileWriter<Image::ITKImage> ITKImageWriter;
+    typename ITKImageWriter::Pointer writer = ITKImageWriter::New();
+    writer->SetFileName(vm["exportImage"].as<std::string>().c_str());
+    writer->SetInput(thin_image.getITKImagePointer());
+    writer->Update();
+  }
+  if (vm.count("exportGraph"))
+  {
+    // Object models a boost graph.
+    using Graph = Object;
+    const Graph & graph = vc_new.object();
+    auto num_verts = boost::num_vertices(graph);
+    auto verts = boost::vertices(graph);
+    for(auto&& p = verts.first; p != verts.second; ++p)
+    {
+      std::cout << *p << std::endl;
+      auto out_degree = boost::out_degree(*p, graph);
+      std::cout << out_degree << std::endl;
+
+      // typedef typename boost::graph_traits<Graph>::adjacency_iterator adjacency_iterator;
+      // std::pair<adjacency_iterator,adjacency_iterator> vp1 = boost::adjacent_vertices( *p, graph );
+    };
+    // Edges takes forever, for real. it must be way too many.
+    // auto num_edges = boost::num_edges(graph);
+    // auto edges = boost::edges(graph);
+    std::cout << "#Verts: " << num_verts << std::endl;
+    // std::cout << "#Edges: " << num_edges << std::endl;
+    std::ofstream out;
+    out.open(vm["exportGraph"].as<std::string>().c_str());
+    for (auto &p : thin_set)
+    {
+      out << p[0] << " " << p[1] << " " << p[2] << std::endl;
+    }
+  }
+  if (vm.count("reduceGraph"))
+  {
+    using Graph = Object;
+    const Graph & graph = vc_new.object();
+    using SpatialGraph = SG::GraphAL;
+    SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(graph);
+    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
+    SG::visualize_spatial_graph(reduced_g);
+  }
   // THEN( "visualize the cells" )
   {
     int argc(1);
@@ -322,20 +316,9 @@ int main(int argc, char* const argv[]){
     QApplication app(argc, argv);
     Viewer3D<> viewer(ks);
     viewer.show();
-    const auto & thin_set = vc_new.objectSet();
-    const auto & all_set = obj.pointSet();
 
-    if(!perfect)
-    {
-      viewer.setFillColor(Color(255, 255, 255, 255));
-      viewer << thin_set;
-    }
-    else
-    {
-      viewer.setFillColor(Color(255, 255, 255, 255));
-      DigitalSet & S = perfect_thin.pointSet();
-      viewer << S;
-    }
+    viewer.setFillColor(Color(255, 255, 255, 255));
+    viewer << thin_set;
 
     // All kspace voxels
     viewer.setFillColor(Color(40, 200, 55, 10));
@@ -343,45 +326,6 @@ int main(int argc, char* const argv[]){
 
     viewer << Viewer3D<>::updateDisplay;
 
-    // Export it as a simple list point
-    if (vm.count("exportSDP"))
-    {
-      std::ofstream out;
-      out.open(vm["exportSDP"].as<std::string>().c_str());
-      for (auto &p : thin_set)
-      {
-        out << p[0] << " " << p[1] << " " << p[2] << std::endl;
-      }
-    }
-    if (vm.count("exportGraph"))
-    {
-      // Object models a boost graph.
-      using Graph = Object;
-      const Graph & graph = vc_new.object();
-      auto num_verts = boost::num_vertices(graph);
-      auto verts = boost::vertices(graph);
-      for(auto&& p = verts.first; p != verts.second; ++p)
-      {
-        std::cout << *p << std::endl;
-        auto out_degree = boost::out_degree(*p, graph);
-        std::cout << out_degree << std::endl;
-
-        // typedef typename boost::graph_traits<Graph>::adjacency_iterator adjacency_iterator;
-        // std::pair<adjacency_iterator,adjacency_iterator> vp1 = boost::adjacent_vertices( *p, graph );
-      };
-      // Edges takes forever, for real. it must be way too many.
-      // auto num_edges = boost::num_edges(graph);
-      // auto edges = boost::edges(graph);
-      std::cout << "#Verts: " << num_verts << std::endl;
-      std::cout << "#Verts perfect: " << boost::num_vertices(perfect_thin) << std::endl;
-      // std::cout << "#Edges: " << num_edges << std::endl;
-      std::ofstream out;
-      out.open(vm["exportGraph"].as<std::string>().c_str());
-      for (auto &p : thin_set)
-      {
-        out << p[0] << " " << p[1] << " " << p[2] << std::endl;
-      }
-    }
     app.exec();
   }
 }
