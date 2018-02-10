@@ -76,9 +76,10 @@ int main(int argc, char* const argv[]){
     ( "profile",  po::bool_switch()->default_value(false), "profile algorithm" )
     ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output" )
     ( "reduceGraph,r", po::bool_switch()->default_value(false), "Reduce obj graph into a new SpatialGraph, converting chain nodes (degree=2) into edge_points.")
+    ( "visualizeThin,t", po::bool_switch()->default_value(false), "Visualize thin result")
     ( "exportSDP,e", po::value<std::string>(), "Export the resulting set of points in a simple (sequence of discrete point (sdp)).")
     ( "exportGraph,g", po::value<std::string>(), "Export the resulting set of points as a graph. It saves a list of nodes (.nod) and a list of edges (.edg)")
-    ( "exportImage,k", po::value<std::string>(), "Export the resulting set of points as an ITK Image.");
+    ( "exportImage,o", po::value<std::string>(), "Export the resulting set of points as an ITK Image.");
   bool parseOK=true;
   po::variables_map vm;
 
@@ -132,6 +133,9 @@ int main(int argc, char* const argv[]){
          select_string == "first" ))
      )
      throw po::validation_error(po::validation_error::invalid_option_value, "select");
+
+  bool reduceGraph = vm["reduceGraph"].as<bool>();
+  bool visualizeThin = vm["visualizeThin"].as<bool>();
   /*-------------- End of parse -----------------------------*/
 
   using Domain = Z3i::Domain ;
@@ -300,7 +304,7 @@ int main(int argc, char* const argv[]){
       out << p[0] << " " << p[1] << " " << p[2] << std::endl;
     }
   }
-  if (vm.count("reduceGraph"))
+  if (reduceGraph)
   {
     using Graph = Object;
     const Graph & graph = vc_new.object();
@@ -310,6 +314,7 @@ int main(int argc, char* const argv[]){
     SG::visualize_spatial_graph(reduced_g);
   }
   // THEN( "visualize the cells" )
+  if (visualizeThin)
   {
     int argc(1);
     char** argv(nullptr);
