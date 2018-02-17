@@ -16,15 +16,15 @@ struct sg_3D {
     sg_3D() {
         this->g = GraphType(4);
 
-        SG::Point n3{{0, 3, 0}};
-        SG::Point n2{{0, 2, 0}};
-        SG::Point n1{{0, 1, 0}};
-        SG::Point p0{{0, 0, 0}};
-        SG::Point e1{{1, 0, 0}};
-        SG::Point e2{{2, 0, 0}};
-        SG::Point s1{{0, -1, 0}};
-        SG::Point s2{{0, -2, 0}};
-        SG::Point s3{{0, -3, 0}};
+        SG::PointType n3{{0, 3, 0}};
+        SG::PointType n2{{0, 2, 0}};
+        SG::PointType n1{{0, 1, 0}};
+        SG::PointType p0{{0, 0, 0}};
+        SG::PointType e1{{1, 0, 0}};
+        SG::PointType e2{{2, 0, 0}};
+        SG::PointType s1{{0, -1, 0}};
+        SG::PointType s2{{0, -2, 0}};
+        SG::PointType s3{{0, -3, 0}};
 
         g[0].pos = n3;
         g[1].pos = p0;

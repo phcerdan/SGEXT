@@ -17,7 +17,7 @@ struct spatial_graph {
     using edge_iterator =
         typename boost::graph_traits<GraphType>::edge_iterator;
 };
-void print_pos(std::ostream &out, const SG::SpatialNode::Point &pos) {
+void print_pos(std::ostream &out, const SG::SpatialNode::PointType &pos) {
     out << "{";
     for (auto &p : pos) {
         if (p >= 0)
@@ -149,13 +149,13 @@ struct sg_one_edge : public spatial_graph {
         using boost::add_edge;
         this->g = GraphType(2);
         // Add edge with an associated SpatialEdge at construction.
-        SG::Point n3{{0, 3, 0}};
-        SG::Point n2{{0, 2, 0}};
-        SG::Point n1{{0, 1, 0}};
-        SG::Point p0{{0, 0, 0}};
-        SG::Point s1{{0, -1, 0}};
-        SG::Point s2{{0, -2, 0}};
-        SG::Point s3{{0, -3, 0}};
+        SG::PointType n3{{0, 3, 0}};
+        SG::PointType n2{{0, 2, 0}};
+        SG::PointType n1{{0, 1, 0}};
+        SG::PointType p0{{0, 0, 0}};
+        SG::PointType s1{{0, -1, 0}};
+        SG::PointType s2{{0, -2, 0}};
+        SG::PointType s3{{0, -3, 0}};
         g[0].pos = n3;
         g[1].pos = s3;
 
@@ -179,15 +179,15 @@ struct sg_easy : public spatial_graph {
         using boost::add_edge;
         this->g = GraphType(4);
         // Add edge with an associated SpatialEdge at construction.
-        SG::Point n3{{0, 3, 0}};
-        SG::Point n2{{0, 2, 0}};
-        SG::Point n1{{0, 1, 0}};
-        SG::Point p0{{1, 0, 0}};
-        SG::Point e1{{2, 0, 0}};
-        SG::Point e2{{3, 0, 0}};
-        SG::Point s1{{0, -1, 0}};
-        SG::Point s2{{0, -2, 0}};
-        SG::Point s3{{0, -3, 0}};
+        SG::PointType n3{{0, 3, 0}};
+        SG::PointType n2{{0, 2, 0}};
+        SG::PointType n1{{0, 1, 0}};
+        SG::PointType p0{{1, 0, 0}};
+        SG::PointType e1{{2, 0, 0}};
+        SG::PointType e2{{3, 0, 0}};
+        SG::PointType s1{{0, -1, 0}};
+        SG::PointType s2{{0, -2, 0}};
+        SG::PointType s3{{0, -3, 0}};
 
         g[0].pos = n3;
         g[1].pos = p0;
@@ -220,15 +220,15 @@ struct sg_easy_centered : public spatial_graph {
         using boost::add_edge;
         this->g = GraphType(4);
         // Add edge with an associated SpatialEdge at construction.
-        SG::Point n3{{0, 3, 0}};
-        SG::Point n2{{0, 2, 0}};
-        SG::Point n1{{0, 1, 0}};
-        SG::Point p0{{0, 0, 0}};
-        SG::Point e1{{1, 0, 0}};
-        SG::Point e2{{2, 0, 0}};
-        SG::Point s1{{0, -1, 0}};
-        SG::Point s2{{0, -2, 0}};
-        SG::Point s3{{0, -3, 0}};
+        SG::PointType n3{{0, 3, 0}};
+        SG::PointType n2{{0, 2, 0}};
+        SG::PointType n1{{0, 1, 0}};
+        SG::PointType p0{{0, 0, 0}};
+        SG::PointType e1{{1, 0, 0}};
+        SG::PointType e2{{2, 0, 0}};
+        SG::PointType s1{{0, -1, 0}};
+        SG::PointType s2{{0, -2, 0}};
+        SG::PointType s3{{0, -3, 0}};
 
         g[0].pos = n3;
         g[1].pos = p0;
@@ -268,15 +268,15 @@ struct sg_extra_connected_junctions : public spatial_graph {
         using boost::add_edge;
         this->g = GraphType(6);
         // Add edge with an associated SpatialEdge at construction.
-        SG::Point n3{{0, 3, 0}};
-        SG::Point n2{{0, 2, 0}};
-        SG::Point n1{{0, 1, 0}};
-        SG::Point p0{{0, 0, 0}};
-        SG::Point e1{{1, 0, 0}};
-        SG::Point e2{{2, 0, 0}};
-        SG::Point s1{{0, -1, 0}};
-        SG::Point s2{{0, -2, 0}};
-        SG::Point s3{{0, -3, 0}};
+        SG::PointType n3{{0, 3, 0}};
+        SG::PointType n2{{0, 2, 0}};
+        SG::PointType n1{{0, 1, 0}};
+        SG::PointType p0{{0, 0, 0}};
+        SG::PointType e1{{1, 0, 0}};
+        SG::PointType e2{{2, 0, 0}};
+        SG::PointType s1{{0, -1, 0}};
+        SG::PointType s2{{0, -2, 0}};
+        SG::PointType s3{{0, -3, 0}};
 
         g[0].pos = n3;
         g[1].pos = n1;
@@ -663,14 +663,14 @@ TEST_CASE("split_loop", "[split_loop]") {
         typename boost::graph_traits<SpatialGraph>::vertex_descriptor;
     using SpatialEdge = typename boost::edge_bundle_type<SpatialGraph>::type;
     using SpatialNode = typename boost::vertex_bundle_type<SpatialGraph>::type;
-    SG::Point p0{{0, 0, 0}};
-    SG::Point n1{{0, 1, 0}};
-    SG::Point n2{{0, 2, 0}};
-    SG::Point e1n2{{1, 2, 0}};
-    SG::Point e2n2{{2, 2, 0}};
-    SG::Point e2n1{{2, 1, 0}};
-    SG::Point e2{{2, 0, 0}};
-    SG::Point e1{{1, 0, 0}};
+    SG::PointType p0{{0, 0, 0}};
+    SG::PointType n1{{0, 1, 0}};
+    SG::PointType n2{{0, 2, 0}};
+    SG::PointType e1n2{{1, 2, 0}};
+    SG::PointType e2n2{{2, 2, 0}};
+    SG::PointType e2n1{{2, 1, 0}};
+    SG::PointType e2{{2, 0, 0}};
+    SG::PointType e1{{1, 0, 0}};
     auto sg = SpatialGraph(1);
     vertex_descriptor vertex_id = 0;
     sg[vertex_id].pos = p0;

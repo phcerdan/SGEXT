@@ -8,6 +8,6 @@
 
 namespace SG {
     using GraphAL = boost::adjacency_list<boost::listS, boost::vecS, boost::undirectedS, SpatialNode, SpatialEdge>;
-} // end namespace
 
+} // end namespace
 #endif

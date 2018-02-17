@@ -5,11 +5,13 @@ cmake_minimum_required(VERSION 3.5)
 # endif()
 # cmake ../src  -G"Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT=TRUE
 project(dgtal-play)
+option(ENABLE_TESTING "Enable Tests" OFF)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 14)
 
 find_package(Boost COMPONENTS
         program_options
+        graph
         REQUIRED)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 find_package(DGtal REQUIRED)
@@ -34,5 +36,14 @@ target_link_libraries(thin ${DGTAL_LIBRARIES} )
 target_link_libraries(thin Qt5::Widgets Qt5::Xml )
 target_link_libraries(thin ${VTK_LIBRARIES} )
 
-enable_testing()
-add_subdirectory(test)
+add_executable(analyze_graph analyze_graph.cpp)
+target_link_libraries(analyze_graph ${Boost_LIBRARIES} )
+target_link_libraries(analyze_graph ${ITK_LIBRARIES} )
+target_link_libraries(analyze_graph ${DGTAL_LIBRARIES} )
+target_link_libraries(analyze_graph Qt5::Widgets Qt5::Xml )
+target_link_libraries(analyze_graph ${VTK_LIBRARIES} )
+
+if(ENABLE_TESTING)
+    enable_testing()
+    add_subdirectory(test)
+endif(ENABLE_TESTING)
