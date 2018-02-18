@@ -223,23 +223,23 @@ int main(int argc, char* const argv[]){
    * to calculate for every image....
    */
 
-  // trace.beginBlock("Create Distance Map");
-  // using Predicate = Z3i::DigitalSet;
-  // using L3Metric = ExactPredicateLpSeparableMetric<Z3i::Space, 3>;
-  // using DT       = DistanceTransformation<Z3i::Space, Predicate, L3Metric>;
-  // L3Metric l3;
-  // DT dt(obj.domain(),obj.pointSet(), l3);
-  // trace.endBlock();
+  trace.beginBlock("Create Distance Map");
+  using Predicate = Z3i::DigitalSet;
+  using L3Metric = ExactPredicateLpSeparableMetric<Z3i::Space, 3>;
+  using DT       = DistanceTransformation<Z3i::Space, Predicate, L3Metric>;
+  L3Metric l3;
+  DT dt(obj.domain(),obj.pointSet(), l3);
+  trace.endBlock();
 
   std::function< std::pair<typename Complex::Cell, typename Complex::Data>(const Complex::Clique&) > Select ;
   auto & sel = select_string;
   if (sel == "random") Select = selectRandom<Complex>;
   else if (sel == "first") Select = selectFirst<Complex>;
   else if (sel == "dmax"){
-    // Select =
-    //   [&dt](const Complex::Clique & clique){
-    //     return selectMaxValue<DT, Complex>(dt,clique);
-    //   };
+    Select =
+      [&dt](const Complex::Clique & clique){
+        return selectMaxValue<DT, Complex>(dt,clique);
+      };
   } else throw std::runtime_error("Invalid skel string");
 
   Complex vc_new(ks);

@@ -18,6 +18,8 @@
 #include <boost/graph/graph_concepts.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/filtered_graph.hpp>
+#include <boost/graph/graphviz.hpp>
+
 // Viewer
 #include "DGtal/io/Color.h"
 #include "DGtal/io/colormaps/GradientColorMap.h"
@@ -42,6 +44,7 @@ int main(int argc, char* const argv[]){
     ( "help,h", "display this message." )
     ( "input,i", po::value<string>()->required(), "Input thin image." )
     ( "reduceGraph,r", po::bool_switch()->default_value(false), "Reduce obj graph into a new SpatialGraph, converting chain nodes (degree=2) into edge_points.")
+    ( "exportReducedGraph,o", po::value<string>()->default_value(""), "Write .dot file with the reduced spatial graph." )
     ( "exportHistogram,e", po::value<string>()->default_value(""), "Export histogram." )
     ( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal.")
     ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output." );
@@ -68,9 +71,16 @@ int main(int argc, char* const argv[]){
   bool reduceGraph = vm["reduceGraph"].as<bool>();
   bool visualize = vm["visualize"].as<bool>();
   string exportHistogram_filename = vm["exportHistogram"].as<string>();
-  if(verbose)
-    std::cout << "Output histogram to: " << exportHistogram_filename << std::endl;
+  string exportReducedGraph_filename = vm["exportReducedGraph"].as<string>();
   bool exportHistogram = (exportHistogram_filename != "") ? true : false;
+  bool exportReducedGraph = (exportReducedGraph_filename != "") ? true : false;
+  if(verbose)
+  {
+    if(exportReducedGraph)
+      std::cout << "Output reduced graph (graphviz) to: " << exportReducedGraph_filename << std::endl;
+    if(exportHistogram)
+      std::cout << "Output histogram to: " << exportHistogram_filename << std::endl;
+  }
 
   using Domain = Z3i::Domain ;
   using Image = ImageContainerByITKImage<Domain, unsigned char> ;
@@ -125,28 +135,46 @@ int main(int argc, char* const argv[]){
   const Graph & graph = obj;
   using SpatialGraph = SG::GraphAL;
   SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(graph);
-  SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
-  if(visualize)
-    SG::visualize_spatial_graph(reduced_g);
-
-
-  if(exportHistogram)
+  if(reduceGraph)
   {
-    auto verts = boost::vertices(reduced_g);
-    constexpr size_t NBins = 50;
-    std::array<size_t, NBins> histo_degree;
-    for(auto&& p = verts.first; p != verts.second; ++p)
+    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
+
+    if(exportReducedGraph)
     {
-      auto out_degree = boost::out_degree(*p, reduced_g);
-      histo_degree[out_degree]++;
+      boost::dynamic_properties dp;
+      dp.property("node_id", boost::get(boost::vertex_index, reduced_g));
+      dp.property("spatial_node", boost::get(boost::vertex_bundle, reduced_g));
+      dp.property("spatial_edge", boost::get(boost::edge_bundle, reduced_g));
+      {
+        std::ofstream ofile(exportReducedGraph_filename);
+        boost::write_graphviz_dp(ofile, reduced_g, dp);
+      }
     }
-    std::ofstream out;
-    out.open(exportHistogram_filename.c_str());
-    out << "# Degree | Count" << std::endl;
-    for(size_t i = 0; i != NBins ; ++i)
+
+    if(visualize)
     {
+      SG::visualize_spatial_graph(reduced_g);
+    }
+
+    if(exportHistogram)
+    {
+      auto verts = boost::vertices(reduced_g);
+      constexpr size_t NBins = 50;
+      std::array<size_t, NBins> histo_degree;
+      histo_degree.fill(0);
+      for(auto&& p = verts.first; p != verts.second; ++p)
+      {
+        auto out_degree = boost::out_degree(*p, reduced_g);
+        histo_degree[out_degree]++;
+      }
+      std::ofstream out;
+      out.open(exportHistogram_filename.c_str());
+      out << "# Degree | Count" << std::endl;
+      for(size_t i = 0; i != NBins ; ++i)
+      {
         auto & bin = histo_degree[i];
         out << i << " " << bin << std::endl;
+      }
     }
   }
 

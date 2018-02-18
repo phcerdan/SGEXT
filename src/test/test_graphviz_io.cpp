@@ -2,9 +2,7 @@
 #include "catch_header.h"
 #include "spatial_graph.hpp"
 #include "spatial_node.hpp"
-// #include <boost/graph/detail/read_graphviz_new.hpp>
 #include <boost/graph/graphviz.hpp>
-#include <boost/property_map/transform_value_property_map.hpp>
 #include <fstream>
 #include <iostream>
 
@@ -58,9 +56,14 @@ TEST_CASE_METHOD(sg_3D, "write graphviz", "[IO]") {
     }
 }
 
+/** Please note that node_id "label" is meaningless, but required for the reader.
+ * I haven't found a way, ie with:
+ * static_property_map, ref_property_map or dummy_property_map, to ignore it.
+ * Don't expect that the node_id in the .dot files are the same ids than
+ * in the graph after read.
+ */
 TEST_CASE_METHOD(sg_3D, "read graphviz", "[IO]") {
-//     //From: http://programmingexamples.net/wiki/Boost/BGL/RelabelInputVertices
-    // boost::dynamic_properties dp(boost::ignore_other_properties);
+    //From: http://programmingexamples.net/wiki/Boost/BGL/RelabelInputVertices
     boost::dynamic_properties dp;
     GraphType g2;
     dp.property("node_id", boost::get(&SG::SpatialNode::label, g2));

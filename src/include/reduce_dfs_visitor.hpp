@@ -98,9 +98,9 @@ struct ReduceGraphVisitor : public boost::default_dfs_visitor {
     void discover_vertex(vertex_descriptor u,
                          const SpatialGraph &input_sg) { // check!
         auto degree = boost::out_degree(u, input_sg);
-        std::cout << "discover_vertex: " << u << " : "
-                  << ArrayUtilities::to_string(input_sg[u].pos)
-                  << ". Degree:" << degree << std::endl;
+        // std::cout << "discover_vertex: " << u << " : "
+        //           << ArrayUtilities::to_string(input_sg[u].pos)
+        //           << ". Degree:" << degree << std::endl;
         if (degree != 2) // starting or ending point.
         {
             // Check if current node have an spatial node already created.
@@ -118,10 +118,10 @@ struct ReduceGraphVisitor : public boost::default_dfs_visitor {
                     sg_vertex_descriptor = boost::add_vertex(input_sg[u], m_sg);
                 }
                 // Store the start point to add an edge at the end.
-                std::cout << "m_sg_source: old: " << m_sg_source << std::endl;
+                // std::cout << "m_sg_source: old: " << m_sg_source << std::endl;
                 m_sg_source = sg_vertex_descriptor;
                 m_source = u;
-                std::cout << "m_sg_source: changed to: " << m_sg_source << std::endl;
+                // std::cout << "m_sg_source: changed to: " << m_sg_source << std::endl;
             } else { // Ending node
                 // Add node if it doesn't exist.
                 if (!sg_vertex_exists) {
@@ -161,9 +161,10 @@ struct ReduceGraphVisitor : public boost::default_dfs_visitor {
 
     void tree_edge(edge_descriptor e, const SpatialGraph &input_sg) {
         auto target = boost::target(e, input_sg);
-        std::cout << "tree_edge: " << e << " , target: " << target << " : "
-                  << ArrayUtilities::to_string(input_sg[target].pos)
-                  << std::endl;
+
+        // std::cout << "tree_edge: " << e << " , target: " << target << " : "
+        //           << ArrayUtilities::to_string(input_sg[target].pos)
+        //           << std::endl;
         m_sg_edge.edge_points.push_back(input_sg[target].pos);
     }
     // Used only for loops. The ending vertex of the loop doesn't use tree_edge.
@@ -171,13 +172,13 @@ struct ReduceGraphVisitor : public boost::default_dfs_visitor {
     // recurisve nature of dfs_visit.
     void back_edge(edge_descriptor e, const SpatialGraph &input_sg) {
         auto target = boost::target(e, input_sg);
-        std::cout << "back_edge: " << e << " , target: " << target << " : "
-                  << ArrayUtilities::to_string(input_sg[target].pos)
-                  << std::endl;
+        // std::cout << "back_edge: " << e << " , target: " << target << " : "
+        //           << ArrayUtilities::to_string(input_sg[target].pos)
+        //           << std::endl;
         // Check if it is a loop and store in the reference. Used by
         // terminate function of the dfs_visit: finish_on_junctions.
         if (!m_is_not_loop && target == m_source && m_sg_edge.edge_points.size() > 1){
-            std::cout << "Loop: " << target  << std::endl;
+            // std::cout << "Loop: " << target  << std::endl;
             m_is_not_loop = false;
             split_loop(m_vertex_map[target], m_sg_edge, m_sg);
             return;
@@ -187,8 +188,8 @@ struct ReduceGraphVisitor : public boost::default_dfs_visitor {
     void finish_vertex(vertex_descriptor u, const SpatialGraph &input_sg) {
         typedef typename boost::color_traits<typename ColorMap::mapped_type>
             Color;
-        std::cout << "Finish vertex: " << u << ": "
-                  << ArrayUtilities::to_string(input_sg[u].pos) << std::endl;
+        // std::cout << "Finish vertex: " << u << ": "
+        //           << ArrayUtilities::to_string(input_sg[u].pos) << std::endl;
         // Restore white for vertices with more than 2 degrees.
         // For tree_edge to work on them.
         if (boost::out_degree(u, input_sg) > 2)
@@ -219,8 +220,8 @@ struct SelfLoopGraphVisitor : public ReduceGraphVisitor<SpatialGraph, VertexMap,
     public:
     void discover_vertex(vertex_descriptor u,
                          const SpatialGraph &input_sg) {
-        std::cout << "SL:discover_vertex: " << u << " : "
-                  << ArrayUtilities::to_string(input_sg[u].pos) << std::endl;
+        // std::cout << "SL:discover_vertex: " << u << " : "
+        //           << ArrayUtilities::to_string(input_sg[u].pos) << std::endl;
         if (u == m_start) // starting point
         {
             auto sg_vertex_descriptor = boost::add_vertex(input_sg[u], this->m_sg);
@@ -314,7 +315,7 @@ void split_loop(
     using SpatialNode = typename boost::vertex_bundle_type<SpatialGraph>::type;
     auto &edge_points = sg_edge.edge_points;
     size_t middle_index = edge_points.size() / 2;
-    std::cout << "VertexId:" << loop_vertex_id << " .EdgePoints.size():" << edge_points.size()  <<". middle_index: " <<middle_index << std::endl;
+    // std::cout << "VertexId:" << loop_vertex_id << " .EdgePoints.size():" << edge_points.size()  <<". middle_index: " <<middle_index << std::endl;
     SpatialNode sg_node;
     sg_node.pos = edge_points[middle_index];
     auto created_vertex_id = boost::add_vertex(sg_node, input_sg);
@@ -393,7 +394,7 @@ SpatialGraph reduce_spatial_graph_via_dfs(const SpatialGraph &input_sg) {
             return false;
 
         if (boost::out_degree(u, g) != 2) {
-            std::cout << "Exited" << std::endl;
+            // std::cout << "Exited" << std::endl;
             is_not_loop = true;
             put(propColorMap, u, Color::white());
             return true;
@@ -410,9 +411,9 @@ SpatialGraph reduce_spatial_graph_via_dfs(const SpatialGraph &input_sg) {
         auto degree = boost::out_degree(*vi, input_sg);
         if (degree == 1) {
             start = *vi;
-            std::cout << "Visit: start: " << start << " : "
-                      << ArrayUtilities::to_string(input_sg[start].pos)
-                      << ". Degree: " << degree << std::endl;
+            // std::cout << "Visit: start: " << start << " : "
+            //           << ArrayUtilities::to_string(input_sg[start].pos)
+            //           << ". Degree: " << degree << std::endl;
             boost::depth_first_visit(input_sg, start, vis, propColorMap,
                                      finish_on_junctions);
         }
@@ -421,9 +422,9 @@ SpatialGraph reduce_spatial_graph_via_dfs(const SpatialGraph &input_sg) {
         auto degree = boost::out_degree(*vi, input_sg);
         if (degree > 2) {
             start = *vi;
-            std::cout << "Visit: start: " << start << " : "
-                      << ArrayUtilities::to_string(input_sg[start].pos)
-                      << ". Degree: " << degree << std::endl;
+            // std::cout << "Visit: start: " << start << " : "
+            //           << ArrayUtilities::to_string(input_sg[start].pos)
+            //           << ". Degree: " << degree << std::endl;
             boost::depth_first_visit(input_sg, start, vis, propColorMap,
                                      finish_on_junctions);
         }
@@ -434,8 +435,8 @@ SpatialGraph reduce_spatial_graph_via_dfs(const SpatialGraph &input_sg) {
     for (vi = vi_start; vi != vi_end; ++vi) {
         if (get(propColorMap, *vi) == Color::white() && boost::out_degree(*vi, input_sg) == 2){
             start = *vi;
-            std::cout << "Self-loops: Visit: start: " << start << " : "
-                      << ArrayUtilities::to_string(input_sg[start].pos) << std::endl;
+            // std::cout << "Self-loops: Visit: start: " << start << " : "
+            //           << ArrayUtilities::to_string(input_sg[start].pos) << std::endl;
             boost::depth_first_visit(input_sg, start, vis_self_loop, propColorMap);
         }
     }

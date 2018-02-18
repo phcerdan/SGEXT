@@ -1,3 +1,5 @@
+# test output
+graphviz_test_out.dot
 compile_commands.json
 #GitHub C++ gitignore
 # Compiled Object files
