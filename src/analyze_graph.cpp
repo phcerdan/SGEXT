@@ -20,6 +20,9 @@
 #include <boost/graph/filtered_graph.hpp>
 #include <boost/graph/graphviz.hpp>
 
+// Boost Filesystem
+#include <boost/filesystem.hpp>
+
 // Viewer
 #include "DGtal/io/Color.h"
 #include "DGtal/io/colormaps/GradientColorMap.h"
@@ -35,6 +38,7 @@ using namespace DGtal;
 using namespace std;
 using namespace DGtal::Z3i;
 namespace po = boost::program_options;
+namespace fs = boost::filesystem;
 
 int main(int argc, char* const argv[]){
 
@@ -44,8 +48,8 @@ int main(int argc, char* const argv[]){
     ( "help,h", "display this message." )
     ( "input,i", po::value<string>()->required(), "Input thin image." )
     ( "reduceGraph,r", po::bool_switch()->default_value(false), "Reduce obj graph into a new SpatialGraph, converting chain nodes (degree=2) into edge_points.")
-    ( "exportReducedGraph,o", po::value<string>()->default_value(""), "Write .dot file with the reduced spatial graph." )
-    ( "exportHistogram,e", po::value<string>()->default_value(""), "Export histogram." )
+    ( "exportReducedGraph,o", po::value<string>(), "Write .dot file with the reduced spatial graph." )
+    ( "exportHistogram,e", po::value<string>(), "Export histogram." )
     ( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal.")
     ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output." );
   bool parseOK=true;
@@ -70,17 +74,14 @@ int main(int argc, char* const argv[]){
   bool verbose = vm["verbose"].as<bool>();
   bool reduceGraph = vm["reduceGraph"].as<bool>();
   bool visualize = vm["visualize"].as<bool>();
+  bool exportHistogram = vm.count("exportHistogram");
   string exportHistogram_filename = vm["exportHistogram"].as<string>();
+  bool exportReducedGraph = vm.count("exportReducedGraph");
   string exportReducedGraph_filename = vm["exportReducedGraph"].as<string>();
-  bool exportHistogram = (exportHistogram_filename != "") ? true : false;
-  bool exportReducedGraph = (exportReducedGraph_filename != "") ? true : false;
-  if(verbose)
-  {
-    if(exportReducedGraph)
-      std::cout << "Output reduced graph (graphviz) to: " << exportReducedGraph_filename << std::endl;
-    if(exportHistogram)
-      std::cout << "Output histogram to: " << exportHistogram_filename << std::endl;
-  }
+  // Get filename without extension (and without folders).
+  const fs::path input_stem = fs::path(filename).stem();
+  const fs::path output_file_path = fs::path(
+      input_stem.string() + "_reduced");
 
   using Domain = Z3i::Domain ;
   using Image = ImageContainerByITKImage<Domain, unsigned char> ;
@@ -146,8 +147,13 @@ int main(int argc, char* const argv[]){
       dp.property("spatial_node", boost::get(boost::vertex_bundle, reduced_g));
       dp.property("spatial_edge", boost::get(boost::edge_bundle, reduced_g));
       {
-        std::ofstream ofile(exportReducedGraph_filename);
-        boost::write_graphviz_dp(ofile, reduced_g, dp);
+      const fs::path output_folder_path{exportReducedGraph_filename};
+        fs::path output_full_path = output_folder_path / fs::path(output_file_path.string() + ".dot");
+        std::ofstream out;
+        out.open(output_full_path.string().c_str());
+        boost::write_graphviz_dp(out, reduced_g, dp);
+        if(verbose)
+          std::cout << "Output reduced graph (graphviz) to: " << output_full_path.string() << std::endl;
       }
     }
 
@@ -167,13 +173,19 @@ int main(int argc, char* const argv[]){
         auto out_degree = boost::out_degree(*p, reduced_g);
         histo_degree[out_degree]++;
       }
+      const fs::path output_folder_path{exportHistogram_filename};
+      fs::path output_full_path = output_folder_path / fs::path(output_file_path.string() + ".histo");
       std::ofstream out;
-      out.open(exportHistogram_filename.c_str());
+      out.open(output_full_path.string().c_str());
       out << "# Degree | Count" << std::endl;
       for(size_t i = 0; i != NBins ; ++i)
       {
         auto & bin = histo_degree[i];
         out << i << " " << bin << std::endl;
+      }
+      if(verbose)
+      {
+        std::cout << "Output histogram to: " << output_full_path.string() << std::endl;
       }
     }
   }

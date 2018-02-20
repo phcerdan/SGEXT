@@ -11,6 +11,7 @@ set(CMAKE_CXX_STANDARD 14)
 
 find_package(Boost COMPONENTS
         program_options
+        filesystem
         graph
         REQUIRED)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})

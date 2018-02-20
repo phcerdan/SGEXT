@@ -49,16 +49,14 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/filtered_graph.hpp>
 
-// Reduce graph via dfs:
-#include "spatial_graph.hpp"
-#include "reduce_dfs_visitor.hpp"
-#include "spatial_graph_from_object.hpp"
-#include "visualize_spatial_graph.hpp"
+// Boost Filesystem
+#include <boost/filesystem.hpp>
 
 using namespace DGtal;
 using namespace std;
 using namespace DGtal::Z3i;
 namespace po = boost::program_options;
+namespace fs = boost::filesystem;
 
 int main(int argc, char* const argv[]){
 
@@ -75,10 +73,8 @@ int main(int argc, char* const argv[]){
     ( "persistence,p",  po::value<int>()->default_value(0), "persistence value, implies use of persistence algorithm if p>=1" )
     ( "profile",  po::bool_switch()->default_value(false), "profile algorithm" )
     ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output" )
-    ( "reduceGraph,r", po::bool_switch()->default_value(false), "Reduce obj graph into a new SpatialGraph, converting chain nodes (degree=2) into edge_points.")
-    ( "visualizeThin,t", po::bool_switch()->default_value(false), "Visualize thin result")
+    ( "visualize,t", po::bool_switch()->default_value(false), "Visualize thin result")
     ( "exportSDP,e", po::value<std::string>(), "Export the resulting set of points in a simple (sequence of discrete point (sdp)).")
-    ( "exportGraph,g", po::value<std::string>(), "Export the resulting set of points as a graph. It saves a list of nodes (.nod) and a list of edges (.edg)")
     ( "exportImage,o", po::value<std::string>(), "Export the resulting set of points as an ITK Image.");
   bool parseOK=true;
   po::variables_map vm;
@@ -97,10 +93,9 @@ int main(int argc, char* const argv[]){
     << endl << "Basic usage: "<< endl
     << "asymThin -i <volFileName> -s <ulti,end,1is,is>"
     " [ -f <white,black> -m <minlevel> -M <maxlevel> -v ] "
-    " [-e <filename, export result as sdp file> "
-    " [-g <filename, export result as a list of nodes (.nod) and edges (.edg)> "
-    " [-k <filename, export result as an image> "
-    " [-r <bool, reduce graph, converting chain nodes (edge=2) into edge_points> "
+    " [-e <output_folder, export result as .sdp file> "
+    " [-g <output_folder, export result as a list of nodes (.nod) and edges (.edg)> "
+    " [-k <output_folder, export result as an image .nrrd> "
     " [-p <value, persistence (trimming)>" << endl
     << "options for skel_string = ulti, end, 1is, is" << endl
     << general_opt << "\n";
@@ -134,9 +129,14 @@ int main(int argc, char* const argv[]){
      )
      throw po::validation_error(po::validation_error::invalid_option_value, "select");
 
-  bool reduceGraph = vm["reduceGraph"].as<bool>();
-  bool visualizeThin = vm["visualizeThin"].as<bool>();
+  bool visualize = vm["visualize"].as<bool>();
   /*-------------- End of parse -----------------------------*/
+  // Get filename without extension (and without folders).
+  const fs::path input_stem = fs::path(filename).stem();
+  const fs::path output_file_path = fs::path(
+      input_stem.string() +
+      "_" + select_string + "_" + sk_string + "_p" + std::to_string(persistence));
+
 
   using Domain = Z3i::Domain ;
   using Image = ImageContainerByITKImage<Domain, unsigned char> ;
@@ -203,8 +203,8 @@ int main(int argc, char* const argv[]){
   std::function< bool(const Complex&, const Cell&) > Skel ;
   if (sk == "ulti") Skel = skelUltimate<Complex>;
   else if (sk == "end") Skel = skelEnd<Complex>;
-  else if (sk == "1is") Skel = oneIsthmus<Complex>;
-  else if (sk == "is") Skel = skelIsthmus<Complex>;
+  // else if (sk == "1is") Skel = oneIsthmus<Complex>;
+  // else if (sk == "is") Skel = skelIsthmus<Complex>;
   else if (sk == "1isthmus")
       Skel = [&isthmus_table, &pointMap](const Complex & fc,
                const Complex::Cell & c){
@@ -259,8 +259,10 @@ int main(int argc, char* const argv[]){
   // Export it as a simple list point
   if (vm.count("exportSDP"))
   {
+    const fs::path output_folder_path{vm["exportSDP"].as<std::string>()};
+    fs::path output_full_path = output_folder_path / fs::path(output_file_path.string() + ".sdp");
     std::ofstream out;
-    out.open(vm["exportSDP"].as<std::string>().c_str());
+    out.open(output_full_path.string().c_str());
     for (auto &p : thin_set)
     {
       out << p[0] << " " << p[1] << " " << p[2] << std::endl;
@@ -268,53 +270,18 @@ int main(int argc, char* const argv[]){
   }
   if (vm.count("exportImage"))
   {
+    const fs::path output_folder_path{vm["exportImage"].as<std::string>()};
+    fs::path output_full_path = output_folder_path / fs::path(output_file_path.string() + ".nrrd");
     unsigned int foreground_value = 255;
     auto thin_image = ImageFromSet<Image>::create(thin_set, foreground_value);
     typedef itk::ImageFileWriter<Image::ITKImage> ITKImageWriter;
     typename ITKImageWriter::Pointer writer = ITKImageWriter::New();
-    writer->SetFileName(vm["exportImage"].as<std::string>().c_str());
+    writer->SetFileName(output_full_path.string().c_str());
     writer->SetInput(thin_image.getITKImagePointer());
     writer->Update();
   }
-  if (vm.count("exportGraph"))
-  {
-    // Object models a boost graph.
-    using Graph = Object;
-    const Graph & graph = vc_new.object();
-    auto num_verts = boost::num_vertices(graph);
-    auto verts = boost::vertices(graph);
-    for(auto&& p = verts.first; p != verts.second; ++p)
-    {
-      std::cout << *p << std::endl;
-      auto out_degree = boost::out_degree(*p, graph);
-      std::cout << out_degree << std::endl;
 
-      // typedef typename boost::graph_traits<Graph>::adjacency_iterator adjacency_iterator;
-      // std::pair<adjacency_iterator,adjacency_iterator> vp1 = boost::adjacent_vertices( *p, graph );
-    };
-    // Edges takes forever, for real. it must be way too many.
-    // auto num_edges = boost::num_edges(graph);
-    // auto edges = boost::edges(graph);
-    std::cout << "#Verts: " << num_verts << std::endl;
-    // std::cout << "#Edges: " << num_edges << std::endl;
-    std::ofstream out;
-    out.open(vm["exportGraph"].as<std::string>().c_str());
-    for (auto &p : thin_set)
-    {
-      out << p[0] << " " << p[1] << " " << p[2] << std::endl;
-    }
-  }
-  if (reduceGraph)
-  {
-    using Graph = Object;
-    const Graph & graph = vc_new.object();
-    using SpatialGraph = SG::GraphAL;
-    SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(graph);
-    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
-    SG::visualize_spatial_graph(reduced_g);
-  }
-  // THEN( "visualize the cells" )
-  if (visualizeThin)
+  if (visualize)
   {
     int argc(1);
     char** argv(nullptr);
