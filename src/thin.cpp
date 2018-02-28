@@ -108,7 +108,6 @@ int main(int argc, char* const argv[]){
   string sk_string = vm["skel"].as<string>();
   if (vm.count("skel") &&
      (!( sk_string == "ulti" || sk_string == "end" ||
-         sk_string == "1is" || sk_string == "is" ||
          sk_string == "isthmus" || sk_string == "1isthmus"))
      )
      throw po::validation_error(po::validation_error::invalid_option_value, "skel");
