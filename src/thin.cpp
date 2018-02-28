@@ -65,8 +65,8 @@ int main(int argc, char* const argv[]){
   general_opt.add_options()
     ( "help,h", "display this message." )
     ( "input,i", po::value<string>()->required(), "Input vol file." )
-    ( "skel,s",  po::value<string>()->required(), "type of skeletonization" )
-    ( "select,c",  po::value<string>()->required(), "select method for skeletonization" )
+    ( "skel,s",  po::value<string>()->required(), "type of skeletonization. Valid: 1isthmus, isthmus, end, ulti" )
+    ( "select,c",  po::value<string>()->required(), "select method for skeletonization. Valid: dmax, random, first" )
     ( "foreground,f",  po::value<string>()->default_value("black"), "foreground color in binary image" )
     ( "thresholdMin,m",  po::value<int>()->default_value(0), "threshold min (excluded) to define binary shape" )
     ( "thresholdMax,M",  po::value<int>()->default_value(255), "threshold max (included) to define binary shape" )
@@ -76,31 +76,21 @@ int main(int argc, char* const argv[]){
     ( "visualize,t", po::bool_switch()->default_value(false), "Visualize thin result")
     ( "exportSDP,e", po::value<std::string>(), "Export the resulting set of points in a simple (sequence of discrete point (sdp)).")
     ( "exportImage,o", po::value<std::string>(), "Export the resulting set of points as an ITK Image.");
-  bool parseOK=true;
-  po::variables_map vm;
 
+  po::variables_map vm;
   try {
     po::store(po::parse_command_line(argc, argv, general_opt), vm);
-  } catch(const exception& ex) {
-    parseOK=false;
-    trace.info()<< "Error checking program options: "<< ex.what()<< endl;
+    if (vm.count ( "help" ) || argc<=1 )
+    {
+      std::cout << "Basic usage:\n" << general_opt << "\n";
+      return false;
+    }
+    po::notify ( vm );
+  } catch ( const std::exception& e ) {
+    std::cerr << e.what() << std::endl;
+    return 1;
   }
-  po::notify ( vm );
-  if (!parseOK || vm.count ( "help" ) || argc<=1 )
-  {
-    trace.info() <<
-    "Compute the thinning of a volume using an AsymetricThinningScheme"<< endl
-    << endl << "Basic usage: "<< endl
-    << "asymThin -i <volFileName> -s <ulti,end,1is,is>"
-    " [ -f <white,black> -m <minlevel> -M <maxlevel> -v ] "
-    " [-e <output_folder, export result as .sdp file> "
-    " [-g <output_folder, export result as a list of nodes (.nod) and edges (.edg)> "
-    " [-k <output_folder, export result as an image .nrrd> "
-    " [-p <value, persistence (trimming)>" << endl
-    << "options for skel_string = ulti, end, 1is, is" << endl
-    << general_opt << "\n";
-    return 0;
-  }
+
   //Parse options
   string filename = vm["input"].as<string>();
   bool verbose = vm["verbose"].as<bool>();
@@ -135,8 +125,7 @@ int main(int argc, char* const argv[]){
   const fs::path input_stem = fs::path(filename).stem();
   const fs::path output_file_path = fs::path(
       input_stem.string() +
-      "_" + select_string + "_" + sk_string + "_p" + std::to_string(persistence));
-
+      "_SKEL_" + select_string + "_" + sk_string + "_p" + std::to_string(persistence));
 
   using Domain = Z3i::Domain ;
   using Image = ImageContainerByITKImage<Domain, unsigned char> ;

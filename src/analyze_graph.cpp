@@ -52,24 +52,21 @@ int main(int argc, char* const argv[]){
     ( "exportHistogram,e", po::value<string>(), "Export histogram." )
     ( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal.")
     ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output." );
-  bool parseOK=true;
-  po::variables_map vm;
 
+  po::variables_map vm;
   try {
     po::store(po::parse_command_line(argc, argv, general_opt), vm);
-  } catch(const exception& ex) {
-    parseOK=false;
-    trace.info()<< "Error checking program options: "<< ex.what()<< endl;
+    if (vm.count ( "help" ) || argc<=1 )
+    {
+      std::cout << "Basic usage:\n" << general_opt << "\n";
+      return false;
+    }
+    po::notify ( vm );
+  } catch ( const std::exception& e ) {
+    std::cerr << e.what() << std::endl;
+    return 1;
   }
-  po::notify ( vm );
-  if (!parseOK || vm.count ( "help" ) || argc<=1 )
-  {
-    trace.info() <<
-    "Analyze the image as a Graph"<< endl
-    << endl << "Basic usage: "<< endl
-    << general_opt << "\n";
-    return 0;
-  }
+
   string filename = vm["input"].as<string>();
   bool verbose = vm["verbose"].as<bool>();
   bool reduceGraph = vm["reduceGraph"].as<bool>();
