@@ -176,8 +176,9 @@ int main(int argc, char* const argv[]){
 
   trace.beginBlock("construct with table");
   Complex vc(ks);
-  // vc.construct(obj);
-  vc.construct(obj.pointSet(), functions::loadTable(simplicity::tableSimple26_6 ));
+  vc.construct(obj);
+  vc.setSimplicityTable(functions::loadTable(simplicity::tableSimple26_6 ));
+  // vc.construct(obj.pointSet(), functions::loadTable(simplicity::tableSimple26_6 ));
   trace.endBlock();
   trace.beginBlock("load isthmus table");
   boost::dynamic_bitset<> isthmus_table;
