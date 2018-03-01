@@ -40,6 +40,8 @@ using namespace DGtal::Z3i;
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 
+template<typename SpatialGraph>
+
 int main(int argc, char* const argv[]){
 
   /*-------------- Parse command line -----------------------------*/
@@ -49,7 +51,7 @@ int main(int argc, char* const argv[]){
     ( "input,i", po::value<string>()->required(), "Input thin image." )
     ( "reduceGraph,r", po::bool_switch()->default_value(false), "Reduce obj graph into a new SpatialGraph, converting chain nodes (degree=2) into edge_points.")
     ( "exportReducedGraph,o", po::value<string>(), "Write .dot file with the reduced spatial graph." )
-    ( "exportHistogram,e", po::value<string>(), "Export histogram." )
+    ( "exportHistograms,e", po::value<string>(), "Export histogram." )
     ( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal.")
     ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output." );
 
@@ -170,19 +172,22 @@ int main(int argc, char* const argv[]){
         auto out_degree = boost::out_degree(*p, reduced_g);
         histo_degree[out_degree]++;
       }
-      const fs::path output_folder_path{exportHistogram_filename};
-      fs::path output_full_path = output_folder_path / fs::path(output_file_path.string() + ".histo");
-      std::ofstream out;
-      out.open(output_full_path.string().c_str());
-      out << "# Degree | Count" << std::endl;
-      for(size_t i = 0; i != NBins ; ++i)
+      // Degrees
       {
-        auto & bin = histo_degree[i];
-        out << i << " " << bin << std::endl;
-      }
-      if(verbose)
-      {
-        std::cout << "Output histogram to: " << output_full_path.string() << std::endl;
+        const fs::path output_folder_path{exportHistogram_filename};
+        fs::path output_full_path = output_folder_path / fs::path(output_file_path.string() + ".histodegrees");
+        std::ofstream out;
+        out.open(output_full_path.string().c_str());
+        out << "# Degree | Count" << std::endl;
+        for(size_t i = 0; i != NBins ; ++i)
+        {
+          auto & bin = histo_degree[i];
+          out << i << " " << bin << std::endl;
+        }
+        if(verbose)
+        {
+          std::cout << "Output degree histogram to: " << output_full_path.string() << std::endl;
+        }
       }
     }
   }
