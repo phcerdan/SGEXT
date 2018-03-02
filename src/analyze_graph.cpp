@@ -51,6 +51,7 @@ int main(int argc, char* const argv[]){
     ( "help,h", "display this message." )
     ( "input,i", po::value<string>()->required(), "Input thin image." )
     ( "reduceGraph,r", po::bool_switch()->default_value(false), "Reduce obj graph into a new SpatialGraph, converting chain nodes (degree=2) into edge_points.")
+    ( "removeExtraEdges,c", po::bool_switch()->default_value(false), "Remove extra edges created because connectivity of object.")
     ( "exportReducedGraph,o", po::value<string>(), "Write .dot file with the reduced spatial graph." )
     ( "exportHistograms,e", po::value<string>(), "Export histogram." )
     ( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal.")
@@ -73,6 +74,7 @@ int main(int argc, char* const argv[]){
   string filename = vm["input"].as<string>();
   bool verbose = vm["verbose"].as<bool>();
   bool reduceGraph = vm["reduceGraph"].as<bool>();
+  bool removeExtraEdges = vm["removeExtraEdges"].as<bool>();
   bool visualize = vm["visualize"].as<bool>();
   bool exportHistograms = vm.count("exportHistograms");
   string exportHistograms_filename = vm["exportHistograms"].as<string>();
@@ -139,17 +141,20 @@ int main(int argc, char* const argv[]){
     using SpatialGraph = SG::GraphAL;
     SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(graph);
     // Remove extra edges
+    if(removeExtraEdges)
     {
-      bool any_edge_removed = true;
+      if(verbose)
+        std::cout <<  "Removing extra edges" << std::endl;
       size_t iterations = 0;
-      while(any_edge_removed) {
-        any_edge_removed = SG::remove_extra_edges(sg);
-        iterations++;
+      while(true) {
+        bool any_edge_removed = SG::remove_extra_edges(sg);
+        if(any_edge_removed)
+          iterations++;
+        else
+          break;
       }
       if(verbose)
-      {
         std::cout <<  "Removed extra edges iteratively " << iterations << " times" << std::endl;
-      }
     }
     SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
 
