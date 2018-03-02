@@ -34,13 +34,14 @@
 #include "spatial_graph_from_object.hpp"
 #include "visualize_spatial_graph.hpp"
 
+// compute histograms
+#include "spatial_histograms.hpp"
+
 using namespace DGtal;
 using namespace std;
 using namespace DGtal::Z3i;
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
-
-template<typename SpatialGraph>
 
 int main(int argc, char* const argv[]){
 
@@ -73,8 +74,8 @@ int main(int argc, char* const argv[]){
   bool verbose = vm["verbose"].as<bool>();
   bool reduceGraph = vm["reduceGraph"].as<bool>();
   bool visualize = vm["visualize"].as<bool>();
-  bool exportHistogram = vm.count("exportHistogram");
-  string exportHistogram_filename = vm["exportHistogram"].as<string>();
+  bool exportHistograms = vm.count("exportHistograms");
+  string exportHistograms_filename = vm["exportHistograms"].as<string>();
   bool exportReducedGraph = vm.count("exportReducedGraph");
   string exportReducedGraph_filename = vm["exportReducedGraph"].as<string>();
   // Get filename without extension (and without folders).
@@ -131,12 +132,25 @@ int main(int argc, char* const argv[]){
       app.exec();
   }
 
-  using Graph = Object;
-  const Graph & graph = obj;
-  using SpatialGraph = SG::GraphAL;
-  SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(graph);
   if(reduceGraph)
   {
+    using Graph = Object;
+    const Graph & graph = obj;
+    using SpatialGraph = SG::GraphAL;
+    SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(graph);
+    // Remove extra edges
+    {
+      bool any_edge_removed = true;
+      size_t iterations = 0;
+      while(any_edge_removed) {
+        any_edge_removed = SG::remove_extra_edges(sg);
+        iterations++;
+      }
+      if(verbose)
+      {
+        std::cout <<  "Removed extra edges iteratively " << iterations << " times" << std::endl;
+      }
+    }
     SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
 
     if(exportReducedGraph)
@@ -161,34 +175,60 @@ int main(int argc, char* const argv[]){
       SG::visualize_spatial_graph(reduced_g);
     }
 
-    if(exportHistogram)
+    if(exportHistograms)
     {
-      auto verts = boost::vertices(reduced_g);
-      constexpr size_t NBins = 50;
-      std::array<size_t, NBins> histo_degree;
-      histo_degree.fill(0);
-      for(auto&& p = verts.first; p != verts.second; ++p)
-      {
-        auto out_degree = boost::out_degree(*p, reduced_g);
-        histo_degree[out_degree]++;
-      }
       // Degrees
       {
-        const fs::path output_folder_path{exportHistogram_filename};
+        auto histo_degrees = SG::histogram_degrees(
+            SG::compute_degrees(reduced_g));
+        const fs::path output_folder_path{exportHistograms_filename};
         fs::path output_full_path = output_folder_path / fs::path(output_file_path.string() + ".histodegrees");
         std::ofstream out;
         out.open(output_full_path.string().c_str());
-        out << "# Degree | Count" << std::endl;
-        for(size_t i = 0; i != NBins ; ++i)
-        {
-          auto & bin = histo_degree[i];
-          out << i << " " << bin << std::endl;
-        }
+        out << "# Degrees: L0:centers of bins, L1:counts, L2:breaks" << std::endl;
+        histo_degrees.PrintCenters(out);
+        histo_degrees.PrintCounts(out);
+        histo_degrees.PrintBreaks(out);
         if(verbose)
         {
           std::cout << "Output degree histogram to: " << output_full_path.string() << std::endl;
         }
       }
+      // EndToEnd Distances
+      {
+        auto histo_distances = SG::histogram_distances(
+            SG::compute_distances(reduced_g));
+        const fs::path output_folder_path{exportHistograms_filename};
+        fs::path output_full_path = output_folder_path / fs::path(output_file_path.string() + ".histodistances");
+        std::ofstream out;
+        out.open(output_full_path.string().c_str());
+        out << "# Distances: L0:centers of bins, L1:counts, L2:breaks" << std::endl;
+        histo_distances.PrintCenters(out);
+        histo_distances.PrintCounts(out);
+        histo_distances.PrintBreaks(out);
+        if(verbose)
+        {
+          std::cout << "Output distance histogram to: " << output_full_path.string() << std::endl;
+        }
+      }
+      // Angles between adjacent edges
+      {
+        auto histo_angles = SG::histogram_angles(
+            SG::compute_angles(reduced_g));
+        const fs::path output_folder_path{exportHistograms_filename};
+        fs::path output_full_path = output_folder_path / fs::path(output_file_path.string() + ".histoangles");
+        std::ofstream out;
+        out.open(output_full_path.string().c_str());
+        out << "# Angles: L0:centers of bins, L1:counts, L2:breaks" << std::endl;
+        histo_angles.PrintCenters(out);
+        histo_angles.PrintCounts(out);
+        histo_angles.PrintBreaks(out);
+        if(verbose)
+        {
+          std::cout << "Output distance histogram to: " << output_full_path.string() << std::endl;
+        }
+      }
+
     }
   }
 

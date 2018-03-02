@@ -46,8 +46,9 @@ SpatialGraph spatial_graph_from_object(const ObjectGraph & obj)
     std::unordered_map<obj_vertex_descriptor, sg_vertex_descriptor> dmap;
     for (; ovi != ovi_end; ++ovi, ++svi) {
         // Copy node position
-        for (size_t i = 0; i < ObjectGraph::Point::dimension; ++i)
+        for (size_t i = 0; i < ObjectGraph::Point::dimension; ++i){
             sg[*svi].pos[i] = (*ovi)[i];
+        }
         // Add to map
         dmap[*ovi] = *svi;
     }
@@ -80,9 +81,13 @@ SpatialGraph spatial_graph_from_object(const ObjectGraph & obj)
  * See related tests for further details.
  *
  * @param sg input spatial graph to reduce.
+ *
+ * @return boolean, true if any edge has been removed
+ * false otherwhise.
  */
 template <class SpatialGraph>
-void remove_extra_edges(SpatialGraph & sg) {
+bool remove_extra_edges(SpatialGraph & sg) {
+    bool any_edge_was_removed = false;
     using vertex_descriptor = typename boost::graph_traits<
         SpatialGraph>::vertex_descriptor;
     using vertex_iterator =
@@ -138,9 +143,12 @@ void remove_extra_edges(SpatialGraph & sg) {
     }
     for(auto & edge : edges_to_remove) {
         auto edge_exist = boost::edge(edge.first, edge.second, sg);
-        if (edge_exist.second)
+        if (edge_exist.second){
           boost::remove_edge(edge_exist.first, sg);
+          any_edge_was_removed = true;
+        }
     }
+    return any_edge_was_removed;
 }
 
 } //end namespace
