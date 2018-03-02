@@ -36,11 +36,11 @@ inline static std::ostream &operator<<(std::ostream &os,
     os << "[";
     for (size_t i = 0; i + 1 < size; ++i) {
         os << "{" << se.edge_points[i][0] << " " << se.edge_points[i][1] << " "
-           << se.edge_points[i][3] << "},";
+           << se.edge_points[i][2] << "},";
     }
     if (size > 0) {
         os << "{" << se.edge_points[size - 1][0] << " " << se.edge_points[size - 1][1] << " "
-            << se.edge_points[size - 1][3] << "}";
+            << se.edge_points[size - 1][2] << "}";
     }
     os << "]";
     return os;
