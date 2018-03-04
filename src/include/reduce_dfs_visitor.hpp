@@ -5,6 +5,8 @@
 #include <boost/graph/adjacency_iterator.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/depth_first_search.hpp>
+// Modified by me boost/graph/depth_first_search.hpp
+// #include <depth_first_search_with_exit.hpp>
 #include <boost/graph/graph_traits.hpp>
 #include <iostream>
 #include <tuple>
@@ -198,7 +200,7 @@ struct ReduceGraphVisitor : public boost::default_dfs_visitor {
 };
 
 template <typename SpatialGraph, typename VertexMap, typename ColorMap>
-struct SelfLoopGraphVisitor : public ReduceGraphVisitor<SpatialGraph, VertexMap, ColorMap> {
+struct SelfLoopGraphVisitor : public boost::default_dfs_visitor {
     using SpatialGraphVertexBundle =
         typename boost::vertex_bundle_type<SpatialGraph>::type;
     using SpatialVertex = SpatialGraphVertexBundle;
@@ -211,71 +213,48 @@ struct SelfLoopGraphVisitor : public ReduceGraphVisitor<SpatialGraph, VertexMap,
         typename boost::graph_traits<SpatialGraph>::edge_descriptor;
 
     SelfLoopGraphVisitor(SpatialGraph &sg, ColorMap &color_map,
-                       VertexMap &vertex_map, bool &is_not_loop, const vertex_descriptor &start)
-        : ReduceGraphVisitor<SpatialGraph, VertexMap, ColorMap>(sg, color_map, vertex_map, is_not_loop),
-        m_start(start) {}
+                       const vertex_descriptor &start, bool & end_visit_flag)
+        : m_sg(sg), m_color_map(color_map),
+        m_start(start), m_end_visit_flag(end_visit_flag) {}
 
-    private:
-    const vertex_descriptor &m_start;
+    SpatialGraph &m_sg;
+    ColorMap &m_color_map;
+    const vertex_descriptor & m_start;
+    bool & m_end_visit_flag;
+    protected:
+    SpatialEdge m_sg_edge;
+    static const vertex_descriptor max_vertex_id = std::numeric_limits<vertex_descriptor>::max();
+    vertex_descriptor m_sg_source = max_vertex_id;
+    vertex_descriptor m_source = max_vertex_id;
+    bool m_already_started = false;
     public:
     void discover_vertex(vertex_descriptor u,
                          const SpatialGraph &input_sg) {
-        // std::cout << "SL:discover_vertex: " << u << " : "
-        //           << ArrayUtilities::to_string(input_sg[u].pos) << std::endl;
-        if (u == m_start) // starting point
+        if (boost::out_degree(u, input_sg) == 2 && u == m_start && !this->m_already_started) // starting point
         {
+            this->m_already_started = true;
             auto sg_vertex_descriptor = boost::add_vertex(input_sg[u], this->m_sg);
             this->m_sg_source = sg_vertex_descriptor;
             this->m_source = m_start;
         }
     }
+
+    void tree_edge(edge_descriptor e, const SpatialGraph &input_sg) {
+        auto target = boost::target(e, input_sg);
+        this->m_sg_edge.edge_points.push_back(input_sg[target].pos);
+    }
+
+    void back_edge(edge_descriptor e, const SpatialGraph &input_sg) {
+        auto target = boost::target(e, input_sg);
+        if (target == this->m_source && this->m_sg_edge.edge_points.size() > 2){
+            // std::cout << "Loop: " << target  << std::endl;
+            split_loop(this->m_sg_source, this->m_sg_edge, this->m_sg);
+            // This will trigger lambda function to end the visit
+            this->m_end_visit_flag = true;
+            return;
+        }
+    }
 };
-// template <typename SpatialGraph, typename VertexMap, typename ColorMap>
-// struct SelfLoopVisitor : public boost::default_dfs_visitor {
-//     using SpatialGraphVertexBundle =
-//         typename boost::vertex_bundle_type<SpatialGraph>::type;
-//     using SpatialVertex = SpatialGraphVertexBundle;
-//     using SpatialGraphEdgeBundle =
-//         typename boost::edge_bundle_type<SpatialGraph>::type;
-//     using SpatialEdge = SpatialGraphEdgeBundle;
-//     using vertex_descriptor =
-//         typename boost::graph_traits<SpatialGraph>::vertex_descriptor;
-//     using edge_descriptor =
-//         typename boost::graph_traits<SpatialGraph>::edge_descriptor;
-//
-//     SelfLoopVisitor(SpatialGraph &sg, ColorMap &color_map, VertexMap
-//     &vertex_map)
-//         : m_sg(sg), m_color_map(color_map), m_vertex_map(vertex_map) {}
-//
-//
-//     SpatialGraph &m_sg;
-//     ColorMap &m_color_map;
-//     VertexMap &m_vertex_map;
-//
-//   private:
-//     vertex_descriptor m_start_vertex;
-//     SpatialEdge m_sg_edge;
-//     bool m_already_started = false;
-//
-//   public:
-//     void discover_vertex(vertex_descriptor u, const SpatialGraph &input_sg) {
-//         if (u == m_start_vertex) {
-//         }
-//     }
-//     void tree_edge(edge_descriptor e, const SpatialGraph &input_sg) {
-//         auto target = boost::target(e, input_sg);
-//         // std::cout << "tree_edge: " << e << " , target: " << target << " :
-//         " << ArrayUtilities::to_string(input_sg[target].pos) << std::endl;
-//         m_sg_edge.edge_points.push_back(input_sg[target].pos);
-//     }
-//     void finish_vertex(vertex_descriptor u, const SpatialGraph &input_sg) {
-//         typedef typename boost::color_traits<typename ColorMap::mapped_type>
-//         Color;
-//         // Restore white for vertices with more than 2 degrees.
-//         // For tree_edge to work on them.
-//         if (boost::out_degree(u, input_sg) > 2)
-//             m_color_map[u] = Color::white();
-// };
 
 /**
  * Split self-loop (node with an edge to itself) given the vertex_descriptor,
@@ -326,10 +305,12 @@ void split_loop(
     SpatialEdge created_sg_edge2;
     created_sg_edge2.edge_points.insert(std::end(created_sg_edge2.edge_points),
                                         std::next(nth), edge_points.end());
-    boost::add_edge(loop_vertex_id, created_vertex_id, created_sg_edge1,
-                    input_sg);
-    boost::add_edge(loop_vertex_id, created_vertex_id, created_sg_edge2,
-                    input_sg);
+    boost::add_edge(loop_vertex_id, created_vertex_id,
+        created_sg_edge1, input_sg);
+    boost::add_edge(loop_vertex_id, created_vertex_id,
+        created_sg_edge2, input_sg);
+    // std::cout << "Degree Original: " << boost::degree(loop_vertex_id, input_sg) << std::endl;
+    // std::cout << "Degree created: " << boost::degree(created_vertex_id, input_sg) << std::endl;
 }
 /**
  *
@@ -337,22 +318,10 @@ void split_loop(
  * with no chain-nodes (degree 2) and populated spatial edges with
  * the pos of those chain-nodes.
  *
- * TODO: It doesn't handle perfect loops (no end-points, no junctions, only
- * 2-degree nodes). The implementation right now starts the visit at end and
- * junction nodes (degree!=2). We can keep visiting unexplored nodes (mark as
- * white in the ColorMap), with another Visitor and other end-junction. The goal
- * would be to create a single isolated vertex with a self-edge But that
- * requires a multigraph, or more complex boost graphs See:
- * http://www.boost.org/doc/libs/1_50_0/libs/graph/doc/graph_theory_review.html.
- * We can store the loop as 2 (or X) nodes of 2-degree, with 2 (or X) spatial
- * edges. o-
- * | \
- * o/
- *
- * Should be relatively easy!
- * TODO WIP: split_loop, use it in the visitor when the spatial_edge
- * Problem, finish_on_junctions uses start vertice. The loop doesn't finish.
- *
+ * The implementation right now starts the visit at end and
+ * junction nodes (degree!=2) and then use SelfLoopVisitor
+ * to visit unexplored nodes of degree == 2 (part of self-loops)
+ * We do store the self-loops as 2 nodes of 2-degree, with 2 spatial edges using @sa split_loop function.
  *
  * @tparam SpatialGraph Graph with spatial info.
  * @param input_sg input
@@ -429,16 +398,27 @@ SpatialGraph reduce_spatial_graph_via_dfs(const SpatialGraph &input_sg) {
                                      finish_on_junctions);
         }
     }
-    // Detect self-loops (no degree > 2 in any vertex)
-    SelfLoopGraphVisitor<SpatialGraph, VertexMap, ColorMap> vis_self_loop(
-        sg, colorMap, vertex_map, is_not_loop, start);
-    for (vi = vi_start; vi != vi_end; ++vi) {
+
+    {
+      bool end_visit_flag = false;
+      auto finish_on_end_visit_flag = [&end_visit_flag, &propColorMap](
+          vertex_descriptor u, const SpatialGraph &g) {
+        if (end_visit_flag)
+          return true;
+        return false;
+      };
+      // Detect self-loops (no degree > 2 in any vertex)
+      SelfLoopGraphVisitor<SpatialGraph, VertexMap, ColorMap> vis_self_loop(
+          sg, colorMap, start, end_visit_flag);
+      for (vi = vi_start; vi != vi_end; ++vi) {
         if (get(propColorMap, *vi) == Color::white() && boost::out_degree(*vi, input_sg) == 2){
-            start = *vi;
-            // std::cout << "Self-loops: Visit: start: " << start << " : "
-            //           << ArrayUtilities::to_string(input_sg[start].pos) << std::endl;
-            boost::depth_first_visit(input_sg, start, vis_self_loop, propColorMap);
+          start = *vi;
+          end_visit_flag = false;
+          // std::cout << "Self-loops: Visit: start: " << start << " : "
+          //           << ArrayUtilities::to_string(input_sg[start].pos) << std::endl;
+          boost::depth_first_visit(input_sg, start, vis_self_loop, propColorMap, finish_on_end_visit_flag);
         }
+      }
     }
 
     return sg;
