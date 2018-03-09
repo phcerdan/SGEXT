@@ -35,6 +35,8 @@
 #include "remove_extra_edges.hpp"
 #include "merge_nodes.hpp"
 #include "visualize_spatial_graph.hpp"
+#include "itkViewImage.h"
+#include "visualize_spatial_graph_with_image.hpp"
 
 // compute histograms
 #include "spatial_histograms.hpp"
@@ -85,13 +87,11 @@ int main(int argc, char* const argv[]){
   bool mergeThreeConnectedNodes = vm["mergeThreeConnectedNodes"].as<bool>();
   bool visualize = vm["visualize"].as<bool>();
   bool exportHistograms = vm.count("exportHistograms");
-  string exportHistograms_filename = vm["exportHistograms"].as<string>();
   size_t binsHistoDegrees= vm["binsHistoDegrees"].as<size_t>();
   size_t binsHistoDistances= vm["binsHistoDistances"].as<size_t>();
   size_t binsHistoAngles= vm["binsHistoAngles"].as<size_t>();
   size_t binsHistoCosines= vm["binsHistoCosines"].as<size_t>();
   bool exportReducedGraph = vm.count("exportReducedGraph");
-  string exportReducedGraph_filename = vm["exportReducedGraph"].as<string>();
   // Get filename without extension (and without folders).
   const fs::path input_stem = fs::path(filename).stem();
   const fs::path output_file_path = fs::path(
@@ -189,6 +189,7 @@ int main(int argc, char* const argv[]){
 
     if(exportReducedGraph)
     {
+      string exportReducedGraph_filename = vm["exportReducedGraph"].as<string>();
       boost::dynamic_properties dp;
       dp.property("node_id", boost::get(boost::vertex_index, reduced_g));
       dp.property("spatial_node", boost::get(boost::vertex_bundle, reduced_g));
@@ -207,10 +208,13 @@ int main(int argc, char* const argv[]){
     if(visualize)
     {
       SG::visualize_spatial_graph(reduced_g);
+      itk::Testing::ViewImage(reader->GetOutput());
+      SG::visualize_spatial_graph_with_image(reduced_g, reader->GetOutput());
     }
 
     if(exportHistograms)
     {
+      string exportHistograms_filename = vm["exportHistograms"].as<string>();
       const fs::path output_folder_path{exportHistograms_filename};
       fs::path output_full_path = output_folder_path / fs::path(output_file_path.string() + ".histo");
       std::ofstream out;

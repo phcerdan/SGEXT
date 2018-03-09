@@ -122,6 +122,11 @@ std::vector<double> compute_angles(const SG::GraphAL & sg)
     // It is guaranteed that given: e=out_edge(v); then source(e) == v.
     for (auto vi = verts.first; vi != verts.second; ++vi)
     {
+        // Don't analyze degree 2 nodes (they are only left to mark self-loops.
+        // Degree 0 and 1 won't be computed even without this guard.
+        // auto degree =  boost::out_degree(*vi,sg);
+        // if (degree < 3)
+        //     continue;
         const auto out_edges = boost::out_edges(*vi, sg);
         for (auto ei1 = out_edges.first; ei1 != out_edges.second; ++ei1) {
             auto source = boost::source(*ei1, sg); // = *vi

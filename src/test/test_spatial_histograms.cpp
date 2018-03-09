@@ -12,10 +12,6 @@
 struct test_spatial_graph {
     using GraphType = SG::GraphAL;
     GraphType g;
-    using vertex_iterator =
-        typename boost::graph_traits<GraphType>::vertex_iterator;
-    using edge_iterator =
-        typename boost::graph_traits<GraphType>::edge_iterator;
     test_spatial_graph() {
         using boost::add_edge;
         this->g = GraphType(4);
@@ -186,7 +182,10 @@ struct edges_plus_symbol : public test_spatial_graph {
     }
 };
 
-TEST_CASE_METHOD(edges_plus_symbol, "compute angles and cosines in plus", "[angles][cosines]") {
+TEST_CASE_METHOD(edges_plus_symbol,
+        "compute angles and cosines in plus",
+        "[angles][cosines]")
+{
     constexpr auto pi = 3.14159265358979323846;
     auto angles = SG::compute_angles(g);
     std::sort(angles.begin(), angles.end());
@@ -215,5 +214,71 @@ TEST_CASE_METHOD(edges_plus_symbol, "compute angles and cosines in plus", "[angl
     };
     std::sort(expected_cosines.begin(), expected_cosines.end());
     CHECK(cosines.size() == 6);
+    CHECK(cosines == expected_cosines);
+}
+
+struct test_one_edge {
+    using GraphType = SG::GraphAL;
+    GraphType g;
+    test_one_edge() {
+        this->g = GraphType(2);
+        SG::PointType n3{{0, 3, 0}};
+        SG::PointType s3{{0, -3, 0}};
+        this->g[0].pos = n3;
+        this->g[1].pos = n3;
+        boost::add_edge(0,1,this->g);
+    }
+};
+
+TEST_CASE_METHOD(test_one_edge,
+        "compute angles and cosines in one edge",
+        "[angles][cosines]") {
+    constexpr auto pi = 3.14159265358979323846;
+    auto angles = SG::compute_angles(g);
+    CHECK(angles.size() == 0);
+}
+
+struct test_two_parallel_edges {
+    using GraphType = SG::GraphAL;
+    GraphType g;
+    test_two_parallel_edges() {
+        this->g = GraphType(2);
+        SG::PointType n3{{0, 3, 0}};
+        SG::PointType s3{{0, -3, 0}};
+        this->g[0].pos = n3;
+        this->g[1].pos = n3;
+        boost::add_edge(0,1,this->g);
+        boost::add_edge(1,0,this->g);
+    }
+};
+
+TEST_CASE_METHOD(test_two_parallel_edges,
+        "compute angles and cosines in two_parallel_edges",
+        "[angles][cosines]") {
+    auto edges = boost::num_edges(this->g);
+    std::cout << "Edges of two_paralell edges : " << edges << std::endl;
+    CHECK(edges == 2);
+    constexpr auto pi = 3.14159265358979323846;
+    auto angles = SG::compute_angles(g);
+    std::sort(angles.begin(), angles.end());
+    std::cout << "Angles" << std::endl;
+    std::ostream_iterator<double> out_it (std::cout,", ");
+    std::copy ( angles.begin(), angles.end(), out_it );
+    std::cout <<  std::endl;
+    std::vector<double> expected_angles = { -pi, -pi };
+    std::sort(expected_angles.begin(), expected_angles.end());
+    CHECK(angles.size() == 2);
+    CHECK(angles == expected_angles);
+
+    std::cout << "Cosines" << std::endl;
+    // compute cosines from angles, not from g
+    auto cosines = SG::compute_cosines(angles);
+    std::sort(cosines.begin(), cosines.end());
+    std::ostream_iterator<double> out_it_cos (std::cout,", ");
+    std::copy ( cosines.begin(), cosines.end(), out_it_cos );
+    std::cout <<  std::endl;
+    std::vector<double> expected_cosines = { 1.0, 1.0 };
+    std::sort(expected_cosines.begin(), expected_cosines.end());
+    CHECK(cosines.size() == 2);
     CHECK(cosines == expected_cosines);
 }
