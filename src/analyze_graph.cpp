@@ -32,6 +32,8 @@
 #include "spatial_graph.hpp"
 #include "reduce_dfs_visitor.hpp"
 #include "spatial_graph_from_object.hpp"
+#include "remove_extra_edges.hpp"
+#include "merge_nodes.hpp"
 #include "visualize_spatial_graph.hpp"
 
 // compute histograms
@@ -52,6 +54,11 @@ int main(int argc, char* const argv[]){
     ( "input,i", po::value<string>()->required(), "Input thin image." )
     ( "reduceGraph,r", po::bool_switch()->default_value(false), "Reduce obj graph into a new SpatialGraph, converting chain nodes (degree=2) into edge_points.")
     ( "removeExtraEdges,c", po::bool_switch()->default_value(false), "Remove extra edges created because connectivity of object.")
+    ( "mergeThreeConnectedNodes,m", po::bool_switch()->default_value(false), "Merge three connected nodes (between themselves) into one node.")
+    ( "binsHistoDegrees,d", po::value<size_t>()->default_value(0), "Bins for the histogram of degrees ." )
+    ( "binsHistoDistances,l", po::value<size_t>()->default_value(0), "Bins for the histogram of distances ." )
+    ( "binsHistoAngles,a", po::value<size_t>()->default_value(0), "Bins for the histogram of angles ." )
+    ( "binsHistoCosines,n", po::value<size_t>()->default_value(0), "Bins for the histogram of cosines ." )
     ( "exportReducedGraph,o", po::value<string>(), "Write .dot file with the reduced spatial graph." )
     ( "exportHistograms,e", po::value<string>(), "Export histogram." )
     ( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal.")
@@ -75,9 +82,14 @@ int main(int argc, char* const argv[]){
   bool verbose = vm["verbose"].as<bool>();
   bool reduceGraph = vm["reduceGraph"].as<bool>();
   bool removeExtraEdges = vm["removeExtraEdges"].as<bool>();
+  bool mergeThreeConnectedNodes = vm["mergeThreeConnectedNodes"].as<bool>();
   bool visualize = vm["visualize"].as<bool>();
   bool exportHistograms = vm.count("exportHistograms");
   string exportHistograms_filename = vm["exportHistograms"].as<string>();
+  size_t binsHistoDegrees= vm["binsHistoDegrees"].as<size_t>();
+  size_t binsHistoDistances= vm["binsHistoDistances"].as<size_t>();
+  size_t binsHistoAngles= vm["binsHistoAngles"].as<size_t>();
+  size_t binsHistoCosines= vm["binsHistoCosines"].as<size_t>();
   bool exportReducedGraph = vm.count("exportReducedGraph");
   string exportReducedGraph_filename = vm["exportReducedGraph"].as<string>();
   // Get filename without extension (and without folders).
@@ -87,11 +99,17 @@ int main(int argc, char* const argv[]){
 
   using Domain = Z3i::Domain ;
   using Image = ImageContainerByITKImage<Domain, unsigned char> ;
-  Image imageReader = ITKReader<Image>::importITK(filename);
   const unsigned int Dim = 3;
   using PixelType = unsigned char ;
   using ItkImageType = itk::Image<PixelType, Dim> ;
-  Image image(imageReader.getITKImagePointer());
+  // Read Image using ITK
+  using ReaderType = itk::ImageFileReader<ItkImageType> ;
+  auto reader = ReaderType::New();
+  reader->SetFileName(filename);
+  reader->Update();
+
+  // Convert to DGtal Container
+  Image image(reader->GetOutput());
 
   using DigitalTopology = DT26_6;
   using DigitalSet =
@@ -158,6 +176,17 @@ int main(int argc, char* const argv[]){
     }
     SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
 
+    if(mergeThreeConnectedNodes)
+    {
+      if(verbose){
+        std::cout <<  "Merging three connecting nodes... " << std::endl;
+      }
+      auto nodes_merged = SG::merge_three_connected_nodes(reduced_g);
+      if(verbose){
+        std::cout << nodes_merged <<  " nodes were merged. Those nodes have now degree 0" << std::endl;
+      }
+    }
+
     if(exportReducedGraph)
     {
       boost::dynamic_properties dp;
@@ -182,59 +211,58 @@ int main(int argc, char* const argv[]){
 
     if(exportHistograms)
     {
+      const fs::path output_folder_path{exportHistograms_filename};
+      fs::path output_full_path = output_folder_path / fs::path(output_file_path.string() + ".histo");
+      std::ofstream out;
+      out.open(output_full_path.string().c_str());
       // Degrees
       {
-        auto histo_degrees = SG::histogram_degrees(
-            SG::compute_degrees(reduced_g));
-        const fs::path output_folder_path{exportHistograms_filename};
-        fs::path output_full_path = output_folder_path / fs::path(output_file_path.string() + ".histodegrees");
-        std::ofstream out;
-        out.open(output_full_path.string().c_str());
+        auto degrees = SG::compute_degrees(reduced_g);
+        auto histo_degrees = SG::histogram_degrees(degrees, binsHistoDegrees);
         out << "# Degrees: L0:centers of bins, L1:counts, L2:breaks" << std::endl;
         histo_degrees.PrintCenters(out);
         histo_degrees.PrintCounts(out);
         histo_degrees.PrintBreaks(out);
-        if(verbose)
-        {
-          std::cout << "Output degree histogram to: " << output_full_path.string() << std::endl;
-        }
       }
       // EndToEnd Distances
       {
-        auto histo_distances = SG::histogram_distances(
-            SG::compute_distances(reduced_g));
-        const fs::path output_folder_path{exportHistograms_filename};
-        fs::path output_full_path = output_folder_path / fs::path(output_file_path.string() + ".histodistances");
-        std::ofstream out;
-        out.open(output_full_path.string().c_str());
+        auto distances = SG::compute_distances(reduced_g);
+        if(verbose)
+        {
+          auto range_ptr = std::minmax_element(distances.begin(), distances.end());
+          std::cout << "Min Distance: " << *range_ptr.first << std::endl;
+          std::cout << "Max Distance: " << *range_ptr.second << std::endl;
+        }
+
+        auto histo_distances = SG::histogram_distances(distances, binsHistoDistances);
         out << "# Distances: L0:centers of bins, L1:counts, L2:breaks" << std::endl;
         histo_distances.PrintCenters(out);
         histo_distances.PrintCounts(out);
         histo_distances.PrintBreaks(out);
-        if(verbose)
-        {
-          std::cout << "Output distance histogram to: " << output_full_path.string() << std::endl;
-        }
       }
       // Angles between adjacent edges
       {
-        auto histo_angles = SG::histogram_angles(
-            SG::compute_angles(reduced_g));
-        const fs::path output_folder_path{exportHistograms_filename};
-        fs::path output_full_path = output_folder_path / fs::path(output_file_path.string() + ".histoangles");
-        std::ofstream out;
-        out.open(output_full_path.string().c_str());
+        auto angles = SG::compute_angles(reduced_g);
+        auto histo_angles = SG::histogram_angles( angles, binsHistoAngles );
         out << "# Angles: L0:centers of bins, L1:counts, L2:breaks" << std::endl;
         histo_angles.PrintCenters(out);
         histo_angles.PrintCounts(out);
         histo_angles.PrintBreaks(out);
-        if(verbose)
+        // Cosines of those angles
         {
-          std::cout << "Output distance histogram to: " << output_full_path.string() << std::endl;
+          auto cosines = SG::compute_cosines(angles);
+          auto histo_cosines = SG::histogram_cosines( cosines, binsHistoCosines );
+          out << "# Cosines: L0:centers of bins, L1:counts, L2:breaks" << std::endl;
+          histo_cosines.PrintCenters(out);
+          histo_cosines.PrintCounts(out);
+          histo_cosines.PrintBreaks(out);
         }
       }
-
-    }
+      if(verbose)
+      {
+        std::cout << "Output histograms to: " << output_full_path.string() << std::endl;
+      }
+    } // end export histograms
   }
 
 }

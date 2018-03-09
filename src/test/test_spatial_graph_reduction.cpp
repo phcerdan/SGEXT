@@ -8,6 +8,8 @@
 
 #include "reduce_dfs_visitor.hpp"
 #include "spatial_graph_from_object.hpp"
+#include "remove_extra_edges.hpp"
+#include "spatial_graph_utilities.hpp"
 
 struct spatial_graph {
     using GraphType = SG::GraphAL;
@@ -17,40 +19,7 @@ struct spatial_graph {
     using edge_iterator =
         typename boost::graph_traits<GraphType>::edge_iterator;
 };
-void print_pos(std::ostream &out, const SG::SpatialNode::PointType &pos) {
-    out << "{";
-    for (auto &p : pos) {
-        if (p >= 0)
-            out << " ";
-        out << p << ",";
-    }
-    out << "}";
-}
 
-void print_degrees(const spatial_graph::GraphType &graph) {
-    std::cout << "Print degrees spatial_graph:" << std::endl;
-    std::cout << "Num Vertices: " << boost::num_vertices(graph) << std::endl;
-    spatial_graph::vertex_iterator vi, vi_end;
-    std::tie(vi, vi_end) = boost::vertices(graph);
-    for (; vi != vi_end; ++vi) {
-        std::cout << *vi << ": " << ArrayUtilities::to_string(graph[*vi].pos) <<
-            ". Degree: " << boost::out_degree(*vi, graph) << std::endl;
-    }
-}
-void print_edges(const spatial_graph::GraphType &graph) {
-    std::cout << "Print edges spatial_graph:" << std::endl;
-    std::cout << "Num Edges: " << boost::num_edges(graph) << std::endl;
-    spatial_graph::edge_iterator ei, ei_end;
-    std::tie(ei, ei_end) = boost::edges(graph);
-    for (; ei != ei_end; ++ei) {
-        auto source = boost::source(*ei, graph);
-        auto target = boost::target(*ei, graph);
-        print_pos(std::cout, graph[source].pos);
-        std::cout << "---";
-        print_pos(std::cout, graph[target].pos);
-        std::cout << std::endl;
-    }
-}
 /**
  * Spatial Graph
  *
@@ -638,7 +607,7 @@ TEST_CASE_METHOD(extra_connected_junctions,
     // print_point_container(reduced_edge_points);
     // std::cout << "Expected edge points" << std::endl;
     // print_point_container(expected_edge_points);
-    // ::print_edges(reduced_g);
+    // SG::print_edges(reduced_g);
 }
 
 TEST_CASE_METHOD(extra_connected_junctions,
@@ -654,6 +623,170 @@ TEST_CASE_METHOD(extra_connected_junctions,
     CHECK(num_edges(reduced_g) == num_edges(expected_g));
     CHECK(equal_vertex_positions(reduced_g, expected_g) == true);
     CHECK(equal_edge_points(reduced_g, expected_g) == true);
+}
+
+/**
+ * In 3D, three nodes connected between them, with edges between them of the same size.
+ * Domain::Point n0(0, 0, 0);
+ * Domain::Point n1(1, 1, 0);
+ * Domain::Point n2(1, 0, 1);
+ *
+ * Domain::Point r0(-1, 0, 0);
+ * Domain::Point r1(1, 2, 0);
+ * Domain::Point r2(1, 0, 2);
+ *
+ */
+struct three_connected_nodes : public object_graph {
+    three_connected_nodes(){
+        DigitalTopology::ForegroundAdjacency adjF;
+        DigitalTopology::BackgroundAdjacency adjB;
+        DigitalTopology topo(adjF, adjB,
+                DGtal::DigitalTopologyProperties::JORDAN_DT);
+
+        Domain::Point b1(-10, -10, -10);
+        Domain::Point b2(10, 10, 10);
+        Domain domain(b1, b2);
+        DigitalSet obj_set(domain);
+        Domain::Point n0(0, 0, 0);
+        Domain::Point n1(1, 1, 0);
+        Domain::Point n2(1, 0, 1);
+        Domain::Point r0(-1, 0, 0);
+        Domain::Point r1(1, 2, 0);
+        Domain::Point r2(1, 0, 2);
+        obj_set.insertNew(n0);
+        obj_set.insertNew(n1);
+        obj_set.insertNew(n2);
+        obj_set.insertNew(r0);
+        obj_set.insertNew(r1);
+        obj_set.insertNew(r2);
+        this->obj = Object(topo, obj_set);
+    }
+};
+TEST_CASE_METHOD(three_connected_nodes,
+                 "three connected nodes with same edge length",
+                 "[remove_extra_edges]") {
+    std::cout << "Three connected nodes" << std::endl;
+    using SpatialGraph = spatial_graph::GraphType;
+    SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
+    spatial_graph::vertex_iterator vi, vi_end;
+    std::tie(vi, vi_end) = boost::vertices(sg);
+    size_t count1degrees = 0;
+    size_t count2degrees = 0;
+    size_t count3degrees = 0;
+    for (; vi != vi_end; ++vi) {
+        auto degree = boost::out_degree(*vi, sg);
+        if (degree == 1)
+            count1degrees++;
+        if (degree == 2)
+            count2degrees++;
+        if (degree == 3)
+            count3degrees++;
+    }
+    CHECK(num_vertices(sg) == 6);
+    CHECK(num_edges(sg) == 6);
+    CHECK(count3degrees == 3);
+    CHECK(count2degrees == 0);
+    CHECK(count1degrees == 3);
+    bool any_edge_removed = remove_extra_edges(sg);
+    CHECK_FALSE(any_edge_removed);
+    CHECK(num_vertices(sg) == 6);
+    CHECK(num_edges(sg) == 6);
+    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
+    CHECK(num_vertices(reduced_g) == num_vertices(sg));
+    CHECK(num_edges(reduced_g) == num_edges(sg));
+    SG::print_degrees(reduced_g);
+    SG::print_edges(reduced_g);
+}
+/**
+ * In 3D, three nodes connected between them, with edges between them of the same size.
+ * Domain::Point n0(0, 0, 0);
+ * Domain::Point n1(1, 1, 0);
+ * Domain::Point n2(1, 0, 1);
+ *
+ * Domain::Point r0(-1, 0, 0);
+ * Domain::Point r1(1, 2, 0);
+ * Domain::Point r2(1, 0, 2);
+ *
+ */
+struct three_connected_nodes_with_self_loop : public object_graph {
+    three_connected_nodes_with_self_loop(){
+        DigitalTopology::ForegroundAdjacency adjF;
+        DigitalTopology::BackgroundAdjacency adjB;
+        DigitalTopology topo(adjF, adjB,
+                DGtal::DigitalTopologyProperties::JORDAN_DT);
+
+        Domain::Point b1(-10, -10, -10);
+        Domain::Point b2(10, 10, 10);
+        Domain domain(b1, b2);
+        DigitalSet obj_set(domain);
+        Domain::Point n0(0, 0, 0);
+        Domain::Point n1(1, 1, 0);
+        Domain::Point n2(1, 0, 1);
+        Domain::Point r0(-1, 0, 0);
+        Domain::Point r1(1, 2, 0);
+        Domain::Point r2(1, 0, 2);
+        // Extend r0 and r1 to create a connection between n0 and n1
+        Domain::Point l1(-2, 0, 0);
+        Domain::Point l2(-3, 0, 0);
+        Domain::Point l3(-3, 1, 0);
+        Domain::Point l4(-3, 2, 0);
+        Domain::Point l5(-3, 3, 0);
+        Domain::Point l6(-2, 3, 0);
+        Domain::Point l7(-1, 3, 0);
+        Domain::Point l8(0, 3, 0);
+
+        obj_set.insertNew(n0);
+        obj_set.insertNew(n1);
+        obj_set.insertNew(n2);
+        obj_set.insertNew(r0);
+        obj_set.insertNew(r1);
+        obj_set.insertNew(r2);
+        obj_set.insertNew(l1);
+        obj_set.insertNew(l2);
+        obj_set.insertNew(l3);
+        obj_set.insertNew(l4);
+        obj_set.insertNew(l5);
+        obj_set.insertNew(l6);
+        obj_set.insertNew(l7);
+        obj_set.insertNew(l8);
+        this->obj = Object(topo, obj_set);
+    }
+};
+TEST_CASE_METHOD(three_connected_nodes_with_self_loop,
+                 "three connected nodes_with_self_loop with same edge length",
+                 "[remove_extra_edges]") {
+    std::cout << "Three connected nodes_with_self_loop" << std::endl;
+    using SpatialGraph = spatial_graph::GraphType;
+    SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
+    SG::print_degrees(sg);
+    SG::print_edges(sg);
+    CHECK(num_vertices(sg) == 14);
+    CHECK(num_edges(sg) == 17); // Haven't really thought about his, but should be ok.
+    bool any_edge_removed = remove_extra_edges(sg);
+    CHECK(any_edge_removed == true);
+    CHECK(num_vertices(sg) == 14);
+    CHECK(num_edges(sg) == 15); // 2 edges removed
+    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
+    CHECK(num_vertices(reduced_g) == 4);
+    CHECK(num_edges(reduced_g) == 5);
+    spatial_graph::vertex_iterator vi, vi_end;
+    std::tie(vi, vi_end) = boost::vertices(reduced_g);
+    size_t count1degrees = 0;
+    size_t count2degrees = 0;
+    size_t count3degrees = 0;
+    for (; vi != vi_end; ++vi) {
+        auto degree = boost::out_degree(*vi, reduced_g);
+        if (degree == 1)
+            count1degrees++;
+        if (degree == 2)
+            count2degrees++;
+        if (degree == 3)
+            count3degrees++;
+    }
+    CHECK(count3degrees == 3);
+    CHECK(count2degrees == 0);
+    CHECK(count1degrees == 1);
+    SG::print_spatial_edges(reduced_g);
 }
 
 TEST_CASE("split_loop", "[split_loop]") {
@@ -702,8 +835,8 @@ TEST_CASE_METHOD(sg_square, "Reduce sg_square", "[reduce_graph]") {
     auto reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
     CHECK(num_vertices(reduced_g) == 2);
     CHECK(num_edges(reduced_g) == 2);
-    ::print_degrees(reduced_g);
-    ::print_edges(reduced_g);
+    SG::print_degrees(reduced_g);
+    SG::print_edges(reduced_g);
     // Expected:
     SpatialGraph expected_g = sg_square_expected().g;
     CHECK(equal_vertex_positions(reduced_g, expected_g) == true);
@@ -718,10 +851,86 @@ TEST_CASE_METHOD(sg_square_plus_one, "Reduce sg_square_plus_one",
     auto reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
     CHECK(num_vertices(reduced_g) == 3);
     CHECK(num_edges(reduced_g) == 3);
-    ::print_degrees(reduced_g);
-    ::print_edges(reduced_g);
+    SG::print_degrees(reduced_g);
+    SG::print_edges(reduced_g);
     // Expected:
     SpatialGraph expected_g = sg_square_plus_one_expected().g;
     CHECK(equal_vertex_positions(reduced_g, expected_g) == true);
     CHECK(equal_edge_points(reduced_g, expected_g) == true);
+}
+
+/**
+ * In 3D, structure that  gives more nodes than expected.
+ * Domain::Point p0(0, 0, 0);
+ * Domain::Point p1(1, 0, 0);
+ * Domain::Point p2(0, 1, 0);
+ * Domain::Point p3(-1, -1, 0);
+ * Domain::Point n0(1, 2, 1);
+ *
+ */
+struct debug_one : public object_graph {
+    debug_one(){
+        DigitalTopology::ForegroundAdjacency adjF;
+        DigitalTopology::BackgroundAdjacency adjB;
+        DigitalTopology topo(adjF, adjB,
+                DGtal::DigitalTopologyProperties::JORDAN_DT);
+
+        Domain::Point b1(-10, -10, -10);
+        Domain::Point b2(10, 10, 10);
+        Domain domain(b1, b2);
+        DigitalSet obj_set(domain);
+        Domain::Point p0(0, 0, 0);
+        Domain::Point p1(1, 0, 0);
+        Domain::Point p2(0, 1, 0);
+        Domain::Point p3(-1, -1, 0);
+        Domain::Point n0(1, 2, 1);
+        obj_set.insertNew(p0);
+        obj_set.insertNew(p1);
+        obj_set.insertNew(p2);
+        obj_set.insertNew(p3);
+        obj_set.insertNew(n0);
+        this->obj = Object(topo, obj_set);
+    }
+};
+TEST_CASE_METHOD(debug_one,
+                 "debug_one estructure with more nodes than expected",
+                 "[remove_extra_edges]") {
+    std::cout << "debug_one" << std::endl;
+    using SpatialGraph = spatial_graph::GraphType;
+    SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
+    spatial_graph::vertex_iterator vi, vi_end;
+    std::cout << "Original" << std::endl;
+    SG::print_degrees(sg);
+    SG::print_edges(sg);
+    std::tie(vi, vi_end) = boost::vertices(sg);
+    size_t count1degrees = 0;
+    size_t count2degrees = 0;
+    size_t count3degrees = 0;
+    for (; vi != vi_end; ++vi) {
+        auto degree = boost::out_degree(*vi, sg);
+        if (degree == 1)
+            count1degrees++;
+        if (degree == 2)
+            count2degrees++;
+        if (degree == 3)
+            count3degrees++;
+    }
+    CHECK(num_vertices(sg) == 5);
+    CHECK(num_edges(sg) == 5);
+    CHECK(count3degrees == 2);
+    CHECK(count2degrees == 1);
+    CHECK(count1degrees == 2);
+    bool any_edge_removed = remove_extra_edges(sg);
+    CHECK(any_edge_removed == true);
+    std::cout << "After removal of extra edges" << std::endl;
+    SG::print_degrees(sg);
+    SG::print_edges(sg);
+    CHECK(num_vertices(sg) == 5);
+    CHECK(num_edges(sg) == 4);
+    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
+    std::cout << "Reduced" << std::endl;
+    SG::print_degrees(reduced_g);
+    SG::print_spatial_edges(reduced_g);
+    CHECK(num_vertices(reduced_g) == 4);
+    CHECK(num_edges(reduced_g) == 3);
 }

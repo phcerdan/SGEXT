@@ -170,7 +170,7 @@ struct ReduceGraphVisitor : public boost::default_dfs_visitor {
         m_sg_edge.edge_points.push_back(input_sg[target].pos);
     }
     // Used only for loops. The ending vertex of the loop doesn't use tree_edge.
-    // Sadly this gets called even after hitting finish_on_junction, because the 
+    // Sadly this gets called even after hitting finish_on_junction, because the
     // recurisve nature of dfs_visit.
     void back_edge(edge_descriptor e, const SpatialGraph &input_sg) {
         auto target = boost::target(e, input_sg);

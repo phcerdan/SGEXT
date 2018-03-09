@@ -8,6 +8,13 @@
 
 namespace SG {
 
+/*
+ * Compute degree of all nodes
+ *
+ * @param sg input spatial graph
+ *
+ * @return vector with degrees
+ */
 std::vector<unsigned int> compute_degrees(const SG::GraphAL & sg)
 {
     std::vector<unsigned int> degrees;
@@ -19,15 +26,35 @@ std::vector<unsigned int> compute_degrees(const SG::GraphAL & sg)
     return degrees;
 }
 
-histo::Histo<double> histogram_degrees(const std::vector<unsigned int> & degrees)
+/**
+ * Create histogram of degrees.
+ * @sa compute_distances
+ *
+ * @param degrees input vector of degrees
+ * @param bins number of bins of the histogram,
+ * if bins == 0, the breaks are generated using Scott method.
+ * bins should be greater than max_degrees + 1
+ *
+ * @return  histogram of degrees
+ */
+histo::Histo<double> histogram_degrees(
+        const std::vector<unsigned int> & degrees,
+        size_t bins = 0)
 {
 	auto max_degree = *std::max_element(std::begin(degrees), std::end(degrees) );
     // Generate breaks to get middle of the bins to be the integer
     // value of the degree
-    histo::Histo<double> hist_degrees(degrees,
-            histo::GenerateBreaksFromRangeAndBins(
-                -0.5, max_degree + 0.5, max_degree + 1)
-            );
+    histo::Histo<double> hist_degrees;
+    if(bins == 0)
+        hist_degrees = histo::Histo<double>(degrees,
+                histo::GenerateBreaksFromRangeAndBins(
+                    -0.5, max_degree + 0.5, max_degree + 1)
+                );
+    else
+        hist_degrees = histo::Histo<double>(degrees,
+                histo::GenerateBreaksFromRangeAndBins(
+                    -0.5, max_degree + 0.5, bins)
+                );
     hist_degrees.name = "degrees";
     return hist_degrees;
 }
@@ -56,16 +83,26 @@ std::vector<double> compute_distances(const SG::GraphAL & sg)
 }
 
 /**
- * Compute End to End distances between nodes.
+ * Create histogram of End to End distances between nodes.
  * @sa compute_distances
  *
  * @param distances input vector of distances
+ * @param bins number of bins of the histogram,
+ * if bins == 0, the breaks are generated using Scott method.
  *
  * @return histogram
  */
-histo::Histo<double> histogram_distances(const std::vector<double> & distances)
+histo::Histo<double> histogram_distances(const std::vector<double> & distances, size_t bins = 0)
 {
-    histo::Histo<double> hist_distances(distances);
+	auto max_distance = *std::max_element(std::begin(distances), std::end(distances) );
+    histo::Histo<double> hist_distances;
+    if(bins == 0)
+        hist_distances = histo::Histo<double>(distances);
+    else
+        hist_distances = histo::Histo<double>(distances,
+                histo::GenerateBreaksFromRangeAndBins(
+                    0.0, max_distance, bins)
+                );
     hist_distances.name = "distances";
     return hist_distances;
 }
@@ -89,7 +126,10 @@ std::vector<double> compute_angles(const SG::GraphAL & sg)
         for (auto ei1 = out_edges.first; ei1 != out_edges.second; ++ei1) {
             auto source = boost::source(*ei1, sg); // = *vi
             auto target1 = boost::target(*ei1, sg);
-            for (auto ei2 = ei1; ei2 != out_edges.second; ++ei2)
+            // Copy edge iterator and plus one (to avoid compare the edge with itself)
+            auto ei2 = ei1;
+            ei2++;
+            for (; ei2 != out_edges.second; ++ei2)
             {
                 auto target2 = boost::target(*ei2, sg);
                 ete_angles.emplace_back(
@@ -109,12 +149,22 @@ std::vector<double> compute_angles(const SG::GraphAL & sg)
  * @sa compute_angles
  *
  * @param angles input data
+ * @param bins number of bins of the histogram,
+ * if bins == 0, the breaks are generated using Scott method.
+ *
  * @return histo
  */
-histo::Histo<double> histogram_angles(const std::vector<double> & angles)
+histo::Histo<double> histogram_angles(const std::vector<double> & angles, size_t bins = 0)
 {
     constexpr auto pi = 3.14159265358979323846;
-    histo::Histo<double> hist_angles(angles, std::make_pair(-pi, pi));
+    histo::Histo<double> hist_angles;
+    if(bins == 0)
+        hist_angles = histo::Histo<double>(angles, std::make_pair(-pi, pi));
+    else
+        hist_angles = histo::Histo<double>(angles,
+                histo::GenerateBreaksFromRangeAndBins(
+                    -pi, pi, bins)
+                );
     hist_angles.name = "angles";
     return hist_angles;
 }
@@ -132,11 +182,20 @@ std::vector<double> compute_cosines(const std::vector<double> & angles)
  * @sa compute_cosines
  *
  * @param cosines input data
+ * @param bins number of bins of the histogram,
+ * if bins == 0, the breaks are generated using Scott method.
  * @return histo
  */
-histo::Histo<double> histogram_cosines(const std::vector<double> & cosines)
+histo::Histo<double> histogram_cosines(const std::vector<double> & cosines, size_t bins = 0)
 {
-    histo::Histo<double> hist_cosines(cosines, std::make_pair(-1.0, 1.0));
+    histo::Histo<double> hist_cosines;
+    if(bins == 0)
+        hist_cosines = histo::Histo<double>(cosines, std::make_pair(-1.0, 1.0));
+    else
+        hist_cosines = histo::Histo<double>(cosines,
+                histo::GenerateBreaksFromRangeAndBins(
+                    -1.0, 1.0, bins)
+                );
     hist_cosines.name = "cosines";
     return hist_cosines;
 }

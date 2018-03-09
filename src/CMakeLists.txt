@@ -44,6 +44,13 @@ target_link_libraries(analyze_graph ${DGTAL_LIBRARIES} )
 target_link_libraries(analyze_graph Qt5::Widgets Qt5::Xml )
 target_link_libraries(analyze_graph ${VTK_LIBRARIES} )
 
+add_executable(highlight_image_points highlight_image_points.cpp)
+target_link_libraries(highlight_image_points ${Boost_LIBRARIES} )
+target_link_libraries(highlight_image_points ${ITK_LIBRARIES} )
+target_link_libraries(highlight_image_points ${DGTAL_LIBRARIES} )
+target_link_libraries(highlight_image_points Qt5::Widgets Qt5::Xml )
+target_link_libraries(highlight_image_points ${VTK_LIBRARIES} )
+
 if(ENABLE_TESTING)
     enable_testing()
     add_subdirectory(test)

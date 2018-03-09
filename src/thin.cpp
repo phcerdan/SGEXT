@@ -128,23 +128,29 @@ int main(int argc, char* const argv[]){
 
   using Domain = Z3i::Domain ;
   using Image = ImageContainerByITKImage<Domain, unsigned char> ;
-  Image imageReader = ITKReader<Image>::importITK(filename);
   const unsigned int Dim = 3;
   using PixelType = unsigned char ;
   using ItkImageType = itk::Image<PixelType, Dim> ;
   /*----------------*/
 
+  // Read Image using ITK
+  using ReaderType = itk::ImageFileReader<ItkImageType> ;
+  auto reader = ReaderType::New();
+  reader->SetFileName(filename);
+  reader->Update();
+
   // Invert Filter using ITK.
   using InverterType =
     itk::InvertIntensityImageFilter<ItkImageType, ItkImageType> ;
   auto inverter = InverterType::New();
-  inverter->SetInput(imageReader.getITKImagePointer());
+  inverter->SetInput(reader->GetOutput());
   inverter->Update();
   /*----------------*/
   // Apply filters if neccesary
   Image::ITKImagePointer handle_out = (invert_image) ?
     Image::ITKImagePointer(inverter->GetOutput()) :
-    Image::ITKImagePointer(imageReader.getITKImagePointer());
+    Image::ITKImagePointer(reader->GetOutput());
+  // Convert to DGtal Container
   Image image(handle_out);
 
   DigitalSet image_set (image.domain());

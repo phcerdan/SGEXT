@@ -60,6 +60,7 @@ void visualize_spatial_graph(const SpatialGraph & sg)
     graphLayoutView->SetLayoutStrategyToPassThrough();
     auto style = vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New(); // like paraview
     graphLayoutView->SetInteractorStyle(style) ;
+    graphLayoutView->ScaledGlyphsOn();
 
     graphLayoutView->ResetCamera();
     graphLayoutView->Render();
