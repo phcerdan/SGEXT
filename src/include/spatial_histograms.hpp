@@ -111,10 +111,13 @@ histo::Histo<double> histogram_distances(const std::vector<double> & distances, 
  * Compute angles between adjacent edges in sg
  *
  * @param sg input spatial graph
+ * @param ignore_parallel_edges flag to don't compute angles for parallel edges.
+ * if false, parallel edges will have an angle of 0.0.
  *
  * @return  vector with angles.
  */
-std::vector<double> compute_angles(const SG::GraphAL & sg)
+std::vector<double> compute_angles(const SG::GraphAL & sg,
+        bool ignore_parallel_edges = true)
 {
     std::vector<double> ete_angles;
     const auto verts = boost::vertices(sg);
@@ -137,6 +140,14 @@ std::vector<double> compute_angles(const SG::GraphAL & sg)
             for (; ei2 != out_edges.second; ++ei2)
             {
                 auto target2 = boost::target(*ei2, sg);
+                // Don't compute angle on parallel edges
+                // WARNING: do not check target2 == source
+                // source(ei2) is guaranteed (by out_edges) to be equal to source(ei1)
+                if(ignore_parallel_edges && target2 == target1){
+                    std::cout << "parallel" << std::endl;
+                    continue;
+                }
+
                 ete_angles.emplace_back(
                         ArrayUtilities::angle(
                             ArrayUtilities::minus(sg[target1].pos, sg[source].pos),

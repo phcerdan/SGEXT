@@ -166,7 +166,8 @@ TEST_CASE_METHOD(test_spatial_graph,
     std::vector<double> expected_cosines = {-1.0, 0.0, 0.0};
     std::sort(expected_cosines.begin(), expected_cosines.end());
     CHECK(cosines.size() == 3);
-    CHECK(cosines == expected_cosines);
+    for (size_t i = 0; i < cosines.size(); i++)
+        CHECK( cosines[i] == Approx(expected_cosines[i]).margin(0.0000000000000001) );
 }
 
 struct edges_plus_symbol : public test_spatial_graph {
@@ -214,7 +215,8 @@ TEST_CASE_METHOD(edges_plus_symbol,
     };
     std::sort(expected_cosines.begin(), expected_cosines.end());
     CHECK(cosines.size() == 6);
-    CHECK(cosines == expected_cosines);
+    for (size_t i = 0; i < cosines.size(); i++)
+        CHECK( cosines[i] == Approx(expected_cosines[i]).margin(0.0000000000000001) );
 }
 
 struct test_one_edge {
@@ -235,7 +237,7 @@ TEST_CASE_METHOD(test_one_edge,
         "[angles][cosines]") {
     constexpr auto pi = 3.14159265358979323846;
     auto angles = SG::compute_angles(g);
-    CHECK(angles.size() == 0);
+    CHECK(angles.empty() == true);
 }
 
 struct test_two_parallel_edges {
@@ -258,17 +260,19 @@ TEST_CASE_METHOD(test_two_parallel_edges,
     auto edges = boost::num_edges(this->g);
     std::cout << "Edges of two_paralell edges : " << edges << std::endl;
     CHECK(edges == 2);
+    bool no_ignore_parallel_edges = false;
     constexpr auto pi = 3.14159265358979323846;
-    auto angles = SG::compute_angles(g);
+    auto angles = SG::compute_angles(g, no_ignore_parallel_edges);
     std::sort(angles.begin(), angles.end());
     std::cout << "Angles" << std::endl;
     std::ostream_iterator<double> out_it (std::cout,", ");
     std::copy ( angles.begin(), angles.end(), out_it );
     std::cout <<  std::endl;
-    std::vector<double> expected_angles = { -pi, -pi };
+    std::vector<double> expected_angles = { 0.0, 0.0 };
     std::sort(expected_angles.begin(), expected_angles.end());
     CHECK(angles.size() == 2);
-    CHECK(angles == expected_angles);
+    for (size_t i = 0; i < angles.size(); i++)
+        CHECK( angles[i] == Approx(expected_angles[i]).margin(0.0000000000000001) );
 
     std::cout << "Cosines" << std::endl;
     // compute cosines from angles, not from g
@@ -280,5 +284,31 @@ TEST_CASE_METHOD(test_two_parallel_edges,
     std::vector<double> expected_cosines = { 1.0, 1.0 };
     std::sort(expected_cosines.begin(), expected_cosines.end());
     CHECK(cosines.size() == 2);
-    CHECK(cosines == expected_cosines);
+    for (size_t i = 0; i < cosines.size(); i++)
+        CHECK( cosines[i] == Approx(expected_cosines[i]).margin(0.0000000000000001) );
+}
+
+TEST_CASE_METHOD(test_two_parallel_edges,
+        "compute angles and cosines in two_parallel_edges ignoring parallel edges",
+        "[angles][cosines]") {
+    auto edges = boost::num_edges(this->g);
+    std::cout << "Edges of two_paralell edges ignoring parallel edges : " << edges << std::endl;
+    CHECK(edges == 2);
+    bool ignore_parallel_edges = true;
+    auto angles = SG::compute_angles(g, ignore_parallel_edges);
+    std::sort(angles.begin(), angles.end());
+    std::cout << "Angles" << std::endl;
+    std::ostream_iterator<double> out_it (std::cout,", ");
+    std::copy ( angles.begin(), angles.end(), out_it );
+    std::cout <<  std::endl;
+    CHECK(angles.empty() == true);
+
+    std::cout << "Cosines" << std::endl;
+    // compute cosines from angles, not from g
+    auto cosines = SG::compute_cosines(angles);
+    std::sort(cosines.begin(), cosines.end());
+    std::ostream_iterator<double> out_it_cos (std::cout,", ");
+    std::copy ( cosines.begin(), cosines.end(), out_it_cos );
+    std::cout <<  std::endl;
+    CHECK(cosines.empty() == true);
 }
