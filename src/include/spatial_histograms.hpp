@@ -143,10 +143,8 @@ std::vector<double> compute_angles(const SG::GraphAL & sg,
                 // Don't compute angle on parallel edges
                 // WARNING: do not check target2 == source
                 // source(ei2) is guaranteed (by out_edges) to be equal to source(ei1)
-                if(ignore_parallel_edges && target2 == target1){
-                    std::cout << "parallel" << std::endl;
+                if(ignore_parallel_edges && target2 == target1)
                     continue;
-                }
 
                 ete_angles.emplace_back(
                         ArrayUtilities::angle(
@@ -175,11 +173,11 @@ histo::Histo<double> histogram_angles(const std::vector<double> & angles, size_t
     constexpr auto pi = 3.14159265358979323846;
     histo::Histo<double> hist_angles;
     if(bins == 0)
-        hist_angles = histo::Histo<double>(angles, std::make_pair(-pi, pi));
+        hist_angles = histo::Histo<double>(angles, std::make_pair(0.0, pi));
     else
         hist_angles = histo::Histo<double>(angles,
                 histo::GenerateBreaksFromRangeAndBins(
-                    -pi, pi, bins)
+                    0.0, pi, bins)
                 );
     hist_angles.name = "angles";
     return hist_angles;

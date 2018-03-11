@@ -83,12 +83,12 @@ int main(int argc, char* const argv[]){
     if (vm.count ( "help" ) || argc<=1 )
     {
       std::cout << "Basic usage:\n" << general_opt << "\n";
-      return false;
+      return EXIT_SUCCESS;
     }
     po::notify ( vm );
   } catch ( const std::exception& e ) {
     std::cerr << e.what() << std::endl;
-    return 1;
+    return EXIT_FAILURE;
   }
 
   //Parse options
