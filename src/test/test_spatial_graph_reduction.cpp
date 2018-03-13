@@ -10,6 +10,14 @@
 #include "spatial_graph_from_object.hpp"
 #include "remove_extra_edges.hpp"
 #include "spatial_graph_utilities.hpp"
+#include "merge_nodes.hpp"
+// #include "visualize_spatial_graph.hpp"
+
+// Viewer
+// #include "DGtal/io/Color.h"
+// #include "DGtal/io/colormaps/GradientColorMap.h"
+// #include "DGtal/io/DrawWithDisplay3DModifier.h"
+// #include <DGtal/io/viewers/Viewer3D.h>
 
 struct spatial_graph {
     using GraphType = SG::GraphAL;
@@ -933,4 +941,247 @@ TEST_CASE_METHOD(debug_one,
     SG::print_spatial_edges(reduced_g);
     CHECK(num_vertices(reduced_g) == 4);
     CHECK(num_edges(reduced_g) == 3);
+}
+
+ /**
+ * In 3D, structure that  gives more nodes than expected.
+ * Domain::Point p0(0, 0, 0);
+ * Domain::Point p1(1, 1, 0);
+ * Domain::Point p2(0, 1, 1);
+ * Domain::Point r0(-1, -1, 0);
+ * Domain::Point r1(2, 2, 0);
+ * Domain::Point r2(0, 1, 2);
+ *
+ */
+struct rare_trio : public object_graph {
+    rare_trio(){
+        DigitalTopology::ForegroundAdjacency adjF;
+        DigitalTopology::BackgroundAdjacency adjB;
+        DigitalTopology topo(adjF, adjB,
+                DGtal::DigitalTopologyProperties::JORDAN_DT);
+
+        Domain::Point b1(-10, -10, -10);
+        Domain::Point b2(10, 10, 10);
+        Domain domain(b1, b2);
+        DigitalSet obj_set(domain);
+        Domain::Point p0(0, 0, 0);
+        Domain::Point p1(1, 1, 0);
+        Domain::Point p2(0, 1, 1);
+        // Branches to give them more than degree 2
+        Domain::Point r0(-1, -1, 0);
+        Domain::Point r1(2, 2, 0);
+        Domain::Point r2(0, 1, 2);
+        obj_set.insertNew(p0);
+        obj_set.insertNew(p1);
+        obj_set.insertNew(p2);
+        obj_set.insertNew(r0);
+        obj_set.insertNew(r1);
+        obj_set.insertNew(r2);
+        this->obj = Object(topo, obj_set);
+    }
+};
+TEST_CASE_METHOD(rare_trio,
+                 "rare_trio estructure with more nodes than expected",
+                 "[remove_extra_edges]") {
+    std::cout << "rare_trio" << std::endl;
+    using SpatialGraph = spatial_graph::GraphType;
+    SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
+    spatial_graph::vertex_iterator vi, vi_end;
+    std::cout << "Original" << std::endl;
+    SG::print_degrees(sg);
+    SG::print_edges(sg);
+    std::tie(vi, vi_end) = boost::vertices(sg);
+    size_t count1degrees = 0;
+    size_t count2degrees = 0;
+    size_t count3degrees = 0;
+    for (; vi != vi_end; ++vi) {
+        auto degree = boost::out_degree(*vi, sg);
+        if (degree == 1)
+            count1degrees++;
+        if (degree == 2)
+            count2degrees++;
+        if (degree == 3)
+            count3degrees++;
+    }
+    CHECK(num_vertices(sg) == 6);
+    CHECK(num_edges(sg) == 6);
+    CHECK(count3degrees == 3);
+    CHECK(count2degrees == 0);
+    CHECK(count1degrees == 3);
+    bool any_edge_removed = remove_extra_edges(sg);
+    CHECK(any_edge_removed == false);
+    std::cout << "After removal of extra edges" << std::endl;
+    SG::print_degrees(sg);
+    SG::print_edges(sg);
+    CHECK(num_vertices(sg) == 6);
+    CHECK(num_edges(sg) == 6);
+    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
+    std::cout << "Reduced" << std::endl;
+    SG::print_degrees(reduced_g);
+    SG::print_spatial_edges(reduced_g);
+    CHECK(num_vertices(reduced_g) == 6);
+    CHECK(num_edges(reduced_g) == 6);
+    // SG::visualize_spatial_graph(reduced_g);
+    std::cout << "Merge 3-connected" << std::endl;
+    auto nodes_merged = SG::merge_three_connected_nodes(reduced_g);
+    std::cout << nodes_merged <<  " nodes were merged. Those nodes have now degree 0" << std::endl;
+    CHECK(num_vertices(reduced_g) == 6);
+    CHECK(num_edges(reduced_g) == 3);
+    SG::print_degrees(reduced_g);
+    SG::print_spatial_edges(reduced_g);
+    // SG::visualize_spatial_graph(reduced_g);
+}
+
+
+/**
+ * See image: buggy_structure.png (ignore red cell).
+ * {489 398 3} is the cell below the red cell.
+ * 19089--60205  [spatial_edge="[{489 398 3}]"];
+ * 19089--60205  [spatial_edge="[{489 398 3},{489 398 1}]"];
+ * 19089--60205  [spatial_edge="[{489 398 3},{489 398 1}]"];
+ * 19089 [spatial_node="489 399 2"];
+ * 60205 [spatial_node="488 398 2"];
+ *
+ * 20059 [spatial_node="485 398 3"];
+ * 9069  [spatial_node="494 402 2"];
+ * 20059--60205  [spatial_edge="[{486 398 2},{487 398 1}]"];
+ * 19089--9069  [spatial_edge="[{489 398 3},{489 398 1},{490 400 1},
+ * {491 401 1},{492 401 0},{493 402 1}]"];
+ */
+struct buggy_structure : public object_graph {
+    buggy_structure(){
+        DigitalTopology::ForegroundAdjacency adjF;
+        DigitalTopology::BackgroundAdjacency adjB;
+        DigitalTopology topo(adjF, adjB,
+                DGtal::DigitalTopologyProperties::JORDAN_DT);
+
+        Domain::Point b1(480, 390, -1);
+        Domain::Point b2(500, 410, 10);
+        Domain domain(b1, b2);
+        DigitalSet obj_set(domain);
+        Domain::Point p0(489, 399, 2); // 19089
+        Domain::Point p1(488, 398, 2); // 60205
+        Domain::Point p2(485, 398, 3); // 20059
+        Domain::Point p3(491, 401, 1); // 9069(reduced)
+        Domain::Point p4(491, 401, 3); // other branch
+        Domain::Point r01_0(489, 398, 3); // red
+        Domain::Point r01_1(489, 398, 1);
+        Domain::Point r12_0(486, 398, 2);
+        Domain::Point r12_1(487, 398, 1);
+        Domain::Point r03_1(490, 400, 1);
+        Domain::Point r04_1(490, 400, 3);
+        // Branches to give them more than degree 2
+        obj_set.insertNew(p0);
+        obj_set.insertNew(p1);
+        obj_set.insertNew(p2);
+        obj_set.insertNew(p3);
+        obj_set.insertNew(p4);
+        obj_set.insertNew(r01_0);
+        obj_set.insertNew(r01_1);
+        obj_set.insertNew(r12_0);
+        obj_set.insertNew(r12_1);
+        obj_set.insertNew(r03_1);
+        obj_set.insertNew(r04_1);
+        this->obj = Object(topo, obj_set);
+    }
+};
+TEST_CASE_METHOD(buggy_structure,
+                 "buggy_structure structure with more nodes than expected",
+                 "[remove_extra_edges]") {
+    std::cout << "buggy_structure" << std::endl;
+    using SpatialGraph = spatial_graph::GraphType;
+    SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
+  // {
+  //     DGtal::Z3i::KSpace ks;
+  //     ks.init(obj.domain().lowerBound(), obj.domain().upperBound(),true);
+  //     int argc(1);
+  //     char** argv(nullptr);
+  //     QApplication app(argc, argv);
+  //     DGtal::Viewer3D<> viewer(ks);
+  //     viewer.show();
+  //
+  //     viewer.setFillColor(DGtal::Color(255, 0, 0, 255));
+  //     viewer << Domain::Point(489, 398, 3);
+  //     viewer.setFillColor(DGtal::Color(255, 255, 255, 255));
+  //     viewer << obj.pointSet();
+  //
+  //     viewer << DGtal::Viewer3D<>::updateDisplay;
+  //
+  //     app.exec();
+  // }
+    // SG::visualize_spatial_graph(sg);
+    spatial_graph::vertex_iterator vi, vi_end;
+    std::cout << "Original" << std::endl;
+    SG::print_degrees(sg);
+    SG::print_edges(sg);
+    std::tie(vi, vi_end) = boost::vertices(sg);
+    size_t count1degrees = 0;
+    size_t count2degrees = 0;
+    size_t count3degrees = 0;
+    for (; vi != vi_end; ++vi) {
+        auto degree = boost::out_degree(*vi, sg);
+        if (degree == 1)
+            count1degrees++;
+        if (degree == 2)
+            count2degrees++;
+        if (degree == 3)
+            count3degrees++;
+    }
+    CHECK(num_vertices(sg) == 11);
+    CHECK(num_edges(sg) == 12);
+    CHECK(count3degrees == 0);
+    CHECK(count2degrees == 6);
+    CHECK(count1degrees == 3);
+    bool any_edge_removed = remove_extra_edges(sg);
+    CHECK(any_edge_removed == false);
+    std::cout << "Reduced" << std::endl;
+    bool verbose = true;
+    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg, verbose);
+    // SG::visualize_spatial_graph(reduced_g);
+    SG::print_degrees(reduced_g);
+    SG::print_spatial_edges(reduced_g);
+    // {
+    //     DGtal::Z3i::KSpace ks;
+    //     ks.init(obj.domain().lowerBound(), obj.domain().upperBound(),true);
+    //     int argc(1);
+    //     char** argv(nullptr);
+    //     QApplication app(argc, argv);
+    //     DGtal::Viewer3D<> viewer(ks);
+    //     viewer.show();
+    //
+    //     viewer.setFillColor(DGtal::Color(0, 255, 0, 255));
+    //     viewer << Domain::Point(491, 401, 1); // degree 1
+    //     viewer << Domain::Point(489, 399, 2); // degree 4
+    //     viewer << Domain::Point(485, 398, 3); // 1
+    //     viewer << Domain::Point(488, 398, 2); // 3
+    //     viewer << Domain::Point(491, 401, 3); // 1
+    //     viewer.setFillColor(DGtal::Color(255, 255, 255, 255));
+    //     viewer << obj.pointSet();
+    //
+    //     viewer << DGtal::Viewer3D<>::updateDisplay;
+    //
+    //     app.exec();
+    // }
+    CHECK(num_vertices(reduced_g) == 5);
+    CHECK(num_edges(reduced_g) == 5);
+    std::vector<SG::PointType> all_edge_points;
+    for (auto edge_pair = boost::edges(reduced_g); edge_pair.first != edge_pair.second; ++edge_pair.first) {
+        const auto & eps = reduced_g[*edge_pair.first].edge_points;
+        all_edge_points.insert(std::end(all_edge_points),
+                std::begin(eps), std::end(eps));
+    }
+    std::sort(std::begin(all_edge_points), std::end(all_edge_points));
+    std::vector<SG::PointType> expected_edge_points = {
+        { 486, 398, 2 }, { 487, 398, 1 }, { 489, 398, 1 },
+        { 489, 398, 3 }, { 490, 400, 1 }, { 490, 400, 3 }
+    };
+    std::sort(std::begin(expected_edge_points), std::end(expected_edge_points));
+    CHECK(all_edge_points == expected_edge_points);
+    CHECK(all_edge_points.size() + num_vertices(reduced_g) == 11);
+
+    // SG::visualize_spatial_graph(reduced_g);
+    std::cout << "Merge 3-connected" << std::endl;
+    auto nodes_merged = SG::merge_three_connected_nodes(reduced_g);
+    std::cout << nodes_merged <<  " nodes were merged. Those nodes have now degree 0" << std::endl;
+    CHECK(nodes_merged == 0 );
 }

@@ -57,6 +57,7 @@ int main(int argc, char* const argv[]){
     ( "reduceGraph,r", po::bool_switch()->default_value(false), "Reduce obj graph into a new SpatialGraph, converting chain nodes (degree=2) into edge_points.")
     ( "removeExtraEdges,c", po::bool_switch()->default_value(false), "Remove extra edges created because connectivity of object.")
     ( "mergeThreeConnectedNodes,m", po::bool_switch()->default_value(false), "Merge three connected nodes (between themselves) into one node.")
+    ( "mergeParallelEdges,p", po::bool_switch()->default_value(false), "Check and merge parallel edges that compare equal.")
     ( "binsHistoDegrees,d", po::value<size_t>()->default_value(0), "Bins for the histogram of degrees ." )
     ( "binsHistoDistances,l", po::value<size_t>()->default_value(0), "Bins for the histogram of distances ." )
     ( "binsHistoAngles,a", po::value<size_t>()->default_value(0), "Bins for the histogram of angles ." )
@@ -85,6 +86,7 @@ int main(int argc, char* const argv[]){
   bool reduceGraph = vm["reduceGraph"].as<bool>();
   bool removeExtraEdges = vm["removeExtraEdges"].as<bool>();
   bool mergeThreeConnectedNodes = vm["mergeThreeConnectedNodes"].as<bool>();
+  bool mergeParallelEdges = vm["mergeParallelEdges"].as<bool>();
   bool visualize = vm["visualize"].as<bool>();
   bool exportHistograms = vm.count("exportHistograms");
   size_t binsHistoDegrees= vm["binsHistoDegrees"].as<size_t>();
@@ -184,6 +186,28 @@ int main(int argc, char* const argv[]){
       auto nodes_merged = SG::merge_three_connected_nodes(reduced_g);
       if(verbose){
         std::cout << nodes_merged <<  " nodes were merged. Those nodes have now degree 0" << std::endl;
+      }
+    }
+
+    if(mergeParallelEdges)
+    {
+      if(verbose){
+        std::cout <<  "Merging equal parallel edges... " << std::endl;
+      }
+      auto parallel_edges = SG::get_parallel_edges(reduced_g);
+      auto equal_parallel_edges = SG::get_equal_parallel_edges(parallel_edges, reduced_g);
+      if(verbose){
+        std::cout << "Found " << parallel_edges.size()
+          << " parallel edges. " << equal_parallel_edges.size() <<
+          " are equal!." << std::endl;
+
+          std::cout << "Equal parallel edges between vertex:\n";
+        for (const auto & edge_pair : equal_parallel_edges)
+          std::cout
+            << boost::source(edge_pair.first, reduced_g)
+            << "---"
+            << boost::target(edge_pair.first, reduced_g)
+            << std::endl;
       }
     }
 
