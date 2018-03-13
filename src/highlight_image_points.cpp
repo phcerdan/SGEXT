@@ -37,7 +37,8 @@ int main(int argc, char* const argv[]){
     ( "help,h", "display this message." )
     ( "input,i", po::value<string>()->required(), "Input thin image." )
     ( "exportSDP,o", po::value<string>(), "Write .sdp file the digital set points." )
-    ( "highlightPoints,p", po::value<string>(), "Give a string of points to highlight them (require visualize ON). Example: \"1 3 4, 43 45 53\" " )
+    ( "highlightRedPoints,p", po::value<string>(), "Give a string of points to highlight them in RED (require visualize ON). Example: \"1 3 4, 43 45 53\" " )
+    ( "highlightBluePoints,b", po::value<string>(), "Give a string of points to highlight them n BLUE (require visualize ON). Example: \"1 3 4, 43 45 53\" " )
     ( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal.")
     ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output." );
 
@@ -58,8 +59,10 @@ int main(int argc, char* const argv[]){
   string filename = vm["input"].as<string>();
   bool verbose = vm["verbose"].as<bool>();
   bool visualize = vm["visualize"].as<bool>();
-  bool highlightPoints = vm.count("highlightPoints");
-  string highlightPoints_input = highlightPoints ? vm["highlightPoints"].as<string>() : "";
+  bool highlightRedPoints = vm.count("highlightRedPoints");
+  string highlightRedPoints_input = highlightRedPoints ? vm["highlightRedPoints"].as<string>() : "";
+  bool highlightBluePoints = vm.count("highlightBluePoints");
+  string highlightBluePoints_input = highlightBluePoints ? vm["highlightBluePoints"].as<string>() : "";
   bool exportSDP = vm.count("exportSDP");
   string exportSDP_filename = exportSDP ? vm["exportSDP"].as<string>(): "";
   // Get filename without extension (and without folders).
@@ -95,14 +98,11 @@ int main(int argc, char* const argv[]){
       Viewer3D<> viewer(ks);
       viewer.show();
 
-      viewer.setFillColor(Color(255, 255, 255, 50));
-      viewer << image_set;
-
-      DigitalSet highlight_set(image.domain());
-      if(highlightPoints)
+      DigitalSet highlight_red_set(image.domain());
+      if(highlightRedPoints)
       {
-        std::cout << "Highlighting points" << std::endl;
-        std::istringstream ss(highlightPoints_input);
+        std::cout << "highlighting RED points" << std::endl;
+        std::istringstream ss(highlightRedPoints_input);
         std::cout << ss.str() << std::endl;
         std::string spoint;
         Domain::Point p;
@@ -113,12 +113,38 @@ int main(int argc, char* const argv[]){
           //12 9 131
           sspoint >> p[0] >> p[1] >> p[2];
           std::cout << p << std::endl;
-          highlight_set.insert(p);
+          highlight_red_set.insert(p);
         }
-        // Highlighted
+
         viewer.setFillColor(Color(255, 0, 0, 255));
-        viewer << highlight_set;
+        viewer << highlight_red_set;
       }
+
+      DigitalSet highlight_blue_set(image.domain());
+      if(highlightBluePoints)
+      {
+        std::cout << "highlighting BLUE points" << std::endl;
+        std::istringstream ss(highlightBluePoints_input);
+        std::cout << ss.str() << std::endl;
+        std::string spoint;
+        Domain::Point p;
+        //12 9 131, 23 44 5
+        while(std::getline(ss, spoint, ',')) {
+          std::istringstream sspoint( spoint );
+          std::cout << sspoint.str() << std::endl;
+          //12 9 131
+          sspoint >> p[0] >> p[1] >> p[2];
+          std::cout << p << std::endl;
+          highlight_blue_set.insert(p);
+        }
+
+        viewer.setFillColor(Color(0, 0, 255, 255));
+        viewer << highlight_blue_set;
+      }
+
+      viewer.setFillColor(Color(255, 255, 255, 250));
+      viewer << image_set;
+
 
       viewer << Viewer3D<>::updateDisplay;
 

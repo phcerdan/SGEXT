@@ -11,8 +11,18 @@ namespace SG
 /**
  * Some nodes that are connected between them,
  * could be merged.
- * Transorming 3 nodes with degree 3, to 1 node with degree 3
+ * Transforming 3 nodes with degree 3, to 1 node with degree 3
  * and adding the old nodes into the corresponding spatial edge.
+ *
+ * TODO:
+ * Pitfall1: what happen when 2 of those nodes are connected between them with an extra parallel edge?
+ *     (a)
+ *      o--
+ *(b) o/|  |
+ *     \o--
+ *     (c)
+ *
+ * Solution1: Don't do it in that case, (or use split_loop?)
  *
  * See related tests for further details.
  *
@@ -37,7 +47,8 @@ size_t merge_three_connected_nodes(SpatialGraph & sg) {
     std::tie(vi, vi_end) = boost::vertices(sg);
     for (; vi != vi_end; ++vi) {
         auto degree_current = boost::out_degree(*vi, sg);
-        if (degree_current > 2){
+        // limit to degree 3 nodes
+        if (degree_current == 3){
             // Check that current node is not already selected to remove:
             {
                 auto already_selected_to_delete = std::find_if(
@@ -61,6 +72,7 @@ size_t merge_three_connected_nodes(SpatialGraph & sg) {
                         auto edge_exist_pair = boost::edge(*neighbor_it, *other_neighbor_it, sg);
                         // Check edge between neighbors exist.
                         if(edge_exist_pair.second){
+                            // Check there are more than one edge between them.
                             // Store pair of vertex_descriptor of connected neighbors
                             // Because removing edges causes invalidation of adjacency_iterator
                             neighbors_connected.emplace_back(*neighbor_it, *other_neighbor_it);
@@ -69,17 +81,40 @@ size_t merge_three_connected_nodes(SpatialGraph & sg) {
                 }
             }
 
-            // Compare positions of current and neighbor nodes,
-            // and remove largest edge.
             for(auto & nv : neighbors_connected){
                 auto & sn_first = sg[nv.first];
                 auto & sn_second = sg[nv.second];
                 auto & sn_current = sg[*vi];
+
                 auto degree_first = boost::out_degree(nv.first, sg);
                 auto degree_second = boost::out_degree(nv.second, sg);
                 // If neighbors have more than degree 3, abort merge
+                // note that sn_current can only have degree 3 as well.
                 if (degree_first != 3 && degree_second != 3)
                     continue;
+
+                // If there are more than one edge connecting the node trio, abort.
+                {
+                    bool node_trio_has_parallel_edges = false;
+                    std::vector<vertex_descriptor> tri_nodes = {*vi, nv.first, nv.second};
+                    for(auto it = std::begin(tri_nodes) ; it != std::end(tri_nodes) && !node_trio_has_parallel_edges ; ++it){
+                        auto it_other = it;
+                        for(++it_other; it_other != std::end(tri_nodes) && !node_trio_has_parallel_edges ; ++it_other){
+                            auto out_edges = boost::out_edges(*it, sg);
+                            auto &ei = out_edges.first;
+                            auto &ei_end = out_edges.second;
+                            size_t number_of_edges_between_neighbors = 0;
+                            for (; ei != ei_end ; ++ei )
+                                if(boost::target(*ei, sg) ==
+                                        *it_other )
+                                    ++number_of_edges_between_neighbors;
+                            if(number_of_edges_between_neighbors > 1)
+                                node_trio_has_parallel_edges = true;
+                        }
+                    }
+                    if(node_trio_has_parallel_edges)
+                        continue;
+                }
 
                 auto edge_neighbors_pair = boost::edge(nv.first, nv.second, sg);
                 auto edge_first_pair = boost::edge(*vi, nv.first, sg);

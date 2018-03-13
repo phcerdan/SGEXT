@@ -134,6 +134,4 @@ TEST_CASE_METHOD(three_connected_nodes,
     CHECK(count2degrees == 0);
     CHECK(count1degrees == 3);
     CHECK(count0degrees == 2);
-
-
 }
