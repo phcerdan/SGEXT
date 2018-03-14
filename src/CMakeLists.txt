@@ -52,30 +52,54 @@ find_package(VTK REQUIRED COMPONENTS
 # include(${VTK_USE_FILE})
 include_directories(SYSTEM ${VTK_INCLUDE_DIRS})
 
-include_directories("${CMAKE_SOURCE_DIR}/include")
-set(SOURCES_DIR "${CMAKE_SOURCE_DIR}/sources")
-set(SOURCES_WITH_BOOST
-    ${SOURCES_DIR}/trim_graph.cpp
-    ${SOURCES_DIR}/merge_nodes.cpp
-    ${SOURCES_DIR}/remove_extra_edges.cpp
-    ${SOURCES_DIR}/compute_graph_properties.cpp
-    ${SOURCES_DIR}/spatial_histograms.cpp
-    ${SOURCES_DIR}/split_loop.cpp
-    ${SOURCES_DIR}/reduce_spatial_graph_via_dfs.cpp
-    )
-set(SOURCES_WITH_VTK
-    ${SOURCES_DIR}/convert_to_vtk_graph.cpp
-    ${SOURCES_DIR}/visualize_spatial_graph.cpp
+set(SG_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/include")
+include_directories(${SG_INCLUDE_DIR})
+
+set(SG_SRC_DIR "${CMAKE_SOURCE_DIR}/src")
+# To keep track of headers, unused elsewhere
+set(SG_HEADERS_ONLY
+    ${SG_INCLUDE_DIR}/reduce_dfs_visitor.hpp
+    ${SG_INCLUDE_DIR}/visualize_spatial_graph_with_image.hpp
+    ${SG_INCLUDE_DIR}/spatial_graph_from_object.hpp
+    ${SG_INCLUDE_DIR}/spatial_graph_utilities.hpp
+    # These could form an external project {{{
+    ${SG_INCLUDE_DIR}/array_utilities.hpp
+    ${SG_INCLUDE_DIR}/spatial_graph.hpp
+    ${SG_INCLUDE_DIR}/spatial_node.hpp
+    ${SG_INCLUDE_DIR}/spatial_edge.hpp
+    # }}}
+    # Already external in phcerdan/histo-header. Use git submodule. {
+    ${SG_INCLUDE_DIR}/histo.hpp
+    #}
+    # Taken from your phcerdan/ITKIsotropicWavelets module. {
+    ${SG_INCLUDE_DIR}/itkViewImage.h
+    ${SG_INCLUDE_DIR}/itkViewImage.hxx
+    # }
     )
 
-add_library(SG ${SOURCES_WITH_BOOST})
+set(SG_SRC_WITH_BOOST
+    ${SG_SRC_DIR}/trim_graph.cpp
+    ${SG_SRC_DIR}/merge_nodes.cpp
+    ${SG_SRC_DIR}/remove_extra_edges.cpp
+    ${SG_SRC_DIR}/compute_graph_properties.cpp
+    ${SG_SRC_DIR}/spatial_histograms.cpp
+    ${SG_SRC_DIR}/split_loop.cpp
+    ${SG_SRC_DIR}/reduce_spatial_graph_via_dfs.cpp
+    )
+set(SG_SRC_WITH_VTK
+    ${SG_SRC_DIR}/convert_to_vtk_graph.cpp
+    ${SG_SRC_DIR}/visualize_spatial_graph.cpp
+    ${SG_SRC_DIR}/visualize_spatial_graph_with_image.cpp
+    )
+
+add_library(SG ${SG_SRC_WITH_BOOST})
 target_include_directories(SG PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>  # <prefix>/include/mylib
   )
 target_link_libraries(SG ${Boost_LIBRARIES} )
 
-add_library(SGVtk ${SOURCES_WITH_VTK})
+add_library(SGVtk ${SG_SRC_WITH_VTK})
 target_include_directories(SGVtk PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>  # <prefix>/include/mylib

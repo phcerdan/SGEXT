@@ -23,9 +23,9 @@
 #include "convert_to_vtk_graph.hpp"
 
 namespace SG {
-template <typename SpatialGraph, typename TImage>
+template <typename TImage>
 void visualize_spatial_graph_with_image(
-        const SpatialGraph & sg,
+        const GraphType & sg,
         const TImage* img,
         const std::string& win_title = "itkViewGraph",
         size_t win_x = 600,

@@ -20,7 +20,7 @@ namespace SG {
  *
  * @return reduced graph.
  */
-  SG::GraphType reduce_spatial_graph_via_dfs(const GraphType &input_sg, bool verbose = false);
+GraphType reduce_spatial_graph_via_dfs(const GraphType &input_sg, bool verbose = false);
 
 } // end namespace
 #endif
