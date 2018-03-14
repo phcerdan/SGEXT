@@ -17,18 +17,56 @@ find_package(Boost COMPONENTS
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 find_package(DGtal REQUIRED)
 include_directories(SYSTEM ${DGTAL_INCLUDE_DIRS})
-find_package(ITK REQUIRED)
+# find_package(ITK REQUIRED)
+find_package(ITK REQUIRED COMPONENTS
+  ITKCommon
+  ITKIOImageBase
+  ITKImageGrid
+  ITKImageIntensity
+  ITKImageStatistics
+  ITKVtkGlue
+  IsotropicWavelets
+  ITKImageIO
+)
 include(${ITK_USE_FILE})
 include_directories(SYSTEM ${ITK_INCLUDE_DIRS})
 find_package(Qt5 REQUIRED
     Widgets
     Xml
     OpenGL)
-find_package(VTK REQUIRED)
+
+# find_package(VTK REQUIRED)
+# TODO: What is the proper way to use a vtk${WHATEVER_BACKEND}?
+# is intalled in the system
+find_package(VTK REQUIRED COMPONENTS
+  vtkCommonCore
+  vtkCommonDataModel
+  vtkInteractionWidgets
+  # vtkRenderingOpenGL
+  vtkRenderingCore
+  vtkViewsInfovis
+  NO_MODULE
+)
 include(${VTK_USE_FILE})
 include_directories(SYSTEM ${VTK_INCLUDE_DIRS})
 
-include_directories("./include")
+include_directories("${CMAKE_SOURCE_DIR}/include")
+set(SOURCES_DIR "${CMAKE_SOURCE_DIR}/sources")
+set(SOURCES_ALL
+    ${SOURCES_DIR}/trim_graph.cpp
+    ${SOURCES_DIR}/merge_nodes.cpp
+    )
+
+add_library(SG ${SOURCES_ALL})
+target_include_directories(SG PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include/SG>  # <prefix>/include/mylib
+  )
+target_link_libraries(SG ${Boost_LIBRARIES} )
+# target_link_libraries(SG ${ITK_LIBRARIES} )
+# target_link_libraries(SG ${DGTAL_LIBRARIES} )
+# target_link_libraries(SG Qt5::Widgets Qt5::Xml )
+# target_link_libraries(SG ${VTK_LIBRARIES} )
 
 add_executable(thin thin.cpp)
 target_link_libraries(thin ${Boost_LIBRARIES} )
@@ -38,6 +76,7 @@ target_link_libraries(thin Qt5::Widgets Qt5::Xml )
 target_link_libraries(thin ${VTK_LIBRARIES} )
 
 add_executable(analyze_graph analyze_graph.cpp)
+target_link_libraries(analyze_graph SG )
 target_link_libraries(analyze_graph ${Boost_LIBRARIES} )
 target_link_libraries(analyze_graph ${ITK_LIBRARIES} )
 target_link_libraries(analyze_graph ${DGTAL_LIBRARIES} )
