@@ -6,7 +6,7 @@
 
 namespace SG {
 
-void print_pos(std::ostream &out, const SG::SpatialNode::PointType &pos) {
+inline void print_pos(std::ostream &out, const SG::SpatialNode::PointType &pos) {
     out << "{";
     for (auto &p : pos) {
         if (p >= 0)
@@ -16,12 +16,11 @@ void print_pos(std::ostream &out, const SG::SpatialNode::PointType &pos) {
     out << "}";
 }
 
-template<typename SpatialGraph>
-void print_degrees(const SpatialGraph &graph) {
+inline void print_degrees(const GraphType &graph) {
     std::cout << "Print degrees spatial_graph:" << std::endl;
     std::cout << "Num Vertices: " << boost::num_vertices(graph) << std::endl;
     using vertex_iterator =
-        typename boost::graph_traits<SpatialGraph>::vertex_iterator;
+        boost::graph_traits<GraphType>::vertex_iterator;
     vertex_iterator vi, vi_end;
     std::tie(vi, vi_end) = boost::vertices(graph);
     for (; vi != vi_end; ++vi) {
@@ -30,12 +29,11 @@ void print_degrees(const SpatialGraph &graph) {
     }
 }
 
-template<typename SpatialGraph>
-void print_edges(const SpatialGraph &graph) {
+inline void print_edges(const GraphType &graph) {
     std::cout << "Print edges spatial_graph:" << std::endl;
     std::cout << "Num Edges: " << boost::num_edges(graph) << std::endl;
     using edge_iterator =
-        typename boost::graph_traits<SpatialGraph>::edge_iterator;
+        boost::graph_traits<GraphType>::edge_iterator;
     edge_iterator ei, ei_end;
     std::tie(ei, ei_end) = boost::edges(graph);
     for (; ei != ei_end; ++ei) {
@@ -48,12 +46,11 @@ void print_edges(const SpatialGraph &graph) {
     }
 }
 
-template<typename SpatialGraph>
-void print_spatial_edges(const SpatialGraph &graph) {
+inline void print_spatial_edges(const GraphType &graph) {
     std::cout << "Print edges spatial_graph:" << std::endl;
     std::cout << "Num Edges: " << boost::num_edges(graph) << std::endl;
     using edge_iterator =
-        typename boost::graph_traits<SpatialGraph>::edge_iterator;
+        boost::graph_traits<GraphType>::edge_iterator;
     edge_iterator ei, ei_end;
     std::tie(ei, ei_end) = boost::edges(graph);
     for (; ei != ei_end; ++ei) {

@@ -2,8 +2,6 @@
 #include "visualize_spatial_graph.hpp"
 #include "spatial_graph.hpp"
 #include <iostream>
-#include "reduce_dfs_visitor.hpp"
-#include "spatial_graph_from_object.hpp"
 
 struct sg_3D {
     using GraphType = SG::GraphAL;

@@ -63,6 +63,7 @@ set(SOURCES_WITH_BOOST
     )
 set(SOURCES_WITH_VTK
     ${SOURCES_DIR}/convert_to_vtk_graph.cpp
+    ${SOURCES_DIR}/visualize_spatial_graph.cpp
     )
 
 add_library(SG ${SOURCES_WITH_BOOST})
