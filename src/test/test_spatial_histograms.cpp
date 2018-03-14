@@ -81,7 +81,7 @@ TEST_CASE_METHOD(test_spatial_graph,
                  "histogram distances",
                  "[histograms][distances]")
 {
-    auto distances = SG::compute_distances(g);
+    auto distances = SG::compute_ete_distances(g);
     auto histo_distances = SG::histogram_distances(distances);
     std::cout << "Distance Histogram" << std::endl;
     CHECK(histo_distances.name == "distances");
@@ -92,7 +92,7 @@ TEST_CASE_METHOD(test_spatial_graph,
                  "histogram distances with bins",
                  "[histograms][distances][bins]")
 {
-    auto distances = SG::compute_distances(g);
+    auto distances = SG::compute_ete_distances(g);
     size_t bins = 10;
     auto histo_distances = SG::histogram_distances(distances, bins);
     std::cout << "Distance Histogram with bins" << std::endl;

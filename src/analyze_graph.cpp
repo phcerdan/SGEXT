@@ -256,7 +256,7 @@ int main(int argc, char* const argv[]){
       }
       // EndToEnd Distances
       {
-        auto distances = SG::compute_distances(reduced_g);
+        auto distances = SG::compute_ete_distances(reduced_g);
         if(verbose)
         {
           auto range_ptr = std::minmax_element(distances.begin(), distances.end());

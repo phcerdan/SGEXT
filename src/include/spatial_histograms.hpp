@@ -28,7 +28,7 @@ std::vector<unsigned int> compute_degrees(const SG::GraphAL & sg)
 
 /**
  * Create histogram of degrees.
- * @sa compute_distances
+ * @sa compute_ete_distances
  *
  * @param degrees input vector of degrees
  * @param bins number of bins of the histogram,
@@ -66,7 +66,7 @@ histo::Histo<double> histogram_degrees(
  *
  * @return vector with distances.
  */
-std::vector<double> compute_distances(const SG::GraphAL & sg)
+std::vector<double> compute_ete_distances(const SG::GraphAL & sg)
 {
     std::vector<double> ete_distances;
     const auto edges = boost::edges(sg);
@@ -84,7 +84,7 @@ std::vector<double> compute_distances(const SG::GraphAL & sg)
 
 /**
  * Create histogram of End to End distances between nodes.
- * @sa compute_distances
+ * @sa compute_ete_distances
  *
  * @param distances input vector of distances
  * @param bins number of bins of the histogram,
