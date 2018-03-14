@@ -47,7 +47,7 @@ find_package(VTK REQUIRED COMPONENTS
   vtkViewsInfovis
   NO_MODULE
 )
-include(${VTK_USE_FILE})
+# include(${VTK_USE_FILE})
 include_directories(SYSTEM ${VTK_INCLUDE_DIRS})
 
 include_directories("${CMAKE_SOURCE_DIR}/include")
