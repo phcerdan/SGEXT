@@ -5,6 +5,7 @@
 #include <tuple>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graph_traits.hpp>
+#include <sstream>
 
 namespace SG
 {
@@ -161,9 +162,53 @@ size_t merge_three_connected_nodes(SpatialGraph & sg) {
             auto source = boost::source(*ei, sg);
             auto target = boost::target(*ei, sg);
             auto & spatial_edge = sg[*ei];
-            // TODO, push_back might disorder the edge_points.
-            // This might not be a problem, though.
-            spatial_edge.edge_points.push_back(sg[node_to_remove].pos);
+            auto & sn_to_remove = sg[node_to_remove];
+            // push_back might disorder the edge_points, so only do it if edge_points is empty.
+            if(spatial_edge.edge_points.empty()){
+                spatial_edge.edge_points.push_back(sg[node_to_remove].pos);
+            } else {
+                // Insert it between closer points.
+                // Compute distance between in-point and all the points.
+                std::vector<double> distances_to_in_point(spatial_edge.edge_points.size());
+                std::transform(
+                        std::begin(spatial_edge.edge_points),
+                        std::end(spatial_edge.edge_points),
+                        std::begin(distances_to_in_point),
+                        [&sn_to_remove](const SG::SpatialEdge::PointType & ep){
+                        return ArrayUtilities::distance(ep, sn_to_remove.pos);
+                        }
+                        );
+                // Note: edge_points are contiguous (from DFS)
+                // the new pos, should be at the beggining or at the end.
+                // If at the beginning, we put the first, if at the end, we put it last.
+                // Ordering the edge_points if they get disordered is not trivial at all.
+                // Check "spatial data" structures elsewhere.
+                auto min_it = std::min_element(std::begin(distances_to_in_point),
+                        std::end(distances_to_in_point));
+                // Check they are connected for sanity.
+                // TODO we might check this only in debug mode.
+                {
+                    auto min_dist = *min_it;
+                    if(min_dist > sqrt(3.0) + 2.0 * std::numeric_limits<double>::epsilon()){
+                        std::ostringstream ss;
+                        ss << "The impossible, node_to_remove " << sn_to_remove << " is not connected to the edge " << spatial_edge << std::endl;
+                        throw(ss.str());
+                    }
+                }
+                auto min_index = std::distance(std::begin(distances_to_in_point), min_it);
+                if (min_index == 0) {
+                    spatial_edge.edge_points.insert(std::begin(spatial_edge.edge_points), sg[node_to_remove].pos);
+                } else if(min_index == distances_to_in_point.size() - 1){ // This is safe, as vector is not empty.
+                    // spatial_edge.edge_points.insert(std::end(spatial_edge.edge_points), sg[node_to_remove].pos);
+                    spatial_edge.edge_points.push_back(sg[node_to_remove].pos);
+                } else { // illogical error
+                    std::ostringstream ss;
+                    ss << "The impossible, node_to_remove " << sn_to_remove <<
+                        " closer edge_point is not at the beggining or end"
+                        " position in edge_points. " << spatial_edge << std::endl;
+                    throw(ss.str());
+                }
+            }
             boost::add_edge(node_to_merge_into, target, spatial_edge, sg);
             // boost::remove_edge(node_to_remove, target, sg);
         }
