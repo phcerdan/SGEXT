@@ -1,0 +1,216 @@
+#include "catch_header.h"
+#include "compute_graph_properties.hpp"
+
+/**
+ * Spatial Graph.
+ *     o
+ *     |
+ *     o-o
+ *     |
+ *     o
+ */
+struct test_spatial_graph {
+    using GraphType = SG::GraphAL;
+    GraphType g;
+    test_spatial_graph() {
+        using boost::add_edge;
+        this->g = GraphType(4);
+        // Add edge with an associated SpatialEdge at construction.
+        SG::PointType n3{{0, 3, 0}};
+        SG::PointType n2{{0, 2, 0}};
+        SG::PointType n1{{0, 1, 0}};
+        SG::PointType p0{{0, 0, 0}};
+        SG::PointType e1{{1, 0, 0}};
+        SG::PointType e2{{2, 0, 0}};
+        SG::PointType s1{{0, -1, 0}};
+        SG::PointType s2{{0, -2, 0}};
+        SG::PointType s3{{0, -3, 0}};
+
+        g[0].pos = n3;
+        g[1].pos = p0;
+        g[2].pos = s3;
+        g[3].pos = e2;
+
+        SG::SpatialEdge se01;
+        se01.edge_points.insert(std::end(se01.edge_points), {n1, n2});
+        add_edge(0, 1, se01, g);
+        SG::SpatialEdge se12;
+        se12.edge_points.insert(std::end(se12.edge_points), {s1, s2});
+        add_edge(1, 2, se12, g);
+        SG::SpatialEdge se13;
+        se13.edge_points.insert(std::end(se13.edge_points), {e1});
+        add_edge(1, 3, se13, g);
+    }
+};
+TEST_CASE_METHOD(test_spatial_graph,
+                 "compute angles and cosines",
+                 "[angles][angles][cosines]")
+{
+    constexpr auto pi = 3.14159265358979323846;
+    auto angles = SG::compute_angles(g);
+    std::sort(angles.begin(), angles.end());
+    std::cout << "Angles" << std::endl;
+    std::ostream_iterator<double> out_it (std::cout,", ");
+    std::copy ( angles.begin(), angles.end(), out_it );
+    std::cout <<  std::endl;
+    std::vector<double> expected_angles = {pi, pi/2.0, pi/2.0};
+    std::sort(expected_angles.begin(), expected_angles.end());
+    CHECK(angles.size() == 3);
+    CHECK(angles == expected_angles);
+
+    std::cout << "Cosines" << std::endl;
+    // compute cosines from angles, not from g
+    auto cosines = SG::compute_cosines(angles);
+    std::sort(cosines.begin(), cosines.end());
+    std::ostream_iterator<double> out_it_cos (std::cout,", ");
+    std::copy ( cosines.begin(), cosines.end(), out_it_cos );
+    std::cout <<  std::endl;
+    std::vector<double> expected_cosines = {-1.0, 0.0, 0.0};
+    std::sort(expected_cosines.begin(), expected_cosines.end());
+    CHECK(cosines.size() == 3);
+    for (size_t i = 0; i < cosines.size(); i++)
+        CHECK( cosines[i] == Approx(expected_cosines[i]).margin(0.0000000000000001) );
+}
+
+struct edges_plus_symbol : public test_spatial_graph {
+    edges_plus_symbol() : test_spatial_graph() {
+        SG::PointType w1{{-1, 0, 0}};
+        SG::PointType w2{{-2, 0, 0}};
+        auto added = boost::add_vertex(this->g);
+        this->g[added].pos = w2;
+
+        SG::SpatialEdge se14;
+        se14.edge_points.insert(std::end(se14.edge_points), {w1});
+        boost::add_edge(1, added, se14, this->g);
+    }
+};
+
+TEST_CASE_METHOD(edges_plus_symbol,
+        "compute angles and cosines in plus",
+        "[angles][cosines]")
+{
+    constexpr auto pi = 3.14159265358979323846;
+    auto angles = SG::compute_angles(g);
+    std::sort(angles.begin(), angles.end());
+    std::cout << "Angles" << std::endl;
+    std::ostream_iterator<double> out_it (std::cout,", ");
+    std::copy ( angles.begin(), angles.end(), out_it );
+    std::cout <<  std::endl;
+    std::vector<double> expected_angles = {
+        pi, pi/2.0, pi/2.0,
+        pi, pi/2.0, pi/2.0
+    };
+    std::sort(expected_angles.begin(), expected_angles.end());
+    CHECK(angles.size() == 6);
+    CHECK(angles == expected_angles);
+
+    std::cout << "Cosines" << std::endl;
+    // compute cosines from angles, not from g
+    auto cosines = SG::compute_cosines(angles);
+    std::sort(cosines.begin(), cosines.end());
+    std::ostream_iterator<double> out_it_cos (std::cout,", ");
+    std::copy ( cosines.begin(), cosines.end(), out_it_cos );
+    std::cout <<  std::endl;
+    std::vector<double> expected_cosines = {
+        -1.0, 0.0, 0.0,
+        -1.0, 0.0, 0.0
+    };
+    std::sort(expected_cosines.begin(), expected_cosines.end());
+    CHECK(cosines.size() == 6);
+    for (size_t i = 0; i < cosines.size(); i++)
+        CHECK( cosines[i] == Approx(expected_cosines[i]).margin(0.0000000000000001) );
+}
+
+struct test_one_edge {
+    using GraphType = SG::GraphAL;
+    GraphType g;
+    test_one_edge() {
+        this->g = GraphType(2);
+        SG::PointType n3{{0, 3, 0}};
+        SG::PointType s3{{0, -3, 0}};
+        this->g[0].pos = n3;
+        this->g[1].pos = n3;
+        boost::add_edge(0,1,this->g);
+    }
+};
+
+TEST_CASE_METHOD(test_one_edge,
+        "compute angles and cosines in one edge",
+        "[angles][cosines]") {
+    constexpr auto pi = 3.14159265358979323846;
+    auto angles = SG::compute_angles(g);
+    CHECK(angles.empty() == true);
+}
+
+struct test_two_parallel_edges {
+    using GraphType = SG::GraphAL;
+    GraphType g;
+    test_two_parallel_edges() {
+        this->g = GraphType(2);
+        SG::PointType n3{{0, 3, 0}};
+        SG::PointType s3{{0, -3, 0}};
+        this->g[0].pos = n3;
+        this->g[1].pos = n3;
+        boost::add_edge(0,1,this->g);
+        boost::add_edge(1,0,this->g);
+    }
+};
+
+TEST_CASE_METHOD(test_two_parallel_edges,
+        "compute angles and cosines in two_parallel_edges",
+        "[angles][cosines]") {
+    auto edges = boost::num_edges(this->g);
+    std::cout << "Edges of two_paralell edges : " << edges << std::endl;
+    CHECK(edges == 2);
+    bool no_ignore_parallel_edges = false;
+    constexpr auto pi = 3.14159265358979323846;
+    auto angles = SG::compute_angles(g, no_ignore_parallel_edges);
+    std::sort(angles.begin(), angles.end());
+    std::cout << "Angles" << std::endl;
+    std::ostream_iterator<double> out_it (std::cout,", ");
+    std::copy ( angles.begin(), angles.end(), out_it );
+    std::cout <<  std::endl;
+    std::vector<double> expected_angles = { 0.0, 0.0 };
+    std::sort(expected_angles.begin(), expected_angles.end());
+    CHECK(angles.size() == 2);
+    for (size_t i = 0; i < angles.size(); i++)
+        CHECK( angles[i] == Approx(expected_angles[i]).margin(0.0000000000000001) );
+
+    std::cout << "Cosines" << std::endl;
+    // compute cosines from angles, not from g
+    auto cosines = SG::compute_cosines(angles);
+    std::sort(cosines.begin(), cosines.end());
+    std::ostream_iterator<double> out_it_cos (std::cout,", ");
+    std::copy ( cosines.begin(), cosines.end(), out_it_cos );
+    std::cout <<  std::endl;
+    std::vector<double> expected_cosines = { 1.0, 1.0 };
+    std::sort(expected_cosines.begin(), expected_cosines.end());
+    CHECK(cosines.size() == 2);
+    for (size_t i = 0; i < cosines.size(); i++)
+        CHECK( cosines[i] == Approx(expected_cosines[i]).margin(0.0000000000000001) );
+}
+
+TEST_CASE_METHOD(test_two_parallel_edges,
+        "compute angles and cosines in two_parallel_edges ignoring parallel edges",
+        "[angles][cosines]") {
+    auto edges = boost::num_edges(this->g);
+    std::cout << "Edges of two_paralell edges ignoring parallel edges : " << edges << std::endl;
+    CHECK(edges == 2);
+    bool ignore_parallel_edges = true;
+    auto angles = SG::compute_angles(g, ignore_parallel_edges);
+    std::sort(angles.begin(), angles.end());
+    std::cout << "Angles" << std::endl;
+    std::ostream_iterator<double> out_it (std::cout,", ");
+    std::copy ( angles.begin(), angles.end(), out_it );
+    std::cout <<  std::endl;
+    CHECK(angles.empty() == true);
+
+    std::cout << "Cosines" << std::endl;
+    // compute cosines from angles, not from g
+    auto cosines = SG::compute_cosines(angles);
+    std::sort(cosines.begin(), cosines.end());
+    std::ostream_iterator<double> out_it_cos (std::cout,", ");
+    std::copy ( cosines.begin(), cosines.end(), out_it_cos );
+    std::cout <<  std::endl;
+    CHECK(cosines.empty() == true);
+}

@@ -39,6 +39,7 @@
 #include "visualize_spatial_graph_with_image.hpp"
 
 // compute histograms
+#include "compute_graph_properties.hpp"
 #include "spatial_histograms.hpp"
 
 using namespace DGtal;

@@ -27,6 +27,7 @@ find_package(ITK REQUIRED COMPONENTS
   ITKVtkGlue
   IsotropicWavelets
   ITKImageIO
+  CONFIG
 )
 include(${ITK_USE_FILE})
 include_directories(SYSTEM ${ITK_INCLUDE_DIRS})
@@ -42,31 +43,41 @@ find_package(VTK REQUIRED COMPONENTS
   vtkCommonCore
   vtkCommonDataModel
   vtkInteractionWidgets
-  # vtkRenderingOpenGL
   vtkRenderingCore
   vtkViewsInfovis
-  NO_MODULE
+  CONFIG
 )
+# USE_FILE is deprecated? This is the cause of AUTOINIT warnings
+# https://gitlab.kitware.com/vtk/vtk/issues/15895
 # include(${VTK_USE_FILE})
 include_directories(SYSTEM ${VTK_INCLUDE_DIRS})
 
 include_directories("${CMAKE_SOURCE_DIR}/include")
 set(SOURCES_DIR "${CMAKE_SOURCE_DIR}/sources")
-set(SOURCES_ALL
+set(SOURCES_WITH_BOOST
     ${SOURCES_DIR}/trim_graph.cpp
     ${SOURCES_DIR}/merge_nodes.cpp
+    ${SOURCES_DIR}/remove_extra_edges.cpp
+    ${SOURCES_DIR}/compute_graph_properties.cpp
+    ${SOURCES_DIR}/spatial_histograms.cpp
+    )
+set(SOURCES_WITH_VTK
+    ${SOURCES_DIR}/convert_to_vtk_graph.cpp
     )
 
-add_library(SG ${SOURCES_ALL})
+add_library(SG ${SOURCES_WITH_BOOST})
 target_include_directories(SG PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include/SG>  # <prefix>/include/mylib
+  $<INSTALL_INTERFACE:include>  # <prefix>/include/mylib
   )
 target_link_libraries(SG ${Boost_LIBRARIES} )
-# target_link_libraries(SG ${ITK_LIBRARIES} )
-# target_link_libraries(SG ${DGTAL_LIBRARIES} )
-# target_link_libraries(SG Qt5::Widgets Qt5::Xml )
-# target_link_libraries(SG ${VTK_LIBRARIES} )
+
+add_library(SGVtk ${SOURCES_WITH_VTK})
+target_include_directories(SGVtk PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>  # <prefix>/include/mylib
+  )
+target_link_libraries(SGVtk ${Boost_LIBRARIES} ${VTK_LIBRARIES} )
 
 add_executable(thin thin.cpp)
 target_link_libraries(thin ${Boost_LIBRARIES} )
@@ -77,11 +88,12 @@ target_link_libraries(thin ${VTK_LIBRARIES} )
 
 add_executable(analyze_graph analyze_graph.cpp)
 target_link_libraries(analyze_graph SG )
+target_link_libraries(analyze_graph SGVtk )
 target_link_libraries(analyze_graph ${Boost_LIBRARIES} )
 target_link_libraries(analyze_graph ${ITK_LIBRARIES} )
 target_link_libraries(analyze_graph ${DGTAL_LIBRARIES} )
 target_link_libraries(analyze_graph Qt5::Widgets Qt5::Xml )
-target_link_libraries(analyze_graph ${VTK_LIBRARIES} )
+# target_link_libraries(analyze_graph ${VTK_LIBRARIES} )
 
 add_executable(highlight_image_points highlight_image_points.cpp)
 target_link_libraries(highlight_image_points ${Boost_LIBRARIES} )
