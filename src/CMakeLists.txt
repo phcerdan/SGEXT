@@ -60,6 +60,8 @@ set(SOURCES_WITH_BOOST
     ${SOURCES_DIR}/remove_extra_edges.cpp
     ${SOURCES_DIR}/compute_graph_properties.cpp
     ${SOURCES_DIR}/spatial_histograms.cpp
+    ${SOURCES_DIR}/split_loop.cpp
+    ${SOURCES_DIR}/reduce_spatial_graph_via_dfs.cpp
     )
 set(SOURCES_WITH_VTK
     ${SOURCES_DIR}/convert_to_vtk_graph.cpp

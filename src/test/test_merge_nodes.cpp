@@ -6,7 +6,7 @@
 #include <DGtal/topology/Object.h>
 #include <iostream>
 
-#include "reduce_dfs_visitor.hpp"
+#include "reduce_spatial_graph_via_dfs.hpp"
 #include "spatial_graph_from_object.hpp"
 #include "remove_extra_edges.hpp"
 #include "merge_nodes.hpp"
@@ -97,7 +97,7 @@ TEST_CASE_METHOD(three_connected_nodes,
     CHECK_FALSE(any_edge_removed);
     CHECK(num_vertices(sg) == 6);
     CHECK(num_edges(sg) == 6);
-    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
+    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs(sg);
     CHECK(num_vertices(reduced_g) == num_vertices(sg));
     CHECK(num_edges(reduced_g) == num_edges(sg));
     std::cout << "After reduction:" << std::endl;

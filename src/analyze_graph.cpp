@@ -30,7 +30,7 @@
 #include <DGtal/io/viewers/Viewer3D.h>
 // Reduce graph via dfs:
 #include "spatial_graph.hpp"
-#include "reduce_dfs_visitor.hpp"
+#include "reduce_spatial_graph_via_dfs.hpp"
 #include "spatial_graph_from_object.hpp"
 #include "remove_extra_edges.hpp"
 #include "merge_nodes.hpp"
@@ -177,7 +177,7 @@ int main(int argc, char* const argv[]){
       if(verbose)
         std::cout <<  "Removed extra edges iteratively " << iterations << " times" << std::endl;
     }
-    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
+    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs(sg);
 
     if(mergeThreeConnectedNodes)
     {

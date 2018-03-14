@@ -11,6 +11,10 @@ target_link_libraries(test_visualize_spatial_graph
   )
 add_test(NAME visualize_spatial_graph COMMAND test_visualize_spatial_graph)
 
+add_executable(test_split_loop test_split_loop.cpp)
+target_link_libraries(test_split_loop ${TEST_LIBRARIES} ${ITK_LIBRARIES})
+add_test(NAME split_loop COMMAND test_split_loop)
+
 add_executable(test_spatial_graph_reduction test_spatial_graph_reduction.cpp)
 target_link_libraries(test_spatial_graph_reduction ${TEST_LIBRARIES} ${ITK_LIBRARIES})
 add_test(NAME spatial_graph_reduction COMMAND test_spatial_graph_reduction)

@@ -6,7 +6,7 @@
 #include <DGtal/topology/Object.h>
 #include <iostream>
 
-#include "reduce_dfs_visitor.hpp"
+#include "reduce_spatial_graph_via_dfs.hpp"
 #include "spatial_graph_from_object.hpp"
 #include "remove_extra_edges.hpp"
 #include "spatial_graph_utilities.hpp"
@@ -550,7 +550,7 @@ TEST_CASE_METHOD(one_edge, "Reduce graph with degrees <=2 to one edge",
 
     using SpatialGraph = sg_one_edge::GraphType;
     SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
-    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
+    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs(sg);
     SpatialGraph expected_g = sg_one_edge().g;
     CHECK(num_vertices(reduced_g) == num_vertices(expected_g));
     CHECK(num_edges(reduced_g) == num_edges(expected_g));
@@ -569,7 +569,7 @@ TEST_CASE_METHOD(easy, "Reduce graph with no pitfalls", "[easy]") {
     // print_degrees();
     using SpatialGraph = sg_easy::GraphType;
     SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
-    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
+    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs(sg);
     SpatialGraph expected_g = sg_easy().g;
 
     CHECK(num_vertices(reduced_g) == num_vertices(expected_g));
@@ -599,7 +599,7 @@ TEST_CASE_METHOD(extra_connected_junctions,
     // print_degrees();
     using SpatialGraph = sg_extra_connected_junctions::GraphType;
     SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
-    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
+    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs(sg);
     SpatialGraph expected_g = sg_extra_connected_junctions().g;
 
     CHECK(num_vertices(reduced_g) == num_vertices(expected_g));
@@ -625,7 +625,7 @@ TEST_CASE_METHOD(extra_connected_junctions,
     using SpatialGraph = sg_extra_connected_junctions::GraphType;
     SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
     remove_extra_edges(sg);
-    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
+    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs(sg);
     sg_extra_connected_junctions::GraphType expected_g = sg_easy_centered().g;
     CHECK(num_vertices(reduced_g) == num_vertices(expected_g));
     CHECK(num_edges(reduced_g) == num_edges(expected_g));
@@ -699,7 +699,7 @@ TEST_CASE_METHOD(three_connected_nodes,
     CHECK_FALSE(any_edge_removed);
     CHECK(num_vertices(sg) == 6);
     CHECK(num_edges(sg) == 6);
-    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
+    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs(sg);
     CHECK(num_vertices(reduced_g) == num_vertices(sg));
     CHECK(num_edges(reduced_g) == num_edges(sg));
     SG::print_degrees(reduced_g);
@@ -774,7 +774,7 @@ TEST_CASE_METHOD(three_connected_nodes_with_self_loop,
     CHECK(any_edge_removed == true);
     CHECK(num_vertices(sg) == 14);
     CHECK(num_edges(sg) == 15); // 2 edges removed
-    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
+    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs(sg);
     CHECK(num_vertices(reduced_g) == 4);
     CHECK(num_edges(reduced_g) == 5);
     spatial_graph::vertex_iterator vi, vi_end;
@@ -797,50 +797,12 @@ TEST_CASE_METHOD(three_connected_nodes_with_self_loop,
     SG::print_spatial_edges(reduced_g);
 }
 
-TEST_CASE("split_loop", "[split_loop]") {
-    std::cout << "Split loop" << std::endl;
-    using SpatialGraph = spatial_graph::GraphType;
-    using vertex_descriptor =
-        typename boost::graph_traits<SpatialGraph>::vertex_descriptor;
-    using SpatialEdge = typename boost::edge_bundle_type<SpatialGraph>::type;
-    using SpatialNode = typename boost::vertex_bundle_type<SpatialGraph>::type;
-    SG::PointType p0{{0, 0, 0}};
-    SG::PointType n1{{0, 1, 0}};
-    SG::PointType n2{{0, 2, 0}};
-    SG::PointType e1n2{{1, 2, 0}};
-    SG::PointType e2n2{{2, 2, 0}};
-    SG::PointType e2n1{{2, 1, 0}};
-    SG::PointType e2{{2, 0, 0}};
-    SG::PointType e1{{1, 0, 0}};
-    auto sg = SpatialGraph(1);
-    vertex_descriptor vertex_id = 0;
-    sg[vertex_id].pos = p0;
-    SpatialEdge sg_edge;
-    sg_edge.edge_points.insert(std::end(sg_edge.edge_points),
-                               {n1, n2, e1n2, e2n2, e2n1, e2, e1});
-    SG::split_loop(vertex_id, sg_edge, sg);
-    CHECK(num_vertices(sg) == 2);
-    CHECK(num_edges(sg) == 2);
-    CHECK(sg[1].pos == e2n2);
-    SpatialEdge::PointContainer expected1 = {{n1, n2, e1n2}};
-    std::sort(expected1.begin(), expected1.end());
-    SpatialEdge::PointContainer expected2 = {{e1, e2, e2n1}};
-    std::sort(expected2.begin(), expected2.end());
-    auto edges = boost::edges(sg);
-    for (; edges.first != edges.second; ++edges.first) {
-        auto &created_sg_edge = sg[*edges.first];
-        auto &points = created_sg_edge.edge_points;
-        std::sort(points.begin(), points.end());
-        bool equal_edge_points = (points == expected1 || points == expected2);
-        CHECK(equal_edge_points == true);
-    }
-}
 
 TEST_CASE_METHOD(sg_square, "Reduce sg_square", "[reduce_graph]") {
     std::cout << "Reduce graph - square" << std::endl;
     using SpatialGraph = spatial_graph::GraphType;
     auto &sg = g;
-    auto reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
+    auto reduced_g = SG::reduce_spatial_graph_via_dfs(sg);
     CHECK(num_vertices(reduced_g) == 2);
     CHECK(num_edges(reduced_g) == 2);
     SG::print_degrees(reduced_g);
@@ -856,7 +818,7 @@ TEST_CASE_METHOD(sg_square_plus_one, "Reduce sg_square_plus_one",
     std::cout << "Reduce graph - square plus one" << std::endl;
     using SpatialGraph = spatial_graph::GraphType;
     auto &sg = g;
-    auto reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
+    auto reduced_g = SG::reduce_spatial_graph_via_dfs(sg);
     CHECK(num_vertices(reduced_g) == 3);
     CHECK(num_edges(reduced_g) == 3);
     SG::print_degrees(reduced_g);
@@ -935,7 +897,7 @@ TEST_CASE_METHOD(debug_one,
     SG::print_edges(sg);
     CHECK(num_vertices(sg) == 5);
     CHECK(num_edges(sg) == 4);
-    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
+    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs(sg);
     std::cout << "Reduced" << std::endl;
     SG::print_degrees(reduced_g);
     SG::print_spatial_edges(reduced_g);
@@ -1015,7 +977,7 @@ TEST_CASE_METHOD(rare_trio,
     SG::print_edges(sg);
     CHECK(num_vertices(sg) == 6);
     CHECK(num_edges(sg) == 6);
-    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg);
+    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs(sg);
     std::cout << "Reduced" << std::endl;
     SG::print_degrees(reduced_g);
     SG::print_spatial_edges(reduced_g);
@@ -1136,7 +1098,7 @@ TEST_CASE_METHOD(buggy_structure,
     CHECK(any_edge_removed == false);
     std::cout << "Reduced" << std::endl;
     bool verbose = true;
-    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs<SpatialGraph>(sg, verbose);
+    SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs(sg, verbose);
     // SG::visualize_spatial_graph(reduced_g);
     SG::print_degrees(reduced_g);
     SG::print_spatial_edges(reduced_g);
