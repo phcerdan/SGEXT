@@ -37,8 +37,6 @@ find_package(Qt5 REQUIRED
     OpenGL)
 
 # find_package(VTK REQUIRED)
-# TODO: What is the proper way to use a vtk${WHATEVER_BACKEND}?
-# is intalled in the system
 find_package(VTK REQUIRED COMPONENTS
   vtkCommonCore
   vtkCommonDataModel

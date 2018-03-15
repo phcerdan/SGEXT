@@ -37,5 +37,7 @@ struct test_spatial_graph {
 
 TEST_CASE_METHOD(test_spatial_graph, "Trim","[trim]")
 {
-    trim_graph(g);
+    auto trimmed_g = trim_graph(g);
+    CHECK(boost::num_vertices(trimmed_g) == 0);
+    CHECK(boost::num_edges(trimmed_g) == 0);
 }
