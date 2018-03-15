@@ -37,17 +37,32 @@ find_package(Qt5 REQUIRED
     OpenGL)
 
 # find_package(VTK REQUIRED)
+# find_package(VTK REQUIRED COMPONENTS
+#   vtkCommonCore
+#   vtkCommonDataModel
+#   vtkInteractionWidgets
+#   vtkRenderingCore
+#   vtkViewsInfovis
+#   CONFIG
+# )
+
+# VTK components to handle external dependency histo-header
 find_package(VTK REQUIRED COMPONENTS
-  vtkCommonCore
-  vtkCommonDataModel
-  vtkInteractionWidgets
-  vtkRenderingCore
-  vtkViewsInfovis
-  CONFIG
-)
+    vtkChartsCore
+    vtkCommonCore
+    vtkCommonDataModel
+    vtkInteractionStyle
+    vtkRenderingCore
+    vtkRenderingOpenGL2 # avoid vtkRenderer, vtkRenderWindow not found at run time
+    vtkRenderingContextOpenGL2 # avoid vtkContextDevice2D not found at run time
+    vtkViewsContext2D
+    vtkInteractionWidgets
+    vtkViewsInfovis
+    CONFIG
+    )
 # USE_FILE is deprecated? This is the cause of AUTOINIT warnings
 # https://gitlab.kitware.com/vtk/vtk/issues/15895
-# include(${VTK_USE_FILE})
+include(${VTK_USE_FILE})
 include_directories(SYSTEM ${VTK_INCLUDE_DIRS})
 
 set(SG_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/include")
@@ -67,13 +82,27 @@ set(SG_HEADERS_ONLY
     ${SG_INCLUDE_DIR}/spatial_edge.hpp
     # }}}
     # Already external in phcerdan/histo-header. Use git submodule. {
-    ${SG_INCLUDE_DIR}/histo.hpp
+    # ${SG_INCLUDE_DIR}/histo.hpp
     #}
     # Taken from your phcerdan/ITKIsotropicWavelets module. {
     ${SG_INCLUDE_DIR}/itkViewImage.h
     ${SG_INCLUDE_DIR}/itkViewImage.hxx
     # }
     )
+
+set(HISTO_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/histo/include
+        CACHE PATH "histo include directory")
+install(DIRECTORY ${HISTO_INCLUDE_DIR} DESTINATION include})
+
+# for convenience setup a target
+add_library(histo INTERFACE)
+target_include_directories(histo INTERFACE
+    $<BUILD_INTERFACE:${HISTO_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include)
+
+# need to export target as well
+install(TARGETS histo EXPORT my_export_set DESTINATION include)
+# this exports library: histo
 
 set(SG_SRC_WITH_BOOST
     ${SG_SRC_DIR}/trim_graph.cpp
@@ -93,9 +122,9 @@ set(SG_SRC_WITH_VTK
 add_library(SG ${SG_SRC_WITH_BOOST})
 target_include_directories(SG PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>  # <prefix>/include/mylib
+  $<INSTALL_INTERFACE:include>  # <prefix>/include
   )
-target_link_libraries(SG ${Boost_LIBRARIES} )
+target_link_libraries(SG ${Boost_LIBRARIES} histo )
 
 add_library(SGVtk ${SG_SRC_WITH_VTK})
 target_include_directories(SGVtk PUBLIC

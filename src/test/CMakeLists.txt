@@ -11,6 +11,14 @@ target_link_libraries(test_visualize_spatial_graph
   )
 add_test(NAME visualize_spatial_graph COMMAND test_visualize_spatial_graph)
 
+add_executable(test_visualize_histograms test_visualize_histograms.cpp)
+target_link_libraries(test_visualize_histograms
+  SG
+  SGVtk
+  # ${ITK_LIBRARIES} # ITKVtkGlue is bringing VTK
+  )
+add_test(NAME visualize_histograms COMMAND test_visualize_histograms)
+
 add_executable(test_split_loop test_split_loop.cpp)
 target_link_libraries(test_split_loop ${TEST_LIBRARIES} ${ITK_LIBRARIES})
 add_test(NAME split_loop COMMAND test_split_loop)

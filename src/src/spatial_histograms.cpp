@@ -35,7 +35,7 @@ histo::Histo<double> histogram_distances(const std::vector<double> & distances, 
     else
         hist_distances = histo::Histo<double>(distances,
                 histo::GenerateBreaksFromRangeAndBins(
-                    0.0, max_distance, bins)
+                    0.0, max_distance + 100 * std::numeric_limits<double>::epsilon(), bins)
                 );
     hist_distances.name = "distances";
     return hist_distances;
