@@ -8,6 +8,30 @@ namespace SG {
 
 
 /**
+ * print/write histogram to any ostream in the following format.
+ *  os << "# " << histo.name << ": L0:centers of bins, L1:counts, L2:breaks" << std::endl;
+ *  histo.PrintCenters(os);
+ *  histo.PrintCounts(os);
+ *  histo.PrintBreaks(os);
+ *
+ * Use @read_histogram as the complementary function to read the histogram.
+ *
+ * @param histo input histo
+ * @param os
+ */
+void print_histogram(const histo::Histo<double> & histo, std::ostream & os);
+
+/**
+ * read histogram from istream after being printed in the format
+ * imposed by @print_histogram
+ *
+ * @param is stream
+ * @param name of the histogram
+ *
+ * @return  histo<double>
+ */
+histo::Histo<double> read_histogram(std::istream & is, const std::string & name);
+/**
  * Create histogram of degrees.
  * @sa compute_ete_distances
  *

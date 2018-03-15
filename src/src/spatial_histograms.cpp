@@ -3,6 +3,47 @@
 #include <cmath>
 
 namespace SG {
+void print_histogram(const histo::Histo<double> & histo, std::ostream & os)
+{
+    os << "# " << histo.name << ": L0:centers of bins, L1:counts, L2:breaks" << std::endl;
+    histo.PrintCenters(os);
+    histo.PrintCounts(os);
+    histo.PrintBreaks(os);
+}
+
+histo::Histo<double> read_histogram(std::istream & is, const std::string & name)
+{
+    histo::Histo<double> histo;
+    histo.name = name;
+    std::string line;
+    std::istringstream ss;
+    double num;
+    // Header, ignore
+    std::getline(is, line);
+    // Centers, ignore
+    std::getline(is, line);
+    // Counts, store
+    std::getline(is, line);
+    ss.str(line);
+    while(ss >> num)
+    {
+        histo.counts.push_back(num);
+    }
+    // Breaks, store
+    std::getline(is, line);
+    ss.str(line);
+    ss.clear();
+    while(ss >> num)
+    {
+        histo.breaks.push_back(num);
+    }
+
+    // Complete histogram:
+    histo.bins = histo.counts.size();
+    histo.range.first = histo.breaks[0];
+    histo.range.second = histo.breaks.back();
+    return histo;
+}
 
 histo::Histo<double> histogram_degrees(
         const std::vector<unsigned int> & degrees,
