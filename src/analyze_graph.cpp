@@ -23,20 +23,24 @@
 // Boost Filesystem
 #include <boost/filesystem.hpp>
 
-// Viewer
-#include "DGtal/io/Color.h"
-#include "DGtal/io/colormaps/GradientColorMap.h"
-#include "DGtal/io/DrawWithDisplay3DModifier.h"
-#include <DGtal/io/viewers/Viewer3D.h>
 // Reduce graph via dfs:
 #include "spatial_graph.hpp"
 #include "reduce_spatial_graph_via_dfs.hpp"
 #include "spatial_graph_from_object.hpp"
 #include "remove_extra_edges.hpp"
 #include "merge_nodes.hpp"
+
+#ifdef VISUALIZE
+// Viewer
+#include "DGtal/io/Color.h"
+#include "DGtal/io/colormaps/GradientColorMap.h"
+#include "DGtal/io/DrawWithDisplay3DModifier.h"
+#include <DGtal/io/viewers/Viewer3D.h>
+
 #include "visualize_spatial_graph.hpp"
-// #include "itkViewImage.h"
 #include "visualize_spatial_graph_with_image.hpp"
+// #include "itkViewImage.h"
+#endif
 
 // compute histograms
 #include "compute_graph_properties.hpp"
@@ -135,6 +139,7 @@ int main(int argc, char* const argv[]){
   DigitalTopology topo(adjF, adjB, DGtal::DigitalTopologyProperties::JORDAN_DT);
   Object obj(topo,image_set);
 
+#ifdef VISUALIZE
   if(visualize)
   {
       int argc(1);
@@ -154,6 +159,7 @@ int main(int argc, char* const argv[]){
 
       app.exec();
   }
+#endif
 
   if(reduceGraph)
   {
@@ -231,13 +237,14 @@ int main(int argc, char* const argv[]){
           std::cout << "Output reduced graph (graphviz) to: " << output_full_path.string() << std::endl;
       }
     }
-
+#ifdef VISUALIZE
     if(visualize)
     {
       SG::visualize_spatial_graph(reduced_g);
       // itk::Testing::ViewImage(reader->GetOutput());
       SG::visualize_spatial_graph_with_image(reduced_g, reader->GetOutput());
     }
+#endif
 
     if(exportHistograms)
     {

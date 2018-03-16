@@ -36,11 +36,6 @@
 #include "DGtal/geometry/volumes/distance/ExactPredicateLpSeparableMetric.h"
 #include "DGtal/geometry/volumes/distance/VoronoiMap.h"
 #include "DGtal/geometry/volumes/distance/DistanceTransformation.h"
-// Viewer
-#include "DGtal/io/Color.h"
-#include "DGtal/io/colormaps/GradientColorMap.h"
-#include "DGtal/io/DrawWithDisplay3DModifier.h"
-#include <DGtal/io/viewers/Viewer3D.h>
 
 // Boost Graph:
 #include "DGtal/topology/Object.h"
@@ -51,6 +46,14 @@
 
 // Boost Filesystem
 #include <boost/filesystem.hpp>
+#ifdef VISUALIZE
+// Viewer
+#include "DGtal/io/Color.h"
+#include "DGtal/io/colormaps/GradientColorMap.h"
+#include "DGtal/io/DrawWithDisplay3DModifier.h"
+#include <DGtal/io/viewers/Viewer3D.h>
+#endif
+
 
 using namespace DGtal;
 using namespace std;
@@ -73,7 +76,7 @@ int main(int argc, char* const argv[]){
     ( "persistence,p",  po::value<int>()->default_value(0), "persistence value, implies use of persistence algorithm if p>=1" )
     ( "profile",  po::bool_switch()->default_value(false), "profile algorithm" )
     ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output" )
-    ( "visualize,t", po::bool_switch()->default_value(false), "Visualize thin result")
+    ( "visualize,t", po::bool_switch()->default_value(false), "Visualize thin result.")
     ( "exportSDP,e", po::value<std::string>(), "Export the resulting set of points in a simple (sequence of discrete point (sdp)).")
     ( "exportImage,o", po::value<std::string>(), "Export the resulting set of points as an ITK Image.");
 
@@ -276,6 +279,7 @@ int main(int argc, char* const argv[]){
     writer->Update();
   }
 
+#ifdef VISUALIZE
   if (visualize)
   {
     int argc(1);
@@ -295,6 +299,7 @@ int main(int argc, char* const argv[]){
 
     app.exec();
   }
+#endif
 }
 
 ////////////////////////////////////////////////////////

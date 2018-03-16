@@ -30,7 +30,7 @@ void visualize_histograms(const std::vector<histo::Histo<double>> & input_histog
         auto * qvtkWidget = new QVTKOpenGLWidget;
         qvtkWidget->SetRenderWindow(window.Get());
         layout->addWidget(qvtkWidget);
-        // TODO allow passing different than vtkChart::LINE
+        // TODO allow passing different than vtkChart::LINE? ... dirty
         auto chart = histo::chart_from_histogram(histo);
         auto view = vtkSmartPointer<vtkContextView>::New();
         view->SetRenderWindow(window.Get());
@@ -40,7 +40,7 @@ void visualize_histograms(const std::vector<histo::Histo<double>> & input_histog
         view->SetInteractor(qvtkWidget->GetInteractor());
         qvtkWidget->SetRenderWindow(view->GetRenderWindow());
     }
-    main_window->resize(640, 480);
+    main_window->resize(640, 480);// resize to something or it will fail
     main_window->show();
     app.exec();
 }

@@ -4,21 +4,6 @@ add_executable(test_trim_graph test_trim_graph.cpp)
 target_link_libraries(test_trim_graph SG)
 add_test(NAME trim_graph COMMAND test_trim_graph)
 
-add_executable(test_visualize_spatial_graph test_visualize_spatial_graph.cpp)
-target_link_libraries(test_visualize_spatial_graph
-  SGVtk
-  ${ITK_LIBRARIES} # ITKVtkGlue is bringing VTK
-  )
-add_test(NAME visualize_spatial_graph COMMAND test_visualize_spatial_graph)
-
-add_executable(test_visualize_histograms test_visualize_histograms.cpp
-  ${CMAKE_SOURCE_DIR}/src/visualize_histograms.cpp )
-target_link_libraries(test_visualize_histograms
-  SG
-  SGVtk
-  )
-add_test(NAME visualize_histograms COMMAND test_visualize_histograms)
-
 add_executable(test_split_loop test_split_loop.cpp)
 target_link_libraries(test_split_loop ${TEST_LIBRARIES} ${ITK_LIBRARIES})
 add_test(NAME split_loop COMMAND test_split_loop)
@@ -31,7 +16,6 @@ add_executable(test_merge_nodes test_merge_nodes.cpp)
 target_link_libraries(test_merge_nodes ${TEST_LIBRARIES} ${ITK_LIBRARIES})
 add_test(NAME merge_nodes COMMAND test_merge_nodes)
 
-
 add_executable(test_graphviz_io test_graphviz_io.cpp)
 target_link_libraries(test_graphviz_io ${TEST_LIBRARIES} ${ITK_LIBRARIES})
 add_test(NAME graphviz_io COMMAND test_graphviz_io)
@@ -43,3 +27,20 @@ add_test(NAME compute_graph_properties COMMAND test_compute_graph_properties)
 add_executable(test_spatial_histograms test_spatial_histograms.cpp)
 target_link_libraries(test_spatial_histograms ${TEST_LIBRARIES} ${ITK_LIBRARIES})
 add_test(NAME spatial_histograms COMMAND test_spatial_histograms)
+
+if(VISUALIZE)
+  add_executable(test_visualize_spatial_graph test_visualize_spatial_graph.cpp)
+  target_link_libraries(test_visualize_spatial_graph
+    SGVtk
+    ${ITK_LIBRARIES} # ITKVtkGlue is bringing VTK
+    )
+  add_test(NAME visualize_spatial_graph COMMAND test_visualize_spatial_graph)
+
+  add_executable(test_visualize_histograms test_visualize_histograms.cpp
+    ${CMAKE_SOURCE_DIR}/src/visualize_histograms.cpp )
+  target_link_libraries(test_visualize_histograms
+    SG
+    SGVtk
+    )
+  add_test(NAME visualize_histograms COMMAND test_visualize_histograms)
+endif()
