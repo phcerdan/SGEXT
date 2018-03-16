@@ -11,11 +11,11 @@ target_link_libraries(test_visualize_spatial_graph
   )
 add_test(NAME visualize_spatial_graph COMMAND test_visualize_spatial_graph)
 
-add_executable(test_visualize_histograms test_visualize_histograms.cpp)
+add_executable(test_visualize_histograms test_visualize_histograms.cpp
+  ${CMAKE_SOURCE_DIR}/src/visualize_histograms.cpp )
 target_link_libraries(test_visualize_histograms
   SG
   SGVtk
-  # ${ITK_LIBRARIES} # ITKVtkGlue is bringing VTK
   )
 add_test(NAME visualize_histograms COMMAND test_visualize_histograms)
 

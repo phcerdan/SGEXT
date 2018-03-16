@@ -58,6 +58,7 @@ find_package(VTK REQUIRED COMPONENTS
     vtkViewsContext2D
     vtkInteractionWidgets
     vtkViewsInfovis
+    vtkGUISupportQt # QVTKWidget.h
     CONFIG
     )
 # USE_FILE is deprecated? This is the cause of AUTOINIT warnings
