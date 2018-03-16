@@ -13,7 +13,7 @@ struct SpatialEdge {
     using PointContainer = std::vector<PointType>;
     /**  Distance between end to end (ete) of edges.
      * @warning This is different to edge length --or fibril length. */
-    double ete_distance;
+    // double ete_distance;
 
     /** Vector between the two ends of the edge, it can return both directions.
      * ete_vector_ is used to calculate director cosines(angles) between edges.
@@ -24,7 +24,8 @@ struct SpatialEdge {
      * But it is useless by itself because source(edgeID) and target(edgeID)
      * could returns switched values the next time you call them (unordered
      * pair).*/
-    PointType ete_vector;
+    // PointType ete_vector;
+
     /// Spatial Points between the nodes of the edge.
     PointContainer edge_points;
 };
