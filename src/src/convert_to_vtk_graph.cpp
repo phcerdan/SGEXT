@@ -15,8 +15,6 @@ vtkSmartPointer<vtkMutableUndirectedGraph> convert_to_vtk_graph(
 
     using vertex_descriptor =
          boost::graph_traits<GraphType>::vertex_descriptor;
-    using edge_descriptor =
-         boost::graph_traits<GraphType>::edge_descriptor;
     using vertex_iterator =
          boost::graph_traits<GraphType>::vertex_iterator;
     using edge_iterator =

@@ -69,7 +69,7 @@ int main(int argc, char* const argv[]){
     ( "binsHistoCosines,n", po::value<size_t>()->default_value(0), "Bins for the histogram of cosines ." )
     ( "exportReducedGraph,o", po::value<string>(), "Write .dot file with the reduced spatial graph." )
     ( "exportHistograms,e", po::value<string>(), "Export histogram." )
-    ( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal.")
+    ( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal. Requires VISUALIZE option enabled at build.")
     ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output." );
 
   po::variables_map vm;
@@ -92,13 +92,15 @@ int main(int argc, char* const argv[]){
   bool removeExtraEdges = vm["removeExtraEdges"].as<bool>();
   bool mergeThreeConnectedNodes = vm["mergeThreeConnectedNodes"].as<bool>();
   bool checkParallelEdges = vm["checkParallelEdges"].as<bool>();
-  bool visualize = vm["visualize"].as<bool>();
   bool exportHistograms = vm.count("exportHistograms");
   size_t binsHistoDegrees= vm["binsHistoDegrees"].as<size_t>();
   size_t binsHistoDistances= vm["binsHistoDistances"].as<size_t>();
   size_t binsHistoAngles= vm["binsHistoAngles"].as<size_t>();
   size_t binsHistoCosines= vm["binsHistoCosines"].as<size_t>();
   bool exportReducedGraph = vm.count("exportReducedGraph");
+#ifdef VISUALIZE
+  bool visualize = vm["visualize"].as<bool>();
+#endif
   // Get filename without extension (and without folders).
   const fs::path input_stem = fs::path(filename).stem();
   const fs::path output_file_path = fs::path(

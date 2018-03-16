@@ -8,7 +8,6 @@ TEST_CASE("split_loop", "[split_loop]") {
     using vertex_descriptor =
         typename boost::graph_traits<SpatialGraph>::vertex_descriptor;
     using SpatialEdge = typename boost::edge_bundle_type<SpatialGraph>::type;
-    using SpatialNode = typename boost::vertex_bundle_type<SpatialGraph>::type;
     SG::PointType p0{{0, 0, 0}};
     SG::PointType n1{{0, 1, 0}};
     SG::PointType n2{{0, 2, 0}};

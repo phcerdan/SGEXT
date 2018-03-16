@@ -76,7 +76,7 @@ int main(int argc, char* const argv[]){
     ( "persistence,p",  po::value<int>()->default_value(0), "persistence value, implies use of persistence algorithm if p>=1" )
     ( "profile",  po::bool_switch()->default_value(false), "profile algorithm" )
     ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output" )
-    ( "visualize,t", po::bool_switch()->default_value(false), "Visualize thin result.")
+    ( "visualize,t", po::bool_switch()->default_value(false), "Visualize thin result. Requires VISUALIZE option at build")
     ( "exportSDP,e", po::value<std::string>(), "Export the resulting set of points in a simple (sequence of discrete point (sdp)).")
     ( "exportImage,o", po::value<std::string>(), "Export the resulting set of points as an ITK Image.");
 
@@ -121,7 +121,9 @@ int main(int argc, char* const argv[]){
      )
      throw po::validation_error(po::validation_error::invalid_option_value, "select");
 
+#ifdef VISUALIZE
   bool visualize = vm["visualize"].as<bool>();
+#endif
   /*-------------- End of parse -----------------------------*/
   // Get filename without extension (and without folders).
   const fs::path input_stem = fs::path(filename).stem();
@@ -252,7 +254,6 @@ int main(int argc, char* const argv[]){
   auto elapsed = std::chrono::duration_cast<std::chrono::seconds> (end - start) ;
   if (profile) std::cout <<"Time elapsed: " << elapsed.count() << std::endl;
   const auto & thin_set = vc_new.objectSet();
-  const auto & all_set = obj.pointSet();
 
   // Export it as a simple list point
   if (vm.count("exportSDP"))
@@ -282,6 +283,7 @@ int main(int argc, char* const argv[]){
 #ifdef VISUALIZE
   if (visualize)
   {
+    const auto & all_set = obj.pointSet();
     int argc(1);
     char** argv(nullptr);
     QApplication app(argc, argv);

@@ -123,15 +123,19 @@ set(SG_SRC_WITH_VTK
     ${SG_SRC_DIR}/visualize_spatial_graph_with_image.cpp
     )
 
+set(SG_SRC_WITH_VTK_AND_QT
+    ${SG_SRC_DIR}/visualize_histograms.cpp
+    )
+
 add_library(SG ${SG_SRC_WITH_BOOST})
 target_include_directories(SG PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>  # <prefix>/include
   )
 target_link_libraries(SG ${Boost_LIBRARIES} histo )
- 
+
 if(VISUALIZE)
-    add_library(SGVtk ${SG_SRC_WITH_VTK})
+  add_library(SGVtk ${SG_SRC_WITH_VTK} )
     target_include_directories(SGVtk PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>  # <prefix>/include/mylib
@@ -170,6 +174,17 @@ if(VISUALIZE)
     target_link_libraries(highlight_image_points ${DGTAL_LIBRARIES} )
     target_link_libraries(highlight_image_points Qt5::Widgets Qt5::Xml )
     target_link_libraries(highlight_image_points ${VTK_LIBRARIES} )
+
+    add_executable(visualize_histograms_from_file
+      visualize_histograms_from_file.cpp
+      ${SG_SRC_WITH_VTK_AND_QT}
+      )
+    target_link_libraries(visualize_histograms_from_file SG )
+    target_link_libraries(visualize_histograms_from_file ${Boost_LIBRARIES} )
+    target_link_libraries(visualize_histograms_from_file ${ITK_LIBRARIES} )
+    target_link_libraries(visualize_histograms_from_file ${DGTAL_LIBRARIES} )
+    target_link_libraries(visualize_histograms_from_file Qt5::Widgets Qt5::Xml )
+    target_link_libraries(visualize_histograms_from_file ${VTK_LIBRARIES} )
 endif()
 
 if(ENABLE_TESTING)

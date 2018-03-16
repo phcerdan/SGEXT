@@ -74,12 +74,9 @@ int main(int argc, char* const argv[]){
   using Image = ImageContainerByITKImage<Domain, unsigned char> ;
   Image image = ITKReader<Image>::importITK(filename);
 
-  using DigitalTopology = DT26_6;
   using DigitalSet =
     DGtal::DigitalSetByAssociativeContainer<Domain ,
       std::unordered_set< typename Domain::Point> >;
-  using Object =
-    DGtal::Object<DigitalTopology, DigitalSet>;
 
   DigitalSet image_set (image.domain());
   SetFromImage<Z3i::DigitalSet>::append<Image>(

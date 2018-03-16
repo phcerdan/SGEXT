@@ -35,7 +35,7 @@ void insert_edge_point_with_distance_order(
     auto min_index = std::distance(std::begin(distances_to_in_point), min_it);
     if (min_index == 0)
         edge_points.insert(std::begin(edge_points), new_point);
-    else if(min_index == distances_to_in_point.size() - 1) // This is safe, as vector is not empty.
+    else if(static_cast<unsigned int>(min_index) == distances_to_in_point.size() - 1) // This is safe, as vector is not empty.
         // edge_points.insert(std::end(edge_points), new_point);
         edge_points.push_back(new_point);
     else  // illogical error
@@ -94,10 +94,6 @@ size_t merge_three_connected_nodes(GraphType & sg)
             }
 
             for(auto & nv : neighbors_connected){
-                auto & sn_first = sg[nv.first];
-                auto & sn_second = sg[nv.second];
-                auto & sn_current = sg[*vi];
-
                 auto degree_first = boost::out_degree(nv.first, sg);
                 auto degree_second = boost::out_degree(nv.second, sg);
                 // If neighbors have more than degree 3, abort merge
@@ -170,7 +166,6 @@ size_t merge_three_connected_nodes(GraphType & sg)
         auto edges = boost::out_edges(node_to_remove, sg);
         // Create an edge to the node to merge into.
         for(auto ei = edges.first ; ei != edges.second; ++ei) {
-            auto source = boost::source(*ei, sg);
             auto target = boost::target(*ei, sg);
             auto & spatial_edge = sg[*ei];
             auto & sn_to_remove = sg[node_to_remove];
@@ -194,14 +189,7 @@ std::vector< std::pair<boost::graph_traits< GraphType>::edge_descriptor,
                        boost::graph_traits< GraphType>::edge_descriptor > >
 get_parallel_edges(const GraphType & sg)
 {
-    using vertex_descriptor = boost::graph_traits<
-        GraphType>::vertex_descriptor;
-    using edge_descriptor = boost::graph_traits<
-        GraphType>::edge_descriptor;
-    using vertex_iterator =
-        boost::graph_traits<GraphType>::vertex_iterator;
-    using adjacency_iterator =
-        boost::graph_traits<GraphType>::adjacency_iterator;
+    using edge_descriptor = boost::graph_traits< GraphType>::edge_descriptor;
     using EdgePair = std::pair<edge_descriptor, edge_descriptor>;
     std::vector<EdgePair> parallel_edges;
 
@@ -212,7 +200,6 @@ get_parallel_edges(const GraphType & sg)
     {
         const auto out_edges = boost::out_edges(*vi, sg);
         for (auto ei1 = out_edges.first; ei1 != out_edges.second; ++ei1) {
-            auto source = boost::source(*ei1, sg); // = *vi
             auto target1 = boost::target(*ei1, sg);
             // Copy edge iterator and plus one (to avoid compare the edge with itself)
             auto ei2 = ei1;
@@ -241,7 +228,6 @@ get_equal_parallel_edges(
               boost::graph_traits< GraphType>::edge_descriptor > >
     & parallel_edges, const GraphType & sg)
 {
-    bool there_are_equal_parallel_edges = false;
     using edge_descriptor = boost::graph_traits<
         GraphType>::edge_descriptor;
     using EdgePair = std::pair<edge_descriptor, edge_descriptor>;
@@ -258,7 +244,6 @@ get_equal_parallel_edges(
             //     << "---"
             //     << boost::target(edge_pair.first, sg)
             //     << std::endl;
-            there_are_equal_parallel_edges = true;
             equal_parallel_edges.push_back(edge_pair);
             continue;
         }
@@ -276,7 +261,6 @@ get_equal_parallel_edges(
             //     << "---"
             //     << boost::target(edge_pair.first, sg)
             //     << std::endl;
-            there_are_equal_parallel_edges = true;
             equal_parallel_edges.push_back(edge_pair);
             continue;
             }

@@ -26,11 +26,10 @@ void print_histogram(const histo::Histo<double> & histo, std::ostream & os);
  * imposed by @print_histogram
  *
  * @param is stream
- * @param name of the histogram
  *
  * @return  histo<double>
  */
-histo::Histo<double> read_histogram(std::istream & is, const std::string & name);
+histo::Histo<double> read_histogram(std::istream & is);
 /**
  * Create histogram of degrees.
  * @sa compute_ete_distances

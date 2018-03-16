@@ -65,7 +65,6 @@ inline static std::istream &operator>>(std::istream &is, SpatialEdge &se) {
         is_clean >> x >> y >> z;
         edge_points.push_back({{x,y,z}});
         s.erase(0, last + delim_end.length());
-        auto last = s.find(delim_end);
         pos = s.find(delim_start);
     }
     // set is to the end or lexical_cast fails.

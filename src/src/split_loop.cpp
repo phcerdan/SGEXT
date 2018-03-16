@@ -11,10 +11,6 @@ void split_loop(
     const boost::edge_bundle_type<GraphType>::type &sg_edge,
     GraphType &input_sg)
 {
-    using vertex_descriptor =
-        boost::graph_traits<GraphType>::vertex_descriptor;
-    using edge_descriptor =
-        boost::graph_traits<GraphType>::edge_descriptor;
     using SpatialEdge = boost::edge_bundle_type<GraphType>::type;
     using SpatialNode = boost::vertex_bundle_type<GraphType>::type;
     auto &edge_points = sg_edge.edge_points;

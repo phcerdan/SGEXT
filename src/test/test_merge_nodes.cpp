@@ -70,12 +70,9 @@ TEST_CASE_METHOD(three_connected_nodes,
     using SpatialGraph = SG::GraphAL;
     using vertex_iterator =
         typename boost::graph_traits<SpatialGraph>::vertex_iterator;
-    using edge_iterator =
-        typename boost::graph_traits<SpatialGraph>::edge_iterator;
     SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
     vertex_iterator vi, vi_end;
     std::tie(vi, vi_end) = boost::vertices(sg);
-    auto vi_start = vi;
     size_t count1degrees = 0;
     size_t count2degrees = 0;
     size_t count3degrees = 0;

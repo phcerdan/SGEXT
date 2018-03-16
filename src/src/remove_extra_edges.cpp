@@ -19,12 +19,13 @@ bool remove_extra_edges(GraphType & sg) {
         if (degree > 2){
             adjacency_iterator neighbor_it, neighbor_end_it;
             std::tie(neighbor_it, neighbor_end_it) = boost::adjacent_vertices(*vi, sg);
-            // Compare distance between current node and neighbors
-            // only if the neighbors are connected between them.
-            // Remove the largest edge.
-            // o
-            // |\
-            // oo
+            /* Compare distance between current node and neighbors
+             * only if the neighbors are connected between them.
+             * Remove the largest edge.
+             * o
+             * |\
+             * oo
+             */
             std::vector<std::pair<vertex_descriptor, vertex_descriptor>> neighbors_connected;
             for(; neighbor_it != neighbor_end_it; ++neighbor_it) {
                 auto other_neighbor_it = neighbor_it;

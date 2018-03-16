@@ -147,6 +147,7 @@ TEST_CASE("print and read histogram", "[io]")
     std::vector<unsigned int> data({1, 2, 3, 5, 6, 4, 2, 2, 5});
     size_t bins = 3;
     auto histo = SG::histogram_degrees(data, bins);
+    histo.name = "Whatever";
     // SG::print_histogram(histo, std::cout);
     // stringstream as memory i,o,stream
     std::stringstream buffer;
@@ -154,7 +155,7 @@ TEST_CASE("print and read histogram", "[io]")
     std::cout << "printed into buffer" << std::endl;
     CHECK(buffer.str().empty() == false);
     std::cout << buffer.str() << std::endl;
-    auto histo_read = SG::read_histogram(buffer, "read");
+    auto histo_read = SG::read_histogram(buffer);
     std::cout << "already readed from buffer" << std::endl;
     CHECK(histo_read.bins == histo.bins);
     CHECK(histo_read.counts == histo.counts);
@@ -167,5 +168,6 @@ TEST_CASE("print and read histogram", "[io]")
     CHECK(histo_read.breaks[2] == Approx(histo.breaks[2]));
     CHECK(histo_read.breaks[3] == Approx(histo.breaks[3]));
     CHECK(histo_read.range == histo.range);
+    CHECK(histo_read.name == histo.name);
 }
 

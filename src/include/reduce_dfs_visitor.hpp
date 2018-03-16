@@ -138,7 +138,7 @@ struct ReduceGraphVisitor : public boost::default_dfs_visitor {
                 auto any_edge_exist =
                     boost::edge(m_sg_source, sg_vertex_descriptor, m_sg);
                 if (!any_edge_exist.second) {
-                    auto added = boost::add_edge(m_sg_source, sg_vertex_descriptor, m_sg_edge, m_sg);
+                    boost::add_edge(m_sg_source, sg_vertex_descriptor, m_sg_edge, m_sg);
                     // if(m_verbose)
                     //   std::cout << "Added new edge: (" << m_source << "," << u << ") " << m_sg[added.first] << std::endl;
                 } else {
@@ -173,8 +173,7 @@ struct ReduceGraphVisitor : public boost::default_dfs_visitor {
                     }
                   if (!current_edge_already_exist)
                   {
-                  auto added = boost::add_edge(m_sg_source, sg_vertex_descriptor,
-                      m_sg_edge, m_sg);
+                    boost::add_edge(m_sg_source, sg_vertex_descriptor, m_sg_edge, m_sg);
                   // if(m_verbose)
                   //   std::cout << "Added parallel edge  (" << m_source << "," << u << ") " << m_sg[added.first] << std::endl;
                   }

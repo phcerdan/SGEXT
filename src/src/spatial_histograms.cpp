@@ -11,19 +11,26 @@ void print_histogram(const histo::Histo<double> & histo, std::ostream & os)
     histo.PrintBreaks(os);
 }
 
-histo::Histo<double> read_histogram(std::istream & is, const std::string & name)
+histo::Histo<double> read_histogram(std::istream & is)
 {
     histo::Histo<double> histo;
-    histo.name = name;
     std::string line;
     std::istringstream ss;
     double num;
     // Header, ignore
     std::getline(is, line);
+    std::string delim_first = "# ";
+    std::string delim_second = ": ";
+    auto index_first = line.find(delim_first);
+    auto index_second = line.find(delim_second);
+    auto start = index_first + delim_first.length();
+    auto end = index_second - start;
+    histo.name = line.substr( start, end);
     // Centers, ignore
     std::getline(is, line);
     // Counts, store
     std::getline(is, line);
+    ss.clear();
     ss.str(line);
     while(ss >> num)
     {
@@ -31,8 +38,8 @@ histo::Histo<double> read_histogram(std::istream & is, const std::string & name)
     }
     // Breaks, store
     std::getline(is, line);
-    ss.str(line);
     ss.clear();
+    ss.str(line);
     while(ss >> num)
     {
         histo.breaks.push_back(num);
