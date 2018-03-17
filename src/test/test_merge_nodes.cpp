@@ -132,27 +132,3 @@ TEST_CASE_METHOD(three_connected_nodes,
     CHECK(count1degrees == 3);
     CHECK(count0degrees == 2);
 }
-TEST_CASE("SG::insert_edge_point_with_distance_order",
-          "[insert_edge_point]")
-{
-    SG::SpatialEdge::PointType new_point1 = {{-1,0,0}};
-    SG::SpatialEdge::PointType p0 = {{0,0,0}};
-    SG::SpatialEdge::PointType p1 = {{1,0,0}};
-    SG::SpatialEdge::PointContainer edge_points = {{p0, p1}};
-    // Insert it, should go to the front.
-    SG::insert_edge_point_with_distance_order(edge_points, new_point1);
-    SG::SpatialEdge::PointContainer expected_edge_points1 = {{new_point1, p0, p1}};
-    CHECK(edge_points == expected_edge_points1);
-
-    // Insert it, should go to the back
-    SG::SpatialEdge::PointType new_point2 = {{2,0,0}};
-    SG::insert_edge_point_with_distance_order(edge_points, new_point2);
-    SG::SpatialEdge::PointContainer expected_edge_points2 = {{new_point1, p0, p1, new_point2}};
-    CHECK(edge_points == expected_edge_points2);
-
-    SG::SpatialEdge::PointType new_point3 = {{10,10,10}};
-    CHECK_THROWS( SG::insert_edge_point_with_distance_order(edge_points, new_point3) );
-
-    SG::SpatialEdge::PointType new_point4 = {{1,1,0}};
-    CHECK_THROWS( SG::insert_edge_point_with_distance_order(edge_points, new_point4) );
-}

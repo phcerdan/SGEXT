@@ -164,7 +164,7 @@ TEST_CASE_METHOD(test_two_parallel_edges,
     CHECK(edges == 2);
     bool no_ignore_parallel_edges = false;
     constexpr auto pi = 3.14159265358979323846;
-    auto angles = SG::compute_angles(g, no_ignore_parallel_edges);
+    auto angles = SG::compute_angles(g, 0, no_ignore_parallel_edges);
     std::sort(angles.begin(), angles.end());
     std::cout << "Angles" << std::endl;
     std::ostream_iterator<double> out_it (std::cout,", ");
@@ -197,7 +197,7 @@ TEST_CASE_METHOD(test_two_parallel_edges,
     std::cout << "Edges of two_paralell edges ignoring parallel edges : " << edges << std::endl;
     CHECK(edges == 2);
     bool ignore_parallel_edges = true;
-    auto angles = SG::compute_angles(g, ignore_parallel_edges);
+    auto angles = SG::compute_angles(g, 0, ignore_parallel_edges);
     std::sort(angles.begin(), angles.end());
     std::cout << "Angles" << std::endl;
     std::ostream_iterator<double> out_it (std::cout,", ");
@@ -213,4 +213,84 @@ TEST_CASE_METHOD(test_two_parallel_edges,
     std::copy ( cosines.begin(), cosines.end(), out_it_cos );
     std::cout <<  std::endl;
     CHECK(cosines.empty() == true);
+}
+TEST_CASE_METHOD(test_spatial_graph,
+                 "compute filtered distances",
+                 "[filtered][distances]")
+{
+    CHECK(boost::num_edges(g) == 3);
+    size_t count0 = 0;
+    size_t count1 = 0;
+    size_t count2 = 0;
+    const auto edges = boost::edges(g);
+    for (auto ei = edges.first; ei != edges.second; ++ei) {
+        const auto & ep = g[*ei].edge_points;
+        size_t npoints = ep.size();
+        if(npoints == 0)
+            count0++;
+        if(npoints == 1)
+            count1++;
+        if(npoints == 2)
+            count2++;
+    }
+    CHECK(count0 == 0);
+    CHECK(count1 == 1);
+    CHECK(count2 == 2);
+    auto distances_unfiltered = SG::compute_ete_distances(g);
+    size_t minimum_size_edges = 1;
+    // Discards edges with 0 points (or less than 1)
+    auto distances_filtered_1 = SG::compute_ete_distances(g, minimum_size_edges);
+    // Discards edges with 1 points (or less than 2)
+    auto distances_filtered_2 = SG::compute_ete_distances(g, 2);
+    auto distances_filtered_3 = SG::compute_ete_distances(g, 3);
+    CHECK(distances_filtered_3.empty() == true);
+    CHECK(distances_filtered_2.size() == 2);
+    std::cout << "distances_filtered_2:" << std::endl;
+    std::ostream_iterator<double> out_it_2 (std::cout,", ");
+    std::copy ( distances_filtered_2.begin(), distances_filtered_2.end(), out_it_2 );
+    std::cout << std::endl;
+    CHECK(distances_filtered_1.size() == 3); // No empty ep
+    CHECK(distances_unfiltered.size() == 3);
+}
+
+TEST_CASE_METHOD(test_spatial_graph,
+                 "compute filtered angles",
+                 "[filtered][angles]")
+{
+    CHECK(boost::num_edges(g) == 3);
+    size_t count0 = 0;
+    size_t count1 = 0;
+    size_t count2 = 0;
+    const auto edges = boost::edges(g);
+    for (auto ei = edges.first; ei != edges.second; ++ei) {
+        const auto & ep = g[*ei].edge_points;
+        size_t npoints = ep.size();
+        if(npoints == 0)
+            count0++;
+        if(npoints == 1)
+            count1++;
+        if(npoints == 2)
+            count2++;
+    }
+    CHECK(count0 == 0);
+    CHECK(count1 == 1);
+    CHECK(count2 == 2);
+    auto angles_unfiltered = SG::compute_angles(g);
+    size_t minimum_size_edges = 1;
+    // Discards edges with 0 points (or less than 1)
+    auto angles_filtered_1 = SG::compute_angles(g, minimum_size_edges);
+    // Discards edges with 1 points (or less than 2)
+    auto angles_filtered_2 = SG::compute_angles(g, 2);
+    bool ignore_parallel_edges = true;
+    auto angles_filtered_2_ignore = SG::compute_angles(g, 2, ignore_parallel_edges );
+    auto angles_filtered_3 = SG::compute_angles(g, 3);
+    CHECK(angles_filtered_3.empty() == true);
+    CHECK(angles_filtered_2.size() == 1);
+    std::cout << "angles_filtered_2:" << std::endl;
+    std::ostream_iterator<double> out_it_2 (std::cout,", ");
+    std::copy ( angles_filtered_2.begin(), angles_filtered_2.end(), out_it_2 );
+    std::cout << std::endl;
+    CHECK(angles_filtered_2_ignore.size() == 1);
+    CHECK(angles_filtered_1.size() == 3); // No empty ep
+    CHECK(angles_unfiltered.size() == 3);
 }

@@ -55,7 +55,8 @@ histo::Histo<double> histogram_degrees(
  *
  * @return histogram
  */
-histo::Histo<double> histogram_distances(const std::vector<double> & distances, size_t bins = 0);
+histo::Histo<double> histogram_distances(const std::vector<double> & distances,
+                double width = 0.0);
 
 
 /**
@@ -68,7 +69,8 @@ histo::Histo<double> histogram_distances(const std::vector<double> & distances, 
  *
  * @return histo
  */
-histo::Histo<double> histogram_angles(const std::vector<double> & angles, size_t bins = 0);
+histo::Histo<double> histogram_angles(const std::vector<double> & angles,
+                size_t bins = 100);
 
 
 /**
@@ -80,6 +82,7 @@ histo::Histo<double> histogram_angles(const std::vector<double> & angles, size_t
  * if bins == 0, the breaks are generated using Scott method.
  * @return histo
  */
-histo::Histo<double> histogram_cosines(const std::vector<double> & cosines, size_t bins = 0);
+histo::Histo<double> histogram_cosines(const std::vector<double> & cosines,
+                size_t bins = 100);
 } // end namespace
 #endif

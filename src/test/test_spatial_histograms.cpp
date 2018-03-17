@@ -90,15 +90,17 @@ TEST_CASE_METHOD(test_spatial_graph,
 }
 
 TEST_CASE_METHOD(test_spatial_graph,
-                 "histogram distances with bins",
-                 "[histograms][distances][bins]")
+                 "histogram distances with width",
+                 "[histograms][distances][width]")
 {
     auto distances = SG::compute_ete_distances(g);
-    size_t bins = 10;
-    auto histo_distances = SG::histogram_distances(distances, bins);
+    double width = 0.5;
+    auto histo_distances = SG::histogram_distances(distances, width);
     std::cout << "Distance Histogram with bins" << std::endl;
     CHECK(histo_distances.name == "distances");
-    CHECK(histo_distances.bins == bins);
+    double max_length = 3.0;
+    size_t expected_bins = static_cast<size_t>(max_length / width);
+    CHECK(histo_distances.bins == expected_bins);
     histo_distances.PrintBreaksAndCounts(std::cout);
 }
 

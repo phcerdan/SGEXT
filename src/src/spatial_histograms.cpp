@@ -74,16 +74,17 @@ histo::Histo<double> histogram_degrees(
     return hist_degrees;
 }
 
-histo::Histo<double> histogram_distances(const std::vector<double> & distances, size_t bins )
+histo::Histo<double> histogram_distances(const std::vector<double> & distances,
+        double width )
 {
-	auto max_distance = *std::max_element(std::begin(distances), std::end(distances) );
+    auto max_distance = *std::max_element(std::begin(distances), std::end(distances) );
     histo::Histo<double> hist_distances;
-    if(bins == 0)
+    if(width <= 0.0 + 10 * std::numeric_limits<double>::epsilon())
         hist_distances = histo::Histo<double>(distances);
     else
         hist_distances = histo::Histo<double>(distances,
-                histo::GenerateBreaksFromRangeAndBins(
-                    0.0, max_distance + 100 * std::numeric_limits<double>::epsilon(), bins)
+                histo::GenerateBreaksFromRangeAndWidth(
+                    0.0, max_distance, width)
                 );
     hist_distances.name = "distances";
     return hist_distances;

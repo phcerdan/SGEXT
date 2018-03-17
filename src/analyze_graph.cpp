@@ -63,12 +63,14 @@ int main(int argc, char* const argv[]){
     ( "removeExtraEdges,c", po::bool_switch()->default_value(false), "Remove extra edges created because connectivity of object.")
     ( "mergeThreeConnectedNodes,m", po::bool_switch()->default_value(false), "Merge three connected nodes (between themselves) into one node.")
     ( "checkParallelEdges,p", po::bool_switch()->default_value(false), "Check and print info about parallel edges in the graph. Use verbose option for output.")
-    ( "binsHistoDegrees,d", po::value<size_t>()->default_value(0), "Bins for the histogram of degrees ." )
-    ( "binsHistoDistances,l", po::value<size_t>()->default_value(0), "Bins for the histogram of distances ." )
-    ( "binsHistoAngles,a", po::value<size_t>()->default_value(0), "Bins for the histogram of angles ." )
-    ( "binsHistoCosines,n", po::value<size_t>()->default_value(0), "Bins for the histogram of cosines ." )
-    ( "exportReducedGraph,o", po::value<string>(), "Write .dot file with the reduced spatial graph." )
     ( "exportHistograms,e", po::value<string>(), "Export histogram." )
+    ( "binsHistoDegrees,d", po::value<size_t>()->default_value(0), "Bins for the histogram of degrees. Default [0] get the breaks between 0 and max_degree" )
+    ( "widthHistoDistances,l", po::value<double>()->default_value(0.3), "Width between breaks for histogram of ete distances. Use 0.0 to automatically compute breaks (not recommended)." )
+    ( "binsHistoAngles,a", po::value<size_t>()->default_value(100), "Bins for the histogram of angles . Use 0 for automatic computation of breaks (not recommended)" )
+    ( "binsHistoCosines,n", po::value<size_t>()->default_value(100), "Bins for the histogram of cosines .Use 0 for automatic computation of breaks (not recommended)" )
+    ( "ignoreAngleBetweenParallelEdges,a", po::bool_switch()->default_value(false), "Don't compute angles between parallel edges." )
+    ( "ignoreEdgesShorterThan,s", po::value<size_t>()->default_value(0), "Ignore distance and angles between edges shorter than this value." )
+    ( "exportReducedGraph,o", po::value<string>(), "Write .dot file with the reduced spatial graph." )
     ( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal. Requires VISUALIZE option enabled at build.")
     ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output." );
 
@@ -93,11 +95,14 @@ int main(int argc, char* const argv[]){
   bool mergeThreeConnectedNodes = vm["mergeThreeConnectedNodes"].as<bool>();
   bool checkParallelEdges = vm["checkParallelEdges"].as<bool>();
   bool exportHistograms = vm.count("exportHistograms");
-  size_t binsHistoDegrees= vm["binsHistoDegrees"].as<size_t>();
-  size_t binsHistoDistances= vm["binsHistoDistances"].as<size_t>();
-  size_t binsHistoAngles= vm["binsHistoAngles"].as<size_t>();
-  size_t binsHistoCosines= vm["binsHistoCosines"].as<size_t>();
+  size_t binsHistoDegrees = vm["binsHistoDegrees"].as<size_t>();
+  double widthHistoDistances = vm["widthHistoDistances"].as<double>();
+  size_t binsHistoAngles = vm["binsHistoAngles"].as<size_t>();
+  size_t binsHistoCosines = vm["binsHistoCosines"].as<size_t>();
+  size_t ignoreEdgesShorterThan = vm["ignoreEdgesShorterThan"].as<size_t>();
+  bool ignoreAngleBetweenParallelEdges = vm.count("ignoreAngleBetweenParallelEdges");
   bool exportReducedGraph = vm.count("exportReducedGraph");
+
 #ifdef VISUALIZE
   bool visualize = vm["visualize"].as<bool>();
 #endif
@@ -252,50 +257,45 @@ int main(int argc, char* const argv[]){
     {
       string exportHistograms_filename = vm["exportHistograms"].as<string>();
       const fs::path output_folder_path{exportHistograms_filename};
-      fs::path output_full_path = output_folder_path / fs::path(output_file_path.string() + ".histo");
+      fs::path output_full_path = output_folder_path / fs::path(
+          output_file_path.string() +
+          "_ignEdgesShorterThan" + std::to_string(ignoreEdgesShorterThan) +
+          (ignoreAngleBetweenParallelEdges ? "_ignParallelAngles" : "")   +
+          ".histo");
       std::ofstream out;
       out.open(output_full_path.string().c_str());
       // Degrees
       {
         auto degrees = SG::compute_degrees(reduced_g);
         auto histo_degrees = SG::histogram_degrees(degrees, binsHistoDegrees);
-        out << "# Degrees: L0:centers of bins, L1:counts, L2:breaks" << std::endl;
-        histo_degrees.PrintCenters(out);
-        histo_degrees.PrintCounts(out);
-        histo_degrees.PrintBreaks(out);
+        SG::print_histogram(histo_degrees, out);
       }
       // EndToEnd Distances
       {
-        auto distances = SG::compute_ete_distances(reduced_g);
+        auto distances = SG::compute_ete_distances(reduced_g, ignoreEdgesShorterThan);
+        auto histo_distances = SG::histogram_distances(distances, widthHistoDistances);
+
+        auto range_ptr = std::minmax_element(distances.begin(), distances.end());
         if(verbose)
         {
-          auto range_ptr = std::minmax_element(distances.begin(), distances.end());
           std::cout << "Min Distance: " << *range_ptr.first << std::endl;
           std::cout << "Max Distance: " << *range_ptr.second << std::endl;
+          std::cout << "width of breaks: " << widthHistoDistances << std::endl;
+          std::cout << "bins: " << histo_distances.bins << std::endl;
         }
-
-        auto histo_distances = SG::histogram_distances(distances, binsHistoDistances);
-        out << "# Distances: L0:centers of bins, L1:counts, L2:breaks" << std::endl;
-        histo_distances.PrintCenters(out);
-        histo_distances.PrintCounts(out);
-        histo_distances.PrintBreaks(out);
+        SG::print_histogram(histo_distances, out);
       }
       // Angles between adjacent edges
       {
-        auto angles = SG::compute_angles(reduced_g);
+        auto angles = SG::compute_angles(reduced_g,
+            ignoreEdgesShorterThan, ignoreAngleBetweenParallelEdges);
         auto histo_angles = SG::histogram_angles( angles, binsHistoAngles );
-        out << "# Angles: L0:centers of bins, L1:counts, L2:breaks" << std::endl;
-        histo_angles.PrintCenters(out);
-        histo_angles.PrintCounts(out);
-        histo_angles.PrintBreaks(out);
+        SG::print_histogram(histo_angles, out);
         // Cosines of those angles
         {
           auto cosines = SG::compute_cosines(angles);
           auto histo_cosines = SG::histogram_cosines( cosines, binsHistoCosines );
-          out << "# Cosines: L0:centers of bins, L1:counts, L2:breaks" << std::endl;
-          histo_cosines.PrintCenters(out);
-          histo_cosines.PrintCounts(out);
-          histo_cosines.PrintBreaks(out);
+          SG::print_histogram(histo_cosines, out);
         }
       }
       if(verbose)

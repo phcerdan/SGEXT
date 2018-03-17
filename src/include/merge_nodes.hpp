@@ -10,37 +10,20 @@
 namespace SG
 {
 
-    /**
-     * Insert point in the input container.
-     * The input container is a list of points ordered by connectvity, consecutive points in the container are connected.
-     *
-     * This computes the distance of the new_point with all the existing edge_points.
-     * TODO, an optimization would be to only compute it against first and last.
-     *
-     * PRECONDITION: edge_points are already ordered.
-     *
-     * @param edge_points container with existing points.
-     * Ordered by connectivity, adjacent points are connected.
-     * @param new_point point to intert.
-     */
-void insert_edge_point_with_distance_order(
-        SG::SpatialEdge::PointContainer & edge_points,
-        const SG::SpatialEdge::PointType & new_point);
 /**
  * Some nodes that are connected between them,
  * could be merged.
- * Transforming 3 nodes with degree 3, to 1 node with degree 3
+ * Transforming three nodes with degree 3, to one node with degree 3
  * and adding the old nodes into the corresponding spatial edge.
  *
- * TODO:
- * Pitfall1: what happen when 2 of those nodes are connected between them with an extra parallel edge?
+ * Note: if two of those nodes are connected between them with an extra parallel edge
  *     (a)
  *      o--
  *(b) o/|  |
  *     \o--
  *     (c)
  *
- * Solution1: Don't do it in that case, (or use split_loop?)
+ * The merge of those nodes doesn't happen.
  *
  * See related tests for further details.
  *

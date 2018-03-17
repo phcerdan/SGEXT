@@ -1,4 +1,5 @@
-set(TEST_LIBRARIES SG ${Boost_LIBRARIES} ${DGTAL_LIBRARIES} Qt5::Widgets Qt5::Xml)
+# set(TEST_LIBRARIES SG ${Boost_LIBRARIES} ${DGTAL_LIBRARIES} Qt5::Widgets )
+set(TEST_LIBRARIES SG ${Boost_LIBRARIES} ${DGTAL_LIBRARIES})
 
 add_executable(test_trim_graph test_trim_graph.cpp)
 target_link_libraries(test_trim_graph SG)
@@ -15,6 +16,10 @@ add_test(NAME spatial_graph_reduction COMMAND test_spatial_graph_reduction)
 add_executable(test_merge_nodes test_merge_nodes.cpp)
 target_link_libraries(test_merge_nodes ${TEST_LIBRARIES} ${ITK_LIBRARIES})
 add_test(NAME merge_nodes COMMAND test_merge_nodes)
+
+add_executable(test_edge_points_utilities test_edge_points_utilities.cpp)
+target_link_libraries(test_edge_points_utilities ${TEST_LIBRARIES})
+add_test(NAME edge_points_utilities COMMAND test_edge_points_utilities)
 
 add_executable(test_graphviz_io test_graphviz_io.cpp)
 target_link_libraries(test_graphviz_io ${TEST_LIBRARIES} ${ITK_LIBRARIES})

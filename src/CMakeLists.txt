@@ -35,7 +35,6 @@ include_directories(SYSTEM ${ITK_INCLUDE_DIRS})
 if(VISUALIZE)
     find_package(Qt5 REQUIRED
         Widgets
-        Xml
         OpenGL)
 
     # find_package(VTK REQUIRED)
@@ -111,6 +110,7 @@ install(TARGETS histo EXPORT my_export_set DESTINATION include)
 set(SG_SRC_WITH_BOOST
     ${SG_SRC_DIR}/trim_graph.cpp
     ${SG_SRC_DIR}/merge_nodes.cpp
+    ${SG_SRC_DIR}/edge_points_utilities.cpp
     ${SG_SRC_DIR}/remove_extra_edges.cpp
     ${SG_SRC_DIR}/compute_graph_properties.cpp
     ${SG_SRC_DIR}/spatial_histograms.cpp
