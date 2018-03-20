@@ -40,25 +40,25 @@ std::vector<double> compute_ete_distances(const SG::GraphType & sg)
     return compute_ete_distances(sg, 0);
 }
 
-std::vector<double> compute_contour_length(const SG::GraphType & sg,
+std::vector<double> compute_contour_lengths(const SG::GraphType & sg,
         const size_t minimum_size_edges)
 {
-    std::vector<double> ete_distances;
+    std::vector<double> contour_lengths;
     const auto edges = boost::edges(sg);
     for (auto ei = edges.first; ei != edges.second; ++ei) {
         const auto & eps = sg[*ei].edge_points;
         if(eps.size() < minimum_size_edges)
             continue;
-        ete_distances.emplace_back(
+        contour_lengths.emplace_back(
                 SG::contour_length(*ei, sg)
                 );
     }
-    return ete_distances;
+    return contour_lengths;
 }
 
-std::vector<double> compute_contour_length(const SG::GraphType & sg)
+std::vector<double> compute_contour_lengths(const SG::GraphType & sg)
 {
-    return compute_contour_length(sg, 0);
+    return compute_contour_lengths(sg, 0);
 }
 
 std::vector<double> compute_angles(const SG::GraphType & sg,

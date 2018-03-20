@@ -122,6 +122,24 @@ int main(int argc, char* const argv[]){
       view->SetInteractor(qvtkWidget->GetInteractor());
       qvtkWidget->SetRenderWindow(view->GetRenderWindow());
   }
+  // Contour lengths
+  {
+      histograms.emplace_back(SG::read_histogram(inFile));
+      auto window = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+      auto * qvtkWidget = new QVTKOpenGLWidget;
+      qvtkWidget->SetRenderWindow(window.Get());
+      layout->addWidget(qvtkWidget);
+      auto chart = histo::chart_from_histogram(histograms[4]);
+      // chart->GetAxis(vtkAxis::LEFT)->SetLogScale(true);
+      chart->GetAxis(vtkAxis::BOTTOM)->SetLogScale(true);
+      auto view = vtkSmartPointer<vtkContextView>::New();
+      view->SetRenderWindow(window.Get());
+      view->GetScene()->AddItem(chart);
+      view->GetRenderer()->SetBackground(1.0, 1.0, 1.0);
+      // Connect vtk with qt
+      view->SetInteractor(qvtkWidget->GetInteractor());
+      qvtkWidget->SetRenderWindow(view->GetRenderWindow());
+  }
   main_window->resize(640, 480);// resize to something or it will fail
   main_window->show();
   app.exec();

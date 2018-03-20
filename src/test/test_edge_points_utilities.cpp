@@ -2,7 +2,7 @@
 #include "edge_points_utilities.hpp"
 
 TEST_CASE("edge_points_length",
-          "[edge_points_length")
+          "[edge_points_length]")
 {
     SG::SpatialEdge se;
     CHECK(SG::edge_points_length(se) == 0.0);
@@ -18,7 +18,7 @@ TEST_CASE("edge_points_length",
 }
 
 TEST_CASE("contour_length with multiple edge points",
-          "[contour_length")
+          "[contour_length]")
 {
     auto sg = SG::GraphType(2);
     SG::SpatialEdge::PointType p0 = {{0,0,0}};
@@ -34,7 +34,7 @@ TEST_CASE("contour_length with multiple edge points",
     CHECK(l == Approx(3.0));
 }
 TEST_CASE("contour_length with disconnected points",
-          "[contour_length")
+          "[contour_length]")
 {
     auto sg = SG::GraphType(2);
     SG::SpatialEdge::PointType p0 = {{0,0,0}};
@@ -49,7 +49,7 @@ TEST_CASE("contour_length with disconnected points",
     CHECK_THROWS(SG::contour_length(edge.first, sg));
 }
 TEST_CASE("contour_length with only one edge_point",
-          "[contour_length")
+          "[contour_length]")
 {
     auto sg = SG::GraphType(2);
     SG::SpatialEdge::PointType p0 = {{0,0,0}};
@@ -64,7 +64,7 @@ TEST_CASE("contour_length with only one edge_point",
     CHECK(l == Approx(2.0));
 }
 TEST_CASE("contour_length with zero edge_point",
-          "[contour_length")
+          "[contour_length]")
 {
     auto sg = SG::GraphType(2);
     SG::SpatialEdge::PointType p0 = {{0,0,0}};
@@ -75,6 +75,24 @@ TEST_CASE("contour_length with zero edge_point",
     auto edge = boost::add_edge(0,1,se,sg);
     auto l = SG::contour_length(edge.first, sg);
     CHECK(l == Approx(1.0));
+}
+
+// see images/contour_length_cornercase1
+TEST_CASE("contour_length corner case 1",
+          "[contour_length]")
+{
+    auto sg = SG::GraphType(2);
+
+    SG::SpatialEdge::PointType p0 = {{179,160,46}};
+    SG::SpatialEdge::PointType p3 = {{179,162,45}};
+    sg[0].pos = p0;
+    sg[1].pos = p3;
+    SG::SpatialEdge se;
+    se.edge_points.insert(std::end(se.edge_points), {
+            {178,160,47},{178,160,48},{178,160,49},{178,160,50},{179,159,51},{180,160,52},{181,161,51},{180,161,50},{180,161,49},{180,161,48},{180,161,47},{180,161,46}
+            });
+    auto edge = boost::add_edge(0,1,se,sg);
+    CHECK_NOTHROW(SG::contour_length(edge.first, sg));
 }
 
 TEST_CASE("insert_edge_point_with_distance_order",

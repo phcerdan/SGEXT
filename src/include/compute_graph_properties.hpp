@@ -23,6 +23,19 @@ std::vector<unsigned int> compute_degrees(const SG::GraphAL & sg);
 /**
  * Compute end to end distances of nodes
  * It iterates over all edges and compute distance(target,source)
+ * but filtering out edges with less than \b minimum_size_edges edge_points
+ *
+ * @param sg input spatial graph
+ * @param minimum_size_edges filter out edges with less than this number of points.
+ *
+ * @return vector with distances.
+ */
+std::vector<double> compute_ete_distances(const SG::GraphAL & sg,
+                const size_t minimum_size_edges);
+
+/**
+ * Compute end to end distances of nodes
+ * It iterates over all edges and compute distance(target,source)
  *
  * @param sg input spatial graph
  *
@@ -39,7 +52,7 @@ std::vector<double> compute_ete_distances(const SG::GraphAL & sg);
  *
  * @return vector with distances.
  */
-std::vector<double> compute_countour_distances(const SG::GraphAL & sg,
+std::vector<double> compute_contour_lengths(const SG::GraphAL & sg,
                 const size_t minimum_size_edges);
 
 /**
@@ -49,20 +62,8 @@ std::vector<double> compute_countour_distances(const SG::GraphAL & sg,
  *
  * @return vector with distances.
  */
-std::vector<double> compute_countour_distances(const SG::GraphAL & sg);
+std::vector<double> compute_contour_lengths(const SG::GraphAL & sg);
 
-/**
- * Compute end to end distances of nodes
- * It iterates over all edges and compute distance(target,source)
- * but filtering out edges with less than \b minimum_size_edges edge_points
- *
- * @param sg input spatial graph
- * @param minimum_size_edges filter out edges with less than this number of points.
- *
- * @return vector with distances.
- */
-std::vector<double> compute_ete_distances(const SG::GraphAL & sg,
-                const size_t minimum_size_edges);
 /**
  * Compute angles between all adjacent edges in sg
  *

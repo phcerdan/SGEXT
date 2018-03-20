@@ -4,6 +4,7 @@
 #include "edge_points_utilities.hpp"
 #include <vector>
 #include <algorithm>
+#include <sstream>
 
 namespace SG {
 
@@ -36,29 +37,32 @@ double contour_length(const SG::GraphType::edge_descriptor e,
     // distance between source to eps[0] to be sure. If they are not connected,
     // we know that source is connected to eps.back().
     auto dist_source_first = ArrayUtilities::distance(sg[source].pos, eps[0]);
-    // We can avoid calculate the next one and just compare with sqrt(3.0).
-    // If eps has only one point, we calculate the same distance, but it is correct.
-    auto dist_source_last = ArrayUtilities::distance(sg[source].pos, eps.back());
+    // Dev: It can happen that eps[0] is connected to both, source and target.
+    // But eps.back() is only connected to one end of the spatial edge, see test corner case
+    auto dist_target_last = ArrayUtilities::distance(sg[target].pos, eps.back());
 
     double dist_to_source = 0.0;
     double dist_to_target = 0.0;
+    static auto max_connected_distance = sqrt(3.0) + 2.0 * std::numeric_limits<double>::epsilon();
 
-    if(dist_source_first < dist_source_last){
+    if(dist_source_first < max_connected_distance && dist_target_last < max_connected_distance){
         dist_to_source = dist_source_first;
-        dist_to_target = ArrayUtilities::distance(sg[target].pos, eps.back());
+        dist_to_target = dist_target_last;
     } else {
-        dist_to_source = dist_source_last;
+        dist_to_source = ArrayUtilities::distance(sg[source].pos, eps.back());
         dist_to_target = ArrayUtilities::distance(sg[target].pos, eps[0]);
     }
 
     // sanity check: this won't throw if edge_points are ordered.
     {
-        auto max_connected_distance = sqrt(3.0) + 2.0 * std::numeric_limits<double>::epsilon();
-        if(dist_to_source > max_connected_distance || dist_to_target > max_connected_distance )
-            throw std::runtime_error("contour_length failure, node positions are not connected to the edge_points. Or the edge_points are disordered. Distances: " +
-                    std::to_string(dist_to_source) + ", " +
-                    std::to_string(dist_to_target)
-                    );
+        if(dist_to_source > max_connected_distance || dist_to_target > max_connected_distance ) {
+            std::stringstream ss;
+            ss << "Contour_length failure, node positions are not connected to the edge_points. Or the edge_points are disordered.\n";
+            ss << "Source:    " << sg[source] << " , Target: " << sg[target] << "\n";
+            ss << "Distances: " << dist_to_source << ", " << dist_to_target << "\n";
+            ss << "SpatialEdge:\n " << se;
+            throw std::runtime_error( ss.str() );
+        }
     }
 
     return dist_to_source + SG::edge_points_length(se) + dist_to_target;

@@ -38,24 +38,50 @@ histo::Histo<double> read_histogram(std::istream & is);
  * @param bins number of bins of the histogram,
  * if bins == 0, the breaks are generated using Scott method.
  * bins should be greater than max_degrees + 1
+ * @param histo_name populates histogram name.
  *
  * @return  histogram of degrees
  */
 histo::Histo<double> histogram_degrees(
         const std::vector<unsigned int> & degrees,
-        size_t bins = 0);
+        size_t bins = 0,
+        const std::string &histo_name = "degrees");
 
 /**
  * Create histogram of End to End distances between nodes.
  * @sa compute_ete_distances
  *
  * @param distances input vector of distances
- * @param bins number of bins of the histogram,
- * if bins == 0, the breaks are generated using Scott method.
+ * @param width fixed width between breaks,
+ * if width == 0.0, the breaks are generated using Scott method.
+ * @param histo_name populates histogram name.
  *
  * @return histogram
  */
 histo::Histo<double> histogram_distances(const std::vector<double> & distances,
+                double width = 0.0,
+                const std::string & histo_name = "distances");
+
+/**
+ * helper. Calls @histogram_distances with histo_name = "ete_distances"
+ *
+ * @param distances input ete_distances @compute_ete_distances
+ * @param width of histo breaks
+ *
+ * @return histogram
+ */
+histo::Histo<double> histogram_ete_distances(const std::vector<double> & distances,
+                double width = 0.0);
+
+/**
+ * helper. Calls @histogram_distances with histo_name = "contour_lengths"
+ *
+ * @param distances input ete_distances @compute_contour_lengths
+ * @param width of histo breaks
+ *
+ * @return histogram
+ */
+histo::Histo<double> histogram_contour_lengths(const std::vector<double> & distances,
                 double width = 0.0);
 
 
@@ -70,7 +96,8 @@ histo::Histo<double> histogram_distances(const std::vector<double> & distances,
  * @return histo
  */
 histo::Histo<double> histogram_angles(const std::vector<double> & angles,
-                size_t bins = 100);
+                size_t bins = 100,
+                const std::string & histo_name = "angles");
 
 
 /**
@@ -83,6 +110,7 @@ histo::Histo<double> histogram_angles(const std::vector<double> & angles,
  * @return histo
  */
 histo::Histo<double> histogram_cosines(const std::vector<double> & cosines,
-                size_t bins = 100);
+                size_t bins = 100,
+                const std::string & histo_name = "cosines");
 } // end namespace
 #endif

@@ -273,7 +273,7 @@ int main(int argc, char* const argv[]){
       // EndToEnd Distances
       {
         auto distances = SG::compute_ete_distances(reduced_g, ignoreEdgesShorterThan);
-        auto histo_distances = SG::histogram_distances(distances, widthHistoDistances);
+        auto histo_distances = SG::histogram_ete_distances(distances, widthHistoDistances);
 
         auto range_ptr = std::minmax_element(distances.begin(), distances.end());
         if(verbose)
@@ -297,6 +297,11 @@ int main(int argc, char* const argv[]){
           auto histo_cosines = SG::histogram_cosines( cosines, binsHistoCosines );
           SG::print_histogram(histo_cosines, out);
         }
+      }
+      {
+        auto lengths = SG::compute_contour_lengths(reduced_g, ignoreEdgesShorterThan);
+        auto histo_lengths = SG::histogram_contour_lengths(lengths, widthHistoDistances);
+        SG::print_histogram(histo_lengths, out);
       }
       if(verbose)
       {
