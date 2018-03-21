@@ -68,7 +68,7 @@ int main(int argc, char* const argv[]){
     ( "widthHistoDistances,l", po::value<double>()->default_value(0.3), "Width between breaks for histogram of ete distances. Use 0.0 to automatically compute breaks (not recommended)." )
     ( "binsHistoAngles,a", po::value<size_t>()->default_value(100), "Bins for the histogram of angles . Use 0 for automatic computation of breaks (not recommended)" )
     ( "binsHistoCosines,n", po::value<size_t>()->default_value(100), "Bins for the histogram of cosines .Use 0 for automatic computation of breaks (not recommended)" )
-    ( "ignoreAngleBetweenParallelEdges,a", po::bool_switch()->default_value(false), "Don't compute angles between parallel edges." )
+    ( "ignoreAngleBetweenParallelEdges,g", po::bool_switch()->default_value(false), "Don't compute angles between parallel edges." )
     ( "ignoreEdgesShorterThan,s", po::value<size_t>()->default_value(0), "Ignore distance and angles between edges shorter than this value." )
     ( "exportReducedGraph,o", po::value<string>(), "Write .dot file with the reduced spatial graph." )
     ( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal. Requires VISUALIZE option enabled at build.")
@@ -236,7 +236,11 @@ int main(int argc, char* const argv[]){
       dp.property("spatial_edge", boost::get(boost::edge_bundle, reduced_g));
       {
       const fs::path output_folder_path{exportReducedGraph_filename};
-        fs::path output_full_path = output_folder_path / fs::path(output_file_path.string() + ".dot");
+        fs::path output_full_path = output_folder_path / fs::path(
+            output_file_path.string() +
+            ( removeExtraEdges ? "_c" : "")   +
+            ( mergeThreeConnectedNodes ? "_m" : "")   +
+            ".dot");
         std::ofstream out;
         out.open(output_full_path.string().c_str());
         boost::write_graphviz_dp(out, reduced_g, dp);
@@ -259,31 +263,65 @@ int main(int argc, char* const argv[]){
       const fs::path output_folder_path{exportHistograms_filename};
       fs::path output_full_path = output_folder_path / fs::path(
           output_file_path.string() +
-          "_ignEdgesShorterThan" + std::to_string(ignoreEdgesShorterThan) +
-          (ignoreAngleBetweenParallelEdges ? "_ignParallelAngles" : "")   +
+          ( removeExtraEdges ? "_c" : "")   +
+          ( mergeThreeConnectedNodes ? "_m" : "")   +
+          ( ignoreAngleBetweenParallelEdges ? "_iPA" : "")   +
+          ( ignoreEdgesShorterThan ?
+             "_iShort" + std::to_string(ignoreEdgesShorterThan)  : "") +
+          "_bD" + std::to_string(binsHistoDegrees)  +
+          "_bA" + std::to_string(binsHistoAngles)  +
+          "_bC" + std::to_string(binsHistoCosines)  +
+          "_wL" + std::to_string(widthHistoDistances)  +
           ".histo");
       std::ofstream out;
       out.open(output_full_path.string().c_str());
+
+      // save raw data (without binning).
+      fs::path data_output_full_path = output_folder_path / fs::path(
+          output_file_path.string() +
+          ( removeExtraEdges ? "_c" : "")   +
+          ( mergeThreeConnectedNodes ? "_m" : "")   +
+          ( ignoreAngleBetweenParallelEdges ? "_iPA" : "")   +
+          ( ignoreEdgesShorterThan ?
+             "_iShort" + std::to_string(ignoreEdgesShorterThan)  : "") +
+          ".txt");
+      std::ofstream data_out;
+      data_out.setf(std::ios_base::fixed, std::ios_base::floatfield);
+      data_out.open(data_output_full_path.string().c_str());
       // Degrees
       {
         auto degrees = SG::compute_degrees(reduced_g);
         auto histo_degrees = SG::histogram_degrees(degrees, binsHistoDegrees);
         SG::print_histogram(histo_degrees, out);
+        {
+          data_out.precision(std::numeric_limits< decltype(degrees)::value_type >::max_digits10);
+          data_out << "# degrees" << std::endl;
+          std::ostream_iterator<decltype(degrees)::value_type> out_iter(data_out, " ");
+          std::copy(std::begin(degrees), std::end(degrees), out_iter);
+          data_out << std::endl;
+        }
       }
       // EndToEnd Distances
       {
-        auto distances = SG::compute_ete_distances(reduced_g, ignoreEdgesShorterThan);
-        auto histo_distances = SG::histogram_ete_distances(distances, widthHistoDistances);
+        auto ete_distances = SG::compute_ete_distances(reduced_g, ignoreEdgesShorterThan);
+        auto histo_ete_distances = SG::histogram_ete_distances(ete_distances, widthHistoDistances);
 
-        auto range_ptr = std::minmax_element(distances.begin(), distances.end());
+        auto range_ptr = std::minmax_element(ete_distances.begin(), ete_distances.end());
         if(verbose)
         {
           std::cout << "Min Distance: " << *range_ptr.first << std::endl;
           std::cout << "Max Distance: " << *range_ptr.second << std::endl;
           std::cout << "width of breaks: " << widthHistoDistances << std::endl;
-          std::cout << "bins: " << histo_distances.bins << std::endl;
+          std::cout << "bins: " << histo_ete_distances.bins << std::endl;
         }
-        SG::print_histogram(histo_distances, out);
+        SG::print_histogram(histo_ete_distances, out);
+        {
+          data_out.precision(std::numeric_limits< decltype(ete_distances)::value_type >::max_digits10);
+          data_out << "# ete_distances" << std::endl;
+          std::ostream_iterator<decltype(ete_distances)::value_type> out_iter(data_out, " ");
+          std::copy(std::begin(ete_distances), std::end(ete_distances), out_iter);
+          data_out << std::endl;
+        }
       }
       // Angles between adjacent edges
       {
@@ -291,20 +329,42 @@ int main(int argc, char* const argv[]){
             ignoreEdgesShorterThan, ignoreAngleBetweenParallelEdges);
         auto histo_angles = SG::histogram_angles( angles, binsHistoAngles );
         SG::print_histogram(histo_angles, out);
+        {
+          data_out.precision(std::numeric_limits< decltype(angles)::value_type >::max_digits10);
+          data_out << "# angles" << std::endl;
+          std::ostream_iterator<decltype(angles)::value_type> out_iter(data_out, " ");
+          std::copy(std::begin(angles), std::end(angles), out_iter);
+          data_out << std::endl;
+        }
         // Cosines of those angles
         {
           auto cosines = SG::compute_cosines(angles);
           auto histo_cosines = SG::histogram_cosines( cosines, binsHistoCosines );
           SG::print_histogram(histo_cosines, out);
+          {
+            data_out.precision(std::numeric_limits< decltype(cosines)::value_type >::max_digits10);
+            data_out << "# cosines" << std::endl;
+            std::ostream_iterator<decltype(cosines)::value_type> out_iter(data_out, " ");
+            std::copy(std::begin(cosines), std::end(cosines), out_iter);
+            data_out << std::endl;
+          }
         }
       }
       {
-        auto lengths = SG::compute_contour_lengths(reduced_g, ignoreEdgesShorterThan);
-        auto histo_lengths = SG::histogram_contour_lengths(lengths, widthHistoDistances);
-        SG::print_histogram(histo_lengths, out);
+        auto contour_lengths = SG::compute_contour_lengths(reduced_g, ignoreEdgesShorterThan);
+        auto histo_contour_lengths = SG::histogram_contour_lengths(contour_lengths, widthHistoDistances);
+        SG::print_histogram(histo_contour_lengths, out);
+        {
+          data_out.precision(std::numeric_limits< decltype(contour_lengths)::value_type >::max_digits10);
+          data_out << "# contour_lengths" << std::endl;
+          std::ostream_iterator<decltype(contour_lengths)::value_type> out_iter(data_out, " ");
+          std::copy(std::begin(contour_lengths), std::end(contour_lengths), out_iter);
+          data_out << std::endl;
+        }
       }
       if(verbose)
       {
+        std::cout << "Output data to: " << data_output_full_path.string() << std::endl;
         std::cout << "Output histograms to: " << output_full_path.string() << std::endl;
       }
     } // end export histograms

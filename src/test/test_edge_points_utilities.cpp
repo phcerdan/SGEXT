@@ -95,6 +95,25 @@ TEST_CASE("contour_length corner case 1",
     CHECK_NOTHROW(SG::contour_length(edge.first, sg));
 }
 
+// TEST_CASE_("contour_length_corner case 2",
+//                  "[contour_length]")
+// {
+//     auto sg = SG::GraphType(2);
+//
+//     SG::SpatialEdge::PointType n0 = {{348, 158, 30}};
+//     SG::SpatialEdge::PointType n00 = {{348, 158, 29}};
+//     SG::SpatialEdge::PointType n01 = {{348, 159, 28}};
+//     SG::SpatialEdge::PointType n1 = {{350, 157, 33}};
+//     SG::SpatialEdge::PointType n2 = {{350, 160, 30}};
+//     SG::SpatialEdge::PointType n20 = {{351, 160, 31}};
+//     SG::SpatialEdge::PointType n21 = {{351, 161, 29}};
+//     SG::SpatialEdge::PointType e0 = {{349, 158, 31}};
+//     SG::SpatialEdge::PointType e1 = {{350, 158, 32}}; 
+//     SG::SpatialEdge::PointType e10 = {{351, 158, 33}};
+//     SG::SpatialEdge::PointType e11 = {{351, 159, 33}};
+//     SG::SpatialEdge::PointType e2 = {{350, 159, 31}};
+// }
+
 TEST_CASE("insert_edge_point_with_distance_order",
           "[insert_edge_point]")
 {

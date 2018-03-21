@@ -106,7 +106,7 @@ void insert_edge_point_with_distance_order(
         // edge_points.insert(std::end(edge_points), new_point);
         edge_points.push_back(new_point);
     else  // illogical error
-        throw std::runtime_error("The impossible, node_to_remove closer edge_point is not at the beggining or end position in edge_points.");
+        throw std::runtime_error("The impossible, new point in insert_edge_point_with_distance is not at the beggining or end position in edge_points.");
 }
 
 

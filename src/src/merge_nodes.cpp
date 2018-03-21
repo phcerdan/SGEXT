@@ -59,7 +59,7 @@ size_t merge_three_connected_nodes(GraphType & sg)
                 auto degree_second = boost::out_degree(nv.second, sg);
                 // If neighbors have more than degree 3, abort merge
                 // note that sn_current can only have degree 3 as well.
-                if (degree_first != 3 && degree_second != 3)
+                if (degree_first != 3 || degree_second != 3)
                     continue;
 
                 // If there are more than one edge connecting the node trio, abort.
