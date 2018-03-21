@@ -71,6 +71,7 @@ int main(int argc, char* const argv[]){
     ( "ignoreAngleBetweenParallelEdges,g", po::bool_switch()->default_value(false), "Don't compute angles between parallel edges." )
     ( "ignoreEdgesShorterThan,s", po::value<size_t>()->default_value(0), "Ignore distance and angles between edges shorter than this value." )
     ( "exportReducedGraph,o", po::value<string>(), "Write .dot file with the reduced spatial graph." )
+    ( "exportData,z", po::value<string>(), "Write degrees, ete_distances, contour_lengths, etc. Histograms can be generated from these files afterwards." )
     ( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal. Requires VISUALIZE option enabled at build.")
     ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output." );
 
@@ -94,14 +95,15 @@ int main(int argc, char* const argv[]){
   bool removeExtraEdges = vm["removeExtraEdges"].as<bool>();
   bool mergeThreeConnectedNodes = vm["mergeThreeConnectedNodes"].as<bool>();
   bool checkParallelEdges = vm["checkParallelEdges"].as<bool>();
-  bool exportHistograms = vm.count("exportHistograms");
   size_t binsHistoDegrees = vm["binsHistoDegrees"].as<size_t>();
   double widthHistoDistances = vm["widthHistoDistances"].as<double>();
   size_t binsHistoAngles = vm["binsHistoAngles"].as<size_t>();
   size_t binsHistoCosines = vm["binsHistoCosines"].as<size_t>();
   size_t ignoreEdgesShorterThan = vm["ignoreEdgesShorterThan"].as<size_t>();
-  bool ignoreAngleBetweenParallelEdges = vm.count("ignoreAngleBetweenParallelEdges");
+  bool ignoreAngleBetweenParallelEdges = vm["ignoreAngleBetweenParallelEdges"].as<bool>();
+  bool exportHistograms = vm.count("exportHistograms");
   bool exportReducedGraph = vm.count("exportReducedGraph");
+  bool exportData = vm.count("exportData");
 
 #ifdef VISUALIZE
   bool visualize = vm["visualize"].as<bool>();
@@ -260,8 +262,8 @@ int main(int argc, char* const argv[]){
     if(exportHistograms)
     {
       string exportHistograms_filename = vm["exportHistograms"].as<string>();
-      const fs::path output_folder_path{exportHistograms_filename};
-      fs::path output_full_path = output_folder_path / fs::path(
+      const fs::path histo_output_folder_path{exportHistograms_filename};
+      fs::path histo_output_full_path = histo_output_folder_path / fs::path(
           output_file_path.string() +
           ( removeExtraEdges ? "_c" : "")   +
           ( mergeThreeConnectedNodes ? "_m" : "")   +
@@ -273,11 +275,16 @@ int main(int argc, char* const argv[]){
           "_bC" + std::to_string(binsHistoCosines)  +
           "_wL" + std::to_string(widthHistoDistances)  +
           ".histo");
-      std::ofstream out;
-      out.open(output_full_path.string().c_str());
+      std::ofstream histo_out;
+      histo_out.open(histo_output_full_path.string().c_str());
 
       // save raw data (without binning).
-      fs::path data_output_full_path = output_folder_path / fs::path(
+      // if exportData is not specified use histograms path.
+      fs::path data_output_full_path = histo_output_folder_path;
+      if(exportData)
+        data_output_full_path = fs::path(vm["exportData"].as<string>());
+
+      data_output_full_path = data_output_full_path/ fs::path(
           output_file_path.string() +
           ( removeExtraEdges ? "_c" : "")   +
           ( mergeThreeConnectedNodes ? "_m" : "")   +
@@ -292,7 +299,7 @@ int main(int argc, char* const argv[]){
       {
         auto degrees = SG::compute_degrees(reduced_g);
         auto histo_degrees = SG::histogram_degrees(degrees, binsHistoDegrees);
-        SG::print_histogram(histo_degrees, out);
+        SG::print_histogram(histo_degrees, histo_out);
         {
           data_out.precision(std::numeric_limits< decltype(degrees)::value_type >::max_digits10);
           data_out << "# degrees" << std::endl;
@@ -314,7 +321,7 @@ int main(int argc, char* const argv[]){
           std::cout << "width of breaks: " << widthHistoDistances << std::endl;
           std::cout << "bins: " << histo_ete_distances.bins << std::endl;
         }
-        SG::print_histogram(histo_ete_distances, out);
+        SG::print_histogram(histo_ete_distances, histo_out);
         {
           data_out.precision(std::numeric_limits< decltype(ete_distances)::value_type >::max_digits10);
           data_out << "# ete_distances" << std::endl;
@@ -328,7 +335,7 @@ int main(int argc, char* const argv[]){
         auto angles = SG::compute_angles(reduced_g,
             ignoreEdgesShorterThan, ignoreAngleBetweenParallelEdges);
         auto histo_angles = SG::histogram_angles( angles, binsHistoAngles );
-        SG::print_histogram(histo_angles, out);
+        SG::print_histogram(histo_angles, histo_out);
         {
           data_out.precision(std::numeric_limits< decltype(angles)::value_type >::max_digits10);
           data_out << "# angles" << std::endl;
@@ -340,7 +347,7 @@ int main(int argc, char* const argv[]){
         {
           auto cosines = SG::compute_cosines(angles);
           auto histo_cosines = SG::histogram_cosines( cosines, binsHistoCosines );
-          SG::print_histogram(histo_cosines, out);
+          SG::print_histogram(histo_cosines, histo_out);
           {
             data_out.precision(std::numeric_limits< decltype(cosines)::value_type >::max_digits10);
             data_out << "# cosines" << std::endl;
@@ -353,7 +360,7 @@ int main(int argc, char* const argv[]){
       {
         auto contour_lengths = SG::compute_contour_lengths(reduced_g, ignoreEdgesShorterThan);
         auto histo_contour_lengths = SG::histogram_contour_lengths(contour_lengths, widthHistoDistances);
-        SG::print_histogram(histo_contour_lengths, out);
+        SG::print_histogram(histo_contour_lengths, histo_out);
         {
           data_out.precision(std::numeric_limits< decltype(contour_lengths)::value_type >::max_digits10);
           data_out << "# contour_lengths" << std::endl;
@@ -365,7 +372,7 @@ int main(int argc, char* const argv[]){
       if(verbose)
       {
         std::cout << "Output data to: " << data_output_full_path.string() << std::endl;
-        std::cout << "Output histograms to: " << output_full_path.string() << std::endl;
+        std::cout << "Output histograms to: " << histo_output_full_path.string() << std::endl;
       }
     } // end export histograms
   }

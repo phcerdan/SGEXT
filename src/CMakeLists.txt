@@ -167,6 +167,12 @@ if(VISUALIZE)
     target_compile_definitions(SGVtk PRIVATE VISUALIZE)
 endif()
 
+add_executable(create_distance_map create_distance_map.cpp)
+target_link_libraries(create_distance_map SG )
+target_link_libraries(create_distance_map ${Boost_LIBRARIES} )
+target_link_libraries(create_distance_map ${ITK_LIBRARIES} )
+target_link_libraries(create_distance_map ${DGTAL_LIBRARIES} )
+
 if(VISUALIZE)
     add_executable(highlight_image_points highlight_image_points.cpp)
     target_link_libraries(highlight_image_points ${Boost_LIBRARIES} )
