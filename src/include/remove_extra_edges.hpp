@@ -6,15 +6,19 @@
 namespace SG
 {
 /**
- * Object in DGtal with a 26_9 adjacency consider as adjacent vertices those in diagonals. We are interested in keeping that topology, but it generates spurious edges that confuses further analysis.
+ * Objects in DGtal with a 26_6 topology consider as adjacent vertices those
+ * in diagonals. We are interested in keeping that topology, but it generates
+ * spurious edges that confuses further analysis.
  * We remove the "diagonal" edges when there are shorter ones. Better an example:
+ *
  * o                  o
  * |\                 |
  * o-o      ----->    o-o
  * |/                 |
  * o                  o
  *
- * We are not interested in the diagonal edges, and better keep the center node as the only 3-degree node.
+ * We are not interested in the diagonal edges, and better keep the center
+ * node as the only 3-degree node.
  *
  * See related tests for further details.
  *

@@ -11,19 +11,18 @@ namespace SG
 {
 
 /**
- * Some nodes that are connected between them,
- * could be merged.
+ * Some nodes that are connected between them could be merged.
  * Transforming three nodes with degree 3, to one node with degree 3
- * and adding the old nodes into the corresponding spatial edge.
+ * and adding the old nodes into the corresponding spatial edges.
  *
- * Note: if two of those nodes are connected between them with an extra parallel edge
+ * Note: if two of those nodes are connected between them with an
+ * extra parallel edge, the merge doesn't happen, example:
+ *
  *     (a)
  *      o--
  *(b) o/|  |
  *     \o--
  *     (c)
- *
- * The merge of those nodes doesn't happen.
  *
  * See related tests for further details.
  *
