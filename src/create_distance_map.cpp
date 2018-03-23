@@ -1,3 +1,4 @@
+#include <chrono>
 #include <DGtal/base/Common.h>
 #include <DGtal/helpers/StdDefs.h>
 #include <DGtal/images/ImageContainerByITKImage.h>
