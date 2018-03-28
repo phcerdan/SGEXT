@@ -158,11 +158,6 @@ int main(int argc, char* const argv[]){
   // Convert to DGtal Container
   Image image(handle_out);
 
-  DigitalSet image_set (image.domain());
-  SetFromImage<Z3i::DigitalSet>::append<Image>(
-      image_set, image,
-      thresholdMin, thresholdMax);
-
 
   // Create a VoxelComplex from the set
   using DigitalTopology = DT26_6;
@@ -183,11 +178,18 @@ int main(int argc, char* const argv[]){
   DigitalTopology::ForegroundAdjacency adjF;
   DigitalTopology::BackgroundAdjacency adjB;
   DigitalTopology topo(adjF, adjB, DGtal::DigitalTopologyProperties::JORDAN_DT);
-  Object obj(topo,image_set);
 
   trace.beginBlock("construct with table");
   Complex vc(ks);
-  vc.construct(obj);
+  // Optimization, Construct object in place to save memory. vc stores object.
+  {
+    DigitalSet image_set (image.domain());
+    SetFromImage<Z3i::DigitalSet>::append<Image>(
+        image_set, image,
+        thresholdMin, thresholdMax);
+
+    vc.construct( Object(topo, image_set) );
+  }
   vc.setSimplicityTable(functions::loadTable(simplicity::tableSimple26_6 ));
   // vc.construct(obj.pointSet(), functions::loadTable(simplicity::tableSimple26_6 ));
   trace.endBlock();
@@ -228,7 +230,7 @@ int main(int argc, char* const argv[]){
   using L3Metric = ExactPredicateLpSeparableMetric<Z3i::Space, 3>;
   using DT       = DistanceTransformation<Z3i::Space, Predicate, L3Metric>;
   L3Metric l3;
-  DT dt(obj.domain(),obj.pointSet(), l3);
+  DT dt(vc.object().domain(), vc.objectSet(), l3);
   trace.endBlock();
 
   std::function< std::pair<typename Complex::Cell, typename Complex::Data>(const Complex::Clique&) > Select ;
@@ -283,7 +285,7 @@ int main(int argc, char* const argv[]){
 #ifdef VISUALIZE
   if (visualize)
   {
-    const auto & all_set = obj.pointSet();
+    const auto & all_set = vc.objectSet();
     int argc(1);
     char** argv(nullptr);
     QApplication app(argc, argv);

@@ -237,7 +237,7 @@ int main(int argc, char* const argv[]){
       dp.property("spatial_node", boost::get(boost::vertex_bundle, reduced_g));
       dp.property("spatial_edge", boost::get(boost::edge_bundle, reduced_g));
       {
-      const fs::path output_folder_path{exportReducedGraph_filename};
+        const fs::path output_folder_path{exportReducedGraph_filename};
         fs::path output_full_path = output_folder_path / fs::path(
             output_file_path.string() +
             ( removeExtraEdges ? "_c" : "")   +
