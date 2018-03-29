@@ -1,12 +1,12 @@
+/* Copyright (C) 2018 Pablo Hernandez-Cerdan
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #ifndef COMPUTE_GRAPH_PROPERTIES_HPP
 #define COMPUTE_GRAPH_PROPERTIES_HPP
 
 #include "spatial_graph.hpp"
-// #include <iostream>
-// #include <tuple>
-// #include <boost/graph/adjacency_list.hpp>
-// #include <boost/graph/graph_traits.hpp>
-// #include "spatial_graph.hpp"
 
 namespace SG
 {
