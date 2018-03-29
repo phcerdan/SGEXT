@@ -116,6 +116,8 @@ set(SG_SRC_WITH_BOOST
     ${SG_SRC_DIR}/spatial_histograms.cpp
     ${SG_SRC_DIR}/split_loop.cpp
     ${SG_SRC_DIR}/reduce_spatial_graph_via_dfs.cpp
+    # not requiring boost
+    ${SG_SRC_DIR}/graph_data.cpp
     )
 set(SG_SRC_WITH_VTK
     ${SG_SRC_DIR}/convert_to_vtk_graph.cpp

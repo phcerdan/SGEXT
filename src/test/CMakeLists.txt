@@ -33,6 +33,10 @@ add_executable(test_spatial_histograms test_spatial_histograms.cpp)
 target_link_libraries(test_spatial_histograms ${TEST_LIBRARIES} ${ITK_LIBRARIES})
 add_test(NAME spatial_histograms COMMAND test_spatial_histograms)
 
+add_executable(test_graph_data test_graph_data.cpp)
+target_link_libraries(test_graph_data SG)
+add_test(NAME graph_data COMMAND test_graph_data)
+
 if(VISUALIZE)
   add_executable(test_visualize_spatial_graph test_visualize_spatial_graph.cpp)
   target_link_libraries(test_visualize_spatial_graph
