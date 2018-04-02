@@ -1,3 +1,5 @@
+# python notebooks
+.ipynb_checkpoints
 # Dgtal viewer garbage.
 .qglviewer.xml
 # test output
