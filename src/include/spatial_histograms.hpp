@@ -52,6 +52,11 @@ histo::Histo<double> histogram_degrees(
         size_t bins = 0,
         const std::string &histo_name = "degrees");
 
+histo::Histo<double> histogram_degrees(
+        const std::vector<double> & degrees,
+        size_t bins = 0,
+        const std::string &histo_name = "degrees");
+
 /**
  * Create histogram of End to End distances between nodes.
  * @sa compute_ete_distances

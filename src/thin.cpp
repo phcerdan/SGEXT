@@ -266,6 +266,9 @@ int main(int argc, char* const argv[]){
   if (vm.count("exportSDP"))
   {
     const fs::path output_folder_path{vm["exportSDP"].as<std::string>()};
+    if(!fs::exists(output_folder_path)) {
+      throw std::runtime_error("output folder doesn't exist : " + output_folder_path.string());
+    }
     fs::path output_full_path = output_folder_path / fs::path(output_file_path.string() + ".sdp");
     std::ofstream out;
     out.open(output_full_path.string().c_str());
@@ -277,6 +280,9 @@ int main(int argc, char* const argv[]){
   if (vm.count("exportImage"))
   {
     const fs::path output_folder_path{vm["exportImage"].as<std::string>()};
+    if(!fs::exists(output_folder_path)) {
+      throw std::runtime_error("output folder doesn't exist : " + output_folder_path.string());
+    }
     fs::path output_full_path = output_folder_path / fs::path(output_file_path.string() + ".nrrd");
     unsigned int foreground_value = 255;
     auto thin_image = ImageFromSet<Image>::create(thin_set, foreground_value);
