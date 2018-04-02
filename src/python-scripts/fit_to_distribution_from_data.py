@@ -7,7 +7,9 @@ import matplotlib.pyplot as plt
 import scipy.optimize as optim
 import matplotlib.ticker as plticker
 from io import StringIO
-from fit_functions import geometric_shifted_func, log_normal_func
+from fit_functions import (geometric_shifted_func,
+                           log_normal_func,
+                           power_series_truncated_b1_b2_func)
 from plot_parameters import plot_params
 
 def parse_data(input_file, nskiprows=0):
@@ -22,6 +24,44 @@ def parse_data(input_file, nskiprows=0):
     data = pd.read_csv(StringIO(read_array[data_index]), delimiter=r"\s+", header=None).transpose()
     # return a serie (squeeze)
     return data.squeeze()
+
+def fit_geometric_shifted_func(data):
+    """ only data with degree >=3 is analyzed """
+    data_filtered = data[data >= 3]
+    compute_breaks = [(i - 0.5) for i in range(3, data_filtered.max() + 2)]
+    # compute_breaks = [i for i in range(3, data_filtered.max() + 1)]
+    counts, breaks = np.histogram(data_filtered, bins=compute_breaks, density=True)
+    bin_w = np.abs(breaks[1] - breaks[0])
+    centers = np.arange(breaks[0] + bin_w / 2.0, breaks[-1], bin_w)
+    # area = np.sum(np.diff(breaks) * counts)
+    degree_filtered_mean = data_filtered.mean()
+    initial_guess = degree_filtered_mean
+    popt, pcov = optim.curve_fit(geometric_shifted_func, centers, counts, initial_guess)
+    fit_Z = popt[0]
+    return fit_Z, (centers, counts, breaks), degree_filtered_mean, pcov
+
+def plot_degrees(data, title=""):
+    fit_Z, histo, degree_filtered_mean, pcov = fit_geometric_shifted_func(data)
+    centers, counts, breaks = histo
+    # Plot
+    color_scatter = 'black'
+    color_fit = 'C1'
+    color_parameters = 'C2'
+    fig, ax = plt.subplots()
+    ax.set_title(title)
+    ax.set_xlabel('degree')
+    ax.set_ylabel('$N(p)$')
+    ax.scatter(centers, counts, color=color_scatter, figure=fig)
+    ax.plot(centers, geometric_shifted_func(centers, fit_Z),
+            label='Fit to data:\n Z = ' + "{0:.3f}".format(fit_Z),
+            color=color_fit, figure=fig)
+    ax.plot(centers, geometric_shifted_func(centers, degree_filtered_mean),
+            label='With Parameters:\n Z = ' + "{0:.3f}".format(degree_filtered_mean),
+            color=color_parameters, figure=fig)
+    # print only integer ticks.
+    ax.xaxis.set_major_locator(plticker.MaxNLocator(integer=True))
+    ax.legend()
+    return fig, ax
 
 def fit_log_normal(data, nbins):
     counts, breaks = np.histogram(data, bins=nbins, density=True)
@@ -47,14 +87,15 @@ def plot_distances(data, nbins, title=""):
     fit_mu, fit_std_dev, histo, log_data_mean, log_data_std_dev, pcov = fit_log_normal(data, nbins)
     centers, counts, breaks = histo
     # PLOT
+    color_scatter = 'black'
     color_fit = 'C1'
     color_parameters = 'C2'
     fig, ax = plt.subplots()
     ax.set_title(title)
     ax.set_xlabel('l')
     # ax.set_yscale("log", nonposy='clip')
-    ax.set_ylabel('PDF')
-    ax.scatter(centers, counts, figure=fig)
+    ax.set_ylabel('$P(l)$')
+    ax.scatter(centers, counts, color=color_scatter, figure=fig)
     func = log_normal_func
     # func = gamma_func
     ax.plot(centers, func(centers, fit_mu, fit_std_dev),
@@ -68,38 +109,37 @@ def plot_distances(data, nbins, title=""):
     ax.legend()
     return fig, ax
 
-def fit_geometric_shifted_func(data):
-    """ only data with degree >=3 is analyzed """
-    data_filtered = data[data >= 3]
-    compute_breaks = [(i - 0.5) for i in range(3, data_filtered.max() + 2)]
-    # compute_breaks = [i for i in range(3, data_filtered.max() + 1)]
-    counts, breaks = np.histogram(data_filtered, bins=compute_breaks, density=True)
+def fit_power_series_truncated_b1_b2_func(data, nbins):
+    counts, breaks = np.histogram(data, bins=nbins, density=True)
     bin_w = np.abs(breaks[1] - breaks[0])
     centers = np.arange(breaks[0] + bin_w / 2.0, breaks[-1], bin_w)
-    # area = np.sum(np.diff(breaks) * counts)
-    degree_filtered_mean = data_filtered.mean()
-    initial_guess = degree_filtered_mean
-    popt, pcov = optim.curve_fit(geometric_shifted_func, centers, counts, initial_guess)
-    fit_Z = popt[0]
-    return fit_Z, (centers, counts, breaks), degree_filtered_mean, pcov
+    func = power_series_truncated_b1_b2_func
+    popt, pcov = optim.curve_fit(func, centers, counts)
+    fit_b1 = popt[0]
+    fit_b2 = popt[1]
+    return fit_b1, fit_b2, (centers, counts, breaks), pcov
 
-def plot_degrees(data, title=""):
-    fit_Z, histo, degree_filtered_mean, pcov = fit_geometric_shifted_func(data)
+def plot_cosines(data, nbins, title=""):
+    fit_b1, fit_b2, histo, pcov = fit_power_series_truncated_b1_b2_func(data, nbins)
     centers, counts, breaks = histo
-    # Plot
+    # PLOT
+    color_scatter = 'black'
     color_fit = 'C1'
-    color_parameters = 'C2'
     fig, ax = plt.subplots()
     ax.set_title(title)
-    ax.set_xlabel('degree')
-    ax.set_ylabel('PDF')
-    ax.scatter(centers, counts, figure=fig)
-    ax.plot(centers, geometric_shifted_func(centers, fit_Z),
-            label='Fit to data:\n Z = ' + "{0:.3f}".format(fit_Z),
+    ax.set_xlabel(r'$\beta$')
+    ax.set_ylabel(r'$B(\beta)$')
+    ax.scatter(centers, counts, color=color_scatter, figure=fig)
+    func = power_series_truncated_b1_b2_func
+    ax.plot(centers, func(centers, fit_b1, fit_b2),
+            label='Fit to data:\n $b_1$ = ' + "{0:.3f}".format(fit_b1) +
+            '\n $b_2$ = ' + "{0:.3f}".format(fit_b2),
             color=color_fit, figure=fig)
-    ax.plot(centers, geometric_shifted_func(centers, degree_filtered_mean),
-            label='With Parameters:\n Z = ' + "{0:.3f}".format(degree_filtered_mean),
-            color=color_parameters, figure=fig)
+    # color_parameters = 'C2'
+    # ax.plot(centers, func(centers, log_data_mean, log_data_std_dev),
+    # label='With Parameters:\n $b_1$ = ' + "{0:.3f}".format(log_data_mean) +
+    # '\n $b_2$ = ' + "{0:.3f}".format(log_data_std_dev),
+    # color=color_parameters, figure=fig)
     ax.legend()
     return fig, ax
 
@@ -110,22 +150,16 @@ if __name__ == "__main__":
         sys.exit(1)
     print("fit_to_distribution_from_data %s" % sys.argv[1])
     print("arguments: %s" % len(sys.argv))
-    bins = 30
+    input_bins = 30
     log_plot = False
     if(len(sys.argv) >= 3):
-        bins = int(sys.argv[2])
+        input_bins = int(sys.argv[2])
     if(len(sys.argv) == 4):
         log_plot = True
-    print("bins %d" % bins)
+    print("input_bins %d" % input_bins)
     print("log_plot %s" % log_plot)
 
     input_filename = sys.argv[1]
-
-    # input_filename = "/home/phc/repository_local/network-graph/results/Carrageenan/Dgraphs/p2/graph_data/CarrKbin1_1792_INV_4x4x1_tile_1_tv20.0_SegmentRG_l138_u5000_p0.05_Hole_M3_R1_N10000_SKEL_dmax_1isthmus_p2_reduced_c_m_iPA_iShort1.txt"
-    # input_filename = "/home/phc/repository_local/network-graph/results/Actin/Dgraphs/p2/graph_data/Actin19_11jun13_2_Series2_WSimoncelli_L4_B4_AnisDenoise_t0.0625_N20_c2.0_SegmentRG_l0_u5000_p0.2_CROPPED_Hole_M3_R1_N10000_2x2x2_tile_2_SKEL_dmax_1isthmus_p2_reduced_c_m_iPA_iShort4.txt"
-    # input_filename = "/home/phc/repository_local/network-graph/results/Actin/Dgraphs/p2/histograms/Actin19_11jun13_2_Series2_WSimoncelli_L4_B4_AnisDenoise_t0.0625_N20_c2.0_SegmentRG_l0_u5000_p0.2_CROPPED_Hole_M3_R1_N10000_2x2x2_tile_2_SKEL_dmax_1isthmus_p2_reduced_c_m_iPA_x_iShort4.txt"
-    # input_filename = "/home/phc/repository_local/network-graph/results/Actin/Dgraphs/p2/graph_data/Actin19_11jun13_2_Series2_WSimoncelli_L4_B4_AnisDenoise_t0.0625_N20_c2.0_SegmentRG_l0_u5000_p0.2_CROPPED_Hole_M3_R1_N10000_2x2x2_tile_2_SKEL_dmax_1isthmus_p2_reduced_c_m_iPA.txt"
-    # input_filename = "/home/phc/repository_local/network-graph/results/Actin/Dgraphs/p2/histograms/Actin19_11jun13_2_Series2_WSimoncelli_L4_B4_AnisDenoise_t0.0625_N20_c2.0_SegmentRG_l0_u5000_p0.2_CROPPED_Hole_M3_R1_N10000_2x2x2_tile_2_SKEL_dmax_1isthmus_p2_reduced_c_m_iPA_x.txt"
 
     # ########### Plot Parameters ###############
     fig_size = (8, 6)
@@ -134,10 +168,6 @@ if __name__ == "__main__":
     # ############ Degree ###############
     degree_row = 0
     degrees = parse_data(input_filename, degree_row)
-    #debug remove
-    fit_Z, histo, degree_filtered_mean, pcov = fit_geometric_shifted_func(degrees)
-    centers, counts, breaks = histo
-    # end debug
     fig_degree, ax_degree = plot_degrees(degrees, "Degree")
     fig_degree.set_size_inches(fig_size)
     if(log_plot):
@@ -148,12 +178,19 @@ if __name__ == "__main__":
     # ############ Ete Distance ###############
     ete_distance_row = 2
     ete_distances = parse_data(input_filename, ete_distance_row)
-    ete_bins = bins
+    ete_bins = input_bins
     fig_ete, ax_ete = plot_distances(ete_distances, ete_bins, "End To End Node Distance")
     fig_ete.set_size_inches(fig_size)
     if(log_plot):
         ax_ete.set_yscale("log", nonposy='clip')
     else:
         ax_ete.set_yscale("linear")
+
+    # ########### Cosines ###############
+    cosines_row = 6
+    cosines = parse_data(input_filename, cosines_row)
+    cosines_bins = input_bins
+    fig_cosines, ax_cosines = plot_cosines(cosines, cosines_bins, "End To End Node Distance")
+    fig_cosines.set_size_inches(fig_size)
 
     plt.show()
