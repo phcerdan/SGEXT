@@ -90,6 +90,7 @@ int main(int argc, char* const argv[]){
     ( "binsHistoCosines,n", po::value<size_t>()->default_value(100), "Bins for the histogram of cosines .Use 0 for automatic computation of breaks (not recommended)" )
     ( "ignoreAngleBetweenParallelEdges,g", po::bool_switch()->default_value(false), "Don't compute angles between parallel edges." )
     ( "ignoreEdgesShorterThan,s", po::value<size_t>()->default_value(0), "Ignore distance and angles between edges shorter than this value." )
+    ( "ignoreEdgesToEndNodes,x", po::bool_switch()->default_value(false), "Ignore distance and angles between edges to/from end nodes (degree = 1)." )
     ( "exportReducedGraph,o", po::value<string>(), "Write .dot file with the reduced spatial graph." )
     ( "exportData,z", po::value<string>(), "Write degrees, ete_distances, contour_lengths, etc. Histograms can be generated from these files afterwards." )
     ( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal. Requires VISUALIZE option enabled at build.")
@@ -121,6 +122,7 @@ int main(int argc, char* const argv[]){
   size_t binsHistoCosines = vm["binsHistoCosines"].as<size_t>();
   size_t ignoreEdgesShorterThan = vm["ignoreEdgesShorterThan"].as<size_t>();
   bool ignoreAngleBetweenParallelEdges = vm["ignoreAngleBetweenParallelEdges"].as<bool>();
+  bool ignoreEdgesToEndNodes = vm["ignoreEdgesToEndNodes"].as<bool>();
   bool exportHistograms = vm.count("exportHistograms");
   bool exportReducedGraph = vm.count("exportReducedGraph");
   bool exportData = vm.count("exportData");
@@ -258,6 +260,9 @@ int main(int argc, char* const argv[]){
       dp.property("spatial_edge", boost::get(boost::edge_bundle, reduced_g));
       {
         const fs::path output_folder_path{exportReducedGraph_filename};
+        if(!fs::exists(output_folder_path)) {
+            throw std::runtime_error("output folder doesn't exist : " + output_folder_path.string());
+        }
         fs::path output_full_path = output_folder_path / fs::path(
             output_file_path.string() +
             ( removeExtraEdges ? "_c" : "")   +
@@ -283,11 +288,15 @@ int main(int argc, char* const argv[]){
     {
       string exportHistograms_filename = vm["exportHistograms"].as<string>();
       const fs::path histo_output_folder_path{exportHistograms_filename};
+      if(!fs::exists(histo_output_folder_path)) {
+          throw std::runtime_error("histo_output folder doesn't exist : " + histo_output_folder_path.string());
+      }
       fs::path histo_output_full_path = histo_output_folder_path / fs::path(
           output_file_path.string() +
           ( removeExtraEdges ? "_c" : "")   +
           ( mergeThreeConnectedNodes ? "_m" : "")   +
           ( ignoreAngleBetweenParallelEdges ? "_iPA" : "")   +
+          ( ignoreEdgesToEndNodes ? "_x" : "")   +
           ( ignoreEdgesShorterThan ?
              "_iShort" + std::to_string(ignoreEdgesShorterThan)  : "") +
           "_bD" + std::to_string(binsHistoDegrees)  +
@@ -300,15 +309,19 @@ int main(int argc, char* const argv[]){
 
       // save raw data (without binning).
       // if exportData is not specified use histograms path.
-      fs::path data_output_full_path = histo_output_folder_path;
+      fs::path data_output_folder_path = histo_output_folder_path;
       if(exportData)
-        data_output_full_path = fs::path(vm["exportData"].as<string>());
+        data_output_folder_path = fs::path(vm["exportData"].as<string>());
 
-      data_output_full_path = data_output_full_path/ fs::path(
+      if(!fs::exists(data_output_folder_path)) {
+          throw std::runtime_error("data_output folder doesn't exist : " + data_output_folder_path.string());
+      }
+      fs::path data_output_full_path = data_output_folder_path/ fs::path(
           output_file_path.string() +
           ( removeExtraEdges ? "_c" : "")   +
           ( mergeThreeConnectedNodes ? "_m" : "")   +
           ( ignoreAngleBetweenParallelEdges ? "_iPA" : "")   +
+          ( ignoreEdgesToEndNodes ? "_x" : "")   +
           ( ignoreEdgesShorterThan ?
              "_iShort" + std::to_string(ignoreEdgesShorterThan)  : "") +
           ".txt");
@@ -330,7 +343,8 @@ int main(int argc, char* const argv[]){
       }
       // EndToEnd Distances
       {
-        auto ete_distances = SG::compute_ete_distances(reduced_g, ignoreEdgesShorterThan);
+        auto ete_distances = SG::compute_ete_distances(reduced_g,
+                ignoreEdgesShorterThan, ignoreEdgesToEndNodes);
         auto histo_ete_distances = SG::histogram_ete_distances(ete_distances, widthHistoDistances);
 
         auto range_ptr = std::minmax_element(ete_distances.begin(), ete_distances.end());
@@ -353,7 +367,7 @@ int main(int argc, char* const argv[]){
       // Angles between adjacent edges
       {
         auto angles = SG::compute_angles(reduced_g,
-            ignoreEdgesShorterThan, ignoreAngleBetweenParallelEdges);
+            ignoreEdgesShorterThan, ignoreAngleBetweenParallelEdges, ignoreEdgesToEndNodes);
         auto histo_angles = SG::histogram_angles( angles, binsHistoAngles );
         SG::print_histogram(histo_angles, histo_out);
         {
@@ -377,8 +391,10 @@ int main(int argc, char* const argv[]){
           }
         }
       }
+      // Contour length
       {
-        auto contour_lengths = SG::compute_contour_lengths(reduced_g, ignoreEdgesShorterThan);
+        auto contour_lengths = SG::compute_contour_lengths(reduced_g,
+                ignoreEdgesShorterThan, ignoreEdgesToEndNodes);
         auto histo_contour_lengths = SG::histogram_contour_lengths(contour_lengths, widthHistoDistances);
         SG::print_histogram(histo_contour_lengths, histo_out);
         {

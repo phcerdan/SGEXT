@@ -169,6 +169,10 @@ if(VISUALIZE)
     target_compile_definitions(SGVtk PRIVATE VISUALIZE)
 endif()
 
+add_executable(histograms_from_data histograms_from_data.cpp)
+target_link_libraries(histograms_from_data SG )
+target_link_libraries(histograms_from_data ${Boost_LIBRARIES} )
+
 add_executable(create_distance_map create_distance_map.cpp)
 target_link_libraries(create_distance_map SG )
 target_link_libraries(create_distance_map ${Boost_LIBRARIES} )

@@ -36,7 +36,8 @@ std::vector<unsigned int> compute_degrees(const SG::GraphType & sg)
 }
 
 std::vector<double> compute_ete_distances(const SG::GraphType & sg,
-        const size_t minimum_size_edges)
+        const size_t minimum_size_edges,
+        bool ignore_end_nodes)
 {
     std::vector<double> ete_distances;
     const auto edges = boost::edges(sg);
@@ -46,6 +47,10 @@ std::vector<double> compute_ete_distances(const SG::GraphType & sg,
             continue;
         auto source = boost::source(*ei, sg);
         auto target = boost::target(*ei, sg);
+        if(ignore_end_nodes &&
+           (boost::degree(source, sg) == 1 || boost::degree(target, sg) == 1)
+          )
+            continue;
         const auto & source_pos = sg[source].pos;
         const auto & target_pos = sg[target].pos;
         ete_distances.emplace_back(
@@ -55,19 +60,20 @@ std::vector<double> compute_ete_distances(const SG::GraphType & sg,
     return ete_distances;
 }
 
-std::vector<double> compute_ete_distances(const SG::GraphType & sg)
-{
-    return compute_ete_distances(sg, 0);
-}
-
 std::vector<double> compute_contour_lengths(const SG::GraphType & sg,
-        const size_t minimum_size_edges)
+        const size_t minimum_size_edges,
+        bool ignore_end_nodes)
 {
     std::vector<double> contour_lengths;
     const auto edges = boost::edges(sg);
     for (auto ei = edges.first; ei != edges.second; ++ei) {
         const auto & eps = sg[*ei].edge_points;
         if(eps.size() < minimum_size_edges)
+            continue;
+        if(ignore_end_nodes &&
+           (boost::degree(boost::source(*ei, sg), sg) == 1 ||
+            boost::degree(boost::target(*ei, sg), sg) == 1)
+          )
             continue;
         contour_lengths.emplace_back(
                 SG::contour_length(*ei, sg)
@@ -76,13 +82,10 @@ std::vector<double> compute_contour_lengths(const SG::GraphType & sg,
     return contour_lengths;
 }
 
-std::vector<double> compute_contour_lengths(const SG::GraphType & sg)
-{
-    return compute_contour_lengths(sg, 0);
-}
-
 std::vector<double> compute_angles(const SG::GraphType & sg,
-         const size_t minimum_size_edges, const bool ignore_parallel_edges)
+         const size_t minimum_size_edges,
+         const bool ignore_parallel_edges,
+         const bool ignore_end_nodes)
 {
     std::vector<double> ete_angles;
     const auto verts = boost::vertices(sg);
@@ -102,6 +105,10 @@ std::vector<double> compute_angles(const SG::GraphType & sg,
                 continue;
             auto source = boost::source(*ei1, sg); // = *vi
             auto target1 = boost::target(*ei1, sg);
+            if(ignore_end_nodes &&
+               (boost::degree(source, sg) == 1 || boost::degree(target1, sg) == 1)
+              )
+                continue;
             // Copy edge iterator and plus one (to avoid compare the edge with itself)
             auto ei2 = ei1;
             ei2++;
@@ -111,6 +118,8 @@ std::vector<double> compute_angles(const SG::GraphType & sg,
                 if(eps2.size() < minimum_size_edges)
                     continue;
                 auto target2 = boost::target(*ei2, sg);
+                if(ignore_end_nodes && boost::degree(target2, sg) == 1)
+                    continue;
                 // Don't compute angle on parallel edges
                 // WARNING: do not check target2 == source
                 // source(ei2) is guaranteed (by out_edges) to be equal to source(ei1)
@@ -127,12 +136,6 @@ std::vector<double> compute_angles(const SG::GraphType & sg,
         }
     }
     return ete_angles;
-}
-// no filter of edge_points.size
-// compute angle between parallel edges
-std::vector<double> compute_angles(const SG::GraphType & sg)
-{
-    return compute_angles(sg, 0, false);
 }
 
 std::vector<double> compute_cosines(const std::vector<double> & angles)

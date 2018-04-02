@@ -216,7 +216,7 @@ TEST_CASE_METHOD(test_two_parallel_edges,
 }
 TEST_CASE_METHOD(test_spatial_graph,
                  "compute filtered distances",
-                 "[filtered][distances]")
+                 "[filtered][size][distances]")
 {
     CHECK(boost::num_edges(g) == 3);
     size_t count0 = 0;
@@ -255,7 +255,7 @@ TEST_CASE_METHOD(test_spatial_graph,
 
 TEST_CASE_METHOD(test_spatial_graph,
                  "compute filtered angles",
-                 "[filtered][angles]")
+                 "[filtered][size][angles]")
 {
     CHECK(boost::num_edges(g) == 3);
     size_t count0 = 0;
@@ -292,5 +292,68 @@ TEST_CASE_METHOD(test_spatial_graph,
     std::cout << std::endl;
     CHECK(angles_filtered_2_ignore.size() == 1);
     CHECK(angles_filtered_1.size() == 3); // No empty ep
+    CHECK(angles_unfiltered.size() == 3);
+}
+
+TEST_CASE_METHOD(test_spatial_graph,
+                 "compute filtered distances ignoring end nodes",
+                 "[filtered][ignore_end_nodes][distances]")
+{
+    CHECK(boost::num_edges(g) == 3);
+    size_t count0 = 0;
+    size_t count1 = 0;
+    size_t count2 = 0;
+    const auto edges = boost::edges(g);
+    for (auto ei = edges.first; ei != edges.second; ++ei) {
+        const auto & ep = g[*ei].edge_points;
+        size_t npoints = ep.size();
+        if(npoints == 0)
+            count0++;
+        if(npoints == 1)
+            count1++;
+        if(npoints == 2)
+            count2++;
+    }
+    CHECK(count0 == 0);
+    CHECK(count1 == 1);
+    CHECK(count2 == 2);
+    auto distances_unfiltered = SG::compute_ete_distances(g);
+    size_t minimum_size_edges = 0;
+    bool ignore_end_nodes = true;
+    auto distances_filtered_ignore_end_nodes =
+        SG::compute_ete_distances(g, minimum_size_edges, ignore_end_nodes);
+    CHECK(distances_filtered_ignore_end_nodes.empty() == true);
+    CHECK(distances_unfiltered.size() == 3);
+}
+
+TEST_CASE_METHOD(test_spatial_graph,
+                 "compute filtered angles ignoring end nodes",
+                 "[filtered][ignore_end_nodes][angles]")
+{
+    CHECK(boost::num_edges(g) == 3);
+    size_t count0 = 0;
+    size_t count1 = 0;
+    size_t count2 = 0;
+    const auto edges = boost::edges(g);
+    for (auto ei = edges.first; ei != edges.second; ++ei) {
+        const auto & ep = g[*ei].edge_points;
+        size_t npoints = ep.size();
+        if(npoints == 0)
+            count0++;
+        if(npoints == 1)
+            count1++;
+        if(npoints == 2)
+            count2++;
+    }
+    CHECK(count0 == 0);
+    CHECK(count1 == 1);
+    CHECK(count2 == 2);
+    auto angles_unfiltered = SG::compute_angles(g);
+    size_t minimum_size_edges = 0;
+    bool ignore_parallel_edges = false;
+    bool ignore_end_nodes = true;
+    auto angles_filtered_ignore_end_nodes =
+        SG::compute_angles(g, minimum_size_edges, ignore_parallel_edges, ignore_end_nodes);
+    CHECK(angles_filtered_ignore_end_nodes.empty() == true); // No empty ep
     CHECK(angles_unfiltered.size() == 3);
 }

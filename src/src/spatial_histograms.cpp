@@ -95,6 +95,29 @@ histo::Histo<double> histogram_degrees(
     return hist_degrees;
 }
 
+histo::Histo<double> histogram_degrees(
+        const std::vector<double> & degrees,
+        size_t bins,
+        const std::string & histo_name)
+{
+    auto max_degree = *std::max_element(std::begin(degrees), std::end(degrees) );
+    // Generate breaks to get middle of the bins to be the integer
+    // value of the degree
+    histo::Histo<double> hist_degrees;
+    if(bins == 0)
+        hist_degrees = histo::Histo<double>(degrees,
+                histo::GenerateBreaksFromRangeAndBins(
+                    -0.5, max_degree + 0.5, max_degree + 1)
+                );
+    else
+        hist_degrees = histo::Histo<double>(degrees,
+                histo::GenerateBreaksFromRangeAndBins(
+                    -0.5, max_degree + 0.5, bins)
+                );
+    hist_degrees.name = histo_name;
+    return hist_degrees;
+}
+
 histo::Histo<double> histogram_distances(const std::vector<double> & distances,
         double width,
         const std::string & histo_name)
