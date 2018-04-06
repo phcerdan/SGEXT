@@ -14,6 +14,19 @@ def geometric_shifted_func(p, Z):
     q = 1.0 / (Z - 2)
     return q * (1.0 - q)**(p - 3)
 
+# def mixture_delta_and_geometric_shifted_func(p, Z, prob_one):
+#     """
+#     Z is the average node degree
+#     prob_one is the probability (delta) of degree one in the pool
+#     p exists in [1, inf]
+#     p cannot take degree = 2
+#     """
+#     if(np.random.rand() <= prob_one):
+#         return prob_one
+#     else:
+#         q = 1.0 / (Z - 2)
+#         return (1 - prob_one) * (q * (1 - q)**(p - 3))
+
 def log_normal_func(l, ln_mu, ln_std_dev):
     """
     log normal function. ln_mu is the mean of ln(l)
@@ -25,7 +38,7 @@ def gamma_func(x, alpha, beta):
     """ gamma function  """
     return x**(alpha - 1) * np.exp(-x / beta) / (gamma(alpha) * beta**alpha)
 
-def power_series_truncated_b1_b2_func(x, b1, b2):
+def power_series_truncated_func(x, b1, b2):
     """
     Truncated to 3 func(x) = sum(b_k * (1-x)**(2k-1)), where k = {1,2,3}
     x is a cosine director in the interval (-1.0, 1.0]
