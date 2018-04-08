@@ -1,6 +1,10 @@
 # set(TEST_LIBRARIES SG ${Boost_LIBRARIES} ${DGTAL_LIBRARIES} Qt5::Widgets )
 set(TEST_LIBRARIES SG ${Boost_LIBRARIES} ${DGTAL_LIBRARIES})
 
+add_executable(test_transform_to_physical_point test_transform_to_physical_point.cpp)
+target_link_libraries(test_transform_to_physical_point ${ITK_LIBRARIES})
+add_test(NAME transform_to_physical_point COMMAND test_transform_to_physical_point)
+
 add_executable(test_trim_graph test_trim_graph.cpp)
 target_link_libraries(test_trim_graph SG)
 add_test(NAME trim_graph COMMAND test_trim_graph)
