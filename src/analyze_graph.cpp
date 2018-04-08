@@ -93,7 +93,9 @@ int main(int argc, char* const argv[]){
     ( "ignoreEdgesToEndNodes,x", po::bool_switch()->default_value(false), "Ignore distance and angles between edges to/from end nodes (degree = 1)." )
     ( "exportReducedGraph,o", po::value<string>(), "Write .dot file with the reduced spatial graph." )
     ( "exportData,z", po::value<string>(), "Write degrees, ete_distances, contour_lengths, etc. Histograms can be generated from these files afterwards." )
+#ifdef VISUALIZE
     ( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal. Requires VISUALIZE option enabled at build.")
+#endif
     ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output." );
 
   po::variables_map vm;
@@ -112,6 +114,8 @@ int main(int argc, char* const argv[]){
 
   string filename = vm["input"].as<string>();
   bool verbose = vm["verbose"].as<bool>();
+  if(verbose)
+    std::cout <<"Filename: " << filename << std::endl;
   bool reduceGraph = vm["reduceGraph"].as<bool>();
   bool removeExtraEdges = vm["removeExtraEdges"].as<bool>();
   bool mergeThreeConnectedNodes = vm["mergeThreeConnectedNodes"].as<bool>();
