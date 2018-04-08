@@ -181,20 +181,27 @@ def plot_cosines(data, nbins, title=""):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: " + sys.argv[0] + "graph_data_file.txt [ete_bins=30] [cosines_bins=24] [log_plot=False]")
+        print("Usage: " + sys.argv[0] +
+              "graph_data_file.txt [ete_bins=30] [cosines_bins=21] " +
+              "[contour_bins = 50] [log_plot=False]")
         sys.exit(1)
     print("fit_to_distribution_from_data %s" % sys.argv[1])
     print("arguments: %s" % len(sys.argv))
     input_ete_bins = 30
     input_cosines_bins = 21
+    input_contour_bins = 50
     log_plot = False
     if(len(sys.argv) >= 3):
         input_ete_bins = int(sys.argv[2])
     if(len(sys.argv) >= 4):
         input_cosines_bins = int(sys.argv[3])
-    if(len(sys.argv) == 5):
+    if(len(sys.argv) >= 5):
+        input_contour_bins = int(sys.argv[4])
+    if(len(sys.argv) == 6):
         log_plot = True
     print("input_ete_bins %d" % input_ete_bins)
+    print("input_cosines_bins %d" % input_cosines_bins)
+    print("input_contour_bins %d" % input_contour_bins)
     print("log_plot %s" % log_plot)
 
     input_filename = sys.argv[1]
@@ -249,4 +256,16 @@ if __name__ == "__main__":
     fig_cosines, ax_cosines = plot_cosines(cosines, input_cosines_bins, "Director Cosines")
     fig_cosines.set_size_inches(fig_size)
 
+    # ############ Contour Lengths ###############
+    contour_distance_row = 8
+    contour_distances = parse_data(input_filename, contour_distance_row)
+    fig_contour, ax_contour = plot_distances(contour_distances, input_contour_bins, "Contour Lengths")
+    fig_contour.set_size_inches(fig_size)
+    if(log_plot):
+        ax_contour.set_yscale("log", nonposy='clip')
+    else:
+        ax_contour.set_yscale("linear")
+
+    # ############ Show ###############
     plt.show()
+
