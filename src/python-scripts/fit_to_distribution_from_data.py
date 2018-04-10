@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import scipy.optimize as optim
-import matplotlib.ticker as plticker
+import matplotlib.ticker as ticker
 from io import StringIO
 from fit_functions import (geometric_shifted_func,
                            log_normal_func,
@@ -81,7 +81,7 @@ def plot_branch_degrees(data, title=""):
             '\n$R^2$ = ' + "{0:.5f}".format(r_squared_parameters),
             color=color_parameters, figure=fig)
     # print only integer ticks.
-    ax.xaxis.set_major_locator(plticker.MaxNLocator(integer=True))
+    ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
     ax.legend()
     return fig, ax
 
@@ -129,18 +129,20 @@ def plot_distances(data, nbins, title=""):
     ax.scatter(centers, counts, color=color_scatter, figure=fig)
     r_squared_fit = r_squared_from_curve_fit(centers, counts, func, popt)
     ax.plot(centers, func(centers, *popt),
-            label='Fit to data:\n $\mu$ = ' + "{0:.3f}".format(popt[0]) +
-            '\n s = ' + "{0:.3f}".format(popt[1]) +
+            label='Fit to data:\n $\exp(\mu_l)$ = ' + "{0:.3E}".format(np.exp(popt[0])) +
+            '\n $s_l$ = ' + "{0:.3f}".format(popt[1]) +
             '\n$R^2$ = ' + "{0:.5f}".format(r_squared_fit),
             color=color_fit, figure=fig)
 
     color_parameters = 'C2'
     r_squared_parameters = r_squared_from_curve_fit(centers, counts, func, pfitted)
     ax.plot(centers, func(centers, *pfitted),
-            label='With Parameters:\n $\mu$ = ' + "{0:.3f}".format(pfitted[0]) +
-            '\n s = ' + "{0:.3f}".format(pfitted[1]) +
+            label='With Parameters:\n $\exp(\mu_l)$ = ' + "{0:.3E}".format(np.exp(pfitted[0])) +
+            '\n $s_l$ = ' + "{0:.3f}".format(pfitted[1]) +
             '\n$R^2$ = ' + "{0:.5f}".format(r_squared_parameters),
             color=color_parameters, figure=fig)
+    ax.set_xlim(0.0, breaks[-1] + (breaks[1] - breaks[0]))
+    ax.xaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.2E}"))
 
     ax.legend()
     return fig, ax
@@ -171,8 +173,8 @@ def plot_cosines(data, nbins, title=""):
     func = power_series_truncated_func
     r_squared_fit = r_squared_from_curve_fit(centers, counts, func, popt)
     ax.plot(centers, func(centers, *popt),
-            label='Fit to data:\n $b_1$ = ' + "{0:.3f}".format(fit_b1) +
-            '\n $b_2$ = ' + "{0:.3f}".format(fit_b2) +
+            label='Fit to data:\n $b_1$ = ' + "{0:.3E}".format(fit_b1) +
+            '\n $b_2$ = ' + "{0:.3E}".format(fit_b2) +
             '\n$R^2$ = ' + "{0:.5f}".format(r_squared_fit),
             color=color_fit, figure=fig)
     ax.legend()
