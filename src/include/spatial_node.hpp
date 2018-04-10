@@ -46,7 +46,7 @@ namespace SG {
 /* Stream operators */
 inline static std::ostream& operator<<(std::ostream& os,
         const SpatialNode& sn) {
-    os << ArrayUtilities::to_string(sn.pos);
+    os << sn.pos[0] << " " << sn.pos[1] << " " << sn.pos[2];
     return os;
 }
 inline static std::istream& operator>>(std::istream& is,
