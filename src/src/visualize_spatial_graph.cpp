@@ -26,6 +26,8 @@
 #include <vtkPoints.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkInteractorStyleTrackballCamera.h>
+#include <vtkCamera.h>
+#include <vtkRenderer.h>
 
 #include "convert_to_vtk_graph.hpp"
 namespace SG {
@@ -42,6 +44,20 @@ void visualize_spatial_graph(const GraphType & sg)
     auto style = vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New(); // like paraview
     graphLayoutView->SetInteractorStyle(style) ;
     graphLayoutView->ScaledGlyphsOn();
+
+    // Flip camera because VTK-ITK different corner for origin.
+    double pos[3];
+    double vup[3];
+    vtkCamera *cam = graphLayoutView->GetRenderer()->GetActiveCamera();
+    cam->GetPosition(pos);
+    cam->GetViewUp(vup);
+    for ( unsigned int i = 0; i < 3; ++i )
+    {
+        pos[i] = -pos[i];
+        vup[i] = -vup[i];
+    }
+    cam->SetPosition(pos);
+    cam->SetViewUp(vup);
 
     graphLayoutView->ResetCamera();
     graphLayoutView->Render();
