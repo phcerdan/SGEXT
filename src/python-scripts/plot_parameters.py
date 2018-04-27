@@ -12,13 +12,13 @@ plot_params = {
     'axes.labelsize': 16,
     # 'legend.fontsize': 'medium' # default
     # 'legend.fontsize': 12,
-    'legend.fontsize': 'x-large'
+    'legend.fontsize': 'x-large',
     'xtick.labelsize': 14,
     'ytick.labelsize': 14,
     'text.usetex': True,
     # 'figure.figsize': [width, height],
     'figure.facecolor': 'w',
-    'figure.frameon': False,
+    'figure.frameon': False
 }
 # for k, v in dict_more_params.items():
 #     params[k] = v
