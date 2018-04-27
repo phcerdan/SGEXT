@@ -4,7 +4,8 @@ import pandas as pd
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-import scipy.optimize as optim
+import scipy.optimize as optimize
+import scipy.interpolate as interpolate
 import matplotlib.ticker as ticker
 from io import StringIO
 from fit_functions import (geometric_shifted_func,
@@ -51,7 +52,7 @@ def fit_geometric_shifted_func(data):
     # area = np.sum(np.diff(breaks) * counts)
     degree_filtered_mean = data_filtered.mean()
     initial_guess = degree_filtered_mean
-    popt, pcov = optim.curve_fit(geometric_shifted_func, centers, counts, initial_guess)
+    popt, pcov = optimize.curve_fit(geometric_shifted_func, centers, counts, initial_guess)
     # fit_Z = popt[0]
     return popt, (centers, counts, breaks), pcov, (degree_filtered_mean,)
 
@@ -90,7 +91,7 @@ def fit_gamma(data, nbins):
     bin_w = np.abs(breaks[1] - breaks[0])
     centers = np.arange(breaks[0] + bin_w / 2.0, breaks[-1], bin_w)
     func = gamma_func
-    popt, pcov = optim.curve_fit(func, centers, counts)
+    popt, pcov = optimize.curve_fit(func, centers, counts)
     return popt, (centers, counts, breaks), pcov
 
 def fit_log_normal(data, nbins):
@@ -103,7 +104,7 @@ def fit_log_normal(data, nbins):
     initial_guess = [log_data_mean, log_data_std_dev]
     func = log_normal_func
     # func = gamma_func
-    popt, pcov = optim.curve_fit(func, centers, counts, initial_guess)
+    popt, pcov = optimize.curve_fit(func, centers, counts, initial_guess)
     # data_mean = data.mean()
     # data_std_dev = data.std(ddof=0)
     # data_mu = np.log(data_mean) # WRONG
@@ -128,16 +129,19 @@ def plot_distances(data, nbins, title=""):
     ax.set_ylabel('$P(l)$')
     ax.scatter(centers, counts, color=color_scatter, figure=fig)
     r_squared_fit = r_squared_from_curve_fit(centers, counts, func, popt)
-    ax.plot(centers, func(centers, *popt),
-            label='Fit to data:\n $\exp(\mu_l)$ = ' + "{0:.3E}".format(np.exp(popt[0])) +
+    # ax.plot(centers, func(centers, *popt),
+    centers_smooth = np.linspace(centers.min(), centers.max(), 200)
+    ax.plot(centers_smooth, interpolate.spline(centers, func(centers, *popt), centers_smooth),
+            label='Fit to data:\n $\mu_l$ = ' + "{0:.3E}".format(np.exp(popt[0])) +
             '\n $s_l$ = ' + "{0:.3f}".format(popt[1]) +
             '\n$R^2$ = ' + "{0:.5f}".format(r_squared_fit),
             color=color_fit, figure=fig)
 
     color_parameters = 'C2'
     r_squared_parameters = r_squared_from_curve_fit(centers, counts, func, pfitted)
-    ax.plot(centers, func(centers, *pfitted),
-            label='With Parameters:\n $\exp(\mu_l)$ = ' + "{0:.3E}".format(np.exp(pfitted[0])) +
+    # ax.plot(centers, func(centers, *pfitted),
+    ax.plot(centers_smooth, interpolate.spline(centers, func(centers, *pfitted), centers_smooth),
+            label='With Parameters:\n $\mu_l$ = ' + "{0:.3E}".format(np.exp(pfitted[0])) +
             '\n $s_l$ = ' + "{0:.3f}".format(pfitted[1]) +
             '\n$R^2$ = ' + "{0:.5f}".format(r_squared_parameters),
             color=color_parameters, figure=fig)
@@ -152,7 +156,7 @@ def fit_power_series_truncated_func(data, nbins):
     bin_w = np.abs(breaks[1] - breaks[0])
     centers = np.arange(breaks[0] + bin_w / 2.0, breaks[-1], bin_w)
     func = power_series_truncated_func
-    popt, pcov = optim.curve_fit(func, centers, counts)
+    popt, pcov = optimize.curve_fit(func, centers, counts)
     # fit_b1 = popt[0]
     # fit_b2 = popt[1]
     return popt, (centers, counts, breaks), pcov
@@ -237,10 +241,11 @@ if __name__ == "__main__":
                       label='Ratio of end nodes: ' + "{0:.3f}".format(prob_degree_one), figure=fig_degree)
     ax_degree.legend()
     fig_degree.set_size_inches(fig_size)
-    if(log_plot):
-        ax_degree.set_yscale("log", nonposy='clip')
-    else:
-        ax_degree.set_yscale("linear")
+    ax_degree.set_yscale("log", nonposy='clip')
+    # if(log_plot):
+    #     ax_degree.set_yscale("log", nonposy='clip')
+    # else:
+    #     ax_degree.set_yscale("linear")
 
     # ############ Ete Distance ###############
     ete_distance_row = 2

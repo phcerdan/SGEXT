@@ -141,7 +141,9 @@ Holes are created in the binarization process. These holes (areas of OFF pixels 
 Using [itk::VotingBinaryIterativeHoleFillingImageFilter](https://itk.org/Doxygen/html/classitk_1_1VotingBinaryIterativeHoleFillingImageFilter.html) with the script: https://github.com/phcerdan/ITKfilters/blob/master/scripts-python/binary_denoise_3d_fillholes_iterative.py
 
 ```bash
-python binary_denoise_3d_fillholes_iterative.py ${OUTPUT_BINARY} ${OUTPUT_FOLDER} "3" "1" "10000"
+
+python binary_denoise_3d_fillholes_iterative.py ${OUTPUT_BINARY} ${OUTPUT_FOLDER} \
+${HOLE_MAJORITY} ${HOLE_RADIUS} ${HOLE_ITERATIONS}
 ```
 
 **Parameters:**  
@@ -178,7 +180,12 @@ Using a recent contribution to DGtal: [PR](https://github.com/DGtal-team/DGtal/p
 Using the c++ script `thin` from https://github.com/phcerdan/object_to_spatial_graph
 
 ```bash
-thin ${OUTPUT_BINARY} ${OUTPUT_FOLDER} "3" "1" "10000"
+export SKEL_SELECT=dmax
+export SKEL_TYPE=1isthmus
+export SKEL_PERSISTENCE=2
+thin --input ${OUTPUT_SEGMENTATION} -o ${OUTPUT_FOLDER} \
+  --select ${SKEL_SELECT} --skel ${SKEL_TYPE} \
+  -p ${PERSISTENCE} --foreground white
 ```
 
 **Parameters:**  
@@ -357,6 +364,16 @@ graph G {
        0.000000000        1.000000000        2.000000000        3.000000000
 ```
 
+```bash
+export GRAPH_IGNORE_SHORT_EDGES=1
+export GRAPH_SPACING="5.05050745877353E-07 5.05050745877353E-07 1.00708103855232E-06"
+analyze_graph --input ${OUTPUT_SKELETONIZATION} \
+ --exportReducedGraph ${OUTPUT_FOLDER} --exportData ${GRAPH_DATA_FOLDER}
+ --reduceGraph --removeExtraEdges  --mergeThreeConnectedEdges \
+ --ignoreAngleBetweenParallelEdges \
+ --ignoreEdgesShorterThan ${GRAPH_IGNORE_SHORT_EDGES} \
+ --spacing ${GRAPH_SPACING}
+```
 
 ### 7. Analyze Statistical Distributions from the Spatial Graph ###
 With the `graph_properties` data and the associated `histograms` we can start comparing
