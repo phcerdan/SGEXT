@@ -125,14 +125,14 @@ def plot_distances(data, nbins, title=""):
     color_fit = 'C1'
     fig, ax = plt.subplots()
     ax.set_title(title)
-    ax.set_xlabel('l')
+    ax.set_xlabel('$l$')
     ax.set_ylabel('$P(l)$')
     ax.scatter(centers, counts, color=color_scatter, figure=fig)
     r_squared_fit = r_squared_from_curve_fit(centers, counts, func, popt)
     # ax.plot(centers, func(centers, *popt),
     centers_smooth = np.linspace(centers.min(), centers.max(), 200)
     ax.plot(centers_smooth, interpolate.spline(centers, func(centers, *popt), centers_smooth),
-            label='Fit to data:\n $\mu_l$ = ' + "{0:.3E}".format(np.exp(popt[0])) +
+            label='Fit to data:\n $\exp(\mu_l)$ = ' + "{0:.3E}".format(np.exp(popt[0])) +
             '\n $s_l$ = ' + "{0:.3f}".format(popt[1]) +
             '\n$R^2$ = ' + "{0:.5f}".format(r_squared_fit),
             color=color_fit, figure=fig)
@@ -141,7 +141,7 @@ def plot_distances(data, nbins, title=""):
     r_squared_parameters = r_squared_from_curve_fit(centers, counts, func, pfitted)
     # ax.plot(centers, func(centers, *pfitted),
     ax.plot(centers_smooth, interpolate.spline(centers, func(centers, *pfitted), centers_smooth),
-            label='With Parameters:\n $\mu_l$ = ' + "{0:.3E}".format(np.exp(pfitted[0])) +
+            label='With Parameters:\n $\exp(\mu_l)$ = ' + "{0:.3E}".format(np.exp(pfitted[0])) +
             '\n $s_l$ = ' + "{0:.3f}".format(pfitted[1]) +
             '\n$R^2$ = ' + "{0:.5f}".format(r_squared_parameters),
             color=color_parameters, figure=fig)
@@ -260,7 +260,7 @@ if __name__ == "__main__":
     # ########### Cosines ###############
     cosines_row = 6
     cosines = parse_data(input_filename, cosines_row)
-    fig_cosines, ax_cosines = plot_cosines(cosines, input_cosines_bins, "Director Cosines")
+    fig_cosines, ax_cosines = plot_cosines(cosines, input_cosines_bins, "Direction Cosines")
     fig_cosines.set_size_inches(fig_size)
 
     # ############ Contour Lengths ###############
