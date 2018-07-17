@@ -82,8 +82,8 @@ int main(int argc, char* const argv[]){
     ( "profile",  po::bool_switch()->default_value(false), "profile algorithm" )
     ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output" )
     ( "visualize,t", po::bool_switch()->default_value(false), "Visualize thin result. Requires VISUALIZE option at build")
-    ( "exportSDP,e", po::value<std::string>(), "Export the resulting set of points in a simple (sequence of discrete point (sdp)).")
-    ( "exportImage,o", po::value<std::string>(), "Export the resulting set of points as an ITK Image.");
+    ( "exportSDP,e", po::value<std::string>(), "Folder to export the resulting set of points in a simple (sequence of discrete point (sdp)).")
+    ( "exportImage,o", po::value<std::string>(), "Folder to export the resulting set of points as an ITK Image.");
 
   po::variables_map vm;
   try {
@@ -129,6 +129,24 @@ int main(int argc, char* const argv[]){
 #ifdef VISUALIZE
   bool visualize = vm["visualize"].as<bool>();
 #endif
+
+  if (vm.count("exportImage"))
+  {
+    const fs::path output_folder_path{vm["exportImage"].as<std::string>()};
+    if(!fs::exists(output_folder_path)) {
+      std::cerr << "output folder doesn't exist : " << output_folder_path.string() << std::endl;
+      throw po::validation_error(po::validation_error::invalid_option_value, "output_folder_path");
+    }
+  }
+
+  if (vm.count("exportSDP"))
+  {
+    const fs::path output_folder_path{vm["exportSDP"].as<std::string>()};
+    if(!fs::exists(output_folder_path)) {
+      std::cerr << "output folder doesn't exist : " << output_folder_path.string() << std::endl;
+      throw po::validation_error(po::validation_error::invalid_option_value, "output_folder_path");
+    }
+  }
   /*-------------- End of parse -----------------------------*/
   // Get filename without extension (and without folders).
   const fs::path input_stem = fs::path(filename).stem();
