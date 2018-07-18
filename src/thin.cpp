@@ -87,7 +87,7 @@ int main(int argc, char* const argv[]){
   po::options_description general_opt ( "Allowed options are: " );
   general_opt.add_options()
     ( "help,h", "display this message." )
-    ( "input,i", po::value<string>()->required(), "Input vol file." )
+    ( "input,i", po::value<string>()->required(), "Input 3D image file." )
     ( "skel,s",  po::value<string>()->required(), "type of skeletonization. Valid: 1isthmus, isthmus, end, ulti" )
     ( "select,c",  po::value<string>()->required(), "select method for skeletonization. Valid: dmax, random, first" )
     ( "foreground,f",  po::value<string>()->default_value("black"), "foreground color in binary image" )
@@ -98,7 +98,8 @@ int main(int argc, char* const argv[]){
     ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output" )
     ( "visualize,t", po::bool_switch()->default_value(false), "Visualize thin result. Requires VISUALIZE option at build")
     ( "exportSDP,e", po::value<std::string>(), "Folder to export the resulting set of points in a simple (sequence of discrete point (sdp)).")
-    ( "exportImage,o", po::value<std::string>(), "Folder to export the resulting set of points as an ITK Image.");
+    ( "exportImage,o", po::value<std::string>(), "Folder to export the resulting set of points as an ITK Image.")
+    ( "inputDistanceMapImageFilename,d", po::value<string>(), "Input 3D Distance Map Image from script create_distance_map. Used with option --select=dmax" );
 
   po::variables_map vm;
   try {
@@ -162,6 +163,26 @@ int main(int argc, char* const argv[]){
       throw po::validation_error(po::validation_error::invalid_option_value, "output_folder_path");
     }
   }
+
+  if(select_string == "dmax" && !vm.count("inputDistanceMapImageFilename"))
+  {
+      std::cerr << "Please select an inputDistanceMapImageFilename.\n";
+      std::cerr << "A distance map can be generated using the script:\n";
+      std::cerr << "  create_distance_map -i inputImage -o outputFolder \n";
+      throw po::validation_error(po::validation_error::invalid_option_value, "inputDistanceMapImageFilename");
+  }
+
+  string inputDistanceMapImageFilename = "";
+  if (vm.count("inputDistanceMapImageFilename"))
+  {
+    const fs::path inputDistanceMapImageFilename_path{vm["inputDistanceMapImageFilename"].as<std::string>()};
+    if(!fs::exists(inputDistanceMapImageFilename_path)) {
+      std::cerr << "input distance map does not exist : " << inputDistanceMapImageFilename_path.string() << std::endl;
+      throw po::validation_error(po::validation_error::invalid_option_value, "inputDistanceMapImageFilename");
+    }
+    inputDistanceMapImageFilename = vm["inputDistanceMapImageFilename"].as<string>();
+  }
+
   /*-------------- End of parse -----------------------------*/
   // Get filename without extension (and without folders).
   const fs::path input_stem = fs::path(filename).stem();
@@ -263,22 +284,30 @@ int main(int argc, char* const argv[]){
    * to calculate for every image....
    */
 
-  trace.beginBlock("Create Distance Map");
-  using Predicate = Z3i::DigitalSet;
-  using L3Metric = ExactPredicateLpSeparableMetric<Z3i::Space, 3>;
-  using DT       = DistanceTransformation<Z3i::Space, Predicate, L3Metric>;
-  L3Metric l3;
-  DT dt(vc.object().domain(), vc.objectSet(), l3);
-  trace.endBlock();
+  /* trace.beginBlock("Create Distance Map"); */
+  /* using Predicate = Z3i::DigitalSet; */
+  /* using L3Metric = ExactPredicateLpSeparableMetric<Z3i::Space, 3>; */
+  /* using DT       = DistanceTransformation<Z3i::Space, Predicate, L3Metric>; */
+  /* L3Metric l3; */
+  /* DT dt(vc.object().domain(), vc.objectSet(), l3); */
+  /* trace.endBlock(); */
+
+  using DistanceMapPixelType = float ;
+  using DistanceMapImage = ImageContainerByITKImage<Domain, DistanceMapPixelType> ;
+  Z3i::Domain dummyDomain(Z3i::Point(0,0,0), Z3i::Point(1,1,1));
+  DistanceMapImage distanceMapImage(dummyDomain);
 
   std::function< std::pair<typename Complex::Cell, typename Complex::Data>(const Complex::Clique&) > Select ;
   auto & sel = select_string;
   if (sel == "random") Select = selectRandom<Complex>;
   else if (sel == "first") Select = selectFirst<Complex>;
   else if (sel == "dmax"){
+    trace.beginBlock("Import Distance Map");
+    distanceMapImage = DGtal::ITKReader<DistanceMapImage>::importITK(inputDistanceMapImageFilename);
+    trace.endBlock();
     Select =
-      [&dt](const Complex::Clique & clique){
-        return selectMaxValue<DT, Complex>(dt,clique);
+      [&distanceMapImage](const Complex::Clique & clique){
+        return selectMaxValue<DistanceMapImage, Complex>(distanceMapImage, clique);
       };
   } else throw std::runtime_error("Invalid skel string");
 
