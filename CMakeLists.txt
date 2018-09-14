@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.5)
 #     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wall -pedantic -Wextra")
 # endif()
 # cmake ../src  -G"Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT=TRUE
-project(dgtal-play)
+project(object_to_spatial_graph)
 option(ENABLE_TESTING "Enable Tests" OFF)
 option(VISUALIZE "Enable visualization with VTK and QT." OFF)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -18,7 +18,6 @@ find_package(Boost COMPONENTS
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 find_package(DGtal REQUIRED)
 include_directories(SYSTEM ${DGTAL_INCLUDE_DIRS})
-# find_package(ITK REQUIRED)
 find_package(ITK REQUIRED COMPONENTS
   ITKCommon
   ITKIOImageBase
@@ -33,39 +32,29 @@ find_package(ITK REQUIRED COMPONENTS
 include(${ITK_USE_FILE})
 include_directories(SYSTEM ${ITK_INCLUDE_DIRS})
 if(VISUALIZE)
-    find_package(Qt5 REQUIRED
-        Widgets
-        OpenGL)
+  find_package(Qt5 REQUIRED
+    Widgets
+    OpenGL)
 
-    # find_package(VTK REQUIRED)
-    # find_package(VTK REQUIRED COMPONENTS
-    #   vtkCommonCore
-    #   vtkCommonDataModel
-    #   vtkInteractionWidgets
-    #   vtkRenderingCore
-    #   vtkViewsInfovis
-    #   CONFIG
-    # )
-
-    # VTK components to handle external dependency histo-header
-    find_package(VTK REQUIRED COMPONENTS
-        vtkChartsCore
-        vtkCommonCore
-        vtkCommonDataModel
-        vtkInteractionStyle
-        vtkRenderingCore
-        vtkRenderingOpenGL2 # avoid vtkRenderer, vtkRenderWindow not found at run time
-        vtkRenderingContextOpenGL2 # avoid vtkContextDevice2D not found at run time
-        vtkViewsContext2D
-        vtkInteractionWidgets
-        vtkViewsInfovis
-        vtkGUISupportQt # QVTKWidget.h
-        CONFIG
-        )
-    # USE_FILE is deprecated? This is the cause of AUTOINIT warnings
-    # https://gitlab.kitware.com/vtk/vtk/issues/15895
-    include(${VTK_USE_FILE})
-    include_directories(SYSTEM ${VTK_INCLUDE_DIRS})
+  # VTK components to handle external dependency histo-header
+  find_package(VTK REQUIRED COMPONENTS
+    vtkChartsCore
+    vtkCommonCore
+    vtkCommonDataModel
+    vtkInteractionStyle
+    vtkRenderingCore
+    vtkRenderingOpenGL2 # avoid vtkRenderer, vtkRenderWindow not found at run time
+    vtkRenderingContextOpenGL2 # avoid vtkContextDevice2D not found at run time
+    vtkViewsContext2D
+    vtkInteractionWidgets
+    vtkViewsInfovis
+    vtkGUISupportQt # QVTKWidget.h
+    CONFIG
+    )
+  # USE_FILE is deprecated? This is the cause of AUTOINIT warnings
+  # https://gitlab.kitware.com/vtk/vtk/issues/15895
+  include(${VTK_USE_FILE})
+  include_directories(SYSTEM ${VTK_INCLUDE_DIRS})
 endif()
 
 set(SG_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/include")
@@ -146,58 +135,7 @@ if(VISUALIZE)
     target_compile_definitions(SGVtk PRIVATE VISUALIZE)
 endif()
 
-
-add_executable(thin thin.cpp)
-target_link_libraries(thin ${Boost_LIBRARIES} )
-target_link_libraries(thin ${ITK_LIBRARIES} )
-target_link_libraries(thin ${DGTAL_LIBRARIES} )
-if(VISUALIZE)
-    target_link_libraries(thin Qt5::Widgets Qt5::Xml )
-    target_link_libraries(thin ${VTK_LIBRARIES} )
-    target_compile_definitions(thin PUBLIC VISUALIZE)
-endif()
-
-add_executable(analyze_graph analyze_graph.cpp)
-target_link_libraries(analyze_graph SG )
-target_link_libraries(analyze_graph ${Boost_LIBRARIES} )
-target_link_libraries(analyze_graph ${ITK_LIBRARIES} )
-target_link_libraries(analyze_graph ${DGTAL_LIBRARIES} )
-if(VISUALIZE)
-    target_link_libraries(analyze_graph Qt5::Widgets Qt5::Xml )
-    target_link_libraries(analyze_graph SGVtk )
-    # target_link_libraries(analyze_graph ${VTK_LIBRARIES} )
-    target_compile_definitions(analyze_graph PUBLIC VISUALIZE)
-endif()
-
-add_executable(histograms_from_data histograms_from_data.cpp)
-target_link_libraries(histograms_from_data SG )
-target_link_libraries(histograms_from_data ${Boost_LIBRARIES} )
-
-add_executable(create_distance_map create_distance_map.cpp)
-target_link_libraries(create_distance_map SG )
-target_link_libraries(create_distance_map ${Boost_LIBRARIES} )
-target_link_libraries(create_distance_map ${ITK_LIBRARIES} )
-target_link_libraries(create_distance_map ${DGTAL_LIBRARIES} )
-
-if(VISUALIZE)
-    add_executable(highlight_image_points highlight_image_points.cpp)
-    target_link_libraries(highlight_image_points ${Boost_LIBRARIES} )
-    target_link_libraries(highlight_image_points ${ITK_LIBRARIES} )
-    target_link_libraries(highlight_image_points ${DGTAL_LIBRARIES} )
-    target_link_libraries(highlight_image_points Qt5::Widgets Qt5::Xml )
-    target_link_libraries(highlight_image_points ${VTK_LIBRARIES} )
-
-    add_executable(visualize_histograms_from_file
-      visualize_histograms_from_file.cpp
-      ${SG_SRC_WITH_VTK_AND_QT}
-      )
-    target_link_libraries(visualize_histograms_from_file SG )
-    target_link_libraries(visualize_histograms_from_file ${Boost_LIBRARIES} )
-    target_link_libraries(visualize_histograms_from_file ${ITK_LIBRARIES} )
-    target_link_libraries(visualize_histograms_from_file ${DGTAL_LIBRARIES} )
-    target_link_libraries(visualize_histograms_from_file Qt5::Widgets Qt5::Xml )
-    target_link_libraries(visualize_histograms_from_file ${VTK_LIBRARIES} )
-endif()
+add_subdirectory(cpp-scripts)
 
 if(ENABLE_TESTING)
     enable_testing()
