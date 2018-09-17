@@ -1,8 +1,8 @@
-#include "catch_header.h"
+#include "gmock/gmock.h"
 #include "spatial_graph.hpp"
 #include "split_loop.hpp"
 
-TEST_CASE("split_loop", "[split_loop]") {
+TEST(split_loop, split_loop) {
     std::cout << "Split loop" << std::endl;
     using SpatialGraph = SG::GraphType;
     using vertex_descriptor =
@@ -23,9 +23,9 @@ TEST_CASE("split_loop", "[split_loop]") {
     sg_edge.edge_points.insert(std::end(sg_edge.edge_points),
                                {n1, n2, e1n2, e2n2, e2n1, e2, e1});
     SG::split_loop(vertex_id, sg_edge, sg);
-    CHECK(num_vertices(sg) == 2);
-    CHECK(num_edges(sg) == 2);
-    CHECK(sg[1].pos == e2n2);
+    EXPECT_EQ(num_vertices(sg), 2);
+    EXPECT_EQ(num_edges(sg), 2);
+    EXPECT_EQ(sg[1].pos, e2n2);
     SpatialEdge::PointContainer expected1 = {{n1, n2, e1n2}};
     std::sort(expected1.begin(), expected1.end());
     SpatialEdge::PointContainer expected2 = {{e1, e2, e2n1}};
@@ -36,6 +36,6 @@ TEST_CASE("split_loop", "[split_loop]") {
         auto &points = created_sg_edge.edge_points;
         std::sort(points.begin(), points.end());
         bool equal_edge_points = (points == expected1 || points == expected2);
-        CHECK(equal_edge_points == true);
+        EXPECT_EQ(equal_edge_points, true);
     }
 }

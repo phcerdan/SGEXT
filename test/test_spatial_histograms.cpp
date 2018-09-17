@@ -3,9 +3,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "catch_header.h"
+#include "gmock/gmock.h"
 #include "spatial_histograms.hpp"
 #include "compute_graph_properties.hpp"
+#include <limits>
 
 /**
  * Spatial Graph.
@@ -15,10 +16,10 @@
  *     |
  *     o
  */
-struct test_spatial_graph {
+struct SpatialGraphFixture : public ::testing::Test {
     using GraphType = SG::GraphAL;
     GraphType g;
-    test_spatial_graph() {
+    void SetUp() override {
         using boost::add_edge;
         this->g = GraphType(4);
         // Add edge with an associated SpatialEdge at construction.
@@ -50,14 +51,12 @@ struct test_spatial_graph {
 };
 
 
-TEST_CASE_METHOD(test_spatial_graph,
-                 "histogram degrees",
-                 "[histograms][degrees]")
+TEST_F(SpatialGraphFixture, histogram_degrees)
 {
     auto degrees = SG::compute_degrees(g);
     auto histo_degrees = SG::histogram_degrees(degrees);
     std::cout << "Degrees Histogram" << std::endl;
-    CHECK(histo_degrees.name == "degrees");
+    EXPECT_EQ(histo_degrees.name, "degrees");
     std::cout << "Print counts with breaks" << std::endl;
     histo_degrees.PrintBreaksAndCounts(std::cout);
     std::cout << "Print counts with centers" << std::endl;
@@ -70,85 +69,75 @@ TEST_CASE_METHOD(test_spatial_graph,
     histo_degrees.PrintBreaks(std::cout);
 }
 
-TEST_CASE_METHOD(test_spatial_graph,
-                 "histogram degrees with bins",
-                 "[histograms][degrees][bins]")
+TEST_F(SpatialGraphFixture, histogram_degrees_with_bins)
 {
     auto degrees = SG::compute_degrees(g);
     size_t bins = 10;
     auto histo_degrees = SG::histogram_degrees(degrees, bins);
     std::cout << "Degrees Histogram with bins = " << bins << std::endl;
-    CHECK(histo_degrees.name == "degrees");
-    CHECK(histo_degrees.bins == bins);
+    EXPECT_EQ(histo_degrees.name, "degrees");
+    EXPECT_EQ(histo_degrees.bins, bins);
     histo_degrees.PrintBreaksAndCounts(std::cout);
 }
 
-TEST_CASE_METHOD(test_spatial_graph,
-                 "histogram distances",
-                 "[histograms][distances]")
+TEST_F(SpatialGraphFixture, histogram_distances)
 {
     auto distances = SG::compute_ete_distances(g);
     auto histo_distances = SG::histogram_distances(distances);
     std::cout << "Distance Histogram" << std::endl;
-    CHECK(histo_distances.name == "distances");
+    EXPECT_EQ(histo_distances.name, "distances");
     histo_distances.PrintBreaksAndCounts(std::cout);
 }
 
-TEST_CASE_METHOD(test_spatial_graph,
-                 "histogram distances with width",
-                 "[histograms][distances][width]")
+TEST_F(SpatialGraphFixture, histogram_distances_with_width)
 {
     auto distances = SG::compute_ete_distances(g);
     double width = 0.5;
     auto histo_distances = SG::histogram_distances(distances, width);
     std::cout << "Distance Histogram with bins" << std::endl;
-    CHECK(histo_distances.name == "distances");
+    EXPECT_EQ(histo_distances.name, "distances");
     double max_length = 3.0;
     size_t expected_bins = static_cast<size_t>(max_length / width);
-    CHECK(histo_distances.bins == expected_bins);
+    EXPECT_EQ(histo_distances.bins, expected_bins);
     histo_distances.PrintBreaksAndCounts(std::cout);
 }
 
-TEST_CASE_METHOD(test_spatial_graph,
-                 "histogram angles",
-                 "[histograms][angles][cosines]")
+TEST_F(SpatialGraphFixture, histogram_angles)
 {
     auto angles = SG::compute_angles(g);
     auto histo_angles = SG::histogram_angles(angles);
     std::cout << "Angles Histogram" << std::endl;
-    CHECK(histo_angles.name == "angles");
+    EXPECT_EQ(histo_angles.name, "angles");
     histo_angles.PrintBreaksAndCounts(std::cout);
 
     // compute cosines from angles, not from g
     auto cosines = SG::compute_cosines(angles);
     auto histo_cosines = SG::histogram_cosines(cosines);
     std::cout << "Cosines Histogram" << std::endl;
-    CHECK(histo_cosines.name == "cosines");
+    EXPECT_EQ(histo_cosines.name, "cosines");
     histo_cosines.PrintBreaksAndCounts(std::cout);
 }
 
-TEST_CASE_METHOD(test_spatial_graph,
-                 "histogram angles with bins",
-                 "[histograms][angles][cosines][bins]")
+TEST_F(SpatialGraphFixture, histogram_angles_with_bins)
 {
     auto angles = SG::compute_angles(g);
     size_t bins = 10;
     auto histo_angles = SG::histogram_angles(angles, bins);
     std::cout << "Angles Histogram with bins = " << bins << std::endl;
-    CHECK(histo_angles.name == "angles");
-    CHECK(histo_angles.bins == bins);
+    EXPECT_EQ(histo_angles.name, "angles");
+    EXPECT_EQ(histo_angles.bins, bins);
     histo_angles.PrintBreaksAndCounts(std::cout);
 
     // compute cosines from angles, not from g
     auto cosines = SG::compute_cosines(angles);
     auto histo_cosines = SG::histogram_cosines(cosines, bins);
     std::cout << "Cosines Histogram with bins = " << bins << std::endl;
-    CHECK(histo_cosines.name == "cosines");
-    CHECK(histo_cosines.bins == bins);
+    EXPECT_EQ(histo_cosines.name, "cosines");
+    EXPECT_EQ(histo_cosines.bins, bins);
     histo_cosines.PrintBreaksAndCounts(std::cout);
 }
 
-TEST_CASE("print and read histogram", "[io]")
+TEST(IO, print_and_read_histogram)
 {
     std::cout << "Print and Read" << std::endl;
     std::vector<unsigned int> data({1, 2, 3, 5, 6, 4, 2, 2, 5});
@@ -160,21 +149,21 @@ TEST_CASE("print and read histogram", "[io]")
     std::stringstream buffer;
     SG::print_histogram(histo, buffer);
     std::cout << "printed into buffer" << std::endl;
-    CHECK(buffer.str().empty() == false);
+    EXPECT_EQ(buffer.str().empty(), false);
     std::cout << buffer.str() << std::endl;
     auto histo_read = SG::read_histogram(buffer);
     std::cout << "already readed from buffer" << std::endl;
-    CHECK(histo_read.bins == histo.bins);
-    CHECK(histo_read.counts == histo.counts);
-    // CHECK(histo_read.breaks == histo.breaks); double comparisson failure,
+    EXPECT_EQ(histo_read.bins, histo.bins);
+    EXPECT_EQ(histo_read.counts, histo.counts);
+    // EXPECT_EQ(histo_read.breaks, histo.breaks); double comparisson failure,
     // instead:
-    CHECK(histo_read.breaks.size() == histo.breaks.size());
-    CHECK(histo_read.breaks.size() == bins + 1);
-    CHECK(histo_read.breaks[0] == Approx(histo.breaks[0]));
-    CHECK(histo_read.breaks[1] == Approx(histo.breaks[1]));
-    CHECK(histo_read.breaks[2] == Approx(histo.breaks[2]));
-    CHECK(histo_read.breaks[3] == Approx(histo.breaks[3]));
-    CHECK(histo_read.range == histo.range);
-    CHECK(histo_read.name == histo.name);
+    EXPECT_EQ(histo_read.breaks.size(), histo.breaks.size());
+    EXPECT_EQ(histo_read.breaks.size(), bins + 1);
+    EXPECT_NEAR(histo_read.breaks[0], histo.breaks[0], 0.00001);
+    EXPECT_NEAR(histo_read.breaks[1], histo.breaks[1], 0.00001);
+    EXPECT_NEAR(histo_read.breaks[2], histo.breaks[2], 0.00001);
+    EXPECT_NEAR(histo_read.breaks[3], histo.breaks[3], 0.00001);
+    EXPECT_EQ(histo_read.range, histo.range);
+    EXPECT_EQ(histo_read.name, histo.name);
 }
 
