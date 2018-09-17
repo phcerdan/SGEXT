@@ -1,5 +1,5 @@
+#include "gmock/gmock.h"
 #include "DGtal/graph/ObjectBoostGraphInterface.h"
-#include "catch_header.h"
 #include "spatial_graph.hpp"
 #include <DGtal/base/Common.h>
 #include <DGtal/helpers/StdDefs.h>
@@ -14,7 +14,7 @@
 // use it to check there is no exception in cornercase
 #include "compute_graph_properties.hpp"
 
-struct object_graph {
+struct ObjectGraphFixture : public ::testing::Test {
     using Domain = DGtal::Z3i::Domain;
     using DigitalTopology = DGtal::Z3i::DT26_6;
     using DigitalSet = DGtal::DigitalSetByAssociativeContainer<
@@ -25,6 +25,7 @@ struct object_graph {
     using edge_iterator = typename boost::graph_traits<Object>::edge_iterator;
 
     Object obj;
+    void SetUp() override {}
 };
 
 /**
@@ -38,8 +39,8 @@ struct object_graph {
  * Domain::Point r2(1, 0, 2);
  *
  */
-struct three_connected_nodes : public object_graph {
-    three_connected_nodes(){
+struct ThreeConnectedNodesFixture : public ObjectGraphFixture {
+    void SetUp() override {
         DigitalTopology::ForegroundAdjacency adjF;
         DigitalTopology::BackgroundAdjacency adjB;
         DigitalTopology topo(adjF, adjB,
@@ -65,9 +66,7 @@ struct three_connected_nodes : public object_graph {
     }
 };
 
-TEST_CASE_METHOD(three_connected_nodes,
-                 "three_connected_nodes",
-                 "[merge_nodes]") {
+TEST_F(ThreeConnectedNodesFixture, merge_nodes) {
     std::cout << "Three connected nodes" << std::endl;
     using SpatialGraph = SG::GraphAL;
     using vertex_iterator =
@@ -87,29 +86,29 @@ TEST_CASE_METHOD(three_connected_nodes,
         if (degree == 3)
             count3degrees++;
     }
-    CHECK(num_vertices(sg) == 6);
-    CHECK(num_edges(sg) == 6);
-    CHECK(count3degrees == 3);
-    CHECK(count2degrees == 0);
-    CHECK(count1degrees == 3);
+    EXPECT_EQ(num_vertices(sg), 6);
+    EXPECT_EQ(num_edges(sg), 6);
+    EXPECT_EQ(count3degrees, 3);
+    EXPECT_EQ(count2degrees, 0);
+    EXPECT_EQ(count1degrees, 3);
     bool any_edge_removed = remove_extra_edges(sg);
-    CHECK_FALSE(any_edge_removed);
-    CHECK(num_vertices(sg) == 6);
-    CHECK(num_edges(sg) == 6);
+    EXPECT_FALSE(any_edge_removed);
+    EXPECT_EQ(num_vertices(sg), 6);
+    EXPECT_EQ(num_edges(sg), 6);
     SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs(sg);
-    CHECK(num_vertices(reduced_g) == num_vertices(sg));
-    CHECK(num_edges(reduced_g) == num_edges(sg));
+    EXPECT_EQ(num_vertices(reduced_g), num_vertices(sg));
+    EXPECT_EQ(num_edges(reduced_g), num_edges(sg));
     std::cout << "After reduction:" << std::endl;
     SG::print_degrees(reduced_g);
     SG::print_edges(reduced_g);
 
     std::cout << "Merging three_connected_nodes" << std::endl;
     auto nodes_merged = SG::merge_three_connected_nodes(reduced_g);
-    CHECK(nodes_merged == 2);
+    EXPECT_EQ(nodes_merged, 2);
     // Nodes are not removed but cleared (no edges attached, degree=0)
-    // CHECK(num_vertices(reduced_g) == num_vertices(sg) - 2);
-    CHECK(num_vertices(reduced_g) == num_vertices(sg));
-    CHECK(num_edges(reduced_g) == num_edges(sg) - 3);
+    // EXPECT_EQ(num_vertices(reduced_g), num_vertices(sg) - 2);
+    EXPECT_EQ(num_vertices(reduced_g), num_vertices(sg));
+    EXPECT_EQ(num_edges(reduced_g), num_edges(sg) - 3);
     std::cout << "After merge:" << std::endl;
     SG::print_degrees(reduced_g);
     SG::print_spatial_edges(reduced_g);
@@ -129,14 +128,14 @@ TEST_CASE_METHOD(three_connected_nodes,
         if (degree == 3)
             count3degrees++;
     }
-    CHECK(count3degrees == 1);
-    CHECK(count2degrees == 0);
-    CHECK(count1degrees == 3);
-    CHECK(count0degrees == 2);
+    EXPECT_EQ(count3degrees, 1);
+    EXPECT_EQ(count2degrees, 0);
+    EXPECT_EQ(count1degrees, 3);
+    EXPECT_EQ(count0degrees, 2);
 }
 
-struct contour_length_cornercase2 : public object_graph {
-    contour_length_cornercase2() {
+struct ContourLengthCornercase2Fixture : public ObjectGraphFixture {
+    void SetUp() override {
         DigitalTopology::ForegroundAdjacency adjF;
         DigitalTopology::BackgroundAdjacency adjB;
         DigitalTopology topo(adjF, adjB,
@@ -154,7 +153,7 @@ struct contour_length_cornercase2 : public object_graph {
         Domain::Point n20(351, 160, 31);
         Domain::Point n21(351, 161, 29);
         Domain::Point e0(349, 158, 31);
-        Domain::Point e1(350, 158, 32); 
+        Domain::Point e1(350, 158, 32);
         Domain::Point e10(351, 158, 33);
         Domain::Point e11(351, 159, 33);
         Domain::Point e2(350, 159, 31);
@@ -177,9 +176,7 @@ struct contour_length_cornercase2 : public object_graph {
 
 
 // This test spotted a bug where we were merging nodes with neighbors degree > 3
-TEST_CASE_METHOD(contour_length_cornercase2,
-                 "contour_length_cornercase2",
-                 "[merge_nodes]")
+TEST_F(ContourLengthCornercase2Fixture, merge_nodes)
 {
     using SpatialGraph = SG::GraphAL;
     using vertex_iterator =
@@ -187,23 +184,23 @@ TEST_CASE_METHOD(contour_length_cornercase2,
     SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
     vertex_iterator vi, vi_end;
     bool any_edge_removed = remove_extra_edges(sg);
-    CHECK(any_edge_removed == true);
-    CHECK(num_vertices(sg) == 12);
-    CHECK(num_edges(sg) == 13);
+    EXPECT_EQ(any_edge_removed, true);
+    EXPECT_EQ(num_vertices(sg), 12);
+    EXPECT_EQ(num_edges(sg), 13);
     SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs(sg);
-    CHECK(num_vertices(reduced_g) == 7 );
-    CHECK(num_edges(reduced_g) == 8 );
+    EXPECT_EQ(num_vertices(reduced_g), 7 );
+    EXPECT_EQ(num_edges(reduced_g), 8 );
     std::cout << "After reduction:" << std::endl;
     SG::print_degrees(reduced_g);
     SG::print_edges(reduced_g);
 
     std::cout << "Merging contourlength cornercase2 " << std::endl;
     auto nodes_merged = SG::merge_three_connected_nodes(reduced_g);
-    CHECK(nodes_merged == 0);
+    EXPECT_EQ(nodes_merged, 0);
     // Nodes are not removed but cleared (no edges attached, degree=0)
-    // CHECK(num_vertices(reduced_g) == num_vertices(sg) - 2);
-    CHECK(num_vertices(reduced_g) == 7);
-    CHECK(num_edges(reduced_g) == 8 );
+    // EXPECT_EQ(num_vertices(reduced_g), num_vertices(sg) - 2);
+    EXPECT_EQ(num_vertices(reduced_g), 7);
+    EXPECT_EQ(num_edges(reduced_g), 8 );
     std::cout << "After merge:" << std::endl;
     SG::print_degrees(reduced_g);
     SG::print_spatial_edges(reduced_g);
@@ -226,10 +223,10 @@ TEST_CASE_METHOD(contour_length_cornercase2,
         if (degree == 4)
             count4degrees++;
     }
-    CHECK(count4degrees == 1);
-    CHECK(count3degrees == 3);
-    CHECK(count2degrees == 0);
-    CHECK(count1degrees == 3);
-    CHECK(count0degrees == 0);
-    CHECK_NOTHROW(SG::compute_contour_lengths(reduced_g));
+    EXPECT_EQ(count4degrees, 1);
+    EXPECT_EQ(count3degrees, 3);
+    EXPECT_EQ(count2degrees, 0);
+    EXPECT_EQ(count1degrees, 3);
+    EXPECT_EQ(count0degrees, 0);
+    EXPECT_NO_THROW(SG::compute_contour_lengths(reduced_g));
 }
