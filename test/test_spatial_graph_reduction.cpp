@@ -1,5 +1,5 @@
+#include "gmock/gmock.h"
 #include "DGtal/graph/ObjectBoostGraphInterface.h"
-#include "catch_header.h"
 #include "spatial_graph.hpp"
 #include <DGtal/base/Common.h>
 #include <DGtal/helpers/StdDefs.h>
@@ -19,7 +19,7 @@
 // #include "DGtal/io/DrawWithDisplay3DModifier.h"
 // #include <DGtal/io/viewers/Viewer3D.h>
 
-struct spatial_graph {
+struct SpatialGraphBaseFixture  {
     using GraphType = SG::GraphAL;
     GraphType g;
     using vertex_iterator =
@@ -35,8 +35,9 @@ struct spatial_graph {
  * | |
  * o-o
  */
-struct sg_square : public spatial_graph {
-    sg_square() {
+struct sg_square :
+    public SpatialGraphBaseFixture, ::testing::Test {
+    void SetUp() override {
         using boost::add_edge;
         this->g = GraphType(4);
         g[0].pos = {{0, 0, 0}};
@@ -50,7 +51,7 @@ struct sg_square : public spatial_graph {
     }
 };
 
-struct sg_square_expected : public spatial_graph {
+struct sg_square_expected : public SpatialGraphBaseFixture {
     sg_square_expected() {
         using boost::add_edge;
         this->g = GraphType(2);
@@ -77,8 +78,9 @@ struct sg_square_expected : public spatial_graph {
  * |
  * o
  */
-struct sg_square_plus_one : public spatial_graph {
-    sg_square_plus_one() {
+struct sg_square_plus_one :
+    public SpatialGraphBaseFixture, ::testing::Test {
+    void SetUp() override {
         using boost::add_edge;
         this->g = GraphType(5);
         g[0].pos = {{0, 0, 0}};
@@ -94,7 +96,7 @@ struct sg_square_plus_one : public spatial_graph {
     }
 };
 
-struct sg_square_plus_one_expected : public spatial_graph {
+struct sg_square_plus_one_expected : public SpatialGraphBaseFixture {
     sg_square_plus_one_expected() {
         using boost::add_edge;
         this->g = GraphType(3);
@@ -121,7 +123,7 @@ struct sg_square_plus_one_expected : public spatial_graph {
  *     |
  *     o
  */
-struct sg_one_edge : public spatial_graph {
+struct sg_one_edge : public SpatialGraphBaseFixture {
     sg_one_edge() {
         using boost::add_edge;
         this->g = GraphType(2);
@@ -151,7 +153,8 @@ struct sg_one_edge : public spatial_graph {
  *     |
  *     o
  */
-struct sg_easy : public spatial_graph {
+struct sg_easy :
+    public SpatialGraphBaseFixture {
     sg_easy() {
         using boost::add_edge;
         this->g = GraphType(4);
@@ -192,7 +195,7 @@ struct sg_easy : public spatial_graph {
  *     o
  *  extra_connected_junctions reduces to this.
  */
-struct sg_easy_centered : public spatial_graph {
+struct sg_easy_centered : public SpatialGraphBaseFixture {
     sg_easy_centered() {
         using boost::add_edge;
         this->g = GraphType(4);
@@ -240,7 +243,7 @@ struct sg_easy_centered : public spatial_graph {
  * which are really not nodes, but edge_points of the edges going to the center
  * node. All 5 sg_edges have no edge points.
  */
-struct sg_extra_connected_junctions : public spatial_graph {
+struct sg_extra_connected_junctions : public SpatialGraphBaseFixture {
     sg_extra_connected_junctions() {
         using boost::add_edge;
         this->g = GraphType(6);
@@ -296,7 +299,7 @@ struct sg_extra_connected_junctions : public spatial_graph {
 /**
  * Common typedefs for objects/graphs
  */
-struct object_graph {
+struct object_graph : public ::testing::Test {
     using Domain = DGtal::Z3i::Domain;
     using DigitalTopology = DGtal::Z3i::DT26_6;
     using DigitalSet = DGtal::DigitalSetByAssociativeContainer<
@@ -330,7 +333,7 @@ struct object_graph {
 
 struct one_edge : public object_graph {
 
-    one_edge() {
+    void SetUp() override {
         DigitalTopology::ForegroundAdjacency adjF;
         DigitalTopology::BackgroundAdjacency adjB;
         DigitalTopology topo(adjF, adjB,
@@ -371,7 +374,7 @@ struct one_edge : public object_graph {
  */
 struct easy : public object_graph {
 
-    easy() {
+    void SetUp() override {
         DigitalTopology::ForegroundAdjacency adjF;
         DigitalTopology::BackgroundAdjacency adjB;
         DigitalTopology topo(adjF, adjB,
@@ -423,7 +426,7 @@ struct easy : public object_graph {
  */
 struct extra_connected_junctions : public object_graph {
 
-    extra_connected_junctions() {
+    void SetUp() override {
         DigitalTopology::ForegroundAdjacency adjF;
         DigitalTopology::BackgroundAdjacency adjB;
         DigitalTopology topo(adjF, adjB,
@@ -456,7 +459,7 @@ struct extra_connected_junctions : public object_graph {
 };
 
 // Helpers
-SG::PointContainer all_vertex_positions(const spatial_graph::GraphType &lhs_g) {
+SG::PointContainer all_vertex_positions(const SpatialGraphBaseFixture::GraphType &lhs_g) {
     SG::PointContainer lhs_vertex_points;
     for (auto vp = boost::vertices(lhs_g); vp.first != vp.second; ++vp.first) {
         lhs_vertex_points.push_back(lhs_g[*vp.first].pos);
@@ -464,8 +467,8 @@ SG::PointContainer all_vertex_positions(const spatial_graph::GraphType &lhs_g) {
     return lhs_vertex_points;
 }
 
-bool equal_vertex_positions(const spatial_graph::GraphType &lhs_g,
-                            const spatial_graph::GraphType &rhs_g) {
+bool equal_vertex_positions(const SpatialGraphBaseFixture::GraphType &lhs_g,
+                            const SpatialGraphBaseFixture::GraphType &rhs_g) {
     auto lhs_vertex_points = all_vertex_positions(lhs_g);
     auto rhs_vertex_points = all_vertex_positions(rhs_g);
     std::sort(lhs_vertex_points.begin(), lhs_vertex_points.end());
@@ -473,7 +476,7 @@ bool equal_vertex_positions(const spatial_graph::GraphType &lhs_g,
     return lhs_vertex_points == rhs_vertex_points;
 }
 
-SG::PointContainer all_edge_points(const spatial_graph::GraphType &lhs_g) {
+SG::PointContainer all_edge_points(const SpatialGraphBaseFixture::GraphType &lhs_g) {
     SG::PointContainer lhs_edge_points;
     for (auto ep = boost::edges(lhs_g); ep.first != ep.second; ++ep.first) {
         auto &se = lhs_g[*ep.first];
@@ -490,8 +493,8 @@ void print_point_container(const SG::PointContainer &pc) {
     }
 }
 
-bool equal_edge_points(const spatial_graph::GraphType &lhs_g,
-                       const spatial_graph::GraphType &rhs_g) {
+bool equal_edge_points(const SpatialGraphBaseFixture::GraphType &lhs_g,
+                       const SpatialGraphBaseFixture::GraphType &rhs_g) {
     auto lhs_edge_points = all_edge_points(lhs_g);
     auto rhs_edge_points = all_edge_points(rhs_g);
     std::sort(lhs_edge_points.begin(), lhs_edge_points.end());
@@ -499,13 +502,12 @@ bool equal_edge_points(const spatial_graph::GraphType &lhs_g,
     return lhs_edge_points == rhs_edge_points;
 }
 
-TEST_CASE_METHOD(one_edge, "Convert one_edge obj to spatial graph",
-                 "[convert]") {
+TEST_F(one_edge, object_to_sg) {
     std::cout << "Convert one_edge" << std::endl;
     using SpatialGraph = sg_one_edge::GraphType;
     SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
-    CHECK(boost::num_vertices(sg) == boost::num_vertices(obj));
-    CHECK(boost::num_edges(sg) == boost::num_edges(obj) / 2.0);
+    EXPECT_EQ(boost::num_vertices(sg), boost::num_vertices(obj));
+    EXPECT_EQ(boost::num_edges(sg), boost::num_edges(obj) / 2.0);
     // Dev code:
     // print_point_container(all_vertex_positions(sg));
     // auto edges = boost::edges(sg);
@@ -518,14 +520,12 @@ TEST_CASE_METHOD(one_edge, "Convert one_edge obj to spatial graph",
     // }
 }
 
-TEST_CASE_METHOD(extra_connected_junctions,
-                 "Convert extra_connected_junctions obj to spatial graph",
-                 "[convert]") {
+TEST_F(extra_connected_junctions, object_to_sg) {
     std::cout << "Convert extra" << std::endl;
     using SpatialGraph = sg_extra_connected_junctions::GraphType;
     SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
-    CHECK(boost::num_vertices(sg) == boost::num_vertices(obj));
-    CHECK(boost::num_edges(sg) == boost::num_edges(obj) / 2.0);
+    EXPECT_EQ(boost::num_vertices(sg), boost::num_vertices(obj));
+    EXPECT_EQ(boost::num_edges(sg), boost::num_edges(obj) / 2.0);
     // Dev code:
     // print_point_container(all_vertex_positions(sg));
     // auto edges = boost::edges(sg);
@@ -538,79 +538,76 @@ TEST_CASE_METHOD(extra_connected_junctions,
     // }
 }
 
-TEST_CASE_METHOD(one_edge, "Reduce graph with degrees <=2 to one edge",
-                 "[one_edge]") {
+TEST_F(one_edge, reduce) {
     std::cout << "One Edge" << std::endl;
     auto nverts = boost::num_vertices(obj);
-    CHECK(nverts == obj.size());
+    EXPECT_EQ(nverts, obj.size());
     // std::cout << "V: " << nverts << std::endl;
     auto nedges = boost::num_edges(obj);
     // std::cout << "E: " << nedges << std::endl;
-    CHECK(nedges == 12); // Because object has oriented edges
+    EXPECT_EQ(nedges, 12); // Because object has oriented edges
 
     using SpatialGraph = sg_one_edge::GraphType;
     SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
     SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs(sg);
     SpatialGraph expected_g = sg_one_edge().g;
-    CHECK(num_vertices(reduced_g) == num_vertices(expected_g));
-    CHECK(num_edges(reduced_g) == num_edges(expected_g));
-    CHECK(equal_vertex_positions(reduced_g, expected_g) == true);
-    CHECK(equal_edge_points(reduced_g, expected_g) == true);
+    EXPECT_EQ(num_vertices(reduced_g), num_vertices(expected_g));
+    EXPECT_EQ(num_edges(reduced_g), num_edges(expected_g));
+    EXPECT_EQ(equal_vertex_positions(reduced_g, expected_g), true);
+    EXPECT_EQ(equal_edge_points(reduced_g, expected_g), true);
 }
 
-TEST_CASE_METHOD(easy, "Reduce graph with no pitfalls", "[easy]") {
+TEST_F(easy, reduce) {
     std::cout << "Easy Graph" << std::endl;
     auto nverts = boost::num_vertices(obj);
     // std::cout << "V: " << nverts << std::endl;
-    CHECK(nverts == obj.size());
+    EXPECT_EQ(nverts, obj.size());
     auto nedges = boost::num_edges(obj);
     // std::cout << "E: " << nedges << std::endl;
-    CHECK(nedges == 16);
+    EXPECT_EQ(nedges, 16);
     // print_degrees();
     using SpatialGraph = sg_easy::GraphType;
     SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
     SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs(sg);
     SpatialGraph expected_g = sg_easy().g;
 
-    CHECK(num_vertices(reduced_g) == num_vertices(expected_g));
-    CHECK(num_edges(reduced_g) == num_edges(expected_g));
-    CHECK(equal_vertex_positions(reduced_g, expected_g) == true);
-    CHECK(equal_edge_points(reduced_g, expected_g) == true);
+    EXPECT_EQ(num_vertices(reduced_g), num_vertices(expected_g));
+    EXPECT_EQ(num_edges(reduced_g), num_edges(expected_g));
+    EXPECT_EQ(equal_vertex_positions(reduced_g, expected_g), true);
+    EXPECT_EQ(equal_edge_points(reduced_g, expected_g), true);
     // Dev code:
     // auto reduced_edge_points = all_edge_points(reduced_g);
     // auto expected_edge_points = all_edge_points(expected_g);
-    // CHECK(reduced_edge_points.size() == expected_edge_points.size());
+    // EXPECT_EQ(reduced_edge_points.size(), expected_edge_points.size());
     // std::cout << "Reduced edge points" << std::endl;
     // print_point_container(reduced_edge_points);
     // std::cout << "Expected edge points" << std::endl;
     // print_point_container(expected_edge_points);
 }
 
-TEST_CASE_METHOD(extra_connected_junctions,
-                 "Graph has more junctions than needed, reduction",
-                 "[extra_connected_junctions]") {
+TEST_F(extra_connected_junctions, reduce) {
     std::cout << "Extra Connected Junctions Graph" << std::endl;
     auto nverts = boost::num_vertices(obj);
     // std::cout << "V: " << nverts << std::endl;
-    CHECK(nverts == obj.size());
+    EXPECT_EQ(nverts, obj.size());
     auto nedges = boost::num_edges(obj);
     // std::cout << "E: " << nedges << std::endl;
-    CHECK(nedges == 20);
+    EXPECT_EQ(nedges, 20);
     // print_degrees();
     using SpatialGraph = sg_extra_connected_junctions::GraphType;
     SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
     SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs(sg);
     SpatialGraph expected_g = sg_extra_connected_junctions().g;
 
-    CHECK(num_vertices(reduced_g) == num_vertices(expected_g));
-    CHECK(num_edges(reduced_g) == num_edges(expected_g));
+    EXPECT_EQ(num_vertices(reduced_g), num_vertices(expected_g));
+    EXPECT_EQ(num_edges(reduced_g), num_edges(expected_g));
 
-    CHECK(equal_vertex_positions(reduced_g, expected_g) == true);
-    CHECK(equal_edge_points(reduced_g, expected_g) == true);
+    EXPECT_EQ(equal_vertex_positions(reduced_g, expected_g), true);
+    EXPECT_EQ(equal_edge_points(reduced_g, expected_g), true);
     //// Extra checking if failure:
     // auto reduced_edge_points = all_edge_points(reduced_g);
     // auto expected_edge_points = all_edge_points(expected_g);
-    // CHECK(reduced_edge_points.size() == expected_edge_points.size());
+    // EXPECT_EQ(reduced_edge_points.size(), expected_edge_points.size());
     // std::cout << "Reduced edge points" << std::endl;
     // print_point_container(reduced_edge_points);
     // std::cout << "Expected edge points" << std::endl;
@@ -618,19 +615,17 @@ TEST_CASE_METHOD(extra_connected_junctions,
     // SG::print_edges(reduced_g);
 }
 
-TEST_CASE_METHOD(extra_connected_junctions,
-                 "Graph has more junctions than needed",
-                 "[remove_extra_edges]") {
+TEST_F(extra_connected_junctions, remove_extra_edges) {
     std::cout << "Remove extra edges" << std::endl;
     using SpatialGraph = sg_extra_connected_junctions::GraphType;
     SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
     remove_extra_edges(sg);
     SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs(sg);
     sg_extra_connected_junctions::GraphType expected_g = sg_easy_centered().g;
-    CHECK(num_vertices(reduced_g) == num_vertices(expected_g));
-    CHECK(num_edges(reduced_g) == num_edges(expected_g));
-    CHECK(equal_vertex_positions(reduced_g, expected_g) == true);
-    CHECK(equal_edge_points(reduced_g, expected_g) == true);
+    EXPECT_EQ(num_vertices(reduced_g), num_vertices(expected_g));
+    EXPECT_EQ(num_edges(reduced_g), num_edges(expected_g));
+    EXPECT_EQ(equal_vertex_positions(reduced_g, expected_g), true);
+    EXPECT_EQ(equal_edge_points(reduced_g, expected_g), true);
 }
 
 /**
@@ -670,13 +665,11 @@ struct three_connected_nodes : public object_graph {
         this->obj = Object(topo, obj_set);
     }
 };
-TEST_CASE_METHOD(three_connected_nodes,
-                 "three connected nodes with same edge length",
-                 "[remove_extra_edges]") {
+TEST_F(three_connected_nodes, remove_extra_edges) {
     std::cout << "Three connected nodes" << std::endl;
-    using SpatialGraph = spatial_graph::GraphType;
+    using SpatialGraph = SpatialGraphBaseFixture::GraphType;
     SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
-    spatial_graph::vertex_iterator vi, vi_end;
+    SpatialGraphBaseFixture::vertex_iterator vi, vi_end;
     std::tie(vi, vi_end) = boost::vertices(sg);
     size_t count1degrees = 0;
     size_t count2degrees = 0;
@@ -690,18 +683,18 @@ TEST_CASE_METHOD(three_connected_nodes,
         if (degree == 3)
             count3degrees++;
     }
-    CHECK(num_vertices(sg) == 6);
-    CHECK(num_edges(sg) == 6);
-    CHECK(count3degrees == 3);
-    CHECK(count2degrees == 0);
-    CHECK(count1degrees == 3);
+    EXPECT_EQ(num_vertices(sg), 6);
+    EXPECT_EQ(num_edges(sg), 6);
+    EXPECT_EQ(count3degrees, 3);
+    EXPECT_EQ(count2degrees, 0);
+    EXPECT_EQ(count1degrees, 3);
     bool any_edge_removed = remove_extra_edges(sg);
-    CHECK_FALSE(any_edge_removed);
-    CHECK(num_vertices(sg) == 6);
-    CHECK(num_edges(sg) == 6);
+    EXPECT_FALSE(any_edge_removed);
+    EXPECT_EQ(num_vertices(sg), 6);
+    EXPECT_EQ(num_edges(sg), 6);
     SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs(sg);
-    CHECK(num_vertices(reduced_g) == num_vertices(sg));
-    CHECK(num_edges(reduced_g) == num_edges(sg));
+    EXPECT_EQ(num_vertices(reduced_g), num_vertices(sg));
+    EXPECT_EQ(num_edges(reduced_g), num_edges(sg));
     SG::print_degrees(reduced_g);
     SG::print_edges(reduced_g);
 }
@@ -760,24 +753,22 @@ struct three_connected_nodes_with_self_loop : public object_graph {
         this->obj = Object(topo, obj_set);
     }
 };
-TEST_CASE_METHOD(three_connected_nodes_with_self_loop,
-                 "three connected nodes_with_self_loop with same edge length",
-                 "[remove_extra_edges]") {
+TEST_F(three_connected_nodes_with_self_loop, remove_extra_edges) {
     std::cout << "Three connected nodes_with_self_loop" << std::endl;
-    using SpatialGraph = spatial_graph::GraphType;
+    using SpatialGraph = SpatialGraphBaseFixture::GraphType;
     SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
     SG::print_degrees(sg);
     SG::print_edges(sg);
-    CHECK(num_vertices(sg) == 14);
-    CHECK(num_edges(sg) == 17); // Haven't really thought about his, but should be ok.
+    EXPECT_EQ(num_vertices(sg), 14);
+    EXPECT_EQ(num_edges(sg), 17); // Haven't really thought about his, but should be ok.
     bool any_edge_removed = remove_extra_edges(sg);
-    CHECK(any_edge_removed == true);
-    CHECK(num_vertices(sg) == 14);
-    CHECK(num_edges(sg) == 15); // 2 edges removed
+    EXPECT_EQ(any_edge_removed, true);
+    EXPECT_EQ(num_vertices(sg), 14);
+    EXPECT_EQ(num_edges(sg), 15); // 2 edges removed
     SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs(sg);
-    CHECK(num_vertices(reduced_g) == 4);
-    CHECK(num_edges(reduced_g) == 5);
-    spatial_graph::vertex_iterator vi, vi_end;
+    EXPECT_EQ(num_vertices(reduced_g), 4);
+    EXPECT_EQ(num_edges(reduced_g), 5);
+    SpatialGraphBaseFixture::vertex_iterator vi, vi_end;
     std::tie(vi, vi_end) = boost::vertices(reduced_g);
     size_t count1degrees = 0;
     size_t count2degrees = 0;
@@ -791,42 +782,41 @@ TEST_CASE_METHOD(three_connected_nodes_with_self_loop,
         if (degree == 3)
             count3degrees++;
     }
-    CHECK(count3degrees == 3);
-    CHECK(count2degrees == 0);
-    CHECK(count1degrees == 1);
+    EXPECT_EQ(count3degrees, 3);
+    EXPECT_EQ(count2degrees, 0);
+    EXPECT_EQ(count1degrees, 1);
     SG::print_spatial_edges(reduced_g);
 }
 
 
-TEST_CASE_METHOD(sg_square, "Reduce sg_square", "[reduce_graph]") {
+TEST_F(sg_square, reduce_graph) {
     std::cout << "Reduce graph - square" << std::endl;
-    using SpatialGraph = spatial_graph::GraphType;
+    using SpatialGraph = SpatialGraphBaseFixture::GraphType;
     auto &sg = g;
     auto reduced_g = SG::reduce_spatial_graph_via_dfs(sg);
-    CHECK(num_vertices(reduced_g) == 2);
-    CHECK(num_edges(reduced_g) == 2);
+    EXPECT_EQ(num_vertices(reduced_g), 2);
+    EXPECT_EQ(num_edges(reduced_g), 2);
     SG::print_degrees(reduced_g);
     SG::print_edges(reduced_g);
     // Expected:
     SpatialGraph expected_g = sg_square_expected().g;
-    CHECK(equal_vertex_positions(reduced_g, expected_g) == true);
-    CHECK(equal_edge_points(reduced_g, expected_g) == true);
+    EXPECT_EQ(equal_vertex_positions(reduced_g, expected_g), true);
+    EXPECT_EQ(equal_edge_points(reduced_g, expected_g), true);
 }
 
-TEST_CASE_METHOD(sg_square_plus_one, "Reduce sg_square_plus_one",
-                 "[reduce_graph]") {
+TEST_F(sg_square_plus_one, reduce_graph) {
     std::cout << "Reduce graph - square plus one" << std::endl;
-    using SpatialGraph = spatial_graph::GraphType;
+    using SpatialGraph = SpatialGraphBaseFixture::GraphType;
     auto &sg = g;
     auto reduced_g = SG::reduce_spatial_graph_via_dfs(sg);
-    CHECK(num_vertices(reduced_g) == 3);
-    CHECK(num_edges(reduced_g) == 3);
+    EXPECT_EQ(num_vertices(reduced_g), 3);
+    EXPECT_EQ(num_edges(reduced_g), 3);
     SG::print_degrees(reduced_g);
     SG::print_edges(reduced_g);
     // Expected:
     SpatialGraph expected_g = sg_square_plus_one_expected().g;
-    CHECK(equal_vertex_positions(reduced_g, expected_g) == true);
-    CHECK(equal_edge_points(reduced_g, expected_g) == true);
+    EXPECT_EQ(equal_vertex_positions(reduced_g, expected_g), true);
+    EXPECT_EQ(equal_edge_points(reduced_g, expected_g), true);
 }
 
 /**
@@ -862,13 +852,11 @@ struct debug_one : public object_graph {
         this->obj = Object(topo, obj_set);
     }
 };
-TEST_CASE_METHOD(debug_one,
-                 "debug_one estructure with more nodes than expected",
-                 "[remove_extra_edges]") {
+TEST_F(debug_one, remove_extra_edges) {
     std::cout << "debug_one" << std::endl;
-    using SpatialGraph = spatial_graph::GraphType;
+    using SpatialGraph = SpatialGraphBaseFixture::GraphType;
     SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
-    spatial_graph::vertex_iterator vi, vi_end;
+    SpatialGraphBaseFixture::vertex_iterator vi, vi_end;
     std::cout << "Original" << std::endl;
     SG::print_degrees(sg);
     SG::print_edges(sg);
@@ -885,24 +873,24 @@ TEST_CASE_METHOD(debug_one,
         if (degree == 3)
             count3degrees++;
     }
-    CHECK(num_vertices(sg) == 5);
-    CHECK(num_edges(sg) == 5);
-    CHECK(count3degrees == 2);
-    CHECK(count2degrees == 1);
-    CHECK(count1degrees == 2);
+    EXPECT_EQ(num_vertices(sg), 5);
+    EXPECT_EQ(num_edges(sg), 5);
+    EXPECT_EQ(count3degrees, 2);
+    EXPECT_EQ(count2degrees, 1);
+    EXPECT_EQ(count1degrees, 2);
     bool any_edge_removed = remove_extra_edges(sg);
-    CHECK(any_edge_removed == true);
+    EXPECT_EQ(any_edge_removed, true);
     std::cout << "After removal of extra edges" << std::endl;
     SG::print_degrees(sg);
     SG::print_edges(sg);
-    CHECK(num_vertices(sg) == 5);
-    CHECK(num_edges(sg) == 4);
+    EXPECT_EQ(num_vertices(sg), 5);
+    EXPECT_EQ(num_edges(sg), 4);
     SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs(sg);
     std::cout << "Reduced" << std::endl;
     SG::print_degrees(reduced_g);
     SG::print_spatial_edges(reduced_g);
-    CHECK(num_vertices(reduced_g) == 4);
-    CHECK(num_edges(reduced_g) == 3);
+    EXPECT_EQ(num_vertices(reduced_g), 4);
+    EXPECT_EQ(num_edges(reduced_g), 3);
 }
 
  /**
@@ -942,13 +930,11 @@ struct rare_trio : public object_graph {
         this->obj = Object(topo, obj_set);
     }
 };
-TEST_CASE_METHOD(rare_trio,
-                 "rare_trio estructure with more nodes than expected",
-                 "[remove_extra_edges]") {
+TEST_F(rare_trio, remove_extra_edges) {
     std::cout << "rare_trio" << std::endl;
-    using SpatialGraph = spatial_graph::GraphType;
+    using SpatialGraph = SpatialGraphBaseFixture::GraphType;
     SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
-    spatial_graph::vertex_iterator vi, vi_end;
+    SpatialGraphBaseFixture::vertex_iterator vi, vi_end;
     std::cout << "Original" << std::endl;
     SG::print_degrees(sg);
     SG::print_edges(sg);
@@ -965,30 +951,30 @@ TEST_CASE_METHOD(rare_trio,
         if (degree == 3)
             count3degrees++;
     }
-    CHECK(num_vertices(sg) == 6);
-    CHECK(num_edges(sg) == 6);
-    CHECK(count3degrees == 3);
-    CHECK(count2degrees == 0);
-    CHECK(count1degrees == 3);
+    EXPECT_EQ(num_vertices(sg), 6);
+    EXPECT_EQ(num_edges(sg), 6);
+    EXPECT_EQ(count3degrees, 3);
+    EXPECT_EQ(count2degrees, 0);
+    EXPECT_EQ(count1degrees, 3);
     bool any_edge_removed = remove_extra_edges(sg);
-    CHECK(any_edge_removed == false);
+    EXPECT_EQ(any_edge_removed, false);
     std::cout << "After removal of extra edges" << std::endl;
     SG::print_degrees(sg);
     SG::print_edges(sg);
-    CHECK(num_vertices(sg) == 6);
-    CHECK(num_edges(sg) == 6);
+    EXPECT_EQ(num_vertices(sg), 6);
+    EXPECT_EQ(num_edges(sg), 6);
     SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs(sg);
     std::cout << "Reduced" << std::endl;
     SG::print_degrees(reduced_g);
     SG::print_spatial_edges(reduced_g);
-    CHECK(num_vertices(reduced_g) == 6);
-    CHECK(num_edges(reduced_g) == 6);
+    EXPECT_EQ(num_vertices(reduced_g), 6);
+    EXPECT_EQ(num_edges(reduced_g), 6);
     // SG::visualize_spatial_graph(reduced_g);
     std::cout << "Merge 3-connected" << std::endl;
     auto nodes_merged = SG::merge_three_connected_nodes(reduced_g);
     std::cout << nodes_merged <<  " nodes were merged. Those nodes have now degree 0" << std::endl;
-    CHECK(num_vertices(reduced_g) == 6);
-    CHECK(num_edges(reduced_g) == 3);
+    EXPECT_EQ(num_vertices(reduced_g), 6);
+    EXPECT_EQ(num_edges(reduced_g), 3);
     SG::print_degrees(reduced_g);
     SG::print_spatial_edges(reduced_g);
     // SG::visualize_spatial_graph(reduced_g);
@@ -1047,11 +1033,9 @@ struct buggy_structure : public object_graph {
         this->obj = Object(topo, obj_set);
     }
 };
-TEST_CASE_METHOD(buggy_structure,
-                 "buggy_structure structure with more nodes than expected",
-                 "[remove_extra_edges]") {
+TEST_F(buggy_structure, remove_extra_edges) {
     std::cout << "buggy_structure" << std::endl;
-    using SpatialGraph = spatial_graph::GraphType;
+    using SpatialGraph = SpatialGraphBaseFixture::GraphType;
     SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(obj);
   // {
   //     DGtal::Z3i::KSpace ks;
@@ -1072,7 +1056,7 @@ TEST_CASE_METHOD(buggy_structure,
   //     app.exec();
   // }
     // SG::visualize_spatial_graph(sg);
-    spatial_graph::vertex_iterator vi, vi_end;
+    SpatialGraphBaseFixture::vertex_iterator vi, vi_end;
     std::cout << "Original" << std::endl;
     SG::print_degrees(sg);
     SG::print_edges(sg);
@@ -1089,13 +1073,13 @@ TEST_CASE_METHOD(buggy_structure,
         if (degree == 3)
             count3degrees++;
     }
-    CHECK(num_vertices(sg) == 11);
-    CHECK(num_edges(sg) == 12);
-    CHECK(count3degrees == 0);
-    CHECK(count2degrees == 6);
-    CHECK(count1degrees == 3);
+    EXPECT_EQ(num_vertices(sg), 11);
+    EXPECT_EQ(num_edges(sg), 12);
+    EXPECT_EQ(count3degrees, 0);
+    EXPECT_EQ(count2degrees, 6);
+    EXPECT_EQ(count1degrees, 3);
     bool any_edge_removed = remove_extra_edges(sg);
-    CHECK(any_edge_removed == false);
+    EXPECT_EQ(any_edge_removed, false);
     std::cout << "Reduced" << std::endl;
     bool verbose = true;
     SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs(sg, verbose);
@@ -1124,8 +1108,8 @@ TEST_CASE_METHOD(buggy_structure,
     //
     //     app.exec();
     // }
-    CHECK(num_vertices(reduced_g) == 5);
-    CHECK(num_edges(reduced_g) == 5);
+    EXPECT_EQ(num_vertices(reduced_g), 5);
+    EXPECT_EQ(num_edges(reduced_g), 5);
     std::vector<SG::PointType> all_edge_points;
     for (auto edge_pair = boost::edges(reduced_g); edge_pair.first != edge_pair.second; ++edge_pair.first) {
         const auto & eps = reduced_g[*edge_pair.first].edge_points;
@@ -1138,12 +1122,12 @@ TEST_CASE_METHOD(buggy_structure,
         { 489, 398, 3 }, { 490, 400, 1 }, { 490, 400, 3 }
     };
     std::sort(std::begin(expected_edge_points), std::end(expected_edge_points));
-    CHECK(all_edge_points == expected_edge_points);
-    CHECK(all_edge_points.size() + num_vertices(reduced_g) == 11);
+    EXPECT_EQ(all_edge_points, expected_edge_points);
+    EXPECT_EQ(all_edge_points.size() + num_vertices(reduced_g), 11);
 
     // SG::visualize_spatial_graph(reduced_g);
     std::cout << "Merge 3-connected" << std::endl;
     auto nodes_merged = SG::merge_three_connected_nodes(reduced_g);
     std::cout << nodes_merged <<  " nodes were merged. Those nodes have now degree 0" << std::endl;
-    CHECK(nodes_merged == 0 );
+    EXPECT_EQ(nodes_merged, 0 );
 }

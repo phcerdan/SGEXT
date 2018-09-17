@@ -18,12 +18,12 @@
  *
  * *******************************************************************/
 
-#include "catch_header.h"
+#include "gmock/gmock.h"
 #include "graph_data.hpp"
 #include <sstream>
 #include <algorithm>
 
-TEST_CASE("print and read_data","[io][graph_data]")
+TEST(IO, print_and_read_graph_data)
 {
     // Setup data
     std::vector<double> degrees({1, 2, 3, 4});
@@ -32,6 +32,6 @@ TEST_CASE("print and read_data","[io][graph_data]")
     SG::print_graph_data(header, degrees, buffer);
     // Read data
     auto head_data = SG::read_graph_data(buffer);
-    CHECK(head_data.first == header);
-    CHECK(head_data.second == degrees);
+    EXPECT_EQ(head_data.first, header);
+    EXPECT_EQ(head_data.second, degrees);
 }

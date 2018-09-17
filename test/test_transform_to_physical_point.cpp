@@ -18,15 +18,15 @@
  *
  * *******************************************************************/
 
-#include "catch_header.h"
+#include "gmock/gmock.h"
 #include "transform_to_physical_point.hpp"
 #include "spatial_graph.hpp"
 #include "itkImage.h"
 
-struct default_image
+struct default_image : public ::testing::Test
 {
     using ImageType = itk::Image<unsigned char, 3>;
-    default_image(){
+    void SetUp() override{
         ImageType::RegionType region;
         ImageType::IndexType start;
         start[0] = 0;
@@ -48,7 +48,8 @@ struct default_image
 
 struct non_default_image: public default_image
 {
-    non_default_image() : default_image() {
+    void SetUp() override {
+        default_image::SetUp();
         ImageType::PointType origin;
         origin.Fill(100.0);
         this->image->SetOrigin(origin);
@@ -66,33 +67,27 @@ struct non_default_image: public default_image
     }
 };
 
-TEST_CASE_METHOD(default_image,
-        "index_array_to_physical_point_array default",
-        "[transform][array]")
+TEST_F(default_image, index_array_to_physical_point_array)
 {
     auto input_array = SG::PointType{{1, 1, 1}};
     auto trans_array = SG::index_array_to_physical_point_array<ImageType>(
             input_array,
             this->image);
-    CHECK(trans_array == input_array);
+    EXPECT_THAT(trans_array, input_array);
 }
 
-TEST_CASE_METHOD(non_default_image,
-        "index_array_to_physical_point_array non-default",
-        "[transform][array]")
+TEST_F(non_default_image, index_array_to_physical_point_array)
 {
     auto input_array = SG::PointType{{1, 1, 1}};
     auto trans_array = SG::index_array_to_physical_point_array<ImageType>(
             input_array,
             this->image);
-    CHECK(trans_array[0] == 101.0);
-    CHECK(trans_array[1] == 100.1);
-    CHECK(trans_array[2] == 110.0);
+    EXPECT_EQ(trans_array[0], 101.0);
+    EXPECT_EQ(trans_array[1], 100.1);
+    EXPECT_EQ(trans_array[2], 110.0);
 }
 
-TEST_CASE_METHOD(default_image,
-        "transform_graph_to_physical_point default",
-        "[transform][graph]")
+TEST_F(default_image, transform_graph_to_physical_point)
 {
     using GraphType = SG::GraphAL;
     GraphType g(2);
@@ -111,25 +106,23 @@ TEST_CASE_METHOD(default_image,
 
     SG::transform_graph_to_physical_point<ImageType>(g, this->image);
 
-    CHECK(g[0].pos[0] == 0.0);
-    CHECK(g[0].pos[1] == 0.0);
-    CHECK(g[0].pos[2] == 0.0);
-    CHECK(g[1].pos[0] == 1.0);
-    CHECK(g[1].pos[1] == 1.0);
-    CHECK(g[1].pos[2] == 0.0);
+    EXPECT_EQ(g[0].pos[0], 0.0);
+    EXPECT_EQ(g[0].pos[1], 0.0);
+    EXPECT_EQ(g[0].pos[2], 0.0);
+    EXPECT_EQ(g[1].pos[0], 1.0);
+    EXPECT_EQ(g[1].pos[1], 1.0);
+    EXPECT_EQ(g[1].pos[2], 0.0);
     auto ep1 = g[edge1.first].edge_points[0];
     auto ep2 = g[edge2.first].edge_points[0];
-    CHECK(ep1[0] == 1.0);
-    CHECK(ep1[1] == 0.0);
-    CHECK(ep1[2] == 0.0);
-    CHECK(ep2[0] == 0.0);
-    CHECK(ep2[1] == 1.0);
-    CHECK(ep2[2] == 0.0);
+    EXPECT_EQ(ep1[0], 1.0);
+    EXPECT_EQ(ep1[1], 0.0);
+    EXPECT_EQ(ep1[2], 0.0);
+    EXPECT_EQ(ep2[0], 0.0);
+    EXPECT_EQ(ep2[1], 1.0);
+    EXPECT_EQ(ep2[2], 0.0);
 }
 
-TEST_CASE_METHOD(non_default_image,
-        "transform_graph_to_physical_point non-default",
-        "[transform][graph]")
+TEST_F(non_default_image, transform_graph_to_physical_point)
 {
     using GraphType = SG::GraphAL;
     GraphType g(2);
@@ -148,18 +141,18 @@ TEST_CASE_METHOD(non_default_image,
 
     SG::transform_graph_to_physical_point<ImageType>(g, this->image);
 
-    CHECK(g[0].pos[0] == 100.0);
-    CHECK(g[0].pos[1] == 100.0);
-    CHECK(g[0].pos[2] == 100.0);
-    CHECK(g[1].pos[0] == 101.0);
-    CHECK(g[1].pos[1] == 100.1);
-    CHECK(g[1].pos[2] == 100.0);
+    EXPECT_EQ(g[0].pos[0], 100.0);
+    EXPECT_EQ(g[0].pos[1], 100.0);
+    EXPECT_EQ(g[0].pos[2], 100.0);
+    EXPECT_EQ(g[1].pos[0], 101.0);
+    EXPECT_EQ(g[1].pos[1], 100.1);
+    EXPECT_EQ(g[1].pos[2], 100.0);
     auto ep1 = g[edge1.first].edge_points[0];
     auto ep2 = g[edge2.first].edge_points[0];
-    CHECK(ep1[0] == 101.0);
-    CHECK(ep1[1] == 100.0);
-    CHECK(ep1[2] == 100.0);
-    CHECK(ep2[0] == 100.0);
-    CHECK(ep2[1] == 100.1);
-    CHECK(ep2[2] == 100.0);
+    EXPECT_EQ(ep1[0], 101.0);
+    EXPECT_EQ(ep1[1], 100.0);
+    EXPECT_EQ(ep1[2], 100.0);
+    EXPECT_EQ(ep2[0], 100.0);
+    EXPECT_EQ(ep2[1], 100.1);
+    EXPECT_EQ(ep2[2], 100.0);
 }
