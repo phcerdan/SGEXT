@@ -1,9 +1,9 @@
-#include "catch_header.h"
+#include "gmock/gmock.h"
 #include "visualize_spatial_graph.hpp"
 #include "spatial_graph.hpp"
 #include <iostream>
 
-struct sg_3D {
+struct sg_3D : public ::testing::Test {
     using GraphType = SG::GraphAL;
     GraphType g;
     using vertex_iterator =
@@ -11,7 +11,7 @@ struct sg_3D {
     using edge_iterator =
         typename boost::graph_traits<GraphType>::edge_iterator;
 
-    sg_3D() {
+    void SetUp() override {
         this->g = GraphType(4);
 
         SG::PointType n3{{0, 3, 0}};
@@ -41,9 +41,7 @@ struct sg_3D {
     }
 };
 
-TEST_CASE_METHOD(sg_3D,
-                 "visualize sg_3D",
-                 "[visualize]")
+TEST_F(sg_3D, visualize)
 {
     SG::visualize_spatial_graph(g);
 }

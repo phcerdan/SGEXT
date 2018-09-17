@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.11)
 # cmake_policy(SET CMP0012 NEW)
 # if (UNIX)
 #     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wall -pedantic -Wextra")
@@ -34,6 +34,7 @@ include_directories(SYSTEM ${ITK_INCLUDE_DIRS})
 if(VISUALIZE)
   find_package(Qt5 REQUIRED
     Widgets
+    Xml
     OpenGL)
 
   # VTK components to handle external dependency histo-header
@@ -138,6 +139,24 @@ endif()
 add_subdirectory(cpp-scripts)
 
 if(ENABLE_TESTING)
-    enable_testing()
-    add_subdirectory(test)
+  enable_testing()
+
+  #############################################################################
+  # Fetch GTest
+  include(FetchContent)
+
+  FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG        release-1.8.0
+  )
+
+  FetchContent_GetProperties(googletest)
+  if(NOT googletest_POPULATED)
+    FetchContent_Populate(googletest)
+    add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR})
+  endif()
+  #############################################################################
+
+  add_subdirectory(test)
 endif(ENABLE_TESTING)
