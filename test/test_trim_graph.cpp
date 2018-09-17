@@ -1,10 +1,10 @@
-#include "catch_header.h"
+#include "gmock/gmock.h"
 #include "trim_graph.hpp"
 
-struct test_spatial_graph {
+struct test_spatial_graph : public ::testing::Test {
     using GraphType = SG::GraphAL;
     GraphType g;
-    test_spatial_graph() {
+    void SetUp() override {
         using boost::add_edge;
         this->g = GraphType(4);
         // Add edge with an associated SpatialEdge at construction.
@@ -35,9 +35,9 @@ struct test_spatial_graph {
     }
 };
 
-TEST_CASE_METHOD(test_spatial_graph, "Trim","[trim]")
+TEST_F(test_spatial_graph, trim)
 {
     auto trimmed_g = trim_graph(g);
-    CHECK(boost::num_vertices(trimmed_g) == 0);
-    CHECK(boost::num_edges(trimmed_g) == 0);
+    EXPECT_EQ(boost::num_vertices(trimmed_g), 0);
+    EXPECT_EQ(boost::num_edges(trimmed_g), 0);
 }

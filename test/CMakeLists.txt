@@ -1,59 +1,99 @@
+include(GoogleTest)
 # set(TEST_LIBRARIES SG ${Boost_LIBRARIES} ${DGTAL_LIBRARIES} Qt5::Widgets )
-set(TEST_LIBRARIES SG ${Boost_LIBRARIES} ${DGTAL_LIBRARIES})
+set(GTEST_LIBRARIES gtest gtest_main gmock)
+set(TEST_LIBRARIES SG ${Boost_LIBRARIES} ${DGTAL_LIBRARIES} ${GTEST_LIBRARIES})
 
 add_executable(test_transform_to_physical_point test_transform_to_physical_point.cpp)
-target_link_libraries(test_transform_to_physical_point ${ITK_LIBRARIES})
-add_test(NAME transform_to_physical_point COMMAND test_transform_to_physical_point)
+target_link_libraries(test_transform_to_physical_point ${ITK_LIBRARIES} ${GTEST_LIBRARIES})
+gtest_discover_tests(
+  test_transform_to_physical_point
+  TEST_PREFIX transform_to_physical_point||
+  )
 
 add_executable(test_trim_graph test_trim_graph.cpp)
-target_link_libraries(test_trim_graph SG)
-add_test(NAME trim_graph COMMAND test_trim_graph)
+target_link_libraries(test_trim_graph SG ${GTEST_LIBRARIES})
+gtest_discover_tests(
+  test_trim_graph
+  TEST_PREFIX trim_graph||
+  )
 
 add_executable(test_split_loop test_split_loop.cpp)
 target_link_libraries(test_split_loop ${TEST_LIBRARIES} ${ITK_LIBRARIES})
-add_test(NAME split_loop COMMAND test_split_loop)
+gtest_discover_tests(
+  test_split_loop
+  TEST_PREFIX split_loop||
+  )
 
 add_executable(test_spatial_graph_reduction test_spatial_graph_reduction.cpp)
 target_link_libraries(test_spatial_graph_reduction ${TEST_LIBRARIES} ${ITK_LIBRARIES})
-add_test(NAME spatial_graph_reduction COMMAND test_spatial_graph_reduction)
+gtest_discover_tests(
+  test_spatial_graph_reduction
+  TEST_PREFIX spatial_graph_reduction||
+  )
 
 add_executable(test_merge_nodes test_merge_nodes.cpp)
 target_link_libraries(test_merge_nodes ${TEST_LIBRARIES} ${ITK_LIBRARIES})
-add_test(NAME merge_nodes COMMAND test_merge_nodes)
+gtest_discover_tests(
+  test_merge_nodes
+  TEST_PREFIX merge_nodes||
+  )
 
 add_executable(test_edge_points_utilities test_edge_points_utilities.cpp)
 target_link_libraries(test_edge_points_utilities ${TEST_LIBRARIES})
-add_test(NAME edge_points_utilities COMMAND test_edge_points_utilities)
+gtest_discover_tests(
+  test_edge_points_utilities
+  TEST_PREFIX edge_points_utilities||
+  )
 
 add_executable(test_graphviz_io test_graphviz_io.cpp)
 target_link_libraries(test_graphviz_io ${TEST_LIBRARIES} ${ITK_LIBRARIES})
-add_test(NAME graphviz_io COMMAND test_graphviz_io)
+gtest_discover_tests(
+  test_graphviz_io
+  TEST_PREFIX graphviz_io||
+  )
 
 add_executable(test_compute_graph_properties test_compute_graph_properties.cpp)
 target_link_libraries(test_compute_graph_properties ${TEST_LIBRARIES} ${ITK_LIBRARIES})
-add_test(NAME compute_graph_properties COMMAND test_compute_graph_properties)
+gtest_discover_tests(
+  test_compute_graph_properties
+  TEST_PREFIX compute_graph_properties||
+  )
 
 add_executable(test_spatial_histograms test_spatial_histograms.cpp)
 target_link_libraries(test_spatial_histograms ${TEST_LIBRARIES} ${ITK_LIBRARIES})
-add_test(NAME spatial_histograms COMMAND test_spatial_histograms)
+gtest_discover_tests(
+  test_spatial_histograms
+  TEST_PREFIX spatial_histograms||
+  )
 
 add_executable(test_graph_data test_graph_data.cpp)
-target_link_libraries(test_graph_data SG)
-add_test(NAME graph_data COMMAND test_graph_data)
-
+target_link_libraries(test_graph_data SG ${GTEST_LIBRARIES})
+gtest_discover_tests(
+  test_graph_data
+  TEST_PREFIX graph_data||
+  )
+#
 if(VISUALIZE)
   add_executable(test_visualize_spatial_graph test_visualize_spatial_graph.cpp)
   target_link_libraries(test_visualize_spatial_graph
     SGVtk
     ${ITK_LIBRARIES} # ITKVtkGlue is bringing VTK
+    ${GTEST_LIBRARIES}
     )
-  add_test(NAME visualize_spatial_graph COMMAND test_visualize_spatial_graph)
+  gtest_discover_tests(
+    test_visualize_spatial_graph
+    TEST_PREFIX visualize_spatial_graph||
+    )
 
   add_executable(test_visualize_histograms test_visualize_histograms.cpp
     ${CMAKE_SOURCE_DIR}/src/visualize_histograms.cpp )
   target_link_libraries(test_visualize_histograms
     SG
     SGVtk
+    ${GTEST_LIBRARIES}
     )
-  add_test(NAME visualize_histograms COMMAND test_visualize_histograms)
+  gtest_discover_tests(
+    test_visualize_histograms
+    TEST_PREFIX visualize_histograms||
+    )
 endif()

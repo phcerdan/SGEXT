@@ -1,5 +1,6 @@
-#include "catch_header.h"
+#include "gmock/gmock.h"
 #include "compute_graph_properties.hpp"
+using ::testing::DoubleEq;
 
 /**
  * Spatial Graph.
@@ -9,10 +10,10 @@
  *     |
  *     o
  */
-struct test_spatial_graph {
+struct SpatialGraphFixture : public ::testing::Test {
     using GraphType = SG::GraphAL;
     GraphType g;
-    test_spatial_graph() {
+    void SetUp() override {
         using boost::add_edge;
         this->g = GraphType(4);
         // Add edge with an associated SpatialEdge at construction.
@@ -42,9 +43,8 @@ struct test_spatial_graph {
         add_edge(1, 3, se13, g);
     }
 };
-TEST_CASE_METHOD(test_spatial_graph,
-                 "compute angles and cosines",
-                 "[angles][angles][cosines]")
+
+TEST_F(SpatialGraphFixture, compute_angles_cosines)
 {
     constexpr auto pi = 3.14159265358979323846;
     auto angles = SG::compute_angles(g);
@@ -55,8 +55,8 @@ TEST_CASE_METHOD(test_spatial_graph,
     std::cout <<  std::endl;
     std::vector<double> expected_angles = {pi, pi/2.0, pi/2.0};
     std::sort(expected_angles.begin(), expected_angles.end());
-    CHECK(angles.size() == 3);
-    CHECK(angles == expected_angles);
+    EXPECT_EQ(angles.size(), 3);
+    EXPECT_EQ(angles, expected_angles);
 
     std::cout << "Cosines" << std::endl;
     // compute cosines from angles, not from g
@@ -67,13 +67,14 @@ TEST_CASE_METHOD(test_spatial_graph,
     std::cout <<  std::endl;
     std::vector<double> expected_cosines = {-1.0, 0.0, 0.0};
     std::sort(expected_cosines.begin(), expected_cosines.end());
-    CHECK(cosines.size() == 3);
+    EXPECT_EQ(cosines.size(), 3);
     for (size_t i = 0; i < cosines.size(); i++)
-        CHECK( cosines[i] == Approx(expected_cosines[i]).margin(0.0000000000000001) );
+        EXPECT_NEAR( cosines[i], expected_cosines[i], 0.0000000000000001 );
 }
 
-struct edges_plus_symbol : public test_spatial_graph {
-    edges_plus_symbol() : test_spatial_graph() {
+struct PlusSymbolFixture : public SpatialGraphFixture {
+    void SetUp() override {
+        SpatialGraphFixture::SetUp();
         SG::PointType w1{{-1, 0, 0}};
         SG::PointType w2{{-2, 0, 0}};
         auto added = boost::add_vertex(this->g);
@@ -85,9 +86,7 @@ struct edges_plus_symbol : public test_spatial_graph {
     }
 };
 
-TEST_CASE_METHOD(edges_plus_symbol,
-        "compute angles and cosines in plus",
-        "[angles][cosines]")
+TEST_F(PlusSymbolFixture, compute_angles_cosines)
 {
     constexpr auto pi = 3.14159265358979323846;
     auto angles = SG::compute_angles(g);
@@ -101,8 +100,8 @@ TEST_CASE_METHOD(edges_plus_symbol,
         pi, pi/2.0, pi/2.0
     };
     std::sort(expected_angles.begin(), expected_angles.end());
-    CHECK(angles.size() == 6);
-    CHECK(angles == expected_angles);
+    EXPECT_EQ(angles.size(), 6);
+    EXPECT_EQ(angles, expected_angles);
 
     std::cout << "Cosines" << std::endl;
     // compute cosines from angles, not from g
@@ -116,15 +115,15 @@ TEST_CASE_METHOD(edges_plus_symbol,
         -1.0, 0.0, 0.0
     };
     std::sort(expected_cosines.begin(), expected_cosines.end());
-    CHECK(cosines.size() == 6);
+    EXPECT_EQ(cosines.size(), 6);
     for (size_t i = 0; i < cosines.size(); i++)
-        CHECK( cosines[i] == Approx(expected_cosines[i]).margin(0.0000000000000001) );
+        EXPECT_NEAR( cosines[i], expected_cosines[i], 0.0000000000000001 );
 }
 
-struct test_one_edge {
+struct OneEdge : public ::testing::Test {
     using GraphType = SG::GraphAL;
     GraphType g;
-    test_one_edge() {
+    void SetUp() override {
         this->g = GraphType(2);
         SG::PointType n3{{0, 3, 0}};
         SG::PointType s3{{0, -3, 0}};
@@ -134,18 +133,16 @@ struct test_one_edge {
     }
 };
 
-TEST_CASE_METHOD(test_one_edge,
-        "compute angles and cosines in one edge",
-        "[angles][cosines]") {
+TEST_F(OneEdge, compute_angles_cosines) {
     constexpr auto pi = 3.14159265358979323846;
     auto angles = SG::compute_angles(g);
-    CHECK(angles.empty() == true);
+    EXPECT_EQ(angles.empty(), true);
 }
 
-struct test_two_parallel_edges {
+struct TwoParallelEdgesFixture : public ::testing::Test {
     using GraphType = SG::GraphAL;
     GraphType g;
-    test_two_parallel_edges() {
+    void SetUp() override {
         this->g = GraphType(2);
         SG::PointType n3{{0, 3, 0}};
         SG::PointType s3{{0, -3, 0}};
@@ -156,12 +153,10 @@ struct test_two_parallel_edges {
     }
 };
 
-TEST_CASE_METHOD(test_two_parallel_edges,
-        "compute angles and cosines in two_parallel_edges",
-        "[angles][cosines]") {
+TEST_F(TwoParallelEdgesFixture, compute_angles_cosines) {
     auto edges = boost::num_edges(this->g);
     std::cout << "Edges of two_paralell edges : " << edges << std::endl;
-    CHECK(edges == 2);
+    EXPECT_EQ(edges, 2);
     bool no_ignore_parallel_edges = false;
     constexpr auto pi = 3.14159265358979323846;
     auto angles = SG::compute_angles(g, 0, no_ignore_parallel_edges);
@@ -172,9 +167,9 @@ TEST_CASE_METHOD(test_two_parallel_edges,
     std::cout <<  std::endl;
     std::vector<double> expected_angles = { 0.0, 0.0 };
     std::sort(expected_angles.begin(), expected_angles.end());
-    CHECK(angles.size() == 2);
+    EXPECT_EQ(angles.size(), 2);
     for (size_t i = 0; i < angles.size(); i++)
-        CHECK( angles[i] == Approx(expected_angles[i]).margin(0.0000000000000001) );
+        EXPECT_NEAR( angles[i], expected_angles[i], 0.0000000000000001);
 
     std::cout << "Cosines" << std::endl;
     // compute cosines from angles, not from g
@@ -185,17 +180,15 @@ TEST_CASE_METHOD(test_two_parallel_edges,
     std::cout <<  std::endl;
     std::vector<double> expected_cosines = { 1.0, 1.0 };
     std::sort(expected_cosines.begin(), expected_cosines.end());
-    CHECK(cosines.size() == 2);
+    EXPECT_EQ(cosines.size(), 2);
     for (size_t i = 0; i < cosines.size(); i++)
-        CHECK( cosines[i] == Approx(expected_cosines[i]).margin(0.0000000000000001) );
+        EXPECT_NEAR( cosines[i], expected_cosines[i], 0.0000000000000001);
 }
 
-TEST_CASE_METHOD(test_two_parallel_edges,
-        "compute angles and cosines in two_parallel_edges ignoring parallel edges",
-        "[angles][cosines]") {
+TEST_F(TwoParallelEdgesFixture, compute_ignoring_parallel_edges) {
     auto edges = boost::num_edges(this->g);
     std::cout << "Edges of two_paralell edges ignoring parallel edges : " << edges << std::endl;
-    CHECK(edges == 2);
+    EXPECT_EQ(edges, 2);
     bool ignore_parallel_edges = true;
     auto angles = SG::compute_angles(g, 0, ignore_parallel_edges);
     std::sort(angles.begin(), angles.end());
@@ -203,7 +196,7 @@ TEST_CASE_METHOD(test_two_parallel_edges,
     std::ostream_iterator<double> out_it (std::cout,", ");
     std::copy ( angles.begin(), angles.end(), out_it );
     std::cout <<  std::endl;
-    CHECK(angles.empty() == true);
+    EXPECT_EQ(angles.empty(), true);
 
     std::cout << "Cosines" << std::endl;
     // compute cosines from angles, not from g
@@ -212,13 +205,12 @@ TEST_CASE_METHOD(test_two_parallel_edges,
     std::ostream_iterator<double> out_it_cos (std::cout,", ");
     std::copy ( cosines.begin(), cosines.end(), out_it_cos );
     std::cout <<  std::endl;
-    CHECK(cosines.empty() == true);
+    EXPECT_EQ(cosines.empty(), true);
 }
-TEST_CASE_METHOD(test_spatial_graph,
-                 "compute filtered distances",
-                 "[filtered][size][distances]")
+
+TEST_F(SpatialGraphFixture, compute_filtered_distances)
 {
-    CHECK(boost::num_edges(g) == 3);
+    EXPECT_EQ(boost::num_edges(g), 3);
     size_t count0 = 0;
     size_t count1 = 0;
     size_t count2 = 0;
@@ -233,9 +225,9 @@ TEST_CASE_METHOD(test_spatial_graph,
         if(npoints == 2)
             count2++;
     }
-    CHECK(count0 == 0);
-    CHECK(count1 == 1);
-    CHECK(count2 == 2);
+    EXPECT_EQ(count0, 0);
+    EXPECT_EQ(count1, 1);
+    EXPECT_EQ(count2, 2);
     auto distances_unfiltered = SG::compute_ete_distances(g);
     size_t minimum_size_edges = 1;
     // Discards edges with 0 points (or less than 1)
@@ -243,21 +235,19 @@ TEST_CASE_METHOD(test_spatial_graph,
     // Discards edges with 1 points (or less than 2)
     auto distances_filtered_2 = SG::compute_ete_distances(g, 2);
     auto distances_filtered_3 = SG::compute_ete_distances(g, 3);
-    CHECK(distances_filtered_3.empty() == true);
-    CHECK(distances_filtered_2.size() == 2);
+    EXPECT_EQ(distances_filtered_3.empty(), true);
+    EXPECT_EQ(distances_filtered_2.size(), 2);
     std::cout << "distances_filtered_2:" << std::endl;
     std::ostream_iterator<double> out_it_2 (std::cout,", ");
     std::copy ( distances_filtered_2.begin(), distances_filtered_2.end(), out_it_2 );
     std::cout << std::endl;
-    CHECK(distances_filtered_1.size() == 3); // No empty ep
-    CHECK(distances_unfiltered.size() == 3);
+    EXPECT_EQ(distances_filtered_1.size(), 3); // No empty ep
+    EXPECT_EQ(distances_unfiltered.size(), 3);
 }
 
-TEST_CASE_METHOD(test_spatial_graph,
-                 "compute filtered angles",
-                 "[filtered][size][angles]")
+TEST_F(SpatialGraphFixture, compute_filtered_angles)
 {
-    CHECK(boost::num_edges(g) == 3);
+    EXPECT_EQ(boost::num_edges(g), 3);
     size_t count0 = 0;
     size_t count1 = 0;
     size_t count2 = 0;
@@ -272,9 +262,9 @@ TEST_CASE_METHOD(test_spatial_graph,
         if(npoints == 2)
             count2++;
     }
-    CHECK(count0 == 0);
-    CHECK(count1 == 1);
-    CHECK(count2 == 2);
+    EXPECT_EQ(count0, 0);
+    EXPECT_EQ(count1, 1);
+    EXPECT_EQ(count2, 2);
     auto angles_unfiltered = SG::compute_angles(g);
     size_t minimum_size_edges = 1;
     // Discards edges with 0 points (or less than 1)
@@ -284,22 +274,20 @@ TEST_CASE_METHOD(test_spatial_graph,
     bool ignore_parallel_edges = true;
     auto angles_filtered_2_ignore = SG::compute_angles(g, 2, ignore_parallel_edges );
     auto angles_filtered_3 = SG::compute_angles(g, 3);
-    CHECK(angles_filtered_3.empty() == true);
-    CHECK(angles_filtered_2.size() == 1);
+    EXPECT_EQ(angles_filtered_3.empty(), true);
+    EXPECT_EQ(angles_filtered_2.size(), 1);
     std::cout << "angles_filtered_2:" << std::endl;
     std::ostream_iterator<double> out_it_2 (std::cout,", ");
     std::copy ( angles_filtered_2.begin(), angles_filtered_2.end(), out_it_2 );
     std::cout << std::endl;
-    CHECK(angles_filtered_2_ignore.size() == 1);
-    CHECK(angles_filtered_1.size() == 3); // No empty ep
-    CHECK(angles_unfiltered.size() == 3);
+    EXPECT_EQ(angles_filtered_2_ignore.size(), 1);
+    EXPECT_EQ(angles_filtered_1.size(), 3); // No empty ep
+    EXPECT_EQ(angles_unfiltered.size(), 3);
 }
 
-TEST_CASE_METHOD(test_spatial_graph,
-                 "compute filtered distances ignoring end nodes",
-                 "[filtered][ignore_end_nodes][distances]")
+TEST_F(SpatialGraphFixture, filtered_distances_ignoring_end_nodes)
 {
-    CHECK(boost::num_edges(g) == 3);
+    EXPECT_EQ(boost::num_edges(g), 3);
     size_t count0 = 0;
     size_t count1 = 0;
     size_t count2 = 0;
@@ -314,23 +302,21 @@ TEST_CASE_METHOD(test_spatial_graph,
         if(npoints == 2)
             count2++;
     }
-    CHECK(count0 == 0);
-    CHECK(count1 == 1);
-    CHECK(count2 == 2);
+    EXPECT_EQ(count0, 0);
+    EXPECT_EQ(count1, 1);
+    EXPECT_EQ(count2, 2);
     auto distances_unfiltered = SG::compute_ete_distances(g);
     size_t minimum_size_edges = 0;
     bool ignore_end_nodes = true;
     auto distances_filtered_ignore_end_nodes =
         SG::compute_ete_distances(g, minimum_size_edges, ignore_end_nodes);
-    CHECK(distances_filtered_ignore_end_nodes.empty() == true);
-    CHECK(distances_unfiltered.size() == 3);
+    EXPECT_EQ(distances_filtered_ignore_end_nodes.empty(), true);
+    EXPECT_EQ(distances_unfiltered.size(), 3);
 }
 
-TEST_CASE_METHOD(test_spatial_graph,
-                 "compute filtered angles ignoring end nodes",
-                 "[filtered][ignore_end_nodes][angles]")
+TEST_F(SpatialGraphFixture, filtered_angles_ignoring_end_nodes)
 {
-    CHECK(boost::num_edges(g) == 3);
+    EXPECT_EQ(boost::num_edges(g), 3);
     size_t count0 = 0;
     size_t count1 = 0;
     size_t count2 = 0;
@@ -345,15 +331,15 @@ TEST_CASE_METHOD(test_spatial_graph,
         if(npoints == 2)
             count2++;
     }
-    CHECK(count0 == 0);
-    CHECK(count1 == 1);
-    CHECK(count2 == 2);
+    EXPECT_EQ(count0, 0);
+    EXPECT_EQ(count1, 1);
+    EXPECT_EQ(count2, 2);
     auto angles_unfiltered = SG::compute_angles(g);
     size_t minimum_size_edges = 0;
     bool ignore_parallel_edges = false;
     bool ignore_end_nodes = true;
     auto angles_filtered_ignore_end_nodes =
         SG::compute_angles(g, minimum_size_edges, ignore_parallel_edges, ignore_end_nodes);
-    CHECK(angles_filtered_ignore_end_nodes.empty() == true); // No empty ep
-    CHECK(angles_unfiltered.size() == 3);
+    EXPECT_EQ(angles_filtered_ignore_end_nodes.empty(), true); // No empty ep
+    EXPECT_EQ(angles_unfiltered.size(), 3);
 }
