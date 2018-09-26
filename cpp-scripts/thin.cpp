@@ -25,6 +25,7 @@
 #include <DGtal/helpers/StdDefs.h>
 #include <DGtal/io/readers/GenericReader.h>
 #include <DGtal/io/readers/ITKReader.h>
+#include "DGtal/io/writers/ITKWriter.h"
 #include <DGtal/images/ImageContainerByITKImage.h>
 #include "DGtal/images/imagesSetsUtils/SetFromImage.h"
 #include "DGtal/images/imagesSetsUtils/ImageFromSet.h"
@@ -347,12 +348,14 @@ int main(int argc, char* const argv[]){
     }
     fs::path output_full_path = output_folder_path / fs::path(output_file_path.string() + ".nrrd");
     unsigned int foreground_value = 255;
-    auto thin_image = ImageFromSet<Image>::create(thin_set, foreground_value);
-    typedef itk::ImageFileWriter<Image::ITKImage> ITKImageWriter;
-    typename ITKImageWriter::Pointer writer = ITKImageWriter::New();
-    writer->SetFileName(output_full_path.string().c_str());
-    writer->SetInput(thin_image.getITKImagePointer());
-    writer->Update();
+    Image thin_image(image.domain());
+    ImageFromSet<Image>::append<DigitalSet>(thin_image, thin_set, foreground_value);
+    bool write_status = ITKWriter<Image>::exportITK(
+        output_full_path.string().c_str(),
+        thin_image);
+    if(!write_status) {
+        std::cerr << "Failure writing file: " << output_full_path.string() << std::endl;
+    }
   }
 
 #ifdef VISUALIZE
