@@ -37,8 +37,8 @@
 #include <DGtal/topology/CubicalComplex.h>
 #include <DGtal/topology/CubicalComplexFunctions.h>
 
-#include <DGtal/topology/VoxelComplex.h>
-#include <DGtal/topology/VoxelComplexFunctions.h>
+#include <DGtal/topology/VoxelComplexNoObject.h>
+#include <DGtal/topology/VoxelComplexNoObjectFunctions.h>
 #include "DGtal/topology/NeighborhoodConfigurations.h"
 #include "DGtal/topology/tables/NeighborhoodTables.h"
 // ITKWriter
@@ -222,15 +222,13 @@ int main(int argc, char* const argv[]){
   Image image(handle_out);
 
 
-  // Create a VoxelComplex from the set
+  // Create a VoxelComplexNoObject from the set
   using DigitalTopology = DT26_6;
   using DigitalSet =
     DGtal::DigitalSetByAssociativeContainer<Domain ,
       std::unordered_set< typename Domain::Point> >;
-  using Object =
-    DGtal::Object<DigitalTopology, DigitalSet>;
   using Complex =
-    DGtal::VoxelComplex<KSpace, Object>;
+    DGtal::VoxelComplexNoObject<KSpace>;
 
   auto & sk = sk_string;
   KSpace ks;
@@ -244,14 +242,14 @@ int main(int argc, char* const argv[]){
 
   trace.beginBlock("construct with table");
   Complex vc(ks);
-  // Optimization, Construct object in place to save memory. vc stores object.
+  // Optimization, Construct in place to save memory. vc stores object.
   {
     DigitalSet image_set (image.domain());
     SetFromImage<Z3i::DigitalSet>::append<Image>(
         image_set, image,
         thresholdMin, thresholdMax);
 
-    vc.construct( Object(topo, image_set) );
+    vc.construct( image_set );
   }
   vc.setSimplicityTable(functions::loadTable(simplicity::tableSimple26_6 ));
   // vc.construct(obj.pointSet(), functions::loadTable(simplicity::tableSimple26_6 ));
@@ -326,8 +324,10 @@ int main(int argc, char* const argv[]){
   auto end = std::chrono::system_clock::now();
   auto elapsed = std::chrono::duration_cast<std::chrono::seconds> (end - start) ;
   if (profile) std::cout <<"Time elapsed: " << elapsed.count() << std::endl;
-  const auto & thin_set = vc_new.objectSet();
 
+  /* const auto & thin_set = vc_new.objectSet(); */
+  DigitalSet thin_set(image.domain());
+  vc_new.dumpVoxels(thin_set);
   // Export it as a simple list point
   if (vm.count("exportSDP"))
   {
@@ -338,7 +338,7 @@ int main(int argc, char* const argv[]){
     fs::path output_full_path = output_folder_path / fs::path(output_file_path.string() + ".sdp");
     std::ofstream out;
     out.open(output_full_path.string().c_str());
-    for (auto &p : thin_set)
+    for (const auto &p : thin_set)
     {
       out << p[0] << " " << p[1] << " " << p[2] << std::endl;
     }
@@ -382,7 +382,8 @@ int main(int argc, char* const argv[]){
 #ifdef VISUALIZE
   if (visualize)
   {
-    const auto & all_set = vc.objectSet();
+    DigitalSet all_set(image.domain());
+    vc.dumpVoxels(all_set);
     int argc(1);
     char** argv(nullptr);
     QApplication app(argc, argv);
