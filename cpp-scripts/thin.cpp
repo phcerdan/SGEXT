@@ -76,7 +76,7 @@ int main(int argc, char* const argv[]){
     ( "input,i", po::value<string>()->required(), "Input 3D image file." )
     ( "skel,s",  po::value<string>()->required(), "type of skeletonization. Valid: 1isthmus, isthmus, end, ulti" )
     ( "select,c",  po::value<string>()->required(), "select method for skeletonization. Valid: dmax, random, first" )
-    ( "foreground,f",  po::value<string>()->default_value("black"), "foreground color in binary image" )
+    ( "foreground,f",  po::value<string>()->default_value("white"), "foreground color in binary image. [black|white]" )
     ( "thresholdMin,m",  po::value<int>()->default_value(0), "threshold min (excluded) to define binary shape" )
     ( "thresholdMax,M",  po::value<int>()->default_value(255), "threshold max (included) to define binary shape" )
     ( "persistence,p",  po::value<int>()->default_value(0), "persistence value, implies use of persistence algorithm if p>=1" )
@@ -166,7 +166,7 @@ int main(int argc, char* const argv[]){
       std::cerr << "input distance map does not exist : " << inputDistanceMapImageFilename_path.string() << std::endl;
       throw po::validation_error(po::validation_error::invalid_option_value, "inputDistanceMapImageFilename");
     }
-    inputDistanceMapImageFilename = vm["inputDistanceMapImageFilename"].as<string>();
+    inputDistanceMapImageFilename = inputDistanceMapImageFilename_path.string();
   }
 
   /*-------------- End of parse -----------------------------*/
@@ -193,8 +193,10 @@ int main(int argc, char* const argv[]){
   using InverterType =
     itk::InvertIntensityImageFilter<ItkImageType, ItkImageType> ;
   auto inverter = InverterType::New();
-  inverter->SetInput(reader->GetOutput());
-  inverter->Update();
+  if(invert_image) {
+    inverter->SetInput(reader->GetOutput());
+    inverter->Update();
+  }
   /*----------------*/
   // Apply filters if neccesary
   Image::ITKImagePointer handle_out = (invert_image) ?
