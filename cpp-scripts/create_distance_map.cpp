@@ -16,6 +16,9 @@
 #include "DGtal/geometry/volumes/distance/DistanceTransformation.h"
 #include "DGtal/images/SimpleThresholdForegroundPredicate.h"
 
+// Invert
+#include "itkInvertIntensityImageFilter.h"
+
 // ITKWriter
 #include <itkImageFileWriter.h>
 // boost::program_options
@@ -40,6 +43,7 @@ int main(int argc, char* const argv[]){
     ( "input,i", po::value<string>()->required(), "Input thin image." )
     ( "outputFolder,o", po::value<string>()->required(), "Output folder for the distance map." )
     // ( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal. Requires VISUALIZE option enabled at build.")
+    ( "foreground,f",  po::value<string>()->default_value("white"), "foreground color in binary image [black|white]" )
     ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output." );
 
   po::variables_map vm;
@@ -59,6 +63,10 @@ int main(int argc, char* const argv[]){
   std::string filename = vm["input"].as<string>();
   std::string outputFolder = vm["outputFolder"].as<string>();;
   bool verbose = vm["verbose"].as<bool>();
+  string foreground = vm["foreground"].as<string>();
+  if (vm.count("foreground") && (!(foreground == "white" || foreground == "black")))
+    throw po::validation_error(po::validation_error::invalid_option_value, "foreground");
+  bool invert_image = (foreground == "black") ? true : false ;
 
   // Get filename without extension (and without folders).
   const fs::path input_stem = fs::path(filename).stem();
@@ -78,8 +86,20 @@ int main(int argc, char* const argv[]){
   reader->SetFileName(filename);
   reader->Update();
 
+  // Invert Filter using ITK.
+  using InverterType =
+    itk::InvertIntensityImageFilter<ItkImageType, ItkImageType> ;
+  auto inverter = InverterType::New();
+  if(invert_image) {
+    inverter->SetInput(reader->GetOutput());
+    inverter->Update();
+  }
+
+  Image::ITKImagePointer handle_out = (invert_image) ?
+    Image::ITKImagePointer(inverter->GetOutput()) :
+    Image::ITKImagePointer(reader->GetOutput());
   // Convert to DGtal Container
-  Image image(reader->GetOutput());
+  Image image(handle_out);
 
   auto start = std::chrono::system_clock::now();
   trace.beginBlock("Create Distance Map");
