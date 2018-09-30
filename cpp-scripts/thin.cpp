@@ -36,13 +36,14 @@
 #include <DGtal/io/boards/Board2D.h>
 #include <DGtal/topology/CubicalComplex.h>
 #include <DGtal/topology/CubicalComplexFunctions.h>
+#include "DGtal/topology/KhalimskyCellHashFunctions.h"
 
 #include <DGtal/topology/VoxelComplexNoObject.h>
 #include <DGtal/topology/VoxelComplexNoObjectFunctions.h>
 #include "DGtal/topology/NeighborhoodConfigurations.h"
 #include "DGtal/topology/tables/NeighborhoodTables.h"
 // ITKWriter
-#include <itkImageFileWriter.h>
+#include "itkImageFileWriter.h"
 #include "itkChangeInformationImageFilter.h"
 
 // Invert
@@ -224,11 +225,11 @@ int main(int argc, char* const argv[]){
 
   // Create a VoxelComplexNoObject from the set
   using DigitalTopology = DT26_6;
-  using DigitalSet =
+  using DigitalSet = // DGtal::Z3i::DigitalSet;
     DGtal::DigitalSetByAssociativeContainer<Domain ,
       std::unordered_set< typename Domain::Point> >;
-  using Complex =
-    DGtal::VoxelComplexNoObject<KSpace>;
+  using ComplexMap = std::unordered_map<KSpace::Cell, DGtal::CubicalCellData>;
+  using Complex = DGtal::VoxelComplexNoObject<KSpace, ComplexMap>;
 
   auto & sk = sk_string;
   KSpace ks;
