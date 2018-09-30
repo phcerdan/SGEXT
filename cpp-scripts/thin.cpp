@@ -28,6 +28,7 @@
 #include "DGtal/topology/tables/NeighborhoodTables.h"
 // ITKWriter
 #include <itkImageFileWriter.h>
+#include "itkChangeInformationImageFilter.h"
 
 // Invert
 #include "itkInvertIntensityImageFilter.h"
@@ -337,11 +338,29 @@ int main(int argc, char* const argv[]){
     unsigned int foreground_value = 255;
     Image thin_image(image.domain());
     ImageFromSet<Image>::append<DigitalSet>(thin_image, thin_set, foreground_value);
-    bool write_status = ITKWriter<Image>::exportITK(
-        output_full_path.string().c_str(),
-        thin_image);
-    if(!write_status) {
-        std::cerr << "Failure writing file: " << output_full_path.string() << std::endl;
+    // Copy metadata information (spacing, origin, direction) from original image to the output.
+    using ChangeInformationFilter = itk::ChangeInformationImageFilter<ItkImageType>;
+    auto changeInfo = ChangeInformationFilter::New();
+    changeInfo->ChangeAll();
+    changeInfo->UseReferenceImageOn();
+    changeInfo->SetReferenceImage(reader->GetOutput());
+    changeInfo->SetInput(thin_image.getITKImagePointer());
+    changeInfo->Update();
+
+    // Write the image
+    using ITKImageWriter = itk::ImageFileWriter<ItkImageType>;
+    auto writer = ITKImageWriter::New();
+    try
+    {
+      writer->SetFileName(output_full_path.string().c_str());
+      writer->SetInput(changeInfo->GetOutput());
+      writer->Update();
+    }
+    catch (itk::ExceptionObject &e)
+    {
+      std::cerr << "Failure writing file: " << output_full_path.string() << std::endl;
+      trace.error() << e;
+      throw IOException();
     }
   }
 
