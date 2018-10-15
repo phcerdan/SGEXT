@@ -1,6 +1,7 @@
 # SGEXT-scripts
 
 **S**patial**G**raph **Ext**ractor.
+
 Provides scripts to generate a thin/skeletonized image from binary images (segmentations).
 A thin image is a one pixel wide image, conserving the same topology (same number of holes, and shapes) than the input binary image.
 
