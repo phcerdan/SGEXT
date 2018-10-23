@@ -56,11 +56,13 @@ bool remove_extra_edges(GraphType & sg) {
                 auto & sn_current = sg[*vi];
                 auto dist_first = ArrayUtilities::distance(sn_current.pos, sn_first.pos);
                 auto dist_second = ArrayUtilities::distance(sn_current.pos, sn_second.pos);
-                if(dist_first > dist_second) {
+                auto dist_between = ArrayUtilities::distance(sn_first.pos, sn_second.pos);
+                if(dist_first > dist_second &&  dist_first > dist_between)
                     edges_to_remove.emplace_back(nv.first, *vi);
-                } else if(dist_first < dist_second) {
+                else if(dist_second > dist_first &&  dist_second > dist_between)
                     edges_to_remove.emplace_back(nv.second, *vi);
-                }
+                else if(dist_between > dist_first &&  dist_between > dist_second)
+                    edges_to_remove.emplace_back(nv.first, nv.second);
             }
         }
     }
