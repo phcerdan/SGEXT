@@ -14,5 +14,9 @@ The thin output can also be converted to a Spatial Graph, this is a regular grap
 Using histo.hpp from: https://github.com/phcerdan/histo-header
 SHA: 556ada3ff79c0180a0cbec36ff29a30da5acb367
 
+## Contributors
+
+- Pablo Hernandez-Cerdan
+- Megan Chambers
 
 [1]: Couprie and Bertrand, “Asymmetric Parallel 3D Thinning Scheme and Algorithms Based on Isthmuses.” Pattern Recognition Letters. June,  2016. DOI:10.1016/j.patrec.2015.03.014
