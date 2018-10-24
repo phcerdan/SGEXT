@@ -59,6 +59,7 @@ inline void print_edges(const GraphType &graph) {
     for (; ei != ei_end; ++ei) {
         auto source = boost::source(*ei, graph);
         auto target = boost::target(*ei, graph);
+        std::cout << source << "---" << target << " ; " ;
         print_pos(std::cout, graph[source].pos);
         std::cout << "---";
         print_pos(std::cout, graph[target].pos);
@@ -76,6 +77,7 @@ inline void print_spatial_edges(const GraphType &graph) {
     for (; ei != ei_end; ++ei) {
         auto source = boost::source(*ei, graph);
         auto target = boost::target(*ei, graph);
+        std::cout << source << "---" << target << " ; " ;
         print_pos(std::cout, graph[source].pos);
         std::cout << "---";
         print_pos(std::cout, graph[target].pos);
