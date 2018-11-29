@@ -42,6 +42,11 @@ target_link_libraries(create_distance_map ${Boost_LIBRARIES} )
 target_link_libraries(create_distance_map ${ITK_LIBRARIES} )
 target_link_libraries(create_distance_map ${DGTAL_LIBRARIES} )
 
+add_executable(mask_distance_map_with_thin_image mask_distance_map_with_thin_image.cpp)
+target_link_libraries(mask_distance_map_with_thin_image SG )
+target_link_libraries(mask_distance_map_with_thin_image ${Boost_LIBRARIES} )
+target_link_libraries(mask_distance_map_with_thin_image ${ITK_LIBRARIES} )
+
 if(VISUALIZE)
     add_executable(highlight_image_points highlight_image_points.cpp)
     target_link_libraries(highlight_image_points ${Boost_LIBRARIES} )

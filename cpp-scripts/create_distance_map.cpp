@@ -20,7 +20,9 @@
 #include "itkInvertIntensityImageFilter.h"
 
 // ITKWriter
-#include <itkImageFileWriter.h>
+#include "itkImageFileWriter.h"
+#include "itkChangeInformationImageFilter.h"
+
 // boost::program_options
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
@@ -115,12 +117,39 @@ int main(int argc, char* const argv[]){
   auto elapsed = std::chrono::duration_cast<std::chrono::seconds> (end - start) ;
   if (verbose) std::cout <<"Time elapsed: " << elapsed.count() << std::endl;
 
-  // Write distance map
-  const fs::path output_folder_path{outputFolder};
-  fs::path output_full_path = output_folder_path / fs::path(output_file_path.string() + ".nrrd");
-  bool write_status = ITKWriter<DT>::exportITK(
-          output_full_path.string().c_str(),
-          dt);
-  if(!write_status)
-      std::cerr << "Failure writing file" << std::endl;
+  // Write the dt image, keeping the metadata of the original image.
+  {
+    using FloatPixelType = float;
+    using FloatImage = ImageContainerByITKImage<Domain, FloatPixelType> ;
+    using ItkFloatImageType = itk::Image<FloatPixelType, Dim> ;
+    FloatImage dt_itk_image(dt.domain());
+    std::copy(dt.constRange().begin(), dt.constRange().end(), dt_itk_image.range().outputIterator());
+
+    using ChangeInformationFilter = itk::ChangeInformationImageFilter<ItkFloatImageType>;
+    auto changeInfo = ChangeInformationFilter::New();
+    changeInfo->ChangeAll();
+    changeInfo->SetOutputOrigin(reader->GetOutput()->GetOrigin());
+    changeInfo->SetOutputSpacing(reader->GetOutput()->GetSpacing());
+    changeInfo->SetOutputDirection(reader->GetOutput()->GetDirection());
+    changeInfo->SetInput(dt_itk_image.getITKImagePointer());
+    changeInfo->Update();
+
+    // Write the image
+    using ITKImageWriter = itk::ImageFileWriter<ItkFloatImageType>;
+    auto writer = ITKImageWriter::New();
+    const fs::path output_folder_path{outputFolder};
+    fs::path output_full_path = output_folder_path / fs::path(output_file_path.string() + ".nrrd");
+    try
+    {
+      writer->SetFileName(output_full_path.string().c_str());
+      writer->SetInput(changeInfo->GetOutput());
+      writer->Update();
+    }
+    catch (itk::ExceptionObject &e)
+    {
+      std::cerr << "Failure writing file: " << output_full_path.string() << std::endl;
+      trace.error() << e;
+      throw IOException();
+    }
+  }
 }
