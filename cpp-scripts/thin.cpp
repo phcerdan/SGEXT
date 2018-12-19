@@ -23,8 +23,8 @@
 #include <DGtal/topology/CubicalComplexFunctions.h>
 #include "DGtal/topology/KhalimskyCellHashFunctions.h"
 
-#include <DGtal/topology/VoxelComplexNoObject.h>
-#include <DGtal/topology/VoxelComplexNoObjectFunctions.h>
+#include <DGtal/topology/VoxelComplex.h>
+#include <DGtal/topology/VoxelComplexFunctions.h>
 #include "DGtal/topology/NeighborhoodConfigurations.h"
 #include "DGtal/topology/tables/NeighborhoodTables.h"
 // ITKWriter
@@ -208,13 +208,13 @@ int main(int argc, char* const argv[]){
   Image image(handle_out);
 
 
-  // Create a VoxelComplexNoObject from the set
+  // Create a VoxelComplex from the set
   using DigitalTopology = DT26_6;
   using DigitalSet = // DGtal::Z3i::DigitalSet;
     DGtal::DigitalSetByAssociativeContainer<Domain ,
       std::unordered_set< typename Domain::Point> >;
   using ComplexMap = std::unordered_map<KSpace::Cell, DGtal::CubicalCellData>;
-  using Complex = DGtal::VoxelComplexNoObject<KSpace, ComplexMap>;
+  using Complex = DGtal::VoxelComplex<KSpace, ComplexMap>;
 
   auto & sk = sk_string;
   KSpace ks;
