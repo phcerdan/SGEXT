@@ -16,7 +16,9 @@ find_package(Boost COMPONENTS
         graph
         REQUIRED)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
-find_package(DGtal REQUIRED)
+# Requires version with this PR in: https://github.com/DGtal-team/DGtal/pull/1369
+# Merged in DGtal 1.0.beta
+find_package(DGtal REQUIRED 1.0)
 include_directories(SYSTEM ${DGTAL_INCLUDE_DIRS})
 find_package(ITK REQUIRED COMPONENTS
   ITKCommon
