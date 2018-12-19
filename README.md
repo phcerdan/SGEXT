@@ -14,6 +14,102 @@ The thin output can also be converted to a Spatial Graph, this is a regular grap
 Using histo.hpp from: https://github.com/phcerdan/histo-header
 SHA: 556ada3ff79c0180a0cbec36ff29a30da5acb367
 
+## Build
+Build ITK
+Build DGtal, with a version with this patch included: (1.0 should be enough)
+https://github.com/DGtal-team/DGtal/pull/1369
+
+```bash
+cd your_favourite_folder
+mkdir DGtal; cd DGtal
+git clone https://github.com/DGtal-team/DGtal src
+#(optional): cd src; hub checkout https://github.com/DGtal-team/DGtal
+mkdir build; cd build;
+cmake -DBUILD_TYPE:STRING=Release -DBUILD_EXAMPLES:BOOL=OFF -DBUILD_TESTING:BOOL=OFF -DWITH_ITK:BOOL=ON -DITK_DIR:PATH=your_path_to_build_dir_ITK ../src
+```
+
+I do have scripts doing the thinning (and post-processing graph analysis) here:
+https://github.com/phcerdan/SGEXT-scripts
+
+They add a boost dependency.
+
+So install boost (any non-extremely old version should be ok), using package manager for example.
+And build the scripts
+
+```
+cd your_favourite_folder
+mkdir SGEXT-scripts; cd SGEXT-scripts
+git clone https://github.com/phcerdan/SGEXT-scripts src
+mkdir build; cd build
+cmake -DBUILD_TYPE:STRING=Release -DDGtal_DIR:PATH=/path/DGtal/build -DITK_DIR:PATH=your_path_to_build_dir_ITK ../src
+# if Boost is not the system path, also -DBoost_DIR:PATH=...
+```
+
+## Usage
+The scripts are in folder `cpp-scripts`
+the inputImage to these scripts is a label/binary image.
+all the scripts provide a --help or -h option for guidance.
+
+### Distance Map
+Create a distance map using DGtal most precise way with Lp metric. The output is a float/double image with pixels storing the distance to the background (heavy image).
+```bash
+create_distance_map \
+    -i inputImage.nrrd \
+    -o outputFolder \
+    -v # verbose flag --recommended--
+```
+
+In verbose mode, the output would be:
+```bash
+New Block [Create Distance Map]
+EndBlock [Create Distance Map] (108686 ms)
+Time elapsed: 108
+```
+
+the outputFolder will be populated with `inputImage_DMAP.nrrd` (heavy image).
+
+### Thinning
+Using VoxelComplex in DGtal, based on Bertrand and Couprie research in digital topology. Ensures topology consistency,
+and implements a way to perform a prunning on the branches based on local information.
+```bash
+thin \
+    -i inputImage.nrrd \
+    -o outputFolder \
+    -s 1isthmus \
+    -c dmax \ # Requires distance map, ensures centrality of the thinning
+    -d distanceMapImage.nrrd \
+#    -p 2 \ Optional persistence, useful for noisy images, default to 0.
+    -v # verbose flag --recommended--
+```
+
+### Get radius of vesselnes
+The distance map can also be used as a really good approximation to vesselnes radius. In order to get this information 
+for our skeletonized image we can use the script mask_distance_map_with_thin_image
+
+```bash
+mask_distance_map_with_thin_image \
+    -i inputDistanceMapImage.nrrd \
+    -m inputSkeletonizedImage.nrrd \
+    -o outputFolder \
+    -v # verbose flag --recommended--
+```
+
+This will generate an image `skeletonizedImage_DMAP_MASKED` in the output folder
+
+### Graph processing
+To convert the skeletonized image into a graph we used boost graph. The following script
+
+```bash
+analyze_graph \
+    -i inputSkeletonizedImage.nrrd
+    -o outputFolder \ # This will generate a .dot file with all the graph information
+    -r \ # reduce graph, convert chain nodes (degree 2) into edge points.
+    -c \ # removeExtraEdges (remove edges created because full connectivity)
+    -m \ # mergeThreeConnectedNodes
+    -v
+```
+More options are possible, use `--help` for details.
+
 ## Contributors
 
 - Pablo Hernandez-Cerdan
