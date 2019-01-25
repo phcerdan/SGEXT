@@ -27,7 +27,6 @@ find_package(ITK REQUIRED COMPONENTS
   ITKImageIntensity
   ITKImageStatistics
   ITKVtkGlue
-  IsotropicWavelets
   ITKImageIO
   CONFIG
 )
