@@ -168,6 +168,7 @@ RUN cd $BUILD_PATH && \
     cd ${SGEXT_SCRIPTS_BUILD_DIR} && \
     find . -name "*.o" -delete && \
     find ../SGEXT_SCRIPTS* -depth -name .git -exec rm -rf '{}' \;
+ENV PATH="${SGEXT_SCRIPTS_BUILD_DIR}/cpp-scripts:${PATH}"
 
 # Build-time metadata as defined at http://label-schema.org
 ARG BUILD_DATE

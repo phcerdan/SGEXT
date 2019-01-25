@@ -10,9 +10,18 @@ A distance map can be used for the thin image to be in the centerline of the inp
 The thinning algorithm used was contributed by the author to the DGtal library, based on the work of Couprie and Bertrand [1]
 
 The thin output can also be converted to a Spatial Graph, this is a regular graph, an adjacency list holding the nodes and edges, plus all the geometrical information. In the case of a nodes/vertices, a spatial node with 3D location. In edges, a spatial edge, a data structure with a consecutive list of points connecting the nodes.
- 
+
 Using histo.hpp from: https://github.com/phcerdan/histo-header
 SHA: 556ada3ff79c0180a0cbec36ff29a30da5acb367
+
+## Docker
+Use the [Dockerfile](https://github.com/phcerdan/SGEXT-scripts/blob/master/Dockerfile) that takes care of all
+the dependencies and building.
+
+You can then test it with `docker run sgext/base thin --help`
+
+- To mount a data folder inside the container, run `docker run -v <data-dir>:/data sgext/base ls /data`
+- The `-v` option binds `<data-dir>` on your machine to `/data` inside the docker container. Please read this [page](https://docs.docker.com/storage/bind-mounts/) for more details on bind mounts.
 
 ## Build
 Build ITK
@@ -44,6 +53,7 @@ mkdir build; cd build
 cmake -DBUILD_TYPE:STRING=Release -DDGtal_DIR:PATH=/path/DGtal/build -DITK_DIR:PATH=your_path_to_build_dir_ITK ../src
 # if Boost is not the system path, also -DBoost_DIR:PATH=...
 ```
+
 
 ## Usage
 The scripts are in folder `cpp-scripts`
@@ -83,7 +93,7 @@ thin \
 ```
 
 ### Get radius of vesselnes
-The distance map can also be used as a really good approximation to vesselnes radius. In order to get this information 
+The distance map can also be used as a really good approximation to vesselnes radius. In order to get this information
 for our skeletonized image we can use the script mask_distance_map_with_thin_image
 
 ```bash
