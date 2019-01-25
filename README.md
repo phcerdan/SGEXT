@@ -15,13 +15,26 @@ Using histo.hpp from: https://github.com/phcerdan/histo-header
 SHA: 556ada3ff79c0180a0cbec36ff29a30da5acb367
 
 ## Docker
-Use the [Dockerfile](https://github.com/phcerdan/SGEXT-scripts/blob/master/Dockerfile) that takes care of all
-the dependencies and building.
+First build the container with all the dependencies, [Dockerfile-base](https://github.com/phcerdan/SGEXT-scripts/blob/master/Dockerfile-base).
 
-You can then test it with `docker run sgext/base thin --help`
+```bash
+docker build -f Dockerfile-base -t sgext/base .
+```
+
+Then use the [Dockerfile](https://github.com/phcerdan/SGEXT-scripts/blob/master/Dockerfile) that copies your local source folder with this repository into the container.
+
+```bash
+docker build -f Dockerfile -t sgext/scripts .
+```
+
+You can then test it with `docker run sgext/scripts thin --help`
 
 - To mount a data folder inside the container, run `docker run -v <data-dir>:/data sgext/base ls /data`
 - The `-v` option binds `<data-dir>` on your machine to `/data` inside the docker container. Please read this [page](https://docs.docker.com/storage/bind-mounts/) for more details on bind mounts.
+
+```bash
+`docker run -v <data-dir>:/data sgext/scripts thin --help`
+```
 
 ## Build
 Build ITK
