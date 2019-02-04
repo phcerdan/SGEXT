@@ -20,14 +20,20 @@ include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 # Merged in DGtal 1.0.beta
 find_package(DGtal REQUIRED 1.0)
 include_directories(SYSTEM ${DGTAL_INCLUDE_DIRS})
+
+set(ITKVtkGlueModule "")
+if(VISUALIZE)
+  set(ITKVtkGlueModule ITKVtkGlue)
+endif()
+
 find_package(ITK REQUIRED COMPONENTS
   ITKCommon
   ITKIOImageBase
   ITKImageGrid
   ITKImageIntensity
   ITKImageStatistics
-  ITKVtkGlue
   ITKImageIO
+  ${ITKVtkGlueModule}
   CONFIG
 )
 include(${ITK_USE_FILE})
