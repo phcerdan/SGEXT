@@ -21,6 +21,21 @@ include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 find_package(DGtal REQUIRED 1.0)
 include_directories(SYSTEM ${DGTAL_INCLUDE_DIRS})
 
+find_package(ITK CONFIG REQUIRED)
+include(${ITK_USE_FILE})
+
+set(ITKImageIOModule "")
+if(${ITK_VERSION} VERSION_LESS "4.13.0")
+# Create list of avaialble image formats
+foreach(ImageFormat ${LIST_OF_IMAGEIO_FORMATS})
+  if (NOT ${ImageFormat}_image_module_name )
+    list(APPEND ITKImageIOModule ITKIO${ImageFormat})
+  endif()
+endforeach()
+else()
+  set(ITKImageIOModule ITKImageIO)
+endif()
+
 set(ITKVtkGlueModule "")
 if(VISUALIZE)
   set(ITKVtkGlueModule ITKVtkGlue)
@@ -32,8 +47,8 @@ find_package(ITK REQUIRED COMPONENTS
   ITKImageGrid
   ITKImageIntensity
   ITKImageStatistics
-  ITKImageIO
   ${ITKVtkGlueModule}
+  ${ITKImageIOModule}
   CONFIG
 )
 include(${ITK_USE_FILE})
