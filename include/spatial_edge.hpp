@@ -22,15 +22,12 @@
 #define SPATIAL_EDGE_HPP
 
 #include "array_utilities.hpp"
-#include <vector>
+#include "common_types.hpp"
 
 namespace SG {
-using PointType = ArrayUtilities::Array3D;
-using PointContainer = std::vector<PointType>;
-
 struct SpatialEdge {
-    using PointType = ArrayUtilities::Array3D;
-    using PointContainer = std::vector<PointType>;
+    using PointType = SG::PointType;
+    using PointContainer = SG::PointContainer;
     /// Spatial Points between the nodes of the edge.
     PointContainer edge_points;
 };

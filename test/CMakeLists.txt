@@ -3,6 +3,20 @@ include(GoogleTest)
 set(GTEST_LIBRARIES gtest gtest_main gmock)
 set(TEST_LIBRARIES SG ${Boost_LIBRARIES} ${DGTAL_LIBRARIES} ${GTEST_LIBRARIES})
 
+add_executable(test_bounding_box test_bounding_box.cpp)
+target_link_libraries(test_bounding_box ${Boost_LIBRARIES} ${GTEST_LIBRARIES})
+gtest_discover_tests(
+  test_bounding_box
+  TEST_PREFIX bounding_box||
+  )
+
+add_executable(test_filter_spatial_graph test_filter_spatial_graph.cpp)
+target_link_libraries(test_filter_spatial_graph ${Boost_LIBRARIES} ${GTEST_LIBRARIES})
+gtest_discover_tests(
+  test_filter_spatial_graph
+  TEST_PREFIX filter_spatial_graph||
+  )
+
 add_executable(test_transform_to_physical_point test_transform_to_physical_point.cpp)
 target_link_libraries(test_transform_to_physical_point ${ITK_LIBRARIES} ${GTEST_LIBRARIES})
 gtest_discover_tests(
