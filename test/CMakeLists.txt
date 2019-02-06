@@ -11,7 +11,7 @@ gtest_discover_tests(
   )
 
 add_executable(test_filter_spatial_graph test_filter_spatial_graph.cpp)
-target_link_libraries(test_filter_spatial_graph ${Boost_LIBRARIES} ${GTEST_LIBRARIES})
+target_link_libraries(test_filter_spatial_graph SG ${Boost_LIBRARIES} ${GTEST_LIBRARIES})
 gtest_discover_tests(
   test_filter_spatial_graph
   TEST_PREFIX filter_spatial_graph||
