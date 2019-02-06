@@ -110,4 +110,28 @@ if(VISUALIZE)
     test_visualize_histograms
     TEST_PREFIX visualize_histograms||
     )
+
+  add_executable(test_get_vtk_points_from_graph test_get_vtk_points_from_graph.cpp
+    ${CMAKE_SOURCE_DIR}/src/get_vtk_points_from_graph.cpp )
+  target_link_libraries(test_get_vtk_points_from_graph
+    SG
+    SGVtk
+    ${GTEST_LIBRARIES}
+    )
+  gtest_discover_tests(
+    test_get_vtk_points_from_graph
+    TEST_PREFIX get_vtk_points_from_graph||
+    )
+
+  add_executable(test_graph_points_locator test_graph_points_locator.cpp
+    ${CMAKE_SOURCE_DIR}/src/graph_points_locator.cpp )
+  target_link_libraries(test_graph_points_locator
+    SG
+    SGVtk
+    ${GTEST_LIBRARIES}
+    )
+  gtest_discover_tests(
+    test_graph_points_locator
+    TEST_PREFIX graph_points_locator||
+    )
 endif()
