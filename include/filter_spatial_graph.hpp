@@ -24,6 +24,7 @@
 //  The bounding box should be in index or physical coordinates space?
 //  Extras needed: A map with keys in bounding box coordinates and values in
 //  graph ids, edge and/or vertex.
+//
 
 namespace SG {
 /**
@@ -31,6 +32,10 @@ namespace SG {
  * are unrelated to the input graph.
  *
  * Nodes might exist outside the bounding box if any edge crosses the boundary.
+ *
+ * XXX: Please note that this operation is pure brute force and quite
+ * expensive.
+ * Better (if possible) to clip the thin image, and compute graph from it.
  *
  * @param box the bounding box in the same coordinates than the spatial graph
  * @param g spatial graph
