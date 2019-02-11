@@ -52,11 +52,15 @@ namespace SG {
    * @param kdtree
    * @param
    */
-  std::vector<graph_descriptor> graph_closest_n_points_locator(const PointType &queryPoint, vtkKdTreePointLocator * kdtree,
+  std::vector<graph_descriptor> graph_closest_n_points_locator(
+      const PointType &queryPoint,
+      vtkKdTreePointLocator * kdtree,
       const std::unordered_map<vtkIdType, std::vector<graph_descriptor>> & idMap,
       const int closest_n_points = 5 );
 
-  std::vector<graph_descriptor> graph_closest_points_by_radius_locator(const PointType &queryPoint, vtkKdTreePointLocator * kdtree,
+  std::vector<graph_descriptor> graph_closest_points_by_radius_locator(
+      const PointType &queryPoint,
+      vtkKdTreePointLocator * kdtree,
       const std::unordered_map<vtkIdType, std::vector<graph_descriptor>> & idMap,
       double radius);
 } // ns SG
