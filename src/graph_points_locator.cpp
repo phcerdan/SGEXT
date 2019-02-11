@@ -50,7 +50,9 @@ bool all_graph_descriptors_exist(const std::vector<graph_descriptor> & gdescs)
 }
 
 
-std::vector<graph_descriptor> graph_closest_n_points_locator(const PointType &queryPoint, vtkKdTreePointLocator * kdtree,
+std::vector<graph_descriptor> graph_closest_n_points_locator(
+        const PointType &queryPoint,
+        vtkKdTreePointLocator * kdtree,
         const std::unordered_map<vtkIdType, std::vector<graph_descriptor>> & idMap,
         const int closest_n_points)
 {
@@ -68,7 +70,9 @@ std::vector<graph_descriptor> graph_closest_n_points_locator(const PointType &qu
     return out_gdescs;
 };
 
-std::vector<graph_descriptor> graph_closest_points_by_radius_locator(const PointType &queryPoint, vtkKdTreePointLocator * kdtree,
+std::vector<graph_descriptor> graph_closest_points_by_radius_locator(
+        const PointType &queryPoint,
+        vtkKdTreePointLocator * kdtree,
         const std::unordered_map<vtkIdType, std::vector<graph_descriptor>> & idMap,
         double radius)
 {
