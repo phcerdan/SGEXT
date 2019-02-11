@@ -6,6 +6,8 @@
 #include "gmock/gmock.h"
 #include "graph_points_locator.hpp"
 #include "get_vtk_points_from_graph.hpp"
+#include "graph_locator_fixtures.hpp"
+#include "filter_spatial_graph.hpp"
 
 struct GraphPointLocatorFixture : public ::testing::Test {
     using GraphType = SG::GraphType;
@@ -188,3 +190,51 @@ TEST_F(GraphPointLocatorFixture, graph_closest_points_by_radius_locator_small_ra
     EXPECT_FALSE(gdesc1.is_edge);
     EXPECT_EQ(gdesc1.vertex_d, 3);
 }
+
+// #include "visualize_spatial_graph.hpp"
+// TEST_F(MatchingGraphsFixture, visualize_it)
+// {
+//     SG::visualize_spatial_graph(g0);
+//     SG::visualize_spatial_graph(g1);
+//     SG::visualize_spatial_graph(gR);
+// }
+//
+
+TEST_F(MatchingGraphsFixture, works)
+{
+    std::vector<std::reference_wrapper<const GraphType>> graphs;
+    graphs.reserve(2);
+    graphs.push_back(std::cref(g0));
+    graphs.push_back(std::cref(g1));
+    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs);
+    auto kdtree = SG::build_kdtree_locator(merger_map_pair.first->GetPoints());
+    // g0 and g1 should have 13 unique points when combined
+    EXPECT_EQ(kdtree->GetDataSet()->GetNumberOfPoints(), 13);
+    // testing::print_vtk_points(kdtree.GetPointer());
+
+    // So... the big question: how do we compare graphs and construct the result?
+    // a)
+    // - iterate over every unique point of the kdtree.
+    // Each point has a vector<graph_descriptor> associated to it.
+    // - our candidates to take action on are points that do not exist in all the graphs.
+    //  - kdtree locator can be used to find nearest point in other graphs.
+    //
+    // b) construct the graph
+    // Use a filtered_graph (view)
+    // filter by a set of vertex:
+    // filter by a set of edges:
+    // And optionally copy it into a new graph a the end
+
+    std::unordered_set<GraphType::vertex_descriptor> removed_nodes;
+    SG::EdgeDescriptorUnorderedSet removed_edges;
+    // Iterate over all nodes of high-freq graph.
+    // - Work on points that do not exist in the other graph
+    // A) vertex in highG
+    //  - edge_point in lowG ---> Means: new branch!
+    //    Study neighbors of the vertex:
+    // B) edge_point in highG
+    //  - vertex in lowG ---> Means: branch is extended!
+    //
+
+
+};
