@@ -23,9 +23,8 @@
 
 #include "spatial_graph.hpp"
 #include "bounding_box.hpp"
-
 #include <boost/graph/filtered_graph.hpp>
-#include <boost/graph/copy.hpp>
+#include "hash_edge_descriptor.hpp"
 
 // Create a filtered_graph type, use keep tag
 // Create bool function for edges and vertices to filter. Return true if in bounding box.
@@ -40,6 +39,14 @@
 //
 
 namespace SG {
+
+using FilteredGraphType =  boost::filtered_graph<GraphType,
+      std::function<bool(GraphType::edge_descriptor)>,
+      std::function<bool(GraphType::vertex_descriptor)>>;
+
+using EdgeDescriptorUnorderedSet = std::unordered_set<GraphType::edge_descriptor, SG::edge_hash<GraphType>>;
+
+FilteredGraphType filter_by_bounding_box_no_copy(const BoundingBox & box, GraphType & g);
 /**
  * Return a new graph which is inside the bounding box. Please note that indices or ids
  * are unrelated to the input graph.
@@ -56,5 +63,14 @@ namespace SG {
  * @return a copy of the graph
  */
 GraphType filter_by_bounding_box(const BoundingBox & box, GraphType & g);
+
+FilteredGraphType filter_by_sets_no_copy(
+        const std::unordered_set<GraphType::vertex_descriptor> & remove_nodes,
+        const EdgeDescriptorUnorderedSet & remove_edges,
+        GraphType & g);
+GraphType filter_by_sets(
+        const std::unordered_set<GraphType::vertex_descriptor> & remove_nodes,
+        const EdgeDescriptorUnorderedSet & remove_edges,
+        GraphType & g);
 } /* ns SG */
 #endif
