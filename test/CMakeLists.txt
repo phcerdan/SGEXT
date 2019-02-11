@@ -11,7 +11,7 @@ gtest_discover_tests(
   )
 
 add_executable(test_filter_spatial_graph test_filter_spatial_graph.cpp)
-target_link_libraries(test_filter_spatial_graph ${Boost_LIBRARIES} ${GTEST_LIBRARIES})
+target_link_libraries(test_filter_spatial_graph SG ${Boost_LIBRARIES} ${GTEST_LIBRARIES})
 gtest_discover_tests(
   test_filter_spatial_graph
   TEST_PREFIX filter_spatial_graph||
@@ -123,11 +123,15 @@ if(VISUALIZE)
     TEST_PREFIX get_vtk_points_from_graph||
     )
 
+  add_library(graph_locator_fixtures graph_locator_fixtures.cpp)
+  target_link_libraries(graph_locator_fixtures SG ${Boost_LIBRARIES} ${GTEST_LIBRARIES})
+
   add_executable(test_graph_points_locator test_graph_points_locator.cpp
     ${CMAKE_SOURCE_DIR}/src/graph_points_locator.cpp )
   target_link_libraries(test_graph_points_locator
     SG
     SGVtk
+    graph_locator_fixtures
     ${GTEST_LIBRARIES}
     )
   gtest_discover_tests(
