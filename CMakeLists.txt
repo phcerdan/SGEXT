@@ -138,6 +138,7 @@ set(SG_SRC_WITH_VTK
     ${SG_SRC_DIR}/visualize_spatial_graph_with_image.cpp
     ${SG_SRC_DIR}/get_vtk_points_from_graph.cpp
     ${SG_SRC_DIR}/graph_points_locator.cpp
+    ${SG_SRC_DIR}/compare_graphs.cpp
     )
 
 set(SG_SRC_WITH_VTK_AND_QT
