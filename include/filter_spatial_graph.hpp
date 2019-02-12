@@ -29,9 +29,11 @@ using FilteredGraphType =  boost::filtered_graph<GraphType,
       std::function<bool(GraphType::edge_descriptor)>,
       std::function<bool(GraphType::vertex_descriptor)>>;
 
-using EdgeDescriptorUnorderedSet = std::unordered_set<GraphType::edge_descriptor, SG::edge_hash<GraphType>>;
+using VertexDescriptorUnorderedSet = std::unordered_set<GraphType::vertex_descriptor>;
+using EdgeDescriptorUnorderedSet = std::unordered_set<GraphType::edge_descriptor,
+                                                      SG::edge_hash<GraphType>>;
 
-FilteredGraphType filter_by_bounding_box_no_copy(const BoundingBox & box, GraphType & g);
+FilteredGraphType filter_by_bounding_box_no_copy(const BoundingBox & box, const GraphType & g);
 /**
  * Return a new graph which is inside the bounding box. Please note that indices or ids
  * are unrelated to the input graph.
@@ -47,15 +49,15 @@ FilteredGraphType filter_by_bounding_box_no_copy(const BoundingBox & box, GraphT
  *
  * @return a copy of the graph
  */
-GraphType filter_by_bounding_box(const BoundingBox & box, GraphType & g);
+GraphType filter_by_bounding_box(const BoundingBox & box, const GraphType & g);
 
 FilteredGraphType filter_by_sets_no_copy(
-        const std::unordered_set<GraphType::vertex_descriptor> & remove_nodes,
         const EdgeDescriptorUnorderedSet & remove_edges,
-        GraphType & g);
+        const VertexDescriptorUnorderedSet & remove_nodes,
+        const GraphType & g);
 GraphType filter_by_sets(
-        const std::unordered_set<GraphType::vertex_descriptor> & remove_nodes,
         const EdgeDescriptorUnorderedSet & remove_edges,
-        GraphType & g);
+        const VertexDescriptorUnorderedSet & remove_nodes,
+        const GraphType & g);
 } /* ns SG */
 #endif
