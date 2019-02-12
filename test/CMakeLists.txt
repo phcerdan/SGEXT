@@ -138,4 +138,17 @@ if(VISUALIZE)
     test_graph_points_locator
     TEST_PREFIX graph_points_locator||
     )
+
+  add_executable(test_compare_graphs test_compare_graphs.cpp
+    ${CMAKE_SOURCE_DIR}/src/compare_graphs.cpp )
+  target_link_libraries(test_compare_graphs
+    SG
+    SGVtk
+    graph_locator_fixtures
+    ${GTEST_LIBRARIES}
+    )
+  gtest_discover_tests(
+    test_compare_graphs
+    TEST_PREFIX compare_graphs||
+    )
 endif()

@@ -26,7 +26,7 @@
 
 namespace SG {
 
-FilteredGraphType filter_by_bounding_box_no_copy(const BoundingBox & box, GraphType & g)
+FilteredGraphType filter_by_bounding_box_no_copy(const BoundingBox & box, const GraphType & g)
 {
   auto edge_lambda = [&](GraphType::edge_descriptor ed) -> bool {
         auto & edge_points = g[ed].edge_points;
@@ -59,7 +59,7 @@ FilteredGraphType filter_by_bounding_box_no_copy(const BoundingBox & box, GraphT
   return FilteredGraphType(g, edge_lambda, vertex_lambda);
 };
 
-GraphType filter_by_bounding_box(const BoundingBox & box, GraphType & g)
+GraphType filter_by_bounding_box(const BoundingBox & box, const GraphType & g)
 {
   auto filtered_view = filter_by_bounding_box_no_copy(box, g);
 
@@ -69,14 +69,16 @@ GraphType filter_by_bounding_box(const BoundingBox & box, GraphType & g)
 };
 
 FilteredGraphType filter_by_sets_no_copy(
-        const std::unordered_set<GraphType::vertex_descriptor> & remove_nodes,
         const EdgeDescriptorUnorderedSet & remove_edges,
-        GraphType & g)
+        const VertexDescriptorUnorderedSet & remove_nodes,
+        const GraphType & g)
 {
-    auto edge_lambda = [&](GraphType::edge_descriptor ed) -> bool {
+    // WARNING: We would have to capture the sets by value if we want to copy
+    // around the FilteredGraph if the input remove_ sets go out of scope.
+    auto edge_lambda = [&remove_edges](GraphType::edge_descriptor ed) -> bool {
         return !static_cast<bool>(remove_edges.count(ed));
     };
-    auto vertex_lambda = [&](GraphType::vertex_descriptor vd) -> bool {
+    auto vertex_lambda = [&remove_nodes](GraphType::vertex_descriptor vd) -> bool {
         return !static_cast<bool>(remove_nodes.count(vd));
     };
 
@@ -84,12 +86,12 @@ FilteredGraphType filter_by_sets_no_copy(
 }
 
 GraphType filter_by_sets(
-        const std::unordered_set<GraphType::vertex_descriptor> & remove_nodes,
         const EdgeDescriptorUnorderedSet & remove_edges,
-        GraphType & g)
+        const VertexDescriptorUnorderedSet & remove_nodes,
+        const GraphType & g)
 {
 
-    auto filtered_view = filter_by_sets_no_copy(remove_nodes, remove_edges, g);
+    auto filtered_view = filter_by_sets_no_copy(remove_edges, remove_nodes, g);
     // Copy the graph -- vertex and edge descriptors are invalidated...
     GraphType out_filtered_graph;
     boost::copy_graph(filtered_view, out_filtered_graph);

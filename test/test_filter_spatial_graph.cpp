@@ -113,7 +113,7 @@ TEST_F(FilterBySetsFixture, remove_nodes)
 {
     std::unordered_set<GraphType::vertex_descriptor> remove_nodes;
     remove_nodes.insert(2);
-    GraphType filtered_graph = SG::filter_by_sets(remove_nodes, {}, g);
+    GraphType filtered_graph = SG::filter_by_sets({}, remove_nodes, g);
     SG::print_degrees(filtered_graph);
     SG::print_spatial_edges(filtered_graph);
     EXPECT_THAT(boost::num_vertices(filtered_graph), 2);
@@ -127,7 +127,7 @@ TEST_F(FilterBySetsFixture, remove_edges)
     bool ed_exist;
     std::tie(ed, ed_exist) = boost::edge(1, 2, g);
     remove_edges.insert(ed);
-    GraphType filtered_graph = SG::filter_by_sets({}, remove_edges, g);
+    GraphType filtered_graph = SG::filter_by_sets(remove_edges, {}, g);
     SG::print_degrees(filtered_graph);
     SG::print_spatial_edges(filtered_graph);
     EXPECT_THAT(boost::num_vertices(filtered_graph), 3);
@@ -143,7 +143,7 @@ TEST_F(FilterBySetsFixture, remove_nodes_and_edges)
     bool ed_exist;
     std::tie(ed, ed_exist) = boost::edge(0, 1, g);
     remove_edges.insert(ed);
-    GraphType filtered_graph = SG::filter_by_sets(remove_nodes, remove_edges, g);
+    GraphType filtered_graph = SG::filter_by_sets(remove_edges, remove_nodes, g);
     SG::print_degrees(filtered_graph);
     SG::print_spatial_edges(filtered_graph);
     EXPECT_THAT(boost::num_vertices(filtered_graph), 2);
