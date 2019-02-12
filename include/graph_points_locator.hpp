@@ -32,6 +32,10 @@ namespace SG {
   namespace detail {
   /**
    * Utility function re-used in other function to
+   * fill the the graph descriptors with the closest graph_descriptor that exists.
+   * The order of filling is determined by closeIdList.
+   *
+   * This can generate a vector of graph_descriptors with different position.
    *
    * @param in_out_gdescs
    * @param closeIdList

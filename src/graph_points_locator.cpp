@@ -32,9 +32,9 @@ void fill_graph_descriptors(std::vector<graph_descriptor> & in_out_gdescs,
     for (vtkIdType closeId_index = 0; closeId_index < closeIdList->GetNumberOfIds(); ++closeId_index){
         auto const & gdescs_at_close_index = idMap.at(closeIdList->GetId(closeId_index));
         for (size_t gdescs_index = 0; gdescs_index < gdescs_size ; ++gdescs_index) {
-            const auto & gdesc = gdescs_at_close_index[gdescs_index];
             if(in_out_gdescs[gdescs_index].exist)
                 continue;
+            const auto & gdesc = gdescs_at_close_index[gdescs_index];
             if(gdesc.exist)
                 in_out_gdescs[gdescs_index] = gdesc;
         }
