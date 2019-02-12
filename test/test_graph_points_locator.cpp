@@ -8,6 +8,8 @@
 #include "get_vtk_points_from_graph.hpp"
 #include "graph_locator_fixtures.hpp"
 #include "filter_spatial_graph.hpp"
+#include <boost/graph/iteration_macros.hpp>
+
 
 struct GraphPointLocatorFixture : public ::testing::Test {
     using GraphType = SG::GraphType;
@@ -191,7 +193,7 @@ TEST_F(GraphPointLocatorFixture, graph_closest_points_by_radius_locator_small_ra
     EXPECT_EQ(gdesc1.vertex_d, 3);
 }
 
-// #include "visualize_spatial_graph.hpp"
+#include "visualize_spatial_graph.hpp"
 // TEST_F(MatchingGraphsFixture, visualize_it)
 // {
 //     SG::visualize_spatial_graph(g0);
@@ -207,7 +209,9 @@ TEST_F(MatchingGraphsFixture, works)
     graphs.push_back(std::cref(g0));
     graphs.push_back(std::cref(g1));
     auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs);
-    auto kdtree = SG::build_kdtree_locator(merger_map_pair.first->GetPoints());
+    auto & mergePoints = merger_map_pair.first;
+    auto & idMap = merger_map_pair.second;
+    auto kdtree = SG::build_kdtree_locator(mergePoints->GetPoints());
     // g0 and g1 should have 13 unique points when combined
     EXPECT_EQ(kdtree->GetDataSet()->GetNumberOfPoints(), 13);
     // testing::print_vtk_points(kdtree.GetPointer());
@@ -235,6 +239,69 @@ TEST_F(MatchingGraphsFixture, works)
     // B) edge_point in highG
     //  - vertex in lowG ---> Means: branch is extended!
     //
+    GraphType::vertex_descriptor v;
+    BGL_FORALL_VERTICES(v, g1, GraphType) {
+        vtkIdType id = kdtree->FindClosestPoint(g1[v].pos.data());
+        const auto & gdescs = idMap[id];
+        const auto & gdesc0 = gdescs[0];
+        const auto & gdesc1 = gdescs[1];
+        assert(gdesc1.exist && gdesc1.is_vertex);
+        if(!gdesc1.exist || !gdesc1.is_vertex) {
+            throw std::runtime_error("Impossible error:"
+                    "graph_descriptor of high-frequency graph does not exist or is not a vertex.");
+        }
 
+        if(!gdesc0.is_vertex) {
+            // Interesting times, graph has evolved
+            // We can:
+            // - find the closest points per graph with graph_closest_points_by_radius_locator
+            //   this does not use topology of graphs, and it is not ensured that the closest
+            //   point is relevant, but should be good most of the time.
+            //   It could be used to ensure that there is no vertex in the graph close by.
+            //   (maybe gdesc0 does not exist because "noise" in pos, but the vertex is close by)
+            //   TODO: Find points around graph0 to check that vertex really does not exit.
+            // - or check neighbors of current vertex.
+
+            // Case: Remove branch between existing
+            if(gdesc0.exist) {
+                GraphType::vertex_descriptor v_adj;
+                BGL_FORALL_ADJ(v, v_adj, g1, GraphType){
+                    vtkIdType id_adj = kdtree->FindClosestPoint(g1[v_adj].pos.data());
+                    const auto & gdescs_adj = idMap[id_adj];
+                    const auto & gdesc_adj0 = gdescs_adj[0];
+                    // if it exists, but it is not a vertex
+                    if(gdesc_adj0.exist && gdesc_adj0.is_edge) {
+                        if(true) {
+                            std::cout << "Source: v: " << v << " ; pos: " << g1[v].pos[0] <<", " << g1[v].pos[1] << std::endl;
+                            std::cout << "Adj: v_adj: " << v_adj << " ; pos: " << g1[v_adj].pos[0] <<", " << g1[v_adj].pos[1] << std::endl;
+                            SG::print_graph_descriptor(gdesc_adj0, "graph_desc at graph0");
+                        }
+                        // returns any edge between nodes. Ensure, TODO: HOW? there are no parallel edges.
+                        auto any_edge_exist = boost::edge(v, v_adj, g1);
+                        // edge exist for sure, no need to check with .second
+                        // also no need to worry about inserting the edge twice, the container is a set.
+                        removed_edges.insert(any_edge_exist.first);
+                    }
+                }
+            }
+        }
+    }
+
+    // Filter the graph using removed_edges
+    GraphType filtered_graph = SG::filter_by_sets({}, removed_edges, g1);
+    EXPECT_EQ(removed_edges.size(), 1);
+    std::cout << "Removed edges: " << std::endl;
+    for(const auto & edge : removed_edges){
+        std::cout << edge << std::endl;
+        EXPECT_TRUE(edge.m_source == 4 || edge.m_target == 4);
+        EXPECT_TRUE(edge.m_source == 5 || edge.m_target == 5);
+    }
+
+    EXPECT_EQ(boost::num_vertices(g1), 6);
+    EXPECT_EQ(boost::num_vertices(filtered_graph), boost::num_vertices(g1));
+    EXPECT_EQ(boost::num_edges(filtered_graph), boost::num_edges(g1) - 1);
+    SG::visualize_spatial_graph(g0);
+    SG::visualize_spatial_graph(g1);
+    SG::visualize_spatial_graph(filtered_graph);
 
 };
