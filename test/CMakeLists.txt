@@ -110,4 +110,45 @@ if(VISUALIZE)
     test_visualize_histograms
     TEST_PREFIX visualize_histograms||
     )
+
+  add_executable(test_get_vtk_points_from_graph test_get_vtk_points_from_graph.cpp
+    ${CMAKE_SOURCE_DIR}/src/get_vtk_points_from_graph.cpp )
+  target_link_libraries(test_get_vtk_points_from_graph
+    SG
+    SGVtk
+    ${GTEST_LIBRARIES}
+    )
+  gtest_discover_tests(
+    test_get_vtk_points_from_graph
+    TEST_PREFIX get_vtk_points_from_graph||
+    )
+
+  add_library(graph_locator_fixtures graph_locator_fixtures.cpp)
+  target_link_libraries(graph_locator_fixtures SG ${Boost_LIBRARIES} ${GTEST_LIBRARIES})
+
+  add_executable(test_graph_points_locator test_graph_points_locator.cpp
+    ${CMAKE_SOURCE_DIR}/src/graph_points_locator.cpp )
+  target_link_libraries(test_graph_points_locator
+    SG
+    SGVtk
+    graph_locator_fixtures
+    ${GTEST_LIBRARIES}
+    )
+  gtest_discover_tests(
+    test_graph_points_locator
+    TEST_PREFIX graph_points_locator||
+    )
+
+  add_executable(test_compare_graphs test_compare_graphs.cpp
+    ${CMAKE_SOURCE_DIR}/src/compare_graphs.cpp )
+  target_link_libraries(test_compare_graphs
+    SG
+    SGVtk
+    graph_locator_fixtures
+    ${GTEST_LIBRARIES}
+    )
+  gtest_discover_tests(
+    test_compare_graphs
+    TEST_PREFIX compare_graphs||
+    )
 endif()
