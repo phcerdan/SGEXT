@@ -1,3 +1,17 @@
+set(_scripts_targets
+    thin
+    analyze_graph
+    full_graph
+    histograms_from_data
+    create_distance_map
+    mask_distance_map_with_thin_image
+    )
+
+set(_scripts_targets_visualize
+    highlight_image_points
+    visualize_histograms_from_file
+    )
+
 add_executable(thin thin.cpp)
 target_link_libraries(thin ${Boost_LIBRARIES} )
 target_link_libraries(thin ${ITK_LIBRARIES} )
@@ -66,3 +80,14 @@ if(VISUALIZE)
     target_link_libraries(visualize_histograms_from_file Qt5::Widgets Qt5::Xml )
     target_link_libraries(visualize_histograms_from_file ${VTK_LIBRARIES} )
 endif()
+
+if(VISUALIZE)
+    list(APPEND _scripts_targets ${_scripts_targets_visualize})
+endif()
+
+# Even if you install the targets, the dependencies are not bundled/packaged
+# The user would have to set LD_LIBRARY_PATH poiting to the dependency libraries
+# DGtal, VTK, etc
+install(TARGETS ${_scripts_targets}
+        RUNTIME DESTINATION bin
+        )
