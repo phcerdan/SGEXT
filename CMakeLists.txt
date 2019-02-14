@@ -1,10 +1,14 @@
 cmake_minimum_required(VERSION 3.8.1)
-# cmake_policy(SET CMP0012 NEW)
-# if (UNIX)
-#     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wall -pedantic -Wextra")
-# endif()
-# cmake ../src  -G"Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT=TRUE
-project(object_to_spatial_graph)
+
+if(POLICY CMP0048)
+  cmake_policy(SET CMP0048 NEW)
+endif()
+
+project(SGEXT
+  VERSION 0.8.0
+  LANGUAGES CXX)
+message(STATUS "SGEXT version: ${SGEXT_VERSION}")
+
 option(ENABLE_TESTING "Enable Tests" OFF)
 option(VISUALIZE "Enable visualization with VTK and QT." OFF)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -107,13 +111,13 @@ set(SG_HEADERS_ONLY
 
 set(HISTO_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/histo/include
         CACHE PATH "histo include directory")
-install(DIRECTORY ${HISTO_INCLUDE_DIR} DESTINATION include})
+install(DIRECTORY ${HISTO_INCLUDE_DIR}/ DESTINATION include/sgext)
 
 # for convenience setup a target
 add_library(histo INTERFACE)
 target_include_directories(histo INTERFACE
     $<BUILD_INTERFACE:${HISTO_INCLUDE_DIR}>
-    $<INSTALL_INTERFACE:include)
+    $<INSTALL_INTERFACE:include/sgext>)
 
 # need to export target as well
 install(TARGETS histo EXPORT my_export_set DESTINATION include)
@@ -177,6 +181,7 @@ if(ENABLE_TESTING)
     GIT_TAG        release-1.8.0
   )
 
+  set(CMAKE_POLICY_DEFAULT_CMP0048 NEW) # google test raises warning about it
   FetchContent_GetProperties(googletest)
   if(NOT googletest_POPULATED)
     FetchContent_Populate(googletest)
@@ -186,3 +191,62 @@ if(ENABLE_TESTING)
 
   add_subdirectory(test)
 endif(ENABLE_TESTING)
+
+
+# EXPORT and generate .config file for find_package
+
+set(_target_libraries SG histo)
+if(VISUALIZE)
+  list(APPEND _target_libraries SGVtk)
+endif()
+set(sgext_export_file "${PROJECT_BINARY_DIR}/SGEXTTargets.cmake")
+
+install(TARGETS ${_target_libraries}
+        EXPORT SGEXTTargets
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        )
+export( TARGETS ${_target_libraries}
+  NAMESPACE SGEXT::
+  FILE ${sgext_export_file})
+
+install (EXPORT SGEXTTargets
+  NAMESPACE SGEXT::
+  DESTINATION lib/sgext/cmake )
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
+  DESTINATION include/sgext
+  PATTERN "*.txt" EXCLUDE)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/SGEXTConfig.cmake
+              ${CMAKE_CURRENT_BINARY_DIR}/SGEXTConfigVersion.cmake
+              DESTINATION lib/sgext/cmake )
+
+include(CMakePackageConfigHelpers)
+
+write_basic_package_version_file (SGEXTConfigVersion.cmake
+  VERSION ${SGEXT_VERSION}
+  COMPATIBILITY SameMajorVersion)
+
+# Build tree
+set(SGEXT_TARGETS_FILE ${sgext_export_file})
+configure_package_config_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/SGEXTConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/SGEXTConfig.cmake
+  INSTALL_DESTINATION lib/sgext/cmake
+  PATH_VARS SGEXT_TARGETS_FILE
+  NO_CHECK_REQUIRED_COMPONENTS_MACRO # SGEXT does not provide components
+  INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}
+  )
+
+# # Install tree
+set(SGEXT_TARGETS_FILE ${CMAKE_INSTALL_PREFIX}/lib/sgext/cmake/SGEXTTargets.cmake)
+configure_package_config_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/SGEXTConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/cmake/SGEXTConfig.cmake
+  INSTALL_DESTINATION lib/sgext/cmake
+  PATH_VARS SGEXT_TARGETS_FILE
+  NO_CHECK_REQUIRED_COMPONENTS_MACRO # SGEXT does not provide components
+  )
+
