@@ -5,12 +5,26 @@ set(_scripts_targets
     histograms_from_data
     create_distance_map
     mask_distance_map_with_thin_image
+    merge_low_high_info_graphs
     )
 
 set(_scripts_targets_visualize
     highlight_image_points
     visualize_histograms_from_file
     )
+option(MERGE_GRAPHS "Enable merge graphs script." ON)
+if(MERGE_GRAPHS)
+    add_executable(merge_low_high_info_graphs merge_low_high_info_graphs.cpp)
+    target_link_libraries(merge_low_high_info_graphs SG )
+    target_link_libraries(merge_low_high_info_graphs SGVtk )
+    # target_link_libraries(merge_low_high_info_graphs ${Boost_LIBRARIES} )
+    # target_link_libraries(merge_low_high_info_graphs ${ITK_LIBRARIES} )
+    # target_link_libraries(merge_low_high_info_graphs ${VTK_LIBRARIES} )
+    if(VISUALIZE)
+        target_link_libraries(merge_low_high_info_graphs Qt5::Widgets Qt5::Xml )
+        target_compile_definitions(merge_low_high_info_graphs PUBLIC VISUALIZE)
+    endif()
+endif()
 
 add_executable(thin thin.cpp)
 target_link_libraries(thin ${Boost_LIBRARIES} )

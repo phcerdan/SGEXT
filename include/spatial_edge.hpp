@@ -20,6 +20,7 @@ struct SpatialEdge {
 /* Stream operators */
 inline static std::ostream &operator<<(std::ostream &os,
                                        const SpatialEdge &se) {
+    os.precision(100);
     auto size = se.edge_points.size();
     os << "[";
     for (size_t i = 0; i + 1 < size; ++i) {

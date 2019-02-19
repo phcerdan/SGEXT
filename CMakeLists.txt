@@ -132,6 +132,7 @@ set(SG_SRC_WITH_BOOST
     ${SG_SRC_DIR}/spatial_histograms.cpp
     ${SG_SRC_DIR}/split_loop.cpp
     ${SG_SRC_DIR}/reduce_spatial_graph_via_dfs.cpp
+    ${SG_SRC_DIR}/spatial_graph_utilities.cpp
     ${SG_SRC_DIR}/filter_spatial_graph.cpp
     # not requiring boost
     ${SG_SRC_DIR}/graph_data.cpp
@@ -162,6 +163,7 @@ if(VISUALIZE)
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>  # <prefix>/include/mylib
         )
+    target_link_libraries(SGVtk SG )
     target_link_libraries(SGVtk ${Boost_LIBRARIES} ${VTK_LIBRARIES} )
     target_compile_definitions(SGVtk PRIVATE VISUALIZE)
 endif()

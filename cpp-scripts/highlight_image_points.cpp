@@ -77,7 +77,16 @@ int main(int argc, char* const argv[]){
 
   using Domain = Z3i::Domain ;
   using Image = ImageContainerByITKImage<Domain, unsigned char> ;
-  Image image = ITKReader<Image>::importITK(filename);
+  const unsigned int Dim = 3;
+  using PixelType = unsigned char ;
+  using ItkImageType = itk::Image<PixelType, Dim> ;
+  // Read Image using ITK
+  using ReaderType = itk::ImageFileReader<ItkImageType> ;
+  auto reader = ReaderType::New();
+  reader->SetFileName(filename);
+  reader->Update();
+  auto itk_image = reader->GetOutput();
+  Image image(itk_image);
 
   using DigitalSet =
     DGtal::DigitalSetByAssociativeContainer<Domain ,
@@ -108,12 +117,18 @@ int main(int argc, char* const argv[]){
         std::cout << ss.str() << std::endl;
         std::string spoint;
         Domain::Point p;
+        Image::ITKImage::PointType itk_point;
+        Image::ITKImage::IndexType itk_index;
         //12 9 131, 23 44 5
         while(std::getline(ss, spoint, ',')) {
           std::istringstream sspoint( spoint );
           std::cout << sspoint.str() << std::endl;
           //12 9 131
-          sspoint >> p[0] >> p[1] >> p[2];
+          sspoint >> itk_point[0] >> itk_point[1] >> itk_point[2];
+          itk_image->TransformPhysicalPointToIndex(itk_point, itk_index);
+          p[0] = itk_index[0];
+          p[1] = itk_index[1];
+          p[2] = itk_index[2];
           std::cout << p << std::endl;
           highlight_red_set.insert(p);
         }
@@ -130,12 +145,18 @@ int main(int argc, char* const argv[]){
         std::cout << ss.str() << std::endl;
         std::string spoint;
         Domain::Point p;
+        Image::ITKImage::PointType itk_point;
+        Image::ITKImage::IndexType itk_index;
         //12 9 131, 23 44 5
         while(std::getline(ss, spoint, ',')) {
           std::istringstream sspoint( spoint );
           std::cout << sspoint.str() << std::endl;
           //12 9 131
-          sspoint >> p[0] >> p[1] >> p[2];
+          sspoint >> itk_point[0] >> itk_point[1] >> itk_point[2];
+          itk_image->TransformPhysicalPointToIndex(itk_point, itk_index);
+          p[0] = itk_index[0];
+          p[1] = itk_index[1];
+          p[2] = itk_index[2];
           std::cout << p << std::endl;
           highlight_blue_set.insert(p);
         }
