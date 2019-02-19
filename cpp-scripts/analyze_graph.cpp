@@ -30,6 +30,7 @@
 
 // Reduce graph via dfs:
 #include "spatial_graph.hpp"
+#include "spatial_graph_utilities.hpp"
 #include "reduce_spatial_graph_via_dfs.hpp"
 #include "spatial_graph_from_object.hpp"
 #include "remove_extra_edges.hpp"
@@ -216,9 +217,10 @@ int main(int argc, char* const argv[]){
       if(verbose){
         std::cout <<  "Merging three connecting nodes... " << std::endl;
       }
-      auto nodes_merged = SG::merge_three_connected_nodes(reduced_g);
+      bool inPlace = true;
+      auto nodes_merged = SG::merge_three_connected_nodes(reduced_g, inPlace);
       if(verbose){
-        std::cout << nodes_merged <<  " nodes were merged. Those nodes have now degree 0" << std::endl;
+        std::cout << nodes_merged <<  " nodes were merged. Those nodes have now degree 0 if inPlace is not set" << std::endl;
       }
     }
 
@@ -259,30 +261,31 @@ int main(int argc, char* const argv[]){
       }
       itk_spacing = reader->GetOutput()->GetSpacing();
       SG::transform_graph_to_physical_point<ItkImageType>(reduced_g, reader->GetOutput());
-    }
-    if(spacing != "")
-    {
-      std::istringstream in(spacing);
-      double sp;
-      for(size_t i = 0; i < ItkImageType::ImageDimension; i++)
+      if(spacing != "")
       {
-        in >> sp;
-        itk_spacing[i] = sp;
-      }
+        std::istringstream in(spacing);
+        double sp;
+        for(size_t i = 0; i < ItkImageType::ImageDimension; i++)
+        {
+          in >> sp;
+          itk_spacing[i] = sp;
+        }
 
-      if(verbose)
-      {
-        std::cout << "Changing Spacing to: " << itk_spacing << std::endl;
-      }
+        if(verbose)
+        {
+          std::cout << "Changing Spacing to: " << itk_spacing << std::endl;
+        }
 
-      reader->GetOutput()->SetSpacing(itk_spacing);
-      SG::transform_graph_to_physical_point<ItkImageType>(reduced_g,
-          reader->GetOutput());
+        reader->GetOutput()->SetSpacing(itk_spacing);
+        SG::transform_graph_to_physical_point<ItkImageType>(reduced_g,
+            reader->GetOutput());
+      }
     }
     // Format itk_spacing into a string:
     std::ostringstream sp_stream;
     sp_stream << itk_spacing[0] << "_" << itk_spacing[1] << "_" << itk_spacing[2];
     auto sp_string = sp_stream.str();
+    std::cout << "spacing: " << sp_string << std::endl;
 
     if(exportReducedGraph)
     {
@@ -303,7 +306,17 @@ int main(int argc, char* const argv[]){
             ( mergeThreeConnectedNodes ? "_m" : "")   +
             ".dot");
         std::ofstream out;
+        auto repeated_points = SG::check_unique_points_in_graph(reduced_g);
+        if(repeated_points.second) {
+          std::cout << "Warning: duplicated points exist in reduced_g"
+            "Repeated Points: " << repeated_points.first.size() << std::endl;
+          for(const auto & p : repeated_points.first) {
+            SG::print_pos(std::cout, p);
+            std::cout << std::endl;
+          }
+        }
         out.open(output_full_path.string().c_str());
+
         boost::write_graphviz_dp(out, reduced_g, dp);
         if(verbose)
           std::cout << "Output reduced graph (graphviz) to: " << output_full_path.string() << std::endl;
