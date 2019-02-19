@@ -20,10 +20,11 @@
 
 #include "merge_nodes.hpp"
 #include "edge_points_utilities.hpp"
+#include "filter_spatial_graph.hpp"
 
 namespace SG {
 
-size_t merge_three_connected_nodes(GraphType & sg)
+size_t merge_three_connected_nodes(GraphType & sg, bool inPlace)
 {
     size_t node_was_merged = 0;
     using vertex_descriptor = boost::graph_traits<
@@ -140,6 +141,7 @@ size_t merge_three_connected_nodes(GraphType & sg)
                 sg);
     }
 
+    SG::VertexDescriptorUnorderedSet removed_nodes;
     // Connect new nodes to node_to_merge_into.
     for(auto & nodes : nodes_to_remove) {
         auto & node_to_remove = nodes.first;
@@ -159,9 +161,15 @@ size_t merge_three_connected_nodes(GraphType & sg)
         // Remove vertex destroys all iterators/descripts
         // when using a vecS as vertex_intex_t
         // boost::remove_vertex(node_to_remove, sg);
+        removed_nodes.insert(node_to_remove);
         boost::clear_vertex(node_to_remove, sg);
         node_was_merged++;
     }
+
+    if(inPlace){
+        sg = SG::filter_by_sets({}, removed_nodes, sg);
+    }
+
     return node_was_merged;
 }
 

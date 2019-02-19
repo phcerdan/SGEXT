@@ -50,7 +50,7 @@ namespace SG
  *
  * @return number of nodes merged/cleared.
  */
-size_t merge_three_connected_nodes(GraphType & sg);
+size_t merge_three_connected_nodes(GraphType & sg, bool inPlace = true);
 
 std::vector< std::pair<boost::graph_traits< GraphType>::edge_descriptor,
                        boost::graph_traits< GraphType>::edge_descriptor > >

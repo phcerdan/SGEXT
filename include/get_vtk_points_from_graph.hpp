@@ -32,6 +32,7 @@
 
 namespace SG {
 
+
 /**
  * Get vtkPoints extracted from the input spatial graph.
  *

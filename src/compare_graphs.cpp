@@ -21,6 +21,7 @@
 #include "compare_graphs.hpp"
 #include "get_vtk_points_from_graph.hpp"
 #include "graph_points_locator.hpp"
+#include "filter_spatial_graph.hpp"
 #include <boost/graph/copy.hpp>
 #include <boost/graph/iteration_macros.hpp>
 

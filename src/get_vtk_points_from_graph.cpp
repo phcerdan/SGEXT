@@ -20,6 +20,7 @@
 
 #include "get_vtk_points_from_graph.hpp"
 #include <unordered_map>
+#include "spatial_graph_utilities.hpp"
 
 namespace SG {
 
@@ -34,7 +35,6 @@ std::unordered_map< vtkIdType, std::vector<graph_descriptor>>
          boost::graph_traits<GraphType>::vertex_iterator;
     using edge_iterator =
          boost::graph_traits<GraphType>::edge_iterator;
-
     auto points = vtkSmartPointer<vtkPoints>::New();
 
     std::unordered_map< vtkIdType, std::vector<graph_descriptor>> idMap;
@@ -56,8 +56,6 @@ std::unordered_map< vtkIdType, std::vector<graph_descriptor>>
     edge_iterator ei, ei_end;
     std::tie(ei, ei_end) = boost::edges(sg);
     for (; ei != ei_end; ++ei) {
-        auto source = boost::source(*ei, sg);
-        auto target = boost::target(*ei, sg);
         auto &sg_edge = sg[*ei];
         auto &sg_edge_points = sg_edge.edge_points;
         for (size_t index = 0; index < sg_edge_points.size(); ++index) {
@@ -73,6 +71,21 @@ std::unordered_map< vtkIdType, std::vector<graph_descriptor>>
             idMap[id] = gdescs;
         }
     }
+#ifndef NDEBUG
+    std::set<PointType> repeated_points;
+    bool repeated_exists;
+    std::tie(repeated_points, repeated_exists) =  check_unique_points_in_graph(sg);
+    if(repeated_exists){
+        std::cout << "Warning: duplicated points exist in get_vtk_points_from_graph."
+            "Repeated Points: " << repeated_points.size() << std::endl;
+        for(const auto & p : repeated_points) {
+            SG::print_pos(std::cout, p);
+            std::cout << std::endl;
+        }
+    }
+    // assert(duplicated_points_exist == false);
+#endif
+
     return std::make_pair(points, idMap);
 };
 
