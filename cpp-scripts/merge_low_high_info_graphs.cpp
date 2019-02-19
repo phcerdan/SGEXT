@@ -39,6 +39,7 @@
 #include "spatial_graph.hpp"
 #include "spatial_graph_utilities.hpp"
 #include "compare_graphs.hpp"
+#include "serialize_spatial_graph.hpp"
 
 #ifdef VISUALIZE
 #include "visualize_spatial_graph.hpp"
@@ -57,6 +58,7 @@ int main(int argc, char* const argv[]){
     ( "help,h", "display this message." )
     ( "highInfoGraph,i", po::value<string>()->required(), "Input high info graph." )
     ( "lowInfoGraph,l", po::value<string>()->required(), "Input low info graph ." )
+    ( "useSerialized,u", po::bool_switch()->default_value(false), "Use stored serialized graphs. If off, it will require .dot graphviz files.")
     ( "exportMergedGraph,o", po::value<string>()->required(), "Write .dot file with the merged spatial graph." )
 #ifdef VISUALIZE
     ( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal. Requires VISUALIZE option enabled at build.")
@@ -85,6 +87,8 @@ int main(int argc, char* const argv[]){
     std::cout <<"Filename Low Info Graph: " << filenameLow << std::endl;
   }
   bool exportMergedGraph = vm.count("exportMergedGraph");
+  bool useSerialized = vm["useSerialized"].as<bool>();
+
 #ifdef VISUALIZE
   bool visualize = vm["visualize"].as<bool>();
 #endif
@@ -95,21 +99,45 @@ int main(int argc, char* const argv[]){
 
   SG::GraphType g0; // lowGraph
   SG::GraphType g1; // highGraph
-  boost::dynamic_properties dp0;
-  {
-    dp0.property("node_id", boost::get(&SG::SpatialNode::label, g0));
-    dp0.property("spatial_node", boost::get(boost::vertex_bundle, g0));
-    dp0.property("spatial_edge", boost::get(boost::edge_bundle, g0));
-    std::ifstream ifileLow(filenameLow);
-    boost::read_graphviz(ifileLow, g0, dp0, "node_id");
+  if(!useSerialized) { // read graphviz
+    boost::dynamic_properties dp0;
+    {
+      dp0.property("node_id", boost::get(&SG::SpatialNode::label, g0));
+      dp0.property("spatial_node", boost::get(boost::vertex_bundle, g0));
+      dp0.property("spatial_edge", boost::get(boost::edge_bundle, g0));
+      std::ifstream ifileLow(filenameLow);
+      boost::read_graphviz(ifileLow, g0, dp0, "node_id");
+    }
+    boost::dynamic_properties dp1;
+    {
+      dp1.property("node_id", boost::get(&SG::SpatialNode::label, g1));
+      dp1.property("spatial_node", boost::get(boost::vertex_bundle, g1));
+      dp1.property("spatial_edge", boost::get(boost::edge_bundle, g1));
+      std::ifstream ifileHigh(filenameHigh);
+      boost::read_graphviz(ifileHigh, g1, dp1, "node_id");
+    }
+  } else {
+    g0 = SG::read_serialized_graph(filenameLow);
+    g1 = SG::read_serialized_graph(filenameHigh);
   }
-  boost::dynamic_properties dp1;
-  {
-    dp1.property("node_id", boost::get(&SG::SpatialNode::label, g1));
-    dp1.property("spatial_node", boost::get(boost::vertex_bundle, g1));
-    dp1.property("spatial_edge", boost::get(boost::edge_bundle, g1));
-    std::ifstream ifileHigh(filenameHigh);
-    boost::read_graphviz(ifileHigh, g1, dp1, "node_id");
+
+  auto repeated_points_g0 = SG::check_unique_points_in_graph(g0);
+  if(repeated_points_g0.second) {
+    std::cout << "Warning: duplicated points exist in low info graph (g0)"
+      "Repeated Points: " << repeated_points_g0.first.size() << std::endl;
+    for(const auto & p : repeated_points_g0.first) {
+      SG::print_pos(std::cout, p);
+      std::cout << std::endl;
+    }
+  }
+  auto repeated_points_g1 = SG::check_unique_points_in_graph(g1);
+  if(repeated_points_g1.second) {
+    std::cout << "Warning: duplicated points exist in high info graph (g1)"
+      "Repeated Points: " << repeated_points_g1.first.size() << std::endl;
+    for(const auto & p : repeated_points_g1.first) {
+      SG::print_pos(std::cout, p);
+      std::cout << std::endl;
+    }
   }
 
   auto nvertices_g0 = boost::num_vertices(g0);
@@ -123,19 +151,23 @@ int main(int argc, char* const argv[]){
   }
 
   // Make the comparison between low and high and take the result
-  auto merged_g = SG::compare_high_and_low_info_graphs(g0, g1);
+  auto merged_g = SG::compare_low_and_high_info_graphs(g0, g1);
+  auto nvertices_merged = boost::num_vertices(merged_g);
+  auto nedges_merged = boost::num_edges(merged_g);
+  std::cout << "** GMerged:  vertices: " <<  nvertices_merged << ". edges: " << nedges_merged << std::endl;
 
   if(exportMergedGraph) {
     string exportMergedGraph_filename_merged = vm["exportMergedGraph"].as<string>();
-    boost::dynamic_properties dp_merged;
-    dp_merged.property("node_id", boost::get(boost::vertex_index, merged_g));
-    dp_merged.property("spatial_node", boost::get(boost::vertex_bundle, merged_g));
-    dp_merged.property("spatial_edge", boost::get(boost::edge_bundle, merged_g));
-    {
-      const fs::path output_folder_path{exportMergedGraph_filename_merged};
-      if(!fs::exists(output_folder_path)) {
-        throw std::runtime_error("output folder doesn't exist : " + output_folder_path.string());
-      }
+    const fs::path output_folder_path{exportMergedGraph_filename_merged};
+    if(!fs::exists(output_folder_path)) {
+      throw std::runtime_error("output folder doesn't exist : " + output_folder_path.string());
+    }
+
+    if(!useSerialized) {
+      boost::dynamic_properties dp_merged;
+      dp_merged.property("node_id", boost::get(boost::vertex_index, merged_g));
+      dp_merged.property("spatial_node", boost::get(boost::vertex_bundle, merged_g));
+      dp_merged.property("spatial_edge", boost::get(boost::edge_bundle, merged_g));
       fs::path output_full_path = output_folder_path / fs::path(
           output_file_path.string() +
           ".dot");
@@ -144,6 +176,13 @@ int main(int argc, char* const argv[]){
       boost::write_graphviz_dp(out, merged_g, dp_merged);
       if(verbose)
         std::cout << "Output merged graph (graphviz) to: " << output_full_path.string() << std::endl;
+    } else {
+      fs::path output_full_path = output_folder_path / fs::path(
+          output_file_path.string() +
+          ".txt");
+      SG::write_serialized_graph(merged_g, output_full_path.string());
+      if(verbose)
+        std::cout << "Output merged graph (serialize) to: " << output_full_path.string() << std::endl;
     }
   }
 #ifdef VISUALIZE

@@ -18,18 +18,15 @@
  *
  * *******************************************************************/
 
+#ifndef SERIALIZE_SPATIAL_GRAPH_HPP
+#define SERIALIZE_SPATIAL_GRAPH_HPP
+
+#include <string>
 #include "spatial_graph.hpp"
-#include "filter_spatial_graph.hpp"
 
 namespace SG {
 
-std::pair<EdgeDescriptorUnorderedSet, VertexDescriptorUnorderedSet>
-remove_edges_and_nodes_from_high_info_graph(
-        const GraphType & g0,
-        const GraphType & g1);
-
-GraphType
-compare_low_and_high_info_graphs(
-    const GraphType & g0,
-    const GraphType & g1);
-} // end ns SG
+void write_serialized_graph(GraphType & sg, const std::string & absolute_path);
+GraphType read_serialized_graph(const std::string & absolute_path);
+} // ns SG
+#endif

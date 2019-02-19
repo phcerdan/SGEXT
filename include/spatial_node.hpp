@@ -24,6 +24,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <boost/serialization/array.hpp>
 namespace SG {
 
     struct SpatialNode
@@ -59,5 +60,17 @@ inline static std::istream& operator>>(std::istream& is,
     return is;
 }
 
+
 } // end namespace SG
+
+namespace boost {
+    namespace serialization {
+        template <class Archive>
+            void serialize(Archive &ar, SG::SpatialNode &sn, unsigned /*version*/) {
+                ar & sn.label;
+                ar & sn.pos;
+        }
+    } // namespace serialization
+}
+
 #endif

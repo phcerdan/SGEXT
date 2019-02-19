@@ -117,7 +117,7 @@ remove_edges_and_nodes_from_high_info_graph(
 
 
 GraphType
-compare_high_and_low_info_graphs(
+compare_low_and_high_info_graphs(
   const GraphType & g0,
   const GraphType & g1)
 {

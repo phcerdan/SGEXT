@@ -64,7 +64,7 @@ TEST_F(MatchingGraphsFixture, compare_graphs)
     }
 
     // auto filtered_graph = SG::filter_by_sets(removed_edges, removed_nodes, g1);
-    auto filtered_graph= SG::compare_high_and_low_info_graphs(g0, g1);
+    auto filtered_graph= SG::compare_low_and_high_info_graphs(g0, g1);
     EXPECT_EQ(boost::num_vertices(g1), 6);
     EXPECT_EQ(boost::num_vertices(filtered_graph), boost::num_vertices(g1));
     EXPECT_EQ(boost::num_edges(filtered_graph), boost::num_edges(g1) - 1);
