@@ -24,7 +24,8 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/filtered_graph.hpp>
 #include <boost/graph/graphviz.hpp>
-
+// serialize
+#include "serialize_spatial_graph.hpp"
 // Boost Filesystem
 #include <boost/filesystem.hpp>
 
@@ -78,6 +79,7 @@ int main(int argc, char* const argv[]){
     ( "spacing", po::value<string>()->default_value(""), "Provide external spacing between voxels. Ignores metadata of itk image and apply it." )
     ( "exportReducedGraph,o", po::value<string>(), "Write .dot file with the reduced spatial graph." )
     ( "exportData,z", po::value<string>(), "Write degrees, ete_distances, contour_lengths, etc. Histograms can be generated from these files afterwards." )
+    ( "exportSerialized,u", po::value<string>(), "Write serialized graph with the reduced spatial graph." )
 #ifdef VISUALIZE
     ( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal. Requires VISUALIZE option enabled at build.")
 #endif
@@ -116,6 +118,7 @@ int main(int argc, char* const argv[]){
   bool ignoreAngleBetweenParallelEdges = vm["ignoreAngleBetweenParallelEdges"].as<bool>();
   bool ignoreEdgesToEndNodes = vm["ignoreEdgesToEndNodes"].as<bool>();
   bool exportReducedGraph = vm.count("exportReducedGraph");
+  bool exportSerialized = vm.count("exportSerialized");
   bool exportData = vm.count("exportData");
   // bool exportHistograms = vm.count("exportHistograms");
   // size_t binsHistoDegrees = vm["binsHistoDegrees"].as<size_t>();
@@ -287,6 +290,17 @@ int main(int argc, char* const argv[]){
     auto sp_string = sp_stream.str();
     std::cout << "spacing: " << sp_string << std::endl;
 
+    // Check unique points of graph
+    auto repeated_points = SG::check_unique_points_in_graph(reduced_g);
+    if(repeated_points.second) {
+      std::cout << "Warning: duplicated points exist in reduced_g"
+        "Repeated Points: " << repeated_points.first.size() << std::endl;
+      for(const auto & p : repeated_points.first) {
+        SG::print_pos(std::cout, p);
+        std::cout << std::endl;
+      }
+    }
+
     if(exportReducedGraph)
     {
       string exportReducedGraph_filename = vm["exportReducedGraph"].as<string>();
@@ -306,21 +320,30 @@ int main(int argc, char* const argv[]){
             ( mergeThreeConnectedNodes ? "_m" : "")   +
             ".dot");
         std::ofstream out;
-        auto repeated_points = SG::check_unique_points_in_graph(reduced_g);
-        if(repeated_points.second) {
-          std::cout << "Warning: duplicated points exist in reduced_g"
-            "Repeated Points: " << repeated_points.first.size() << std::endl;
-          for(const auto & p : repeated_points.first) {
-            SG::print_pos(std::cout, p);
-            std::cout << std::endl;
-          }
-        }
         out.open(output_full_path.string().c_str());
 
         boost::write_graphviz_dp(out, reduced_g, dp);
         if(verbose)
           std::cout << "Output reduced graph (graphviz) to: " << output_full_path.string() << std::endl;
       }
+    }
+
+    if(exportSerialized)
+    {
+      string exportReducedGraph_filename = vm["exportReducedGraph"].as<string>();
+      const fs::path output_folder_path{exportReducedGraph_filename};
+      if(!fs::exists(output_folder_path)) {
+        throw std::runtime_error("output folder doesn't exist : " + output_folder_path.string());
+      }
+      fs::path output_full_path = output_folder_path / fs::path(
+          output_file_path.string() +
+          ( "_sp" + sp_string ) +
+          ( removeExtraEdges ? "_c" : "")   +
+          ( mergeThreeConnectedNodes ? "_m" : "")   +
+          ".txt");
+      SG::write_serialized_graph(reduced_g, output_full_path.string());
+      if(verbose)
+        std::cout << "Output reduced graph (serialized) to: " << output_full_path.string() << std::endl;
     }
 #ifdef VISUALIZE
     if(visualize)

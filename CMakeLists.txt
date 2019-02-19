@@ -18,6 +18,7 @@ find_package(Boost COMPONENTS
         program_options
         filesystem
         graph
+        serialization
         REQUIRED)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 # Requires version with this PR in: https://github.com/DGtal-team/DGtal/pull/1369
@@ -134,6 +135,7 @@ set(SG_SRC_WITH_BOOST
     ${SG_SRC_DIR}/reduce_spatial_graph_via_dfs.cpp
     ${SG_SRC_DIR}/spatial_graph_utilities.cpp
     ${SG_SRC_DIR}/filter_spatial_graph.cpp
+    ${SG_SRC_DIR}/serialize_spatial_graph.cpp
     # not requiring boost
     ${SG_SRC_DIR}/graph_data.cpp
     )
