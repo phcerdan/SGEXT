@@ -8,6 +8,8 @@
 
 #include "array_utilities.hpp"
 #include "common_types.hpp"
+#include <boost/serialization/array.hpp>
+#include <boost/serialization/vector.hpp>
 
 namespace SG {
 struct SpatialEdge {
@@ -62,4 +64,13 @@ inline static std::istream &operator>>(std::istream &is, SpatialEdge &se) {
 }
 
 } // namespace SG
+
+namespace boost {
+    namespace serialization {
+        template <class Archive>
+            void serialize(Archive &ar, SG::SpatialEdge &se, unsigned /*version*/) {
+                ar & se.edge_points;
+        }
+    } // namespace serialization
+}
 #endif
