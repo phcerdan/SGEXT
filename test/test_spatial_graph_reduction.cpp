@@ -969,14 +969,23 @@ TEST_F(rare_trio, remove_extra_edges) {
     SG::print_spatial_edges(reduced_g);
     EXPECT_EQ(num_vertices(reduced_g), 6);
     EXPECT_EQ(num_edges(reduced_g), 6);
+    // perform a copy
+    auto reduced_g_delete_nodes = reduced_g;
     // SG::visualize_spatial_graph(reduced_g);
     std::cout << "Merge 3-connected" << std::endl;
-    auto nodes_merged = SG::merge_three_connected_nodes(reduced_g);
-    std::cout << nodes_merged <<  " nodes were merged. Those nodes have now degree 0" << std::endl;
+    bool removeNodesInPlace = true;
+    auto nodes_merged = SG::merge_three_connected_nodes(reduced_g, !removeNodesInPlace);
+    std::cout << nodes_merged <<  " nodes were merged. Those nodes have now degree 0." << std::endl;
     EXPECT_EQ(num_vertices(reduced_g), 6);
     EXPECT_EQ(num_edges(reduced_g), 3);
     SG::print_degrees(reduced_g);
     SG::print_spatial_edges(reduced_g);
+    auto nodes_merged_and_deleted = SG::merge_three_connected_nodes(reduced_g_delete_nodes, removeNodesInPlace);
+    std::cout << nodes_merged_and_deleted <<  " nodes were merged. Those nodes were deletes form the graph." << std::endl;
+    EXPECT_EQ(num_vertices(reduced_g_delete_nodes), 4);
+    EXPECT_EQ(num_edges(reduced_g_delete_nodes), 3);
+    SG::print_degrees(reduced_g_delete_nodes);
+    SG::print_spatial_edges(reduced_g_delete_nodes);
     // SG::visualize_spatial_graph(reduced_g);
 }
 
