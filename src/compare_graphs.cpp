@@ -97,15 +97,23 @@ remove_edges_and_nodes_from_high_info_graph(
       }
     }
 
+    // TODO hard coded! FIX -- hit performance if too big, bad comparison if too low.
+    double radius = 2.0;
     SG::EdgeDescriptorUnorderedSet growing_edges;
     // Iterate over all vertices of low info graph
     {
       GraphType::vertex_descriptor v;
       BGL_FORALL_VERTICES(v, g0, GraphType) {
-        vtkIdType id = kdtree->FindClosestPoint(g0[v].pos.data());
-        const auto & gdescs = idMap[id];
-        const auto & gdesc0 = gdescs[0];
-        const auto & gdesc1 = gdescs[1];
+        // vtkIdType id = kdtree->FindClosestPoint(g0[v].pos.data());
+        auto closest_points_list_from_g0_vertex =
+          SG::graph_closest_points_by_radius_locator(g0[v].pos,
+              kdtree, idMap, radius);
+        auto closest_descriptors_from_g0_vertex =
+          closest_existing_descriptors_by_graph(closest_points_list_from_g0_vertex, idMap);
+
+        // const auto & gdescs = idMap[closest_descriptors_from_g0_vertex[];
+        const auto & gdesc0 = closest_descriptors_from_g0_vertex[0].descriptor;
+        const auto & gdesc1 = closest_descriptors_from_g0_vertex[1].descriptor;
         assert(gdesc0.exist && gdesc0.is_vertex);
         // |__|
         // |__|
@@ -114,10 +122,20 @@ remove_edges_and_nodes_from_high_info_graph(
           // Low graph has grown from an end point
           auto source_g1 = boost::source(gdesc1.edge_d, g1);
           auto target_g1 = boost::target(gdesc1.edge_d, g1);
-          vtkIdType id_source_g1 = kdtree->FindClosestPoint(g1[source_g1].pos.data());
-          vtkIdType id_target_g1 = kdtree->FindClosestPoint(g1[target_g1].pos.data());
-          const auto & gdescs_source_g1 = idMap[id_source_g1];
-          const auto & gdescs_target_g1 = idMap[id_target_g1];
+          // vtkIdType id_source_g1 = kdtree->FindClosestPoint(g1[source_g1].pos.data());
+          // vtkIdType id_target_g1 = kdtree->FindClosestPoint(g1[target_g1].pos.data());
+          auto closest_points_list_from_source_g1 =
+            SG::graph_closest_points_by_radius_locator(g1[source_g1].pos,
+                kdtree, idMap, radius);
+          auto closest_descriptors_from_source_g1 =
+            closest_existing_descriptors_by_graph(closest_points_list_from_source_g1, idMap);
+          auto closest_points_list_from_target_g1 =
+            SG::graph_closest_points_by_radius_locator(g1[target_g1].pos,
+                kdtree, idMap, radius);
+          auto closest_descriptors_from_target_g1 =
+            closest_existing_descriptors_by_graph(closest_points_list_from_target_g1, idMap);
+          // const auto & gdescs_source_g1 = idMap[id_source_g1];
+          // const auto & gdescs_target_g1 = idMap[id_target_g1];
           const auto & gdesc_source0 = gdescs_source_g1[0];
           const auto & gdesc_target0 = gdescs_target_g1[0];
           // TODO these source0/target0 are PROBABLY not existant!
@@ -125,10 +143,13 @@ remove_edges_and_nodes_from_high_info_graph(
           // using the kdtree radius (sorted by distance), and return
           // the first point that exist in target graph. It is a projection.
           // Use it instead of FindClosestPoint
+          // DONE
           //
+          // if source0 is not existant
+          // - the graph has grown/extended.
           // if source0 is an edge point.
           // - a merge into an existing vessel. EXPLORE FURTHER
-          // if source 0 is a node
+          // if source0 is a node
           // - two branches headed in opposite directions have merged . GOOD
           // vtkIdType id_source0 = kdtree->FindClosestPoint(gdesc_target0.vertex_dpos.data());
           // vtkIdType id_target0 = kdtree->FindClosestPoint(target_g1_pos.data());
