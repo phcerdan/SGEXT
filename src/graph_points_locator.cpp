@@ -22,27 +22,59 @@
 #include "vtkPolyData.h"
 namespace SG {
 
-namespace detail {
-void fill_graph_descriptors(std::vector<graph_descriptor> & in_out_gdescs,
+std::vector<IdWithGraphDescriptor>
+closest_existing_descriptors_by_graph(
         vtkIdList * closeIdList,
-        const std::unordered_map<vtkIdType, std::vector<graph_descriptor>> & idMap){
-    using namespace SG;
-    auto gdescs_size = in_out_gdescs.size();
-    // Fill out_gdescs from the closest points.
+        const std::unordered_map<vtkIdType, std::vector<graph_descriptor>> & idMap)
+{
+    const size_t gdescs_size = idMap.cbegin()->second.size();
+    std::vector<IdWithGraphDescriptor> id_graph_descriptors(gdescs_size);
+    // Fill id_graph_descriptors from the closest points.
+    // the list should be ordered from closest to furthest
     for (vtkIdType closeId_index = 0; closeId_index < closeIdList->GetNumberOfIds(); ++closeId_index){
-        auto const & gdescs_at_close_index = idMap.at(closeIdList->GetId(closeId_index));
+        vtkIdType idList = closeIdList->GetId(closeId_index);
+        auto const & gdescs_at_close_index = idMap.at(idList);
         for (size_t gdescs_index = 0; gdescs_index < gdescs_size ; ++gdescs_index) {
-            if(in_out_gdescs[gdescs_index].exist)
+            if(id_graph_descriptors[gdescs_index].exist)
                 continue;
             const auto & gdesc = gdescs_at_close_index[gdescs_index];
-            if(gdesc.exist)
-                in_out_gdescs[gdescs_index] = gdesc;
+            if(gdesc.exist) {
+                id_graph_descriptors[gdescs_index].exist = true;
+                id_graph_descriptors[gdescs_index].id = idList;
+                id_graph_descriptors[gdescs_index].descriptor = gdesc;
+            }
         }
-        if(all_graph_descriptors_exist(in_out_gdescs))
+        if(all_graph_descriptors_exist(id_graph_descriptors))
             break;
     }
+    return id_graph_descriptors;
 }
-} // ns detail
+
+std::vector<IdWithGraphDescriptor>
+closest_existing_vertex_by_graph(
+        vtkIdList * closeIdList,
+        const std::unordered_map<vtkIdType, std::vector<graph_descriptor>> & idMap)
+{
+    const size_t gdescs_size = idMap.cbegin()->second.size();
+    std::vector<IdWithGraphDescriptor> id_graph_descriptors(gdescs_size);
+    for (vtkIdType closeId_index = 0; closeId_index < closeIdList->GetNumberOfIds(); ++closeId_index){
+        vtkIdType idList = closeIdList->GetId(closeId_index);
+        auto const & gdescs_at_close_index = idMap.at(idList);
+        for (size_t gdescs_index = 0; gdescs_index < gdescs_size ; ++gdescs_index) {
+            if(id_graph_descriptors[gdescs_index].exist)
+                continue;
+            const auto & gdesc = gdescs_at_close_index[gdescs_index];
+            if(gdesc.exist && gdesc.is_vertex) {
+                id_graph_descriptors[gdescs_index].exist = true;
+                id_graph_descriptors[gdescs_index].id = idList;
+                id_graph_descriptors[gdescs_index].descriptor = gdesc;
+            }
+        }
+        if(all_graph_descriptors_exist(id_graph_descriptors))
+            break;
+    }
+    return id_graph_descriptors;
+}
 
 vtkSmartPointer<vtkKdTreePointLocator>
 build_kdtree_locator(vtkPoints * inputPoints)
@@ -54,7 +86,15 @@ build_kdtree_locator(vtkPoints * inputPoints)
     kdtree->SetDataSet(dataSet);
     kdtree->BuildLocator();
     return kdtree;
-};
+}
+
+bool all_graph_descriptors_exist(const std::vector<IdWithGraphDescriptor> & gdescs)
+{
+    for(const auto & gdesc_with_id: gdescs){
+        if(!gdesc_with_id.exist) return false;
+    }
+    return true;
+}
 
 bool all_graph_descriptors_exist(const std::vector<graph_descriptor> & gdescs)
 {
@@ -65,34 +105,31 @@ bool all_graph_descriptors_exist(const std::vector<graph_descriptor> & gdescs)
 }
 
 
-std::vector<graph_descriptor> graph_closest_n_points_locator(
+vtkSmartPointer<vtkIdList>
+graph_closest_n_points_locator(
         const PointType &queryPoint,
         vtkKdTreePointLocator * kdtree,
         const std::unordered_map<vtkIdType, std::vector<graph_descriptor>> & idMap,
         const int closest_n_points)
 {
-    const size_t gdescs_size = idMap.cbegin()->second.size();
-    std::vector<graph_descriptor> out_gdescs(gdescs_size);
-
     auto closeIdList = vtkSmartPointer<vtkIdList>::New();
     kdtree->FindClosestNPoints(closest_n_points, queryPoint.data(), closeIdList );
 
-    SG::detail::fill_graph_descriptors(out_gdescs, closeIdList, idMap);
-
-    if(!all_graph_descriptors_exist(out_gdescs))
-        std::cerr << "WARNING: Graph descriptor not filled for some graph" << std::endl;
-
-    return out_gdescs;
+    return closeIdList;
+    // auto out_gdescs = SG::closest_existing_descriptors_by_graph(closeIdList, idMap);
+    // if(!all_graph_descriptors_exist(out_gdescs))
+    //     std::cerr << "WARNING: Graph descriptor not filled for some graph" << std::endl;
+    // return out_gdescs;
 };
 
-std::vector<graph_descriptor> graph_closest_points_by_radius_locator(
+vtkSmartPointer<vtkIdList>
+graph_closest_points_by_radius_locator(
         const PointType &queryPoint,
         vtkKdTreePointLocator * kdtree,
         const std::unordered_map<vtkIdType, std::vector<graph_descriptor>> & idMap,
         double radius)
 {
     const size_t gdescs_size = idMap.cbegin()->second.size();
-    std::vector<graph_descriptor> out_gdescs(gdescs_size);
 
     auto closeIdList = vtkSmartPointer<vtkIdList>::New();
     kdtree->FindPointsWithinRadius(radius, queryPoint.data(), closeIdList);
@@ -125,11 +162,10 @@ std::vector<graph_descriptor> graph_closest_points_by_radius_locator(
         closeIdList->SetId(closeId_index, real_ids[closeId_index]);
     }
 
-    SG::detail::fill_graph_descriptors(out_gdescs, closeIdList, idMap);
-
-    if(!all_graph_descriptors_exist(out_gdescs))
-        std::cerr << "WARNING: Graph descriptor not filled for some graph" << std::endl;
-
-    return out_gdescs;
+    return closeIdList;
+    // auto out_gdescs = SG::closest_existing_descriptors_by_graph(closeIdList, idMap);
+    // if(!all_graph_descriptors_exist(out_gdescs))
+    //     std::cerr << "WARNING: Graph descriptor not filled for some graph" << std::endl;
+    // return out_gdescs;
 };
 } // ns SG

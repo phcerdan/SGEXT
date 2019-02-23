@@ -26,25 +26,48 @@
 #include <vtkKdTreePointLocator.h>
 #include <vtkPoints.h>
 #include <vtkSmartPointer.h>
+#include <vtkIdList.h>
 
 namespace SG {
 
-  namespace detail {
+  struct IdWithGraphDescriptor {
+    bool exist = false;
+    vtkIdType id;
+    graph_descriptor descriptor;
+  };
+
   /**
-   * Utility function re-used in other function to
-   * fill the the graph descriptors with the closest graph_descriptor that exists.
-   * The order of filling is determined by closeIdList.
+   * The output is a vector (of size equal to the number of graphs on input idMap)
+   * where each index is associated to a graph, and it contains a graph_descriptor
+   * and a point id, corresponding to the closest EXISTING point for that graph.
    *
-   * This can generate a vector of graph_descriptors with different position.
+   * Given an ordered list, return a list with graph_descriptors and point id.
+   * The order of filling is given by the the order of the input list.
+   * The size of the return vector is given by the number of graphs existing in idMap.
    *
-   * @param in_out_gdescs
    * @param closeIdList
    * @param idMap
+   *
+   * @return vector of graph_descriptos with id
    */
-  void fill_graph_descriptors(std::vector<graph_descriptor> & in_out_gdescs,
-      vtkIdList * closeIdList,
-      const std::unordered_map<vtkIdType, std::vector<graph_descriptor>> & idMap);
-  } //ns detail
+  std::vector<IdWithGraphDescriptor>
+    closest_existing_descriptors_by_graph(
+        vtkIdList * closeIdList,
+        const std::unordered_map<vtkIdType, std::vector<graph_descriptor>> & idMap);
+
+  /**
+   * Similar to \ref closest_existing_descriptors_by_graph but returns the closest
+   * vertex instead of just the closest existing vertex OR edge.
+   *
+   * @param closeIdList
+   * @param idMap
+   *
+   * @return
+   */
+  std::vector<IdWithGraphDescriptor>
+    closest_existing_vertex_by_graph(
+        vtkIdList * closeIdList,
+        const std::unordered_map<vtkIdType, std::vector<graph_descriptor>> & idMap);
 
   /**
    * Builds a kdtree from input points
@@ -62,22 +85,23 @@ namespace SG {
    * @return false if any gdesc.exist == false
    */
   bool all_graph_descriptors_exist(const std::vector<graph_descriptor> & gdescs);
+  bool all_graph_descriptors_exist(const std::vector<IdWithGraphDescriptor> & gdescs);
 
   /**
    * Use the kdtree point locator and the idMap from a set of graphs to query a point in space.
-   * It returns a vector of graph_descriptors.
+   * It returns a list of vtkId points
    *
    * @param queryPoint
    * @param kdtree
    * @param
    */
-  std::vector<graph_descriptor> graph_closest_n_points_locator(
+  vtkSmartPointer<vtkIdList> graph_closest_n_points_locator(
       const PointType &queryPoint,
       vtkKdTreePointLocator * kdtree,
       const std::unordered_map<vtkIdType, std::vector<graph_descriptor>> & idMap,
       const int closest_n_points = 5 );
 
-  std::vector<graph_descriptor> graph_closest_points_by_radius_locator(
+  vtkSmartPointer<vtkIdList> graph_closest_points_by_radius_locator(
       const PointType &queryPoint,
       vtkKdTreePointLocator * kdtree,
       const std::unordered_map<vtkIdType, std::vector<graph_descriptor>> & idMap,

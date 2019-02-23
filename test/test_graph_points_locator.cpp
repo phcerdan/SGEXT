@@ -136,14 +136,15 @@ TEST_F(GraphPointLocatorFixture, graph_closest_n_points_locator) {
     EXPECT_EQ(kdtree->GetDataSet()->GetNumberOfPoints(), 7);
 
     SG::PointType testPoint = {{3,0,0}};
-    auto out_gdescs = SG::graph_closest_n_points_locator(testPoint, kdtree, merger_map_pair.second);
-    const auto & gdesc0 = out_gdescs[0];
+    auto closest_id_list = SG::graph_closest_n_points_locator(testPoint, kdtree, merger_map_pair.second);
+    auto out_gdescs = SG::closest_existing_descriptors_by_graph(closest_id_list, merger_map_pair.second);
+    const auto & gdesc0 = out_gdescs[0].descriptor;
     SG::print_graph_descriptor(gdesc0);
     EXPECT_TRUE(gdesc0.exist);
     EXPECT_TRUE(gdesc0.is_vertex);
     EXPECT_FALSE(gdesc0.is_edge);
     EXPECT_EQ(gdesc0.vertex_d, 2);
-    const auto & gdesc1 = out_gdescs[1];
+    const auto & gdesc1 = out_gdescs[1].descriptor;
     SG::print_graph_descriptor(gdesc1);
     EXPECT_TRUE(gdesc1.exist);
     EXPECT_TRUE(gdesc1.is_vertex);
@@ -163,14 +164,15 @@ TEST_F(GraphPointLocatorFixture, graph_closest_points_by_radius_locator) {
 
     SG::PointType testPoint = {{3.0,0,0}};
     double radius = 10.0;
-    auto out_gdescs = SG::graph_closest_points_by_radius_locator(testPoint, kdtree, merger_map_pair.second, radius);
-    const auto & gdesc0 = out_gdescs[0];
+    auto closest_id_list = SG::graph_closest_points_by_radius_locator(testPoint, kdtree, merger_map_pair.second, radius);
+    auto out_gdescs = SG::closest_existing_descriptors_by_graph(closest_id_list, merger_map_pair.second);
+    const auto & gdesc0 = out_gdescs[0].descriptor;
     SG::print_graph_descriptor(gdesc0);
     EXPECT_TRUE(gdesc0.exist);
     EXPECT_TRUE(gdesc0.is_vertex);
     EXPECT_FALSE(gdesc0.is_edge);
     EXPECT_EQ(gdesc0.vertex_d, 2);
-    const auto & gdesc1 = out_gdescs[1];
+    const auto & gdesc1 = out_gdescs[1].descriptor;
     SG::print_graph_descriptor(gdesc1);
     EXPECT_TRUE(gdesc1.exist);
     EXPECT_TRUE(gdesc1.is_vertex);
@@ -189,17 +191,41 @@ TEST_F(GraphPointLocatorFixture, graph_closest_points_by_radius_locator_small_ra
 
     SG::PointType testPoint = {{3.0,0,0}};
     double radius = 2.0;
-    auto out_gdescs = SG::graph_closest_points_by_radius_locator(testPoint, kdtree, merger_map_pair.second, radius);
-    const auto & gdesc0 = out_gdescs[0];
+    auto closest_id_list = SG::graph_closest_points_by_radius_locator(testPoint, kdtree, merger_map_pair.second, radius);
+    auto out_gdescs = SG::closest_existing_descriptors_by_graph(closest_id_list, merger_map_pair.second);
+    const auto & gdesc0 = out_gdescs[0].descriptor;
     SG::print_graph_descriptor(gdesc0);
     EXPECT_TRUE(gdesc0.exist);
     EXPECT_TRUE(gdesc0.is_vertex);
     EXPECT_FALSE(gdesc0.is_edge);
     EXPECT_EQ(gdesc0.vertex_d, 2);
-    const auto & gdesc1 = out_gdescs[1];
+    const auto & gdesc1 = out_gdescs[1].descriptor;
     SG::print_graph_descriptor(gdesc1);
     EXPECT_TRUE(gdesc1.exist);
     EXPECT_TRUE(gdesc1.is_vertex);
     EXPECT_FALSE(gdesc1.is_edge);
     EXPECT_EQ(gdesc1.vertex_d, 3);
+}
+
+TEST_F(GraphPointLocatorFixture, graph_closest_points_by_radius_no_points_found) {
+    std::vector<std::reference_wrapper<const GraphType>> graphs;
+    graphs.reserve(2);
+    graphs.push_back(std::cref(g0));
+    graphs.push_back(std::cref(g1));
+    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs);
+    auto kdtree = SG::build_kdtree_locator(merger_map_pair.first->GetPoints());
+    EXPECT_EQ(kdtree->GetDataSet()->GetNumberOfPoints(), 7);
+
+    SG::PointType testPoint = {{100.0,0,0}};
+    double radius = 2.0;
+    auto closest_id_list = SG::graph_closest_points_by_radius_locator(testPoint, kdtree, merger_map_pair.second, radius);
+    auto out_gdescs = SG::closest_existing_descriptors_by_graph(closest_id_list, merger_map_pair.second);
+    EXPECT_FALSE(out_gdescs[0].exist);
+    EXPECT_FALSE(out_gdescs[1].exist);
+    const auto & gdesc0 = out_gdescs[0].descriptor;
+    SG::print_graph_descriptor(gdesc0);
+    EXPECT_FALSE(gdesc0.exist);
+    const auto & gdesc1 = out_gdescs[1].descriptor;
+    SG::print_graph_descriptor(gdesc1);
+    EXPECT_FALSE(gdesc1.exist);
 }
