@@ -103,7 +103,9 @@ TEST_F(ThreeConnectedNodesFixture, merge_nodes) {
     SG::print_edges(reduced_g);
 
     std::cout << "Merging three_connected_nodes" << std::endl;
-    auto nodes_merged = SG::merge_three_connected_nodes(reduced_g);
+    // Do not remove the merge nodes, they become zero degree nodes.
+    bool remove_merged_nodes_in_place = true;
+    auto nodes_merged = SG::merge_three_connected_nodes(reduced_g, !remove_merged_nodes_in_place);
     EXPECT_EQ(nodes_merged, 2);
     // Nodes are not removed but cleared (no edges attached, degree=0)
     // EXPECT_EQ(num_vertices(reduced_g), num_vertices(sg) - 2);
@@ -195,7 +197,10 @@ TEST_F(ContourLengthCornercase2Fixture, merge_nodes)
     SG::print_edges(reduced_g);
 
     std::cout << "Merging contourlength cornercase2 " << std::endl;
-    auto nodes_merged = SG::merge_three_connected_nodes(reduced_g);
+    // Do not remove the merge nodes, they become zero degree nodes.
+    bool remove_merged_nodes_in_place = true;
+    auto nodes_merged = SG::merge_three_connected_nodes(reduced_g,
+            !remove_merged_nodes_in_place);
     EXPECT_EQ(nodes_merged, 0);
     // Nodes are not removed but cleared (no edges attached, degree=0)
     // EXPECT_EQ(num_vertices(reduced_g), num_vertices(sg) - 2);
