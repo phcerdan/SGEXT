@@ -58,7 +58,7 @@ double contour_length(const SG::GraphType::edge_descriptor e,
  * Ordered by connectivity, adjacent points are connected.
  * @param new_point point to intert.
  */
-void insert_edge_point_with_distance_order(
+void insert_unique_edge_point_with_distance_order(
         SG::SpatialEdge::PointContainer & edge_points,
         const SG::SpatialEdge::PointType & new_point);
 
