@@ -73,6 +73,7 @@ if(VISUALIZE)
     vtkRenderingCore
     vtkRenderingOpenGL2 # avoid vtkRenderer, vtkRenderWindow not found at run time
     vtkRenderingContextOpenGL2 # avoid vtkContextDevice2D not found at run time
+    vtkRenderingVolumeOpenGL2 # For volume rendering SmartVolumeMapper
     vtkViewsContext2D
     vtkInteractionWidgets
     vtkViewsInfovis
