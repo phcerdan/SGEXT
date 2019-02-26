@@ -137,7 +137,7 @@ size_t merge_three_connected_nodes(GraphType & sg, bool inPlace)
             auto target = boost::target(*ei, sg);
             auto & spatial_edge = sg[*ei];
             auto & sn_to_remove = sg[node_to_remove];
-            SG::insert_edge_point_with_distance_order(
+            SG::insert_unique_edge_point_with_distance_order(
                     spatial_edge.edge_points,
                     sn_to_remove.pos);
             boost::add_edge(node_to_merge_into, target, spatial_edge, sg);
