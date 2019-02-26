@@ -263,7 +263,7 @@ int main(int argc, char* const argv[]){
         std::cout << "Direction:\n " << reader->GetOutput()->GetDirection() << std::endl;
       }
       itk_spacing = reader->GetOutput()->GetSpacing();
-      SG::transform_graph_to_physical_point<ItkImageType>(reduced_g, reader->GetOutput());
+      SG::transform_graph_to_physical_space<ItkImageType>(reduced_g, reader->GetOutput());
       if(spacing != "")
       {
         std::istringstream in(spacing);
@@ -280,7 +280,7 @@ int main(int argc, char* const argv[]){
         }
 
         reader->GetOutput()->SetSpacing(itk_spacing);
-        SG::transform_graph_to_physical_point<ItkImageType>(reduced_g,
+        SG::transform_graph_to_physical_space<ItkImageType>(reduced_g,
             reader->GetOutput());
       }
     }

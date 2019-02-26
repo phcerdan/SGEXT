@@ -52,27 +52,38 @@ struct non_default_image: public default_image
     }
 };
 
-TEST_F(default_image, index_array_to_physical_point_array)
+TEST_F(default_image, index_array_to_physical_space_array)
 {
     auto input_array = SG::PointType{{1, 1, 1}};
-    auto trans_array = SG::index_array_to_physical_point_array<ImageType>(
+    auto trans_array = SG::index_array_to_physical_space_array<ImageType>(
             input_array,
             this->image);
     EXPECT_THAT(trans_array, input_array);
 }
 
-TEST_F(non_default_image, index_array_to_physical_point_array)
+TEST_F(non_default_image, index_array_to_physical_space_array)
 {
     auto input_array = SG::PointType{{1, 1, 1}};
-    auto trans_array = SG::index_array_to_physical_point_array<ImageType>(
+    auto trans_array = SG::index_array_to_physical_space_array<ImageType>(
             input_array,
             this->image);
-    EXPECT_EQ(trans_array[0], 101.0);
-    EXPECT_EQ(trans_array[1], 100.1);
-    EXPECT_EQ(trans_array[2], 110.0);
+    EXPECT_DOUBLE_EQ(trans_array[0], 101.0);
+    EXPECT_DOUBLE_EQ(trans_array[1], 100.1);
+    EXPECT_DOUBLE_EQ(trans_array[2], 110.0);
 }
 
-TEST_F(default_image, transform_graph_to_physical_point)
+TEST_F(non_default_image, physical_space_array_to_index_array)
+{
+    auto input_array = SG::PointType{{101.0, 100.1, 110.0}};
+    auto trans_array = SG::physical_space_array_to_index_array<ImageType>(
+            input_array,
+            this->image);
+    EXPECT_DOUBLE_EQ(trans_array[0], 1);
+    EXPECT_DOUBLE_EQ(trans_array[1], 1);
+    EXPECT_DOUBLE_EQ(trans_array[2], 1);
+}
+
+TEST_F(default_image, transform_graph_to_physical_space)
 {
     using GraphType = SG::GraphAL;
     GraphType g(2);
@@ -89,25 +100,25 @@ TEST_F(default_image, transform_graph_to_physical_point)
             {{0,1,0}});
     auto edge2 = add_edge(0, 1, se01_2, g);
 
-    SG::transform_graph_to_physical_point<ImageType>(g, this->image);
+    SG::transform_graph_to_physical_space<ImageType>(g, this->image);
 
-    EXPECT_EQ(g[0].pos[0], 0.0);
-    EXPECT_EQ(g[0].pos[1], 0.0);
-    EXPECT_EQ(g[0].pos[2], 0.0);
-    EXPECT_EQ(g[1].pos[0], 1.0);
-    EXPECT_EQ(g[1].pos[1], 1.0);
-    EXPECT_EQ(g[1].pos[2], 0.0);
+    EXPECT_DOUBLE_EQ(g[0].pos[0], 0.0);
+    EXPECT_DOUBLE_EQ(g[0].pos[1], 0.0);
+    EXPECT_DOUBLE_EQ(g[0].pos[2], 0.0);
+    EXPECT_DOUBLE_EQ(g[1].pos[0], 1.0);
+    EXPECT_DOUBLE_EQ(g[1].pos[1], 1.0);
+    EXPECT_DOUBLE_EQ(g[1].pos[2], 0.0);
     auto ep1 = g[edge1.first].edge_points[0];
     auto ep2 = g[edge2.first].edge_points[0];
-    EXPECT_EQ(ep1[0], 1.0);
-    EXPECT_EQ(ep1[1], 0.0);
-    EXPECT_EQ(ep1[2], 0.0);
-    EXPECT_EQ(ep2[0], 0.0);
-    EXPECT_EQ(ep2[1], 1.0);
-    EXPECT_EQ(ep2[2], 0.0);
+    EXPECT_DOUBLE_EQ(ep1[0], 1.0);
+    EXPECT_DOUBLE_EQ(ep1[1], 0.0);
+    EXPECT_DOUBLE_EQ(ep1[2], 0.0);
+    EXPECT_DOUBLE_EQ(ep2[0], 0.0);
+    EXPECT_DOUBLE_EQ(ep2[1], 1.0);
+    EXPECT_DOUBLE_EQ(ep2[2], 0.0);
 }
 
-TEST_F(non_default_image, transform_graph_to_physical_point)
+TEST_F(non_default_image, transform_graph_to_physical_space)
 {
     using GraphType = SG::GraphAL;
     GraphType g(2);
@@ -124,20 +135,59 @@ TEST_F(non_default_image, transform_graph_to_physical_point)
             {{0,1,0}});
     auto edge2 = add_edge(0, 1, se01_2, g);
 
-    SG::transform_graph_to_physical_point<ImageType>(g, this->image);
+    SG::transform_graph_to_physical_space<ImageType>(g, this->image);
 
-    EXPECT_EQ(g[0].pos[0], 100.0);
-    EXPECT_EQ(g[0].pos[1], 100.0);
-    EXPECT_EQ(g[0].pos[2], 100.0);
-    EXPECT_EQ(g[1].pos[0], 101.0);
-    EXPECT_EQ(g[1].pos[1], 100.1);
-    EXPECT_EQ(g[1].pos[2], 100.0);
+    EXPECT_DOUBLE_EQ(g[0].pos[0], 100.0);
+    EXPECT_DOUBLE_EQ(g[0].pos[1], 100.0);
+    EXPECT_DOUBLE_EQ(g[0].pos[2], 100.0);
+    EXPECT_DOUBLE_EQ(g[1].pos[0], 101.0);
+    EXPECT_DOUBLE_EQ(g[1].pos[1], 100.1);
+    EXPECT_DOUBLE_EQ(g[1].pos[2], 100.0);
     auto ep1 = g[edge1.first].edge_points[0];
     auto ep2 = g[edge2.first].edge_points[0];
-    EXPECT_EQ(ep1[0], 101.0);
-    EXPECT_EQ(ep1[1], 100.0);
-    EXPECT_EQ(ep1[2], 100.0);
-    EXPECT_EQ(ep2[0], 100.0);
-    EXPECT_EQ(ep2[1], 100.1);
-    EXPECT_EQ(ep2[2], 100.0);
+    EXPECT_DOUBLE_EQ(ep1[0], 101.0);
+    EXPECT_DOUBLE_EQ(ep1[1], 100.0);
+    EXPECT_DOUBLE_EQ(ep1[2], 100.0);
+    EXPECT_DOUBLE_EQ(ep2[0], 100.0);
+    EXPECT_DOUBLE_EQ(ep2[1], 100.1);
+    EXPECT_DOUBLE_EQ(ep2[2], 100.0);
+}
+
+TEST_F(non_default_image, transform_graph_to_index_space)
+{
+    using GraphType = SG::GraphAL;
+    GraphType g(2);
+    using boost::add_edge;
+    // g[0].pos = {{0, 0, 0}};
+    g[0].pos = {{100.0, 100.0, 100.0}};
+    // g[0].pos = {{1, 1, 0}};
+    g[1].pos = {{101.0, 100.1, 100.0}};
+
+    SG::SpatialEdge se01_1;
+    se01_1.edge_points.insert(std::end(se01_1.edge_points),
+            // 1, 0, 0
+            {{101,100.0,100.0}});
+    auto edge1 = add_edge(0, 1, se01_1, g);
+    SG::SpatialEdge se01_2;
+    se01_2.edge_points.insert(std::end(se01_2.edge_points),
+            // 0, 1, 0
+            {{100.0,100.1,100.0}});
+    auto edge2 = add_edge(0, 1, se01_2, g);
+
+    SG::transform_graph_to_index_space<ImageType>(g, this->image);
+
+    EXPECT_DOUBLE_EQ(g[0].pos[0], 0.);
+    EXPECT_DOUBLE_EQ(g[0].pos[1], 0.);
+    EXPECT_DOUBLE_EQ(g[0].pos[2], 0.);
+    EXPECT_DOUBLE_EQ(g[1].pos[0], 1.);
+    EXPECT_DOUBLE_EQ(g[1].pos[1], 1.);
+    EXPECT_DOUBLE_EQ(g[1].pos[2], 0.);
+    auto ep1 = g[edge1.first].edge_points[0];
+    auto ep2 = g[edge2.first].edge_points[0];
+    EXPECT_DOUBLE_EQ(ep1[0], 1.);
+    EXPECT_DOUBLE_EQ(ep1[1], 0.);
+    EXPECT_DOUBLE_EQ(ep1[2], 0.);
+    EXPECT_DOUBLE_EQ(ep2[0], 0.);
+    EXPECT_DOUBLE_EQ(ep2[1], 1.);
+    EXPECT_DOUBLE_EQ(ep2[2], 0.);
 }
