@@ -90,7 +90,7 @@ double contour_length(const SG::GraphType::edge_descriptor e,
     return dist_to_source + SG::edge_points_length(se) + dist_to_target;
 }
 
-void insert_edge_point_with_distance_order(
+void insert_unique_edge_point_with_distance_order(
         SG::SpatialEdge::PointContainer & edge_points,
         const SG::SpatialEdge::PointType & new_point)
 {
@@ -116,10 +116,23 @@ void insert_edge_point_with_distance_order(
             std::end(distances_to_in_point));
     // Check they are connected for sanity.
     // TODO we might check this only in debug mode.
+    // This check is only valid if the spacing is 1.0 (object/indices space)
     {
         auto min_dist = *min_it;
         if(min_dist > sqrt(3.0) + 2.0 * std::numeric_limits<double>::epsilon())
-            throw std::runtime_error("The impossible, new_point in insert_edge_point_with_distance_order is not connected to the edge_points");
+            throw std::runtime_error("The impossible, new_point in insert_unique_edge_point_with_distance_order is not connected to the edge_points");
+    }
+    // Check that you are not inserting a duplicate
+    {
+        auto min_dist = *min_it;
+        if(std::abs(min_dist) < 2.0 * std::numeric_limits<double>::epsilon())
+        {
+#if !defined(NDEBUG)
+            std::cout << "Note: insert_unique_edge_point_with_distance_order tried to insert a duplicated point, but it was rejected." << std::endl;
+            std::cout << ArrayUtilities::to_string(new_point) << std::endl;
+#endif
+            return;
+        }
     }
     auto min_index = std::distance(std::begin(distances_to_in_point), min_it);
     if (min_index == 0)
@@ -128,7 +141,7 @@ void insert_edge_point_with_distance_order(
         // edge_points.insert(std::end(edge_points), new_point);
         edge_points.push_back(new_point);
     else  // illogical error
-        throw std::runtime_error("The impossible, new point in insert_edge_point_with_distance is not at the beggining or end position in edge_points.");
+        throw std::runtime_error("The impossible, new point in insert_unique_edge_point_with_distance is not at the beggining or end position in edge_points.");
 }
 
 

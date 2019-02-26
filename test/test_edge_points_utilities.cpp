@@ -122,19 +122,19 @@ TEST(insert_edge_point, with_distance_order)
     SG::SpatialEdge::PointType p1 = {{1,0,0}};
     SG::SpatialEdge::PointContainer edge_points = {{p0, p1}};
     // Insert it, should go to the front.
-    SG::insert_edge_point_with_distance_order(edge_points, new_point1);
+    SG::insert_unique_edge_point_with_distance_order(edge_points, new_point1);
     SG::SpatialEdge::PointContainer expected_edge_points1 = {{new_point1, p0, p1}};
     EXPECT_EQ(edge_points, expected_edge_points1);
 
     // Insert it, should go to the back
     SG::SpatialEdge::PointType new_point2 = {{2,0,0}};
-    SG::insert_edge_point_with_distance_order(edge_points, new_point2);
+    SG::insert_unique_edge_point_with_distance_order(edge_points, new_point2);
     SG::SpatialEdge::PointContainer expected_edge_points2 = {{new_point1, p0, p1, new_point2}};
     EXPECT_EQ(edge_points, expected_edge_points2);
 
     SG::SpatialEdge::PointType new_point3 = {{10,10,10}};
-    EXPECT_ANY_THROW( SG::insert_edge_point_with_distance_order(edge_points, new_point3) );
+    EXPECT_ANY_THROW( SG::insert_unique_edge_point_with_distance_order(edge_points, new_point3) );
 
     SG::SpatialEdge::PointType new_point4 = {{1,1,0}};
-    EXPECT_ANY_THROW( SG::insert_edge_point_with_distance_order(edge_points, new_point4) );
+    EXPECT_ANY_THROW( SG::insert_unique_edge_point_with_distance_order(edge_points, new_point4) );
 }
