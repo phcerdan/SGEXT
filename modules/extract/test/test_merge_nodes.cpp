@@ -12,7 +12,7 @@
 #include "merge_nodes.hpp"
 #include "spatial_graph_utilities.hpp"
 // use it to check there is no exception in cornercase
-#include "compute_graph_properties.hpp"
+// #include "compute_graph_properties.hpp"
 
 struct ObjectGraphFixture : public ::testing::Test {
     using Domain = DGtal::Z3i::Domain;
@@ -233,5 +233,5 @@ TEST_F(ContourLengthCornercase2Fixture, merge_nodes)
     EXPECT_EQ(count2degrees, 0);
     EXPECT_EQ(count1degrees, 3);
     EXPECT_EQ(count0degrees, 0);
-    EXPECT_NO_THROW(SG::compute_contour_lengths(reduced_g));
+    // EXPECT_NO_THROW(SG::compute_contour_lengths(reduced_g));
 }
