@@ -151,8 +151,8 @@ remove_edges_and_nodes_from_high_info_graph(
             closest_existing_descriptors_by_graph(closest_points_list_from_target_g1, idMap);
           // const auto & gdescs_source_g1 = idMap[id_source_g1];
           // const auto & gdescs_target_g1 = idMap[id_target_g1];
-          const auto & gdesc_source0 = gdescs_source_g1[0];
-          const auto & gdesc_target0 = gdescs_target_g1[0];
+          // const auto & gdesc_source0 = gdescs_source_g1[0];
+          // const auto & gdesc_target0 = gdescs_target_g1[0];
           // TODO these source0/target0 are PROBABLY not existant!
           // DEVELOP a FindClosestPointInGraph(index_graph (0 or 1))
           // using the kdtree radius (sorted by distance), and return

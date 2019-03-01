@@ -19,18 +19,6 @@
  * *******************************************************************/
 
 #include "graph_locator_fixtures.hpp"
-#include "vtkDataSet.h"
-
-namespace testing {
-void print_vtk_points(vtkAbstractPointLocator * locator)
-{
-    auto npoints = locator->GetDataSet()->GetNumberOfPoints();
-    for(vtkIdType index = 0; index < npoints; ++index){
-        auto point = locator->GetDataSet()->GetPoint(index);
-        std::cout << index << ": " << point[0] << ", " << point[1] << " , " << point[2] << std::endl;
-    }
-};
-}
 
 void MatchingGraphsFixture::CreateG0()
 {

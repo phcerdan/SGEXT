@@ -163,6 +163,7 @@ void visualize_spatial_graph_with_image(
   graphLayoutView->SetLayoutStrategyToPassThrough();
   auto style_graph = vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New(); // like paraview
   graphLayoutView->SetInteractorStyle(style_graph) ;
+  graphLayoutView->SetColorVertices(true);
   // 1 is the default (squares or circles), 9 is spheres ( extremely slow)
   graphLayoutView->SetGlyphType(7);
   // graphLayoutView->Set
