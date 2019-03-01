@@ -9,20 +9,24 @@ project(SGEXT
   LANGUAGES CXX)
 message(STATUS "SGEXT version: ${SGEXT_VERSION}")
 
-option(ENABLE_TESTING "Enable Tests" OFF)
-option(VISUALIZE "Enable visualization with VTK." OFF)
 include(CMakeDependentOption)
-CMAKE_DEPENDENT_OPTION(ENABLE_QT "Use QT for some visualizations" OFF
-  "VISUALIZE" ON)
-option(ENABLE_POINT_LOCATOR "Use VTK KDtree for graph point location." ON)
-option(ENABLE_COMPARE_GRAPHS "Logic to compare and merge low and high information graphs." ON)
+option(SG_BUILD_SCRIPTS "Build cpp-scripts." ON)
+option(SG_BUILD_TESTING "Enable Tests" ON)
+option(SG_MODULE_ANALYZE "Analyze the graph properties." ON)
+option(SG_MODULE_COMPARE "Logic to compare and merge low and high information graphs." ON)
+option(SG_MODULE_LOCATE "Use VTK KDtree for graph point location." ON)
+option(SG_MODULE_VISUALIZE "Functions to visualize spatial graphs and histograms." ON)
+CMAKE_DEPENDENT_OPTION(SG_MODULE_VISUALIZE_ENABLE_QT "Use QT for some visualizations" ON
+  "SG_MODULE_VISUALIZE" ON)
+option(VISUALIZE "Enable visualization with VTK." OFF)
 
-if(VISUALIZE OR ENABLE_POINT_LOCATOR OR ENABLE_COMPARE_GRAPHS)
-  set(REQUIRES_VTK TRUE)
+if(VISUALIZE OR SG_MODULE_VISUALIZE OR SG_MODULE_LOCATE OR SG_MODULE_COMPARE)
+  set(SG_REQUIRES_VTK TRUE)
 endif()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 14)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 find_package(Boost COMPONENTS
         program_options
@@ -34,6 +38,7 @@ include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 # Requires version with this PR in: https://github.com/DGtal-team/DGtal/pull/1369
 # Merged in DGtal 1.0.beta
 find_package(DGtal REQUIRED 1.0)
+message(STATUS "DGtal version: ${DGtal_VERSION}")
 include_directories(SYSTEM ${DGTAL_INCLUDE_DIRS})
 
 find_package(ITK CONFIG REQUIRED)
@@ -51,9 +56,8 @@ else()
   set(ITKImageIOModule ITKImageIO)
 endif()
 
-
 set(ITKVtkGlueModule "")
-if(REQUIRES_VTK)
+if(SG_REQUIRES_VTK)
   set(ITKVtkGlueModule ITKVtkGlue)
 endif()
 
@@ -67,20 +71,22 @@ find_package(ITK REQUIRED COMPONENTS
   ${ITKImageIOModule}
   CONFIG
 )
+message(STATUS "ITK version: ${ITK_VERSION}")
 include(${ITK_USE_FILE})
-include_directories(SYSTEM ${ITK_INCLUDE_DIRS})
-if(ENABLE_QT)
+# include_directories(SYSTEM ${ITK_INCLUDE_DIRS})
+if(SG_MODULE_VISUALIZE_ENABLE_QT)
   find_package(Qt5 REQUIRED
     Widgets
     Xml
     OpenGL)
+  message(STATUS "Qt5 version: ${Qt5_VERSION}")
 
-  if (Qt5_POSITION_INDEPENDENT_CODE)
+  if(Qt5_POSITION_INDEPENDENT_CODE)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
   endif()
 endif()
 
-if(REQUIRES_VTK)
+if(SG_REQUIRES_VTK)
   # VTK components to handle external dependency histo-header
   find_package(VTK REQUIRED COMPONENTS
     vtkChartsCore
@@ -97,36 +103,12 @@ if(REQUIRES_VTK)
     vtkGUISupportQt # QVTKWidget.h
     CONFIG
     )
-  # USE_FILE is deprecated? This is the cause of AUTOINIT warnings
+  message(STATUS "VTK version: ${VTK_VERSION}")
+  # USE_FILE is deprecated? Keep it. This is the cause of AUTOINIT warnings
   # https://gitlab.kitware.com/vtk/vtk/issues/15895
   include(${VTK_USE_FILE})
-  include_directories(SYSTEM ${VTK_INCLUDE_DIRS})
+  # include_directories(SYSTEM ${VTK_INCLUDE_DIRS})
 endif()
-
-set(SG_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/include")
-include_directories(${SG_INCLUDE_DIR})
-
-set(SG_SRC_DIR "${CMAKE_SOURCE_DIR}/src")
-# To keep track of headers, unused elsewhere
-set(SG_HEADERS_ONLY
-    ${SG_INCLUDE_DIR}/reduce_dfs_visitor.hpp
-    ${SG_INCLUDE_DIR}/visualize_spatial_graph_with_image.hpp
-    ${SG_INCLUDE_DIR}/spatial_graph_from_object.hpp
-    ${SG_INCLUDE_DIR}/spatial_graph_utilities.hpp
-    # These could form an external project {{{
-    ${SG_INCLUDE_DIR}/array_utilities.hpp
-    ${SG_INCLUDE_DIR}/spatial_graph.hpp
-    ${SG_INCLUDE_DIR}/spatial_node.hpp
-    ${SG_INCLUDE_DIR}/spatial_edge.hpp
-    # }}}
-    # Already external in phcerdan/histo-header. Use git submodule. {
-    # ${SG_INCLUDE_DIR}/histo.hpp
-    #}
-    # Taken from your phcerdan/ITKIsotropicWavelets module. {
-    ${SG_INCLUDE_DIR}/itkViewImage.h
-    ${SG_INCLUDE_DIR}/itkViewImage.hxx
-    # }
-    )
 
 set(HISTO_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/histo/include
         CACHE PATH "histo include directory")
@@ -139,95 +121,15 @@ target_include_directories(histo INTERFACE
     $<INSTALL_INTERFACE:include/sgext>)
 
 # need to export target as well
-install(TARGETS histo EXPORT my_export_set DESTINATION include)
 # this exports library: histo
+install(TARGETS histo
+  EXPORT SGEXTTargets
+  DESTINATION include)
 
-set(SG_SRC_WITH_BOOST
-    ${SG_SRC_DIR}/trim_graph.cpp
-    ${SG_SRC_DIR}/merge_nodes.cpp
-    ${SG_SRC_DIR}/edge_points_utilities.cpp
-    ${SG_SRC_DIR}/remove_extra_edges.cpp
-    ${SG_SRC_DIR}/compute_graph_properties.cpp
-    ${SG_SRC_DIR}/spatial_histograms.cpp
-    ${SG_SRC_DIR}/split_loop.cpp
-    ${SG_SRC_DIR}/reduce_spatial_graph_via_dfs.cpp
-    ${SG_SRC_DIR}/spatial_graph_utilities.cpp
-    ${SG_SRC_DIR}/filter_spatial_graph.cpp
-    ${SG_SRC_DIR}/serialize_spatial_graph.cpp
-    # not requiring boost
-    ${SG_SRC_DIR}/graph_data.cpp
-    )
-
-set(SG_SRC_WITH_VTK_VISUALIZE
-    ${SG_SRC_DIR}/convert_to_vtk_graph.cpp
-    ${SG_SRC_DIR}/visualize_spatial_graph.cpp
-    ${SG_SRC_DIR}/visualize_spatial_graph_with_image.cpp
-    )
-
-set(SG_SRC_WITH_VTK_POINT_LOCATOR
-    ${SG_SRC_DIR}/convert_to_vtk_graph.cpp
-    ${SG_SRC_DIR}/get_vtk_points_from_graph.cpp
-    ${SG_SRC_DIR}/graph_points_locator.cpp
-    )
-
-set(SG_SRC_COMPARE_GRAPHS
-    ${SG_SRC_DIR}/compare_graphs.cpp
-    )
-
-set(SG_SRC_WITH_VTK_AND_QT
-    ${SG_SRC_DIR}/visualize_histograms.cpp
-    )
-
-add_library(SG ${SG_SRC_WITH_BOOST})
-target_include_directories(SG PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
-  )
-target_link_libraries(SG ${Boost_LIBRARIES} histo )
-
-set(_visualize_library "")
-set(_visualize_definition "")
-if(VISUALIZE)
-  add_library(SGVtkVisualize ${SG_SRC_WITH_VTK_VISUALIZE} )
-  target_include_directories(SGVtkVisualize PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-    )
-  target_link_libraries(SGVtkVisualize
-    SG
-    ${VTK_LIBRARIES})
-  target_compile_definitions(SGVtkVisualize PRIVATE VISUALIZE)
-  set(_visualize_library SGVtkVisualize)
-  set(_visualize_definition VISUALIZE)
-endif()
-
-if(ENABLE_POINT_LOCATOR)
-  add_library(SGPointLocator ${SG_SRC_WITH_VTK_POINT_LOCATOR} )
-  target_link_libraries(SGPointLocator
-    PUBLIC
-    SG
-    ${_visualize_library}
-    )
-  target_compile_definitions(SGPointLocator PRIVATE
-    ${_visualize_definition})
-endif()
-
-if(ENABLE_COMPARE_GRAPHS)
-  add_library(SGCompareGraphs ${SG_SRC_COMPARE_GRAPHS} )
-  target_link_libraries(SGCompareGraphs
-    PUBLIC
-    SGPointLocator
-    ${_visualize_library}
-    )
-  target_compile_definitions(SGCompareGraphs PRIVATE
-    ${_visualize_definition})
-endif()
-
-add_subdirectory(cpp-scripts)
-
-if(ENABLE_TESTING)
+if(SG_BUILD_TESTING)
   enable_testing()
-
+  set(GTEST_LIBRARIES gtest gtest_main gmock)
+  include(GoogleTest)
   #############################################################################
   # Fetch GTest
   include(FetchContent)
@@ -245,36 +147,34 @@ if(ENABLE_TESTING)
     add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR})
   endif()
   #############################################################################
-
-  add_subdirectory(test)
-endif(ENABLE_TESTING)
-
-
-# EXPORT and generate .config file for find_package
-
-set(_target_libraries SG histo)
-if(VISUALIZE)
-  list(APPEND _target_libraries SGVtkVisualize)
+  add_subdirectory(test/fixtures)
 endif()
-set(sgext_export_file "${PROJECT_BINARY_DIR}/SGEXTTargets.cmake")
 
-install(TARGETS ${_target_libraries}
-        EXPORT SGEXTTargets
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        )
-export( TARGETS ${_target_libraries}
-  NAMESPACE SGEXT::
-  FILE ${sgext_export_file})
+set(SG_LIBRARIES "")
+set(sgext_export_file "${PROJECT_BINARY_DIR}/SGEXTTargets.cmake")
+include(SGModuleMacros) # module macros
+add_subdirectory(modules/core)
+add_subdirectory(modules/extract)
+if(SG_MODULE_ANALYZE)
+  add_subdirectory(modules/analyze)
+endif()
+if(SG_MODULE_LOCATE)
+  add_subdirectory(modules/locate)
+endif()
+if(SG_MODULE_COMPARE)
+  add_subdirectory(modules/compare)
+endif()
+if(SG_MODULE_VISUALIZE)
+  add_subdirectory(modules/visualize)
+endif()
+
+if(SG_BUILD_SCRIPTS)
+  add_subdirectory(cpp-scripts)
+endif()
 
 install (EXPORT SGEXTTargets
   NAMESPACE SGEXT::
   DESTINATION lib/sgext/cmake )
-
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
-  DESTINATION include/sgext
-  PATTERN "*.txt" EXCLUDE)
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/SGEXTConfig.cmake
               ${CMAKE_CURRENT_BINARY_DIR}/SGEXTConfigVersion.cmake
@@ -282,7 +182,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/SGEXTConfig.cmake
 
 include(CMakePackageConfigHelpers)
 
-write_basic_package_version_file (SGEXTConfigVersion.cmake
+write_basic_package_version_file(SGEXTConfigVersion.cmake
   VERSION ${SGEXT_VERSION}
   COMPATIBILITY SameMajorVersion)
 
@@ -297,7 +197,7 @@ configure_package_config_file(
   INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}
   )
 
-# # Install tree
+# Install tree
 set(SGEXT_TARGETS_FILE ${CMAKE_INSTALL_PREFIX}/lib/sgext/cmake/SGEXTTargets.cmake)
 configure_package_config_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/cmake/SGEXTConfig.cmake.in
