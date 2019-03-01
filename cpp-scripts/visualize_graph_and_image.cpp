@@ -40,6 +40,7 @@
 #include "spatial_graph_utilities.hpp"
 #include "serialize_spatial_graph.hpp"
 
+#include "visualize_spatial_graph.hpp"
 #include "visualize_spatial_graph_with_image.hpp"
 
 using namespace std;
@@ -52,10 +53,9 @@ int main(int argc, char* const argv[]){
   po::options_description general_opt ( "Allowed options are: " );
   general_opt.add_options()
     ( "help,h", "display this message." )
-    ( "inputImage,i", po::value<string>()->required(), "Input Binary Image. Skeletonized or not." )
     ( "inputGraph,g", po::value<string>()->required(), "Input graph." )
+    ( "inputImage,i", po::value<string>()->default_value(""), "Input Binary Image. Skeletonized or not. If not provided, only the graph will be visualized." )
     ( "useSerialized,u", po::bool_switch()->default_value(true), "Use stored serialized graphs. If off, it will require .dot graphviz files.")
-    ( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal. Requires VISUALIZE option enabled at build.")
     ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output." );
 
   po::variables_map vm;
@@ -81,22 +81,7 @@ int main(int argc, char* const argv[]){
   }
   bool useSerialized = vm["useSerialized"].as<bool>();
 
-  bool visualize = vm["visualize"].as<bool>();
-  // Get filenameImage without extension (and without folders).
-  // const fs::path input_stem = fs::path(filenameImage).stem();
-  // const fs::path output_file_path = fs::path(
-  //     input_stem.string() + "_low_high_merged");
-  //
-
-  const unsigned int Dim = 3;
-  using PixelType = unsigned char ;
-  using ItkImageType = itk::Image<PixelType, Dim> ;
-  using ReaderType = itk::ImageFileReader<ItkImageType> ;
-  auto reader = ReaderType::New();
-  reader->SetFileName(filenameImage);
-  reader->Update();
-
-  SG::GraphType sg; // lowGraph
+  SG::GraphType sg;
   if(!useSerialized) { // read graphviz
     boost::dynamic_properties dp0;
     {
@@ -126,9 +111,22 @@ int main(int argc, char* const argv[]){
 
   // Make the comparison between low and high and take the result
 
-  if(visualize)
+  bool image_provided = false;
+  if(filenameImage != "") {
+    image_provided = true;
+  }
+  if(image_provided)
   {
+    const unsigned int Dim = 3;
+    using PixelType = unsigned char ;
+    using ItkImageType = itk::Image<PixelType, Dim> ;
+    using ReaderType = itk::ImageFileReader<ItkImageType> ;
+    auto reader = ReaderType::New();
+    reader->SetFileName(filenameImage);
+    reader->Update();
     SG::visualize_spatial_graph_with_image(sg, reader->GetOutput());
+  } else {
+    SG::visualize_spatial_graph(sg);
   }
 
 } // end main
