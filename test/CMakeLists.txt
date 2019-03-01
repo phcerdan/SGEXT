@@ -90,7 +90,7 @@ gtest_discover_tests(
 if(VISUALIZE)
   add_executable(test_visualize_spatial_graph test_visualize_spatial_graph.cpp)
   target_link_libraries(test_visualize_spatial_graph
-    SGVtk
+    SGVtkVisualize
     ${ITK_LIBRARIES} # ITKVtkGlue is bringing VTK
     ${GTEST_LIBRARIES}
     )
@@ -103,7 +103,8 @@ if(VISUALIZE)
     ${CMAKE_SOURCE_DIR}/src/visualize_histograms.cpp )
   target_link_libraries(test_visualize_histograms
     SG
-    SGVtk
+    SGVtkVisualize
+    Qt5::Widgets
     ${GTEST_LIBRARIES}
     )
   gtest_discover_tests(
@@ -111,11 +112,10 @@ if(VISUALIZE)
     TEST_PREFIX visualize_histograms||
     )
 
-  add_executable(test_get_vtk_points_from_graph test_get_vtk_points_from_graph.cpp
-    ${CMAKE_SOURCE_DIR}/src/get_vtk_points_from_graph.cpp )
+  add_executable(test_get_vtk_points_from_graph test_get_vtk_points_from_graph.cpp)
   target_link_libraries(test_get_vtk_points_from_graph
     SG
-    SGVtk
+    SGPointLocator
     ${GTEST_LIBRARIES}
     )
   gtest_discover_tests(
@@ -130,7 +130,7 @@ if(VISUALIZE)
     ${CMAKE_SOURCE_DIR}/src/graph_points_locator.cpp )
   target_link_libraries(test_graph_points_locator
     SG
-    SGVtk
+    SGPointLocator
     graph_locator_fixtures
     ${GTEST_LIBRARIES}
     )
@@ -142,8 +142,7 @@ if(VISUALIZE)
   add_executable(test_compare_graphs test_compare_graphs.cpp
     ${CMAKE_SOURCE_DIR}/src/compare_graphs.cpp )
   target_link_libraries(test_compare_graphs
-    SG
-    SGVtk
+    SGCompareGraphs
     graph_locator_fixtures
     ${GTEST_LIBRARIES}
     )

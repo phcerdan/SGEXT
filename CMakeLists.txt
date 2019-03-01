@@ -10,7 +10,17 @@ project(SGEXT
 message(STATUS "SGEXT version: ${SGEXT_VERSION}")
 
 option(ENABLE_TESTING "Enable Tests" OFF)
-option(VISUALIZE "Enable visualization with VTK and QT." OFF)
+option(VISUALIZE "Enable visualization with VTK." OFF)
+include(CMakeDependentOption)
+CMAKE_DEPENDENT_OPTION(ENABLE_QT "Use QT for some visualizations" OFF
+  "VISUALIZE" ON)
+option(ENABLE_POINT_LOCATOR "Use VTK KDtree for graph point location." ON)
+option(ENABLE_COMPARE_GRAPHS "Logic to compare and merge low and high information graphs." ON)
+
+if(VISUALIZE OR ENABLE_POINT_LOCATOR OR ENABLE_COMPARE_GRAPHS)
+  set(REQUIRES_VTK TRUE)
+endif()
+
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 14)
 
@@ -41,8 +51,9 @@ else()
   set(ITKImageIOModule ITKImageIO)
 endif()
 
+
 set(ITKVtkGlueModule "")
-if(VISUALIZE)
+if(REQUIRES_VTK)
   set(ITKVtkGlueModule ITKVtkGlue)
 endif()
 
@@ -58,7 +69,7 @@ find_package(ITK REQUIRED COMPONENTS
 )
 include(${ITK_USE_FILE})
 include_directories(SYSTEM ${ITK_INCLUDE_DIRS})
-if(VISUALIZE)
+if(ENABLE_QT)
   find_package(Qt5 REQUIRED
     Widgets
     Xml
@@ -67,7 +78,9 @@ if(VISUALIZE)
   if (Qt5_POSITION_INDEPENDENT_CODE)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
   endif()
+endif()
 
+if(REQUIRES_VTK)
   # VTK components to handle external dependency histo-header
   find_package(VTK REQUIRED COMPONENTS
     vtkChartsCore
@@ -144,12 +157,20 @@ set(SG_SRC_WITH_BOOST
     # not requiring boost
     ${SG_SRC_DIR}/graph_data.cpp
     )
-set(SG_SRC_WITH_VTK
+
+set(SG_SRC_WITH_VTK_VISUALIZE
     ${SG_SRC_DIR}/convert_to_vtk_graph.cpp
     ${SG_SRC_DIR}/visualize_spatial_graph.cpp
     ${SG_SRC_DIR}/visualize_spatial_graph_with_image.cpp
+    )
+
+set(SG_SRC_WITH_VTK_POINT_LOCATOR
+    ${SG_SRC_DIR}/convert_to_vtk_graph.cpp
     ${SG_SRC_DIR}/get_vtk_points_from_graph.cpp
     ${SG_SRC_DIR}/graph_points_locator.cpp
+    )
+
+set(SG_SRC_COMPARE_GRAPHS
     ${SG_SRC_DIR}/compare_graphs.cpp
     )
 
@@ -160,19 +181,46 @@ set(SG_SRC_WITH_VTK_AND_QT
 add_library(SG ${SG_SRC_WITH_BOOST})
 target_include_directories(SG PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>  # <prefix>/include
+  $<INSTALL_INTERFACE:include>
   )
 target_link_libraries(SG ${Boost_LIBRARIES} histo )
 
+set(_visualize_library "")
+set(_visualize_definition "")
 if(VISUALIZE)
-  add_library(SGVtk ${SG_SRC_WITH_VTK} )
-    target_include_directories(SGVtk PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>  # <prefix>/include/mylib
-        )
-    target_link_libraries(SGVtk SG )
-    target_link_libraries(SGVtk ${Boost_LIBRARIES} ${VTK_LIBRARIES} )
-    target_compile_definitions(SGVtk PRIVATE VISUALIZE)
+  add_library(SGVtkVisualize ${SG_SRC_WITH_VTK_VISUALIZE} )
+  target_include_directories(SGVtkVisualize PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+    )
+  target_link_libraries(SGVtkVisualize
+    SG
+    ${VTK_LIBRARIES})
+  target_compile_definitions(SGVtkVisualize PRIVATE VISUALIZE)
+  set(_visualize_library SGVtkVisualize)
+  set(_visualize_definition VISUALIZE)
+endif()
+
+if(ENABLE_POINT_LOCATOR)
+  add_library(SGPointLocator ${SG_SRC_WITH_VTK_POINT_LOCATOR} )
+  target_link_libraries(SGPointLocator
+    PUBLIC
+    SG
+    ${_visualize_library}
+    )
+  target_compile_definitions(SGPointLocator PRIVATE
+    ${_visualize_definition})
+endif()
+
+if(ENABLE_COMPARE_GRAPHS)
+  add_library(SGCompareGraphs ${SG_SRC_COMPARE_GRAPHS} )
+  target_link_libraries(SGCompareGraphs
+    PUBLIC
+    SGPointLocator
+    ${_visualize_library}
+    )
+  target_compile_definitions(SGCompareGraphs PRIVATE
+    ${_visualize_definition})
 endif()
 
 add_subdirectory(cpp-scripts)
@@ -206,7 +254,7 @@ endif(ENABLE_TESTING)
 
 set(_target_libraries SG histo)
 if(VISUALIZE)
-  list(APPEND _target_libraries SGVtk)
+  list(APPEND _target_libraries SGVtkVisualize)
 endif()
 set(sgext_export_file "${PROJECT_BINARY_DIR}/SGEXTTargets.cmake")
 
