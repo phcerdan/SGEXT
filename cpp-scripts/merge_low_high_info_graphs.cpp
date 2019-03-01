@@ -26,7 +26,6 @@
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
 // graph
-#include "DGtal/graph/ObjectBoostGraphInterface.h"
 #include <boost/graph/graph_concepts.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/filtered_graph.hpp>
@@ -61,7 +60,7 @@ int main(int argc, char* const argv[]){
     ( "useSerialized,u", po::bool_switch()->default_value(false), "Use stored serialized graphs. If off, it will require .dot graphviz files.")
     ( "exportMergedGraph,o", po::value<string>()->required(), "Write .dot file with the merged spatial graph." )
 #ifdef VISUALIZE
-    ( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal. Requires VISUALIZE option enabled at build.")
+    ( "visualize,t", po::bool_switch()->default_value(false), "Visualize. Requires VISUALIZE option enabled at build.")
 #endif
     ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output." );
 
