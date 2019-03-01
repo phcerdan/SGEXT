@@ -11,6 +11,7 @@ set(_scripts_targets
 set(_scripts_targets_visualize
     highlight_image_points
     visualize_histograms_from_file
+    visualize_graph_and_image
     )
 option(MERGE_GRAPHS "Enable merge graphs script." ON)
 if(MERGE_GRAPHS)
@@ -93,6 +94,14 @@ if(VISUALIZE)
     target_link_libraries(visualize_histograms_from_file ${DGTAL_LIBRARIES} )
     target_link_libraries(visualize_histograms_from_file Qt5::Widgets Qt5::Xml )
     target_link_libraries(visualize_histograms_from_file ${VTK_LIBRARIES} )
+
+    add_executable(visualize_graph_and_image visualize_graph_and_image.cpp)
+    target_link_libraries(visualize_graph_and_image SG SGVtk)
+    target_link_libraries(visualize_graph_and_image ${Boost_LIBRARIES} )
+    target_link_libraries(visualize_graph_and_image ${ITK_LIBRARIES} )
+    target_link_libraries(visualize_graph_and_image ${DGTAL_LIBRARIES} )
+    target_link_libraries(visualize_graph_and_image Qt5::Widgets Qt5::Xml )
+    target_link_libraries(visualize_graph_and_image ${VTK_LIBRARIES} )
 endif()
 
 if(VISUALIZE)
