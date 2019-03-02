@@ -17,11 +17,11 @@ find_package(VTK COMPONENTS
   vtkViewsContext2D
   vtkInteractionWidgets
   vtkViewsInfovis
-  vtkGUISupportQt # QVTKWidget.h
+  # vtkGUISupportQt # QVTKWidget.h
   CONFIG
   )
 
 get_filename_component(SGEXT_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
-if(NOT TARGET SG)
+if(NOT TARGET SGCore)
   include ("${SGEXT_CMAKE_DIR}/SGEXTTargets.cmake")
 endif()

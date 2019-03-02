@@ -5,11 +5,6 @@
 
 #include "gmock/gmock.h"
 #include "spatial_graph.hpp"
-#include "vtkAbstractPointLocator.h"
-
-namespace testing {
-void print_vtk_points(vtkAbstractPointLocator * locator);
-}
 
 /*   g0)
  *       |

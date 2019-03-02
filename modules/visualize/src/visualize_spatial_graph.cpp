@@ -26,8 +26,9 @@ void visualize_spatial_graph(const GraphType & sg)
     auto graphLayoutView = vtkSmartPointer<vtkGraphLayoutView>::New();
     graphLayoutView->AddRepresentationFromInput(vtk_graph);
     graphLayoutView->SetLayoutStrategyToPassThrough();
-    auto style = vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New(); // like paraview
-    graphLayoutView->SetInteractorStyle(style) ;
+    // auto style = vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New(); // like paraview
+    // graphLayoutView->SetInteractorStyle(style) ;
+    graphLayoutView->SetColorVertices(true);
 
     // Flip camera because VTK-ITK different corner for origin.
     double pos[3];
