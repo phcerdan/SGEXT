@@ -8,6 +8,7 @@ ENV SGEXT_SCRIPTS_SRC_DIR ${BUILD_PATH}/${SGEXT_SCRIPTS_SRC_FOLDER_NAME}
 
 # Copy files from current repo into the docker container
 WORKDIR ${SGEXT_SCRIPTS_BUILD_DIR}
+COPY . ${SGEXT_SCRIPTS_SRC_DIR}
 
 RUN cmake \
         -G Ninja \
