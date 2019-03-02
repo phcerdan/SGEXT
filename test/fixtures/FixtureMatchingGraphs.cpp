@@ -3,9 +3,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "graph_locator_fixtures.hpp"
+#include "FixtureMatchingGraphs.hpp"
 
-void MatchingGraphsFixture::CreateG0()
+void FixtureMatchingGraphs::CreateG0()
 {
     using boost::add_edge;
     using boost::add_vertex;
@@ -47,7 +47,7 @@ void MatchingGraphsFixture::CreateG0()
     add_edge(0, 3, se_p0dl3, g0);
 };
 
-void MatchingGraphsFixture::CreateG1()
+void FixtureMatchingGraphs::CreateG1()
 {
     using boost::add_edge;
     using boost::add_vertex;
@@ -110,7 +110,7 @@ void MatchingGraphsFixture::CreateG1()
     add_edge(5, 4, se_dl2_dr2, g1);
 };
 
-void MatchingGraphsFixture::CreateGR()
+void FixtureMatchingGraphs::CreateGR()
 {
     using boost::add_edge;
     using boost::add_vertex;
@@ -154,7 +154,7 @@ void MatchingGraphsFixture::CreateGR()
     add_edge(0, 3, se_p0dl3, gR);
 };
 
-void MatchingGraphsFixture::SetUp()
+void FixtureMatchingGraphs::SetUp()
 {
     this->CreateG0();
     this->CreateG1();
