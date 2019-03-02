@@ -21,19 +21,19 @@
 #include "gmock/gmock.h"
 #include "compare_graphs.hpp"
 #include "filter_spatial_graph.hpp"
-#include "graph_locator_fixtures.hpp"
+#include "FixtureMatchingGraphs.hpp"
 #include "get_vtk_points_from_graph.hpp"
 #include "graph_points_locator.hpp"
 
 // #include "visualize_spatial_graph.hpp"
-// TEST_F(MatchingGraphsFixture, visualize_it)
+// TEST_F(FixtureMatchingGraphs, visualize_it)
 // {
 //     SG::visualize_spatial_graph(g0);
 //     SG::visualize_spatial_graph(g1);
 //     SG::visualize_spatial_graph(gR);
 // }
 
-TEST_F(MatchingGraphsFixture, works)
+TEST_F(FixtureMatchingGraphs, works)
 {
 
     std::vector<std::reference_wrapper<const GraphType>> graphs;
@@ -49,7 +49,7 @@ TEST_F(MatchingGraphsFixture, works)
 }
 
 
-TEST_F(MatchingGraphsFixture, compare_graphs)
+TEST_F(FixtureMatchingGraphs, compare_graphs)
 {
     auto edges_nodes_to_remove = SG::remove_edges_and_nodes_from_high_info_graph(g0, g1);
     const auto & removed_edges = edges_nodes_to_remove.first;

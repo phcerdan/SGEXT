@@ -46,7 +46,7 @@
  *  old edges.
  *
  */
-struct MatchingGraphsFixture : public ::testing::Test {
+struct FixtureMatchingGraphs : public ::testing::Test {
     using GraphType = SG::GraphType;
     GraphType g0;
     GraphType g1;
