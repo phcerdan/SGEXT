@@ -21,12 +21,28 @@
 #include "gmock/gmock.h"
 #include "graph_points_locator.hpp"
 #include "get_vtk_points_from_graph.hpp"
+#include "spatial_graph_functors.hpp"
 
-struct GraphPointLocatorFixture : public ::testing::Test {
+/*
+ * g0:        g1:
+ *     o          o   v:0
+ *     |          |
+ *     .          .   e:(0,1)
+ *     |          |
+ *     o          o   v:1
+ *     |          |
+ *     .          .   e:(1,2)
+ *     |          |
+ *     o          o   v:2
+ *                |
+ *                .   e:(2,3)
+ *                |
+ *                o   v:3
+ */
+struct GraphPointLocatorMatchingFixture : public ::testing::Test {
     using GraphType = SG::GraphType;
     GraphType g0;
     GraphType g1;
-
     void SetUp() override {
         using boost::add_edge;
         using boost::add_vertex;
@@ -61,14 +77,54 @@ struct GraphPointLocatorFixture : public ::testing::Test {
     };
 };
 
-TEST_F(GraphPointLocatorFixture, just_works)
+/*
+ * MatchingFixture with a constant shift in all the positions.
+ * The topology of the graph is conserved.
+ *
+ * g0:    moved_g0:        g1:       moved_g1:
+ *     o                       o
+ *     |           o           |             o
+ *     .           |           .             |
+ *     |           .           |             .
+ *     o           |           o             |
+ *     |           o           |             o
+ *     .           |           .             |
+ *     |           .           |             .
+ *     o           |           o             |
+ *                 o           |             o
+ *                             .             |
+ *                             |             .
+ *                             o             |
+ *                                           o
+ *
+ * Usually the tests use moved_g1 and g0 in locator functions.
+ */
+struct GraphPointLocatorCloseFixture : public GraphPointLocatorMatchingFixture {
+    using GraphType = SG::GraphType;
+    SG::PointType disturbance {{0.0, 0.1, 0.5}};
+    GraphType moved_g0;
+    GraphType moved_g1;
+    void SetUp() override {
+        GraphPointLocatorMatchingFixture::SetUp();
+        this->moved_g0 = this->g0;
+        this->moved_g1 = this->g1;
+        auto nverts = boost::num_vertices(this->moved_g0);
+        auto func_plus = [&](SG::PointType & pos){
+            pos = ArrayUtilities::plus(pos, this->disturbance);
+        };
+        SG::operate_in_graph_pos(moved_g0, func_plus);
+        SG::operate_in_graph_pos(moved_g1, func_plus);
+    }
+};
+
+TEST_F(GraphPointLocatorMatchingFixture, just_works)
 {
     auto point_map_pair = SG::get_vtk_points_from_graph(g0);
     auto kdtree = SG::build_kdtree_locator(point_map_pair.first);
     EXPECT_EQ(kdtree->GetDataSet()->GetNumberOfPoints(), point_map_pair.first->GetNumberOfPoints());
 }
 
-TEST_F(GraphPointLocatorFixture, is_able_to_match_equal_graphs)
+TEST_F(GraphPointLocatorMatchingFixture, is_able_to_match_equal_graphs)
 {
     std::vector<std::reference_wrapper<const GraphType>> graphs;
     graphs.reserve(2);
@@ -84,7 +140,7 @@ TEST_F(GraphPointLocatorFixture, is_able_to_match_equal_graphs)
     EXPECT_EQ(idClosest, expectedId);
 }
 
-TEST_F(GraphPointLocatorFixture, is_able_to_match_almost_equal_graphs)
+TEST_F(GraphPointLocatorMatchingFixture, is_able_to_match_almost_equal_graphs)
 {
     std::vector<std::reference_wrapper<const GraphType>> graphs;
     graphs.reserve(2);
@@ -125,7 +181,7 @@ TEST_F(GraphPointLocatorFixture, is_able_to_match_almost_equal_graphs)
     // }
 }
 
-TEST_F(GraphPointLocatorFixture, graph_closest_n_points_locator) {
+TEST_F(GraphPointLocatorMatchingFixture, graph_closest_n_points_locator) {
 
     std::vector<std::reference_wrapper<const GraphType>> graphs;
     graphs.reserve(2);
@@ -152,7 +208,7 @@ TEST_F(GraphPointLocatorFixture, graph_closest_n_points_locator) {
     EXPECT_EQ(gdesc1.vertex_d, 3);
 }
 
-TEST_F(GraphPointLocatorFixture, graph_closest_points_by_radius_locator) {
+TEST_F(GraphPointLocatorMatchingFixture, graph_closest_points_by_radius_locator) {
 
     std::vector<std::reference_wrapper<const GraphType>> graphs;
     graphs.reserve(2);
@@ -180,7 +236,7 @@ TEST_F(GraphPointLocatorFixture, graph_closest_points_by_radius_locator) {
     EXPECT_EQ(gdesc1.vertex_d, 3);
 }
 
-TEST_F(GraphPointLocatorFixture, graph_closest_points_by_radius_locator_small_radius) {
+TEST_F(GraphPointLocatorMatchingFixture, graph_closest_points_by_radius_locator_small_radius) {
     std::vector<std::reference_wrapper<const GraphType>> graphs;
     graphs.reserve(2);
     graphs.push_back(std::cref(g0));
@@ -207,7 +263,7 @@ TEST_F(GraphPointLocatorFixture, graph_closest_points_by_radius_locator_small_ra
     EXPECT_EQ(gdesc1.vertex_d, 3);
 }
 
-TEST_F(GraphPointLocatorFixture, graph_closest_points_by_radius_no_points_found) {
+TEST_F(GraphPointLocatorMatchingFixture, graph_closest_points_by_radius_no_points_found) {
     std::vector<std::reference_wrapper<const GraphType>> graphs;
     graphs.reserve(2);
     graphs.push_back(std::cref(g0));

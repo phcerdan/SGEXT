@@ -27,7 +27,9 @@
 #include "spatial_edge.hpp"
 
 namespace SG {
-    using GraphAL = boost::adjacency_list<boost::listS, boost::vecS, boost::undirectedS, SpatialNode, SpatialEdge>;
-    using GraphType = GraphAL;
+using GraphAL = boost::adjacency_list<boost::listS, boost::vecS,
+      boost::undirectedS, SpatialNode, SpatialEdge>;
+using GraphType = GraphAL;
 } // end namespace
 #endif
+

@@ -26,6 +26,8 @@
 
 namespace SG {
 
+size_t num_edge_points(const GraphType & sg);
+
 void print_pos(std::ostream &out, const SG::SpatialNode::PointType &pos);
 
 void print_degrees(const GraphType &graph);

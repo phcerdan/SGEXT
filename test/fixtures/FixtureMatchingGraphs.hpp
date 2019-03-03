@@ -18,6 +18,9 @@
  *
  * *******************************************************************/
 
+#ifndef FIXTURE_MATCHING_GRAPHS_HPP
+#define FIXTURE_MATCHING_GRAPHS_HPP
+
 #include "gmock/gmock.h"
 #include "spatial_graph.hpp"
 
@@ -74,3 +77,6 @@ struct FixtureMatchingGraphs : public ::testing::Test {
     void CreateGR();
     void SetUp() override;
 };
+
+#endif
+

@@ -77,7 +77,6 @@ inline static std::istream &operator>>(std::istream &is, SpatialEdge &se) {
     is.seekg (0, is.end);
     return is;
 }
-
 } // namespace SG
 
 namespace boost {

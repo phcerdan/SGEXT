@@ -24,13 +24,15 @@
 #include "filter_spatial_graph.hpp"
 #include <boost/graph/copy.hpp>
 #include <boost/graph/iteration_macros.hpp>
+#include "spatial_graph_utilities.hpp"
 
 namespace SG {
 
 std::pair<EdgeDescriptorUnorderedSet, VertexDescriptorUnorderedSet>
 remove_edges_and_nodes_from_high_info_graph(
         const GraphType & g0,
-        const GraphType & g1)
+        const GraphType & g1,
+        const double radius)
 {
     std::vector<std::reference_wrapper<const GraphType>> graphs;
     graphs.reserve(2);
@@ -67,12 +69,48 @@ remove_edges_and_nodes_from_high_info_graph(
     {
       GraphType::vertex_descriptor v;
       BGL_FORALL_VERTICES(v, g1, GraphType) {
-        vtkIdType id = kdtree->FindClosestPoint(g1[v].pos.data());
-        const auto & gdescs = idMap[id];
-        const auto & gdesc0 = gdescs[0];
-        const auto & gdesc1 = gdescs[1];
-        assert(gdesc1.exist && gdesc1.is_vertex);
-        if(!gdesc0.is_vertex) {
+        // vtkIdType id = kdtree->FindClosestPoint(g1[v].pos.data());
+        // const auto & gdescs = idMap[id];
+        // const auto & gdesc0 = gdescs[0];
+        // const auto & gdesc1 = gdescs[1];
+        // assert(gdesc1.exist && gdesc1.is_vertex);
+        auto closest_points_list_from_g1_vertex =
+          SG::graph_closest_points_by_radius_locator(g1[v].pos,
+              kdtree, idMap, radius);
+        auto closest_descriptors_from_g1_vertex =
+          closest_existing_descriptors_by_graph(closest_points_list_from_g1_vertex, idMap);
+        const auto & id0 = closest_descriptors_from_g1_vertex[0].id;
+        const auto & id1 = closest_descriptors_from_g1_vertex[1].id;
+        const auto & gdesc0 = closest_descriptors_from_g1_vertex[0].descriptor;
+        const auto & gdesc1 = closest_descriptors_from_g1_vertex[1].descriptor;
+        // DEV: WARNING, cannot compare ids between graphs to identify/register same vertex
+        const bool vertex_has_same_id_in_both_graphs = (id0 == id1);
+#ifndef NDEBUG
+        std::cout << "vertex: " << v << " ; pos = ";
+        SG::print_pos(std::cout, g1[v].pos);
+        std::cout << std::endl;
+        std::cout << "**********************************" << std::endl;
+        std::cout << "closest_points_list_from_g1_vertex:" << std::endl;
+        for (auto idIndex = 0;
+            idIndex < closest_points_list_from_g1_vertex->GetNumberOfIds(); ++idIndex) {
+          std::cout << closest_points_list_from_g1_vertex->GetId(idIndex) << ", ";
+        }
+        std::cout << std::endl;
+        for (auto idIndex = 0;
+            idIndex < closest_points_list_from_g1_vertex->GetNumberOfIds(); ++idIndex) {
+          auto a_point = mergePoints->GetPoints()->GetPoint(closest_points_list_from_g1_vertex->GetId(idIndex));
+          std::cout << "(" << a_point[0] << ", " << a_point[1] << ", " << a_point[2] << "), ";
+        }
+        std::cout << std::endl;
+        std::cout << "**********************************" << std::endl;
+        std::cout << "id0: " << id0  << "; id1: " << id1 << std::endl;
+        print_graph_descriptor(gdesc0, "gdesc0");
+        print_graph_descriptor(gdesc1, "gdesc1");
+        std::cout << "**********************************" << std::endl;
+#endif
+        if( !vertex_has_same_id_in_both_graphs ||
+            // idMap.at(id1)[0].exist
+            (vertex_has_same_id_in_both_graphs && gdesc0.is_edge)) {
           // Interesting times, graph has evolved
           // We can:
           // - find the closest points per graph with graph_closest_points_by_radius_locator
@@ -87,33 +125,29 @@ remove_edges_and_nodes_from_high_info_graph(
           // |  |
           // |__|
           // |  |
-          if(gdesc0.exist) {
-            GraphType::vertex_descriptor v_adj;
-            BGL_FORALL_ADJ(v, v_adj, g1, GraphType){
-              vtkIdType id_adj = kdtree->FindClosestPoint(g1[v_adj].pos.data());
-              const auto & gdescs_adj = idMap[id_adj];
-              const auto & gdesc_adj0 = gdescs_adj[0];
-              // if it exists, but it is not a vertex
-              if(gdesc_adj0.exist && gdesc_adj0.is_edge) {
-                if(true) {
-                  std::cout << "Source: v: " << v << " ; pos: " << g1[v].pos[0] <<", " << g1[v].pos[1] << std::endl;
-                  std::cout << "Adj: v_adj: " << v_adj << " ; pos: " << g1[v_adj].pos[0] <<", " << g1[v_adj].pos[1] << std::endl;
-                  SG::print_graph_descriptor(gdesc_adj0, "graph_desc at graph0");
-                }
-                // returns any edge between nodes. Ensure, TODO: HOW? there are no parallel edges.
-                auto any_edge_exist = boost::edge(v, v_adj, g1);
-                // edge exist for sure, no need to check with .second
-                // also no need to worry about inserting the edge twice, the container is a set.
-                remove_edges.insert(any_edge_exist.first);
+          GraphType::vertex_descriptor v_adj;
+          BGL_FORALL_ADJ(v, v_adj, g1, GraphType){
+            vtkIdType id_adj = kdtree->FindClosestPoint(g1[v_adj].pos.data());
+            const auto & gdescs_adj = idMap[id_adj];
+            const auto & gdesc_adj0 = gdescs_adj[0];
+            // if it exists, but it is not a vertex
+            if(gdesc_adj0.exist && gdesc_adj0.is_edge) {
+              if(true) {
+                std::cout << "Source: v: " << v << " ; pos: " << g1[v].pos[0] <<", " << g1[v].pos[1] << std::endl;
+                std::cout << "Adj: v_adj: " << v_adj << " ; pos: " << g1[v_adj].pos[0] <<", " << g1[v_adj].pos[1] << std::endl;
+                SG::print_graph_descriptor(gdesc_adj0, "graph_desc at graph0");
               }
+              // returns any edge between nodes. Ensure, TODO: HOW? there are no parallel edges.
+              auto any_edge_exist = boost::edge(v, v_adj, g1);
+              // edge exist for sure, no need to check with .second
+              // also no need to worry about inserting the edge twice, the container is a set.
+              remove_edges.insert(any_edge_exist.first);
             }
           }
         }
       }
     }
 
-    // TODO hard coded! FIX -- hit performance if too big, bad comparison if too low.
-    double radius = 2.0;
     SG::EdgeDescriptorUnorderedSet growing_edges;
     // Iterate over all vertices of low info graph
     {
@@ -183,9 +217,10 @@ remove_edges_and_nodes_from_high_info_graph(
 GraphType
 compare_low_and_high_info_graphs(
   const GraphType & g0,
-  const GraphType & g1)
+  const GraphType & g1,
+  const double radius)
 {
-    auto edges_nodes_to_remove = remove_edges_and_nodes_from_high_info_graph(g0, g1);
+    auto edges_nodes_to_remove = remove_edges_and_nodes_from_high_info_graph(g0, g1, radius);
     const auto & remove_edges = edges_nodes_to_remove.first;
     const auto & remove_nodes = edges_nodes_to_remove.second;
     return filter_by_sets(remove_edges, remove_nodes, g1);
