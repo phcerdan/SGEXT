@@ -5,6 +5,7 @@
 
 #include "graph_points_locator.hpp"
 #include "vtkPolyData.h"
+#include "spatial_graph_utilities.hpp"
 namespace SG {
 
 std::vector<IdWithGraphDescriptor>
@@ -119,8 +120,10 @@ graph_closest_points_by_radius_locator(
     auto closeIdList = vtkSmartPointer<vtkIdList>::New();
     kdtree->FindPointsWithinRadius(radius, queryPoint.data(), closeIdList);
 
-    if(!closeIdList->GetNumberOfIds())
-        std::cerr << "WARNING: No points found within radius " << radius << std::endl;
+    if(closeIdList->GetNumberOfIds() == 0) {
+        std::cerr << "WARNING: No points found within radius " << radius << " from ";
+        SG::print_pos(std::cerr, queryPoint); std::cerr << std::endl;
+    }
 
     // Order the list of points by distance
     std::vector<double> distances2(closeIdList->GetNumberOfIds());
