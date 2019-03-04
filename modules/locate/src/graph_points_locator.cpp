@@ -62,16 +62,16 @@ closest_existing_vertex_by_graph(
     return id_graph_descriptors;
 }
 
-vtkSmartPointer<vtkKdTreePointLocator>
-build_kdtree_locator(vtkPoints * inputPoints)
+vtkSmartPointer<vtkOctreePointLocator>
+build_octree_locator(vtkPoints * inputPoints)
 {
-    auto kdtree = vtkSmartPointer<vtkKdTreePointLocator>::New();
+    auto octree = vtkSmartPointer<vtkOctreePointLocator>::New();
     // Need to build a data set
     auto dataSet = vtkSmartPointer<vtkPolyData>::New();
     dataSet->SetPoints(inputPoints);
-    kdtree->SetDataSet(dataSet);
-    kdtree->BuildLocator();
-    return kdtree;
+    octree->SetDataSet(dataSet);
+    octree->BuildLocator();
+    return octree;
 }
 
 bool all_graph_descriptors_exist(const std::vector<IdWithGraphDescriptor> & gdescs)
@@ -90,16 +90,15 @@ bool all_graph_descriptors_exist(const std::vector<graph_descriptor> & gdescs)
     return true;
 }
 
-
 vtkSmartPointer<vtkIdList>
 graph_closest_n_points_locator(
         const PointType &queryPoint,
-        vtkKdTreePointLocator * kdtree,
+        vtkOctreePointLocator * octree,
         const std::unordered_map<vtkIdType, std::vector<graph_descriptor>> & idMap,
         const int closest_n_points)
 {
     auto closeIdList = vtkSmartPointer<vtkIdList>::New();
-    kdtree->FindClosestNPoints(closest_n_points, queryPoint.data(), closeIdList );
+    octree->FindClosestNPoints(closest_n_points, queryPoint.data(), closeIdList );
 
     return closeIdList;
     // auto out_gdescs = SG::closest_existing_descriptors_by_graph(closeIdList, idMap);
@@ -111,24 +110,25 @@ graph_closest_n_points_locator(
 vtkSmartPointer<vtkIdList>
 graph_closest_points_by_radius_locator(
         const PointType &queryPoint,
-        vtkKdTreePointLocator * kdtree,
+        vtkOctreePointLocator * octree,
         const std::unordered_map<vtkIdType, std::vector<graph_descriptor>> & idMap,
         double radius)
 {
     const size_t gdescs_size = idMap.cbegin()->second.size();
 
     auto closeIdList = vtkSmartPointer<vtkIdList>::New();
-    kdtree->FindPointsWithinRadius(radius, queryPoint.data(), closeIdList);
+    octree->FindPointsWithinRadius(radius, queryPoint.data(), closeIdList);
 
     if(closeIdList->GetNumberOfIds() == 0) {
-        std::cerr << "WARNING: No points found within radius " << radius << " from ";
+        std::cerr << "WARNING: In graph_closest_points_by_radius_locator -- "
+            "no points found within radius " << radius << " from ";
         SG::print_pos(std::cerr, queryPoint); std::cerr << std::endl;
     }
 
     // Order the list of points by distance
     std::vector<double> distances2(closeIdList->GetNumberOfIds());
     for (vtkIdType closeId_index = 0; closeId_index < closeIdList->GetNumberOfIds(); ++closeId_index){
-        double* point = kdtree->GetDataSet()->GetPoint(closeIdList->GetId(closeId_index));
+        double* point = octree->GetDataSet()->GetPoint(closeIdList->GetId(closeId_index));
         distances2[closeId_index] =
             std::pow(point[0] - queryPoint[0], 2) +
             std::pow(point[1] - queryPoint[1], 2) +
