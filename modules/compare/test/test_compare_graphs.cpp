@@ -45,9 +45,9 @@ TEST_F(FixtureMatchingGraphs, works)
     auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs);
     auto & mergePoints = merger_map_pair.first;
     auto & idMap = merger_map_pair.second;
-    auto kdtree = SG::build_kdtree_locator(mergePoints->GetPoints());
+    auto octree = SG::build_octree_locator(mergePoints->GetPoints());
     // g0 and g1 should have 13 unique points when combined
-    EXPECT_EQ(kdtree->GetDataSet()->GetNumberOfPoints(), 13);
+    EXPECT_EQ(octree->GetDataSet()->GetNumberOfPoints(), 13);
 }
 
 
@@ -101,9 +101,9 @@ TEST_F(FixtureCloseGraphs, works)
     auto & mergePoints = merger_map_pair.first;
     auto & idMap = merger_map_pair.second;
     EXPECT_EQ(mergePoints->GetPoints()->GetNumberOfPoints(), 22);
-    auto kdtree = SG::build_kdtree_locator(mergePoints->GetPoints());
+    auto octree = SG::build_octree_locator(mergePoints->GetPoints());
     // g0 and moved_g1 should have 22 (9 + 13) unique points when combined
-    EXPECT_EQ(kdtree->GetDataSet()->GetNumberOfPoints(), 22);
+    EXPECT_EQ(octree->GetDataSet()->GetNumberOfPoints(), 22);
 }
 
 TEST_F(FixtureCloseGraphs, compare_graphs)
