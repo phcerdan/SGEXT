@@ -6,6 +6,7 @@
 #ifndef GET_VTK_POINTS_FROM_GRAPH_HPP
 #define GET_VTK_POINTS_FROM_GRAPH_HPP
 
+#include "bounding_box.hpp"
 #include "graph_descriptor.hpp"
 #include <functional>
 #include <string>
@@ -17,6 +18,10 @@
 
 namespace SG {
 
+using PointsIdMapPair = std::pair< vtkSmartPointer<vtkPoints>,
+      std::unordered_map< vtkIdType, std::vector<graph_descriptor>> >;
+using MergePointsIdMapPair = std::pair< vtkSmartPointer<vtkMergePoints>,
+      std::unordered_map< vtkIdType, std::vector<graph_descriptor>> >;
 
 /**
  * Get vtkPoints extracted from the input spatial graph.
@@ -33,10 +38,7 @@ namespace SG {
  *
  * @return points and the map where they are located in the graph
  */
-std::pair<
-vtkSmartPointer<vtkPoints>,
-std::unordered_map< vtkIdType, std::vector<graph_descriptor>>
-> get_vtk_points_from_graph(const GraphType & g);
+PointsIdMapPair get_vtk_points_from_graph(const GraphType & g);
 
 /**
  * Append an inputGraph to the tree structure used to merge points, and update
@@ -47,10 +49,17 @@ std::unordered_map< vtkIdType, std::vector<graph_descriptor>>
  * from $get_vtk_points_from_graphs)
  * @param unique_id_map map with vtk points ids pointing to different graphs.
  */
-void vtk_points_append_graph( const GraphType &inputGraph,
+
+void append_new_graph_points(
+        const PointsIdMapPair & new_graph_point_map_pair,
         vtkPointLocator * mergePoints,
         std::unordered_map< vtkIdType, std::vector<graph_descriptor>> & unique_id_map);
 
+void append_new_graph_points(
+        vtkPoints * new_graph_points, // should be const, but GetNumberOfPoints is not const!
+        const std::unordered_map< vtkIdType, std::vector<graph_descriptor>> & new_graph_id_map,
+        vtkPointLocator * mergePoints,
+        std::unordered_map< vtkIdType, std::vector<graph_descriptor>> & unique_id_map);
 /**
  * Returns a unique set of points that are present in any of the inputs graphs
  * (the points might or might not be shared among the graphs), and a map
@@ -66,10 +75,9 @@ void vtk_points_append_graph( const GraphType &inputGraph,
  * @return pair with unique points and the map to the graph descriptors
  * @sa SG::graph_descriptor SG::get_vtk_points_from_graph
  */
-std::pair<
-vtkSmartPointer<vtkMergePoints>,
-std::unordered_map< vtkIdType, std::vector<graph_descriptor>>
-> get_vtk_points_from_graphs(const std::vector<std::reference_wrapper<const GraphType>> & graphs);
+MergePointsIdMapPair get_vtk_points_from_graphs(
+                const std::vector<std::reference_wrapper<const GraphType>> & graphs,
+                const BoundingBox * box = nullptr);
 
 } // ns SG
 #endif
