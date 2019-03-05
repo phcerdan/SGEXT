@@ -3,8 +3,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+#ifndef FIXTURE_MATCHING_GRAPHS_HPP
+#define FIXTURE_MATCHING_GRAPHS_HPP
+
 #include "gmock/gmock.h"
 #include "spatial_graph.hpp"
+#include "bounding_box.hpp"
 
 /*   g0)
  *       |
@@ -33,6 +37,7 @@
  */
 struct FixtureMatchingGraphs : public ::testing::Test {
     using GraphType = SG::GraphType;
+    SG::BoundingBox box = {{-10., -10., -10.}, {10., 10., 10.}};
     GraphType g0;
     GraphType g1;
     GraphType gR;
@@ -59,3 +64,6 @@ struct FixtureMatchingGraphs : public ::testing::Test {
     void CreateGR();
     void SetUp() override;
 };
+
+#endif
+
