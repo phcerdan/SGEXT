@@ -7,6 +7,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_DEPENDS
   ${Boost_LIBRARIES}
   histo)
 set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
+    bounding_box.cpp
     edge_points_utilities.cpp
     filter_spatial_graph.cpp
     graph_data.cpp

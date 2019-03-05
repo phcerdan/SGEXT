@@ -22,6 +22,7 @@
 #define BOUNDING_BOX_HPP
 
 #include "common_types.hpp" // PointType typedef
+#include <vector>
 
 namespace SG {
 
@@ -30,35 +31,47 @@ struct BoundingBox {
   PointType end = {{1.0, 1.0, 1.0}};
 
   BoundingBox() = default;
-  BoundingBox(const PointType & input_ini, const PointType & input_end) :
-    ini(input_ini), end(input_end) {};
-  BoundingBox(const PointType & center, const std::array<size_t, 3> & radius)
-  {
-    for (unsigned int i = 0; i < 3; ++i) {
-      ini[i] = center[i] - radius[i];
-      end[i] = center[i] + radius[i];
-    }
-  };
-  BoundingBox(const PointType &center, size_t radius) :
-    BoundingBox(center, std::array<size_t, 3>{{radius, radius, radius}}) {};
+  BoundingBox(const BoundingBox &) = default;
+  BoundingBox(BoundingBox &&) = default;
+  BoundingBox & operator=(const BoundingBox &) = default;
+  BoundingBox & operator=(BoundingBox &&) = default;
 
-  PointType GetSize() const {
-    return {{ std::abs(end[0] - ini[0]), std::abs(end[1] - ini[1]) , std::abs(end[2] - ini[2])}};
-  }
-  PointType GetRadius() const {
-    auto size = this->GetSize();
-    return {{ size[0] / 2.0, size[1] / 2.0, size[2] / 2.0 }};
-  }
-  PointType GetCenter() const {
-    auto radius = this->GetRadius();
-    return {{ ini[0] + radius[0], ini[1] + radius[1], ini[2] + radius[2] }};
-  }
-  bool is_point_inside(const PointType & input_point) const {
-  return
-    input_point[0] >= ini[0] && input_point[0] <= end[0] &&
-    input_point[1] >= ini[1] && input_point[1] <= end[1] &&
-    input_point[2] >= ini[2] && input_point[2] <= end[2];
-  }
+  BoundingBox(const PointType & input_ini, const PointType & input_end);
+  BoundingBox(const PointType & center, const std::array<size_t, 3> & radius, const bool use_center_and_radius);
+  BoundingBox(const PointType &center, size_t radius);
+  /**
+   * VTK interface
+   * [0] //xmin
+   * [1] //xmax
+   * [2] //ymin
+   * [3] //ymax
+   * [4] //zmin
+   * [5] //zmax
+   * @param bounds[6]
+   */
+  BoundingBox(const double bounds[6]);
+  BoundingBox(double xMin, double xMax, double yMin,
+              double yMax, double zMin, double zMax);
+  void SetBounds(double xMin, double xMax, double yMin,
+                 double yMax, double zMin, double zMax);
+  void SetBounds(const double b[6]);
+  /**
+   * Caller needs to allocate bounds before calling this method.
+   * SG::BoundingBox box(0,1,0,2,0,3);
+   * double bounds[6];
+   * box.GetBounds(bounds);
+   *
+   * @param bounds
+   */
+  void GetBounds(double * bounds) const;
+  static BoundingBox BuildEnclosingBox(const std::vector<double *> & bounds_vector);
+  PointType GetSize() const;
+  PointType GetRadius() const;
+  PointType GetCenter() const;
+  bool is_point_inside(const PointType & input_point) const;
+  bool are_bounds_inside(double * external_bounds) const;
+  void Print(double * bounds, const std::string & label = "BoundingBox") const;
+  void Print(const std::string & label = "BoundingBox") const;
 };
 
 inline bool is_inside(const PointType & input, const BoundingBox & box) {

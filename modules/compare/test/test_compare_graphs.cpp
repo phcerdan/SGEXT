@@ -42,7 +42,7 @@ TEST_F(FixtureMatchingGraphs, works)
     graphs.reserve(2);
     graphs.push_back(std::cref(g0));
     graphs.push_back(std::cref(g1));
-    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs);
+    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs, &box);
     auto & mergePoints = merger_map_pair.first;
     auto & idMap = merger_map_pair.second;
     auto octree = SG::build_octree_locator(mergePoints->GetPoints());
@@ -97,7 +97,7 @@ TEST_F(FixtureCloseGraphs, works)
     graphs.reserve(2);
     graphs.push_back(std::cref(g0));
     graphs.push_back(std::cref(moved_g1));
-    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs);
+    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs, &box);
     auto & mergePoints = merger_map_pair.first;
     auto & idMap = merger_map_pair.second;
     EXPECT_EQ(mergePoints->GetPoints()->GetNumberOfPoints(), 22);
@@ -110,7 +110,7 @@ TEST_F(FixtureCloseGraphs, compare_graphs)
 {
     auto & low_info_g = g0;
     auto & high_info_g = moved_g1;
-    auto edges_nodes_to_remove = SG::remove_edges_and_nodes_from_high_info_graph(low_info_g, high_info_g);
+    auto edges_nodes_to_remove = SG::remove_edges_and_nodes_from_high_info_graph(low_info_g, high_info_g );
     const auto & removed_edges = edges_nodes_to_remove.first;
     const auto & removed_nodes = edges_nodes_to_remove.second;
 
