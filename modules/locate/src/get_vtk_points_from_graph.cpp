@@ -9,11 +9,8 @@
 
 namespace SG {
 
-std::pair<
-vtkSmartPointer<vtkPoints>,
-std::unordered_map< vtkIdType, std::vector<graph_descriptor>>
-> get_vtk_points_from_graph(const GraphType & sg){
-
+PointsIdMapPair get_vtk_points_from_graph(const GraphType & sg)
+{
     using vertex_descriptor =
          boost::graph_traits<GraphType>::vertex_descriptor;
     using vertex_iterator =
@@ -74,25 +71,45 @@ std::unordered_map< vtkIdType, std::vector<graph_descriptor>>
     return std::make_pair(points, idMap);
 };
 
-void vtk_points_append_graph( const GraphType &inputGraph,
+void append_new_graph_points(
+        PointsIdMapPair & new_graph_point_map_pair,
+        vtkPointLocator * mergePoints,
+        std::unordered_map< vtkIdType, std::vector<graph_descriptor>> & unique_id_map)
+{
+    append_new_graph_points(
+            new_graph_point_map_pair.first,
+            new_graph_point_map_pair.second,
+            mergePoints,
+            unique_id_map);
+}
+
+void append_new_graph_points(
+        vtkPoints * new_graph_points,
+        const std::unordered_map< vtkIdType, std::vector<graph_descriptor>> & new_graph_id_map,
         vtkPointLocator * mergePoints,
         std::unordered_map< vtkIdType, std::vector<graph_descriptor>> & unique_id_map)
 {
     const auto number_of_previous_graphs = unique_id_map.cbegin()->second.size();
     auto unique_points = mergePoints->GetPoints();
-    const auto & g = inputGraph;
-    const auto points_map_pair = get_vtk_points_from_graph(g);
-    const auto & points = points_map_pair.first;
-    const auto & id_map = points_map_pair.second;
+    // const auto & g = inputGraph;
+    // const auto points_map_pair = get_vtk_points_from_graph(g);
+    BoundingBox box(mergePoints->GetBounds());
+    if(!box.are_bounds_inside(new_graph_points->GetBounds())) {
+        box.Print("existing merge_points bounds");
+        box.Print(new_graph_points->GetBounds(), "new graph new_graph_points bounds");
+        throw std::runtime_error("vtk_new_graph_points_append_graph: new graph has new_graph_points "
+                "outside of the merger bounding box");
+    }
+    assert(box.are_bounds_inside(new_graph_points->GetBounds()));
     vtkIdType lastPtId;
-    for (vtkIdType point_index = 0; point_index < points->GetNumberOfPoints(); ++point_index){
+    for (vtkIdType point_index = 0; point_index < new_graph_points->GetNumberOfPoints(); ++point_index){
         // Point will be inserted only if unique
         // lastPtId is modified to the id of the point (recently inserted or already present)
-        int is_new_point_inserted = mergePoints->InsertUniquePoint(points->GetPoint(point_index), lastPtId);
+        int is_new_point_inserted = mergePoints->InsertUniquePoint(new_graph_points->GetPoint(point_index), lastPtId);
         // if the point already exists push_back the graph_descriptor for the new graph
         // if it is new, first push the graph descriptors of previous graphs.
-        assert(id_map.at(point_index).size() == 1);
-        const auto & current_graph_gdesc = id_map.at(point_index)[0];
+        assert(new_graph_id_map.at(point_index).size() == 1);
+        const auto & current_graph_gdesc = new_graph_id_map.at(point_index)[0];
         if(!is_new_point_inserted) {
             assert(unique_id_map.at(lastPtId).size() == number_of_previous_graphs);
             unique_id_map[lastPtId].push_back(current_graph_gdesc);
@@ -111,7 +128,9 @@ void vtk_points_append_graph( const GraphType &inputGraph,
 std::pair<
 vtkSmartPointer<vtkMergePoints>,
 std::unordered_map< vtkIdType, std::vector<graph_descriptor>>
-> get_vtk_points_from_graphs(const std::vector<std::reference_wrapper<const GraphType>> & graphs)
+> get_vtk_points_from_graphs(
+        const std::vector<std::reference_wrapper<const GraphType>> & graphs,
+        const BoundingBox * box)
 {
     assert(graphs.size() > 0);
     auto unique_points = vtkSmartPointer<vtkPoints>::New();
@@ -122,41 +141,38 @@ std::unordered_map< vtkIdType, std::vector<graph_descriptor>>
     // vtkSmartPointer<vtkPointSet> pointSet = vtkSmartPointer<vtkPolyData>::New();
     vtkSmartPointer<vtkMergePoints> mergePoints = vtkSmartPointer<vtkMergePoints>::New();
     vtkIdType lastPtId;
-    {
-        const auto points_map_pair = get_vtk_points_from_graph(graphs[0]);
-        unique_points = points_map_pair.first;
-        unique_id_map = points_map_pair.second;
-        // pointSet->SetPoints(unique_points);
-        // mergePoints->SetDataSet(pointSet);
-        // mergePoints->SetDivisions(10, 10, 10);
+    std::vector<PointsIdMapPair> graphs_point_map;
+    std::vector<double*> bounds_vector;
+    for (size_t graph_index = 0; graph_index < graphs.size() ; ++graph_index){
+        graphs_point_map.emplace_back(get_vtk_points_from_graph(graphs[graph_index]));
+        const auto & points_per_graph = graphs_point_map.back().first;
+        bounds_vector.emplace_back(points_per_graph->GetBounds());
+    }
 
-        /* Expand the bounding box a 50% from the initial point set. */
-        double * boundsFromInitialPoints = unique_points->GetBounds();
-        double expandDistance[3];
-        expandDistance[0] = std::abs((boundsFromInitialPoints[1] - boundsFromInitialPoints[0])/4.0);
-        expandDistance[1] = std::abs((boundsFromInitialPoints[3] - boundsFromInitialPoints[2])/4.0);
-        expandDistance[2] = std::abs((boundsFromInitialPoints[5] - boundsFromInitialPoints[4])/4.0);
+    BoundingBox enclosing_box;
+    if(!box)
+         enclosing_box = BoundingBox::BuildEnclosingBox(bounds_vector);
+    else
+        enclosing_box = *box;
+
+    // Init the merger with points from the first graph
+    {
+        unique_points = graphs_point_map[0].first;
         double bounds[6];
-        bounds[0] = boundsFromInitialPoints[0] - expandDistance[0]; //xmin
-        bounds[1] = boundsFromInitialPoints[1] + expandDistance[0]; //xmax
-        bounds[2] = boundsFromInitialPoints[2] - expandDistance[1]; //ymin
-        bounds[3] = boundsFromInitialPoints[3] + expandDistance[1]; //ymax
-        bounds[4] = boundsFromInitialPoints[4] - expandDistance[2]; //zmin
-        bounds[5] = boundsFromInitialPoints[5] + expandDistance[2]; //zmax
-        // Prepare for insertion
+        enclosing_box.GetBounds(bounds);
         mergePoints->InitPointInsertion(unique_points, bounds);
         // Insert the points
+        unique_id_map = graphs_point_map[0].second;
         for (vtkIdType i = 0; i < unique_points->GetNumberOfPoints(); i++)
         {
             mergePoints->InsertUniquePoint(unique_points->GetPoint(i), lastPtId);
-            // They have to be unique from a single graph.
-            assert(unique_id_map.at(lastPtId).size() == 1);
         }
     }
 
     for (size_t graph_index = 1; graph_index < graphs.size() ; ++graph_index){
-        vtk_points_append_graph(graphs[graph_index], mergePoints, unique_id_map);
+        append_new_graph_points(graphs_point_map[graph_index], mergePoints, unique_id_map);
     }
+
     return std::make_pair(mergePoints, unique_id_map);
 };
 

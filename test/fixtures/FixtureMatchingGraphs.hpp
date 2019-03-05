@@ -8,6 +8,7 @@
 
 #include "gmock/gmock.h"
 #include "spatial_graph.hpp"
+#include "bounding_box.hpp"
 
 /*   g0)
  *       |
@@ -36,6 +37,7 @@
  */
 struct FixtureMatchingGraphs : public ::testing::Test {
     using GraphType = SG::GraphType;
+    SG::BoundingBox box = {{-10., -10., -10.}, {10., 10., 10.}};
     GraphType g0;
     GraphType g1;
     GraphType gR;

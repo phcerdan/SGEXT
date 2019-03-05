@@ -5,6 +5,7 @@
 
 #include "spatial_graph.hpp"
 #include "filter_spatial_graph.hpp"
+#include "bounding_box.hpp"
 
 namespace SG {
 

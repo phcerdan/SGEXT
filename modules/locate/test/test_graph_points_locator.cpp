@@ -30,6 +30,7 @@ struct GraphPointLocatorMatchingFixture : public ::testing::Test {
     using GraphType = SG::GraphType;
     GraphType g0;
     GraphType g1;
+    SG::BoundingBox box = {{-10, -10, -10}, {10, 10, 10}};
     void SetUp() override {
         using boost::add_edge;
         using boost::add_vertex;
@@ -128,7 +129,8 @@ TEST_F(GraphPointLocatorMatchingFixture, get_vtk_points_from_graphs)
     graphs.reserve(2);
     graphs.push_back(std::cref(g0));
     graphs.push_back(std::cref(g1));
-    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs);
+    EXPECT_NO_THROW(SG::get_vtk_points_from_graphs(graphs));
+    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs, &box);
     auto & mergePoints = merger_map_pair.first;
     size_t expected_num_unique_points = 4 + 3;
     EXPECT_EQ(mergePoints->GetPoints()->GetNumberOfPoints(), expected_num_unique_points);
@@ -140,7 +142,7 @@ TEST_F(GraphPointLocatorMatchingFixture, octree_locator_works_for_exactly_equal_
     graphs.reserve(2);
     graphs.push_back(std::cref(g0));
     graphs.push_back(std::cref(g0));
-    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs);
+    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs, &box);
     auto octree = SG::build_octree_locator(merger_map_pair.first->GetPoints());
     size_t expected_num_unique_points = 3 + 2 ;
     EXPECT_EQ(merger_map_pair.first->GetPoints()->GetNumberOfPoints(), expected_num_unique_points);
@@ -157,7 +159,7 @@ TEST_F(GraphPointLocatorMatchingFixture, octree_locator_works_for_almost_equal_g
     graphs.reserve(2);
     graphs.push_back(std::cref(g0));
     graphs.push_back(std::cref(g1));
-    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs);
+    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs, &box);
     auto octree = SG::build_octree_locator(merger_map_pair.first->GetPoints());
     size_t expected_num_unique_points = 4 + 3;
     EXPECT_EQ(merger_map_pair.first->GetPoints()->GetNumberOfPoints(), expected_num_unique_points);
@@ -199,7 +201,7 @@ TEST_F(GraphPointLocatorMatchingFixture, graph_closest_n_points_locator) {
     graphs.reserve(2);
     graphs.push_back(std::cref(g0));
     graphs.push_back(std::cref(g1));
-    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs);
+    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs, &box);
     auto & mergePoints = merger_map_pair.first;
     auto & idMap = merger_map_pair.second;
     auto octree = SG::build_octree_locator(merger_map_pair.first->GetPoints());
@@ -224,7 +226,7 @@ TEST_F(GraphPointLocatorMatchingFixture, graph_closest_n_points_locator_descript
     graphs.reserve(2);
     graphs.push_back(std::cref(g0));
     graphs.push_back(std::cref(g1));
-    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs);
+    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs, &box);
     auto & mergePoints = merger_map_pair.first;
     auto & idMap = merger_map_pair.second;
     auto octree = SG::build_octree_locator(merger_map_pair.first->GetPoints());
@@ -262,7 +264,7 @@ TEST_F(GraphPointLocatorMatchingFixture, graph_closest_points_by_radius_locator)
     graphs.reserve(2);
     graphs.push_back(std::cref(g0));
     graphs.push_back(std::cref(g1));
-    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs);
+    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs, &box);
     auto & mergePoints = merger_map_pair.first;
     auto & idMap = merger_map_pair.second;
     auto octree = SG::build_octree_locator(merger_map_pair.first->GetPoints());
@@ -288,14 +290,27 @@ TEST_F(GraphPointLocatorMatchingFixture, graph_closest_points_by_radius_locator)
 TEST_F(GraphPointLocatorMatchingFixture, graph_closest_points_by_radius_locator_small_radius) {
     std::vector<std::reference_wrapper<const GraphType>> graphs;
     graphs.reserve(2);
-    graphs.push_back(std::cref(g0));
     graphs.push_back(std::cref(g1));
-    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs);
+    graphs.push_back(std::cref(g0));
+    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs, &box);
     auto & mergePoints = merger_map_pair.first;
     auto & idMap = merger_map_pair.second;
     auto octree = SG::build_octree_locator(merger_map_pair.first->GetPoints());
+    octree->SetDebug(true);
+    octree->Print(std::cout);
 
-    SG::PointType testPoint = {{3.1,0,0}};
+    double bounds[6];
+    octree->GetDataSet()->GetBounds(bounds);
+    std::cout << "Bounds" << std::endl;
+    std::cout <<
+    bounds[0] << ", " <<
+    bounds[1] << ", " <<
+    bounds[2] << ", " <<
+    bounds[3] << ", " <<
+    bounds[4] << ", " <<
+    bounds[5] << std::endl;
+
+    SG::PointType testPoint = {{2.5, 0., 0.}};
     double radius = 0.2;
     std::cout << "Print points g0, g1" << std::endl;
     SG::print_locator_points(octree);
@@ -303,7 +318,7 @@ TEST_F(GraphPointLocatorMatchingFixture, graph_closest_points_by_radius_locator_
 
     double dist2;
     auto closestId = octree->FindClosestPointWithinRadius(radius, testPoint.data(), dist2);
-    vtkIdType expected_closest_id = 5;
+    vtkIdType expected_closest_id = 6;
     EXPECT_EQ(closestId, expected_closest_id);
     EXPECT_TRUE(dist2 >= 0. && dist2 <= radius);
 
@@ -341,7 +356,7 @@ TEST_F(GraphPointLocatorMatchingFixture, graph_closest_points_by_radius_no_point
     graphs.reserve(2);
     graphs.push_back(std::cref(g0));
     graphs.push_back(std::cref(g1));
-    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs);
+    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs, &box);
     auto & mergePoints = merger_map_pair.first;
     auto & idMap = merger_map_pair.second;
     auto octree = SG::build_octree_locator(merger_map_pair.first->GetPoints());
@@ -384,7 +399,7 @@ TEST_F(GraphPointLocatorCloseFixture, get_vtk_points_from_graphs)
     graphs.reserve(2);
     graphs.push_back(std::cref(g0));
     graphs.push_back(std::cref(moved_g1));
-    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs);
+    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs, &box);
     auto & mergePoints = merger_map_pair.first;
     size_t expected_num_unique_points = 12; // (2 + 3) + (4 + 3);
     EXPECT_EQ(mergePoints->GetPoints()->GetNumberOfPoints(), expected_num_unique_points);
@@ -396,7 +411,7 @@ TEST_F(GraphPointLocatorCloseFixture, graph_closest_n_points_locator) {
     graphs.reserve(2);
     graphs.push_back(std::cref(g0));
     graphs.push_back(std::cref(moved_g1));
-    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs);
+    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs, &box);
     auto & mergePoints = merger_map_pair.first;
     auto & idMap = merger_map_pair.second;
     auto octree = SG::build_octree_locator(merger_map_pair.first->GetPoints());
@@ -421,7 +436,7 @@ TEST_F(GraphPointLocatorCloseFixture, graph_closest_n_points_locator_descriptors
     graphs.reserve(2);
     graphs.push_back(std::cref(g0));
     graphs.push_back(std::cref(moved_g1));
-    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs);
+    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs, &box);
     auto & mergePoints = merger_map_pair.first;
     auto & idMap = merger_map_pair.second;
     auto octree = SG::build_octree_locator(merger_map_pair.first->GetPoints());
@@ -458,7 +473,7 @@ TEST_F(GraphPointLocatorCloseFixture, graph_closest_points_by_radius_locator_sma
     graphs.reserve(2);
     graphs.push_back(std::cref(g0));
     graphs.push_back(std::cref(moved_g1));
-    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs);
+    auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs, &box);
     auto & mergePoints = merger_map_pair.first;
     auto & idMap = merger_map_pair.second;
     auto octree = SG::build_octree_locator(merger_map_pair.first->GetPoints());
