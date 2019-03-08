@@ -11,6 +11,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_DEPENDS
     ${ITK_LIBRARIES}
     ${qt_targets}
     ${VTK_LIBRARIES}
+    ${DGTAL_LIBRARIES} # For visualize_object.hpp
     histo)
 set(qt_sources "")
 if(SG_MODULE_VISUALIZE_ENABLE_QT)
@@ -21,6 +22,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
     convert_to_vtk_graph.cpp
     visualize_spatial_graph.cpp
     visualize_spatial_graph_with_image.cpp
+    visualize_object.cpp
     )
 list(TRANSFORM SG_MODULE_${SG_MODULE_NAME}_SOURCES PREPEND "src/")
 add_library(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} ${SG_MODULE_${SG_MODULE_NAME}_SOURCES})
