@@ -13,6 +13,31 @@
 #include "spatial_graph_utilities.hpp"
 // use it to check there is no exception in cornercase
 // #include "compute_graph_properties.hpp"
+// #ifdef VISUALIZE
+#include "visualize_spatial_graph.hpp"
+#include "visualize_object.hpp"
+#include <vtkRenderer.h>
+#include <vtkRenderWindow.h>
+#include <vtkRendererCollection.h>
+// #include <DGtal/io/viewers/Viewer3D.h>
+// void display_object(const DGtal::Z3i::Object26_6 & obj,
+//                     const DGtal::Z3i::Domain & domain)
+// {
+//     using namespace DGtal::Z3i;
+//     int argc(1);
+//     char** argv(nullptr);
+//     QApplication app(argc, argv);
+//
+//     KSpace ks;
+//     ks.init(domain.lowerBound(), domain.upperBound(), true);
+//     DGtal::Viewer3D<> viewer(ks);
+//     viewer.setFillColor(DGtal::Color(255, 255, 255, 255));
+//     viewer << obj.pointSet();
+//     viewer << DGtal::Viewer3D<>::updateDisplay;
+//     viewer.show();
+//
+//     app.exec();
+// }
 
 struct ObjectGraphFixture : public ::testing::Test {
     using Domain = DGtal::Z3i::Domain;
@@ -25,6 +50,7 @@ struct ObjectGraphFixture : public ::testing::Test {
     using edge_iterator = typename boost::graph_traits<Object>::edge_iterator;
 
     Object obj;
+    Domain domain;
     void SetUp() override {}
 };
 
@@ -48,7 +74,7 @@ struct ThreeConnectedNodesFixture : public ObjectGraphFixture {
 
         Domain::Point b1(-10, -10, -10);
         Domain::Point b2(10, 10, 10);
-        Domain domain(b1, b2);
+        domain = Domain(b1, b2);
         DigitalSet obj_set(domain);
         Domain::Point n0(0, 0, 0);
         Domain::Point n1(1, 1, 0);
@@ -145,7 +171,7 @@ struct ContourLengthCornercase2Fixture : public ObjectGraphFixture {
 
         Domain::Point b1(340, 150, 20);
         Domain::Point b2(360, 170, 40);
-        Domain domain(b1, b2);
+        domain = Domain(b1, b2);
         DigitalSet obj_set(domain);
         Domain::Point n0(348, 158, 30);
         Domain::Point n00(348, 158, 29);
@@ -234,4 +260,22 @@ TEST_F(ContourLengthCornercase2Fixture, merge_nodes)
     EXPECT_EQ(count1degrees, 3);
     EXPECT_EQ(count0degrees, 0);
     // EXPECT_NO_THROW(SG::compute_contour_lengths(reduced_g));
+    auto renderWindowInteractor = SG::visualize_object(obj);
+    auto graphLayoutView = SG::visualize_spatial_graph(sg);
+    // From: https://www.vtk.org/Wiki/VTK/Examples/Cxx/Images/BackgroundImage
+    auto renderWindow = renderWindowInteractor->GetRenderWindow();
+    auto renderer = renderWindow->GetRenderers()->GetFirstRenderer();
+
+    graphLayoutView->ResetCamera();
+    graphLayoutView->GetRenderer()->SetLayer(1);
+    graphLayoutView->GetRenderer()->InteractiveOff();
+    graphLayoutView->GetRenderer()->SetActiveCamera( renderer->GetActiveCamera() );
+    // Don't make the z buffer transparent of the graph layout
+    graphLayoutView->GetRenderer()->EraseOff();
+    renderWindow->SetNumberOfLayers(2);
+    renderWindow->AddRenderer(graphLayoutView->GetRenderer());
+    renderer->ResetCamera();
+    // renderWindowInteractor->Initialize();
+    renderWindowInteractor->Start();
 }
+

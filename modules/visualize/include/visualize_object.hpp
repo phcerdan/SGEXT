@@ -18,21 +18,23 @@
  *
  * *******************************************************************/
 
-#ifndef VISUALIZE_SPATIAL_GRAPH_HPP
-#define VISUALIZE_SPATIAL_GRAPH_HPP
-#include "spatial_graph.hpp"
-#include <vtkGraphLayoutView.h>
+#ifndef VISUALIZE_OBJECT_HPP
+#define VISUALIZE_OBJECT_HPP
+
+#include <vtkSmartPointer.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkPoints.h>
+#include <DGtal/helpers/StdDefs.h>
 
 namespace SG {
 
-/**
- * Visualize sg with a vtk graph layout view.
- * Use: visualize_spatial_graph->GetInteractor()->Start();
- *
- * @param sg
- */
-vtkSmartPointer<vtkGraphLayoutView>
-visualize_spatial_graph(const GraphType & sg);
+vtkSmartPointer<vtkRenderWindowInteractor>
+visualize_points_as_cubes( /* const */ vtkPoints * points,
+    const double inputOpacity);
 
-} // namespace SG
+vtkSmartPointer<vtkRenderWindowInteractor>
+visualize_object( const DGtal::Z3i::Object26_6 & obj,
+    const double inputOpacity = 0.8);
+
+} // end namespace SG
 #endif
