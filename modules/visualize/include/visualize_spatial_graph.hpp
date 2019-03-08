@@ -6,15 +6,18 @@
 #ifndef VISUALIZE_SPATIAL_GRAPH_HPP
 #define VISUALIZE_SPATIAL_GRAPH_HPP
 #include "spatial_graph.hpp"
+#include <vtkGraphLayoutView.h>
 
 namespace SG {
 
 /**
  * Visualize sg with a vtk graph layout view.
+ * Use: visualize_spatial_graph->GetInteractor()->Start();
  *
  * @param sg
  */
-void visualize_spatial_graph(const GraphType & sg);
+vtkSmartPointer<vtkGraphLayoutView>
+visualize_spatial_graph(const GraphType & sg);
 
 } // namespace SG
 #endif
