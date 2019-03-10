@@ -46,6 +46,9 @@
 #include <vtkMatrix4x4.h>
 #include <vtkContourValues.h>
 
+#include "visualize_common.hpp"
+#include "visualize_spatial_graph.hpp"
+
 #include "convert_to_vtk_graph.hpp"
 #include "transform_to_physical_point.hpp"
 
@@ -152,25 +155,7 @@ void visualize_spatial_graph_with_image(
   // renderWindowInteractor->Initialize();
   // renderWindowInteractor->Start();
 
-  // Render graph:
-  // // Copy graph to transform it into index space
-  // auto sg_index_space = sg;
-  // SG::transform_graph_to_index_space( sg_index_space, img );
-  vtkSmartPointer<vtkMutableUndirectedGraph> vtk_graph =
-      convert_to_vtk_graph(sg);
-  auto graphLayoutView = vtkSmartPointer<vtkGraphLayoutView>::New();
-  graphLayoutView->AddRepresentationFromInput(vtk_graph);
-  graphLayoutView->SetLayoutStrategyToPassThrough();
-  auto style_graph = vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New(); // like paraview
-  graphLayoutView->SetInteractorStyle(style_graph) ;
-  graphLayoutView->SetColorVertices(true);
-  // 1 is the default (squares or circles), 9 is spheres ( extremely slow)
-  graphLayoutView->SetGlyphType(7);
-  // graphLayoutView->Set
-  // Scaled Glyphs on requires a way to scale it. If uncommented
-  // the glyphs are gone with an error (useful for debugging)
-  // graphLayoutView->ScaledGlyphsOn();
-  graphLayoutView->ResetCamera();
+  auto graphLayoutView = create_graph_layout_view_from_spatial_graph(sg);
   // From: https://www.vtk.org/Wiki/VTK/Examples/Cxx/Images/BackgroundImage
   graphLayoutView->GetRenderer()->SetLayer(1);
   graphLayoutView->GetRenderer()->InteractiveOff();
@@ -185,18 +170,8 @@ void visualize_spatial_graph_with_image(
   renderer->AddViewProp(volume);
 
   // Flip camera because VTK-ITK different corner for origin.
-  double pos[3];
-  double vup[3];
   vtkCamera *cam = renderer->GetActiveCamera();
-  cam->GetPosition(pos);
-  cam->GetViewUp(vup);
-  for ( unsigned int i = 0; i < 3; ++i )
-    {
-    pos[i] = -pos[i];
-    vup[i] = -vup[i];
-    }
-  cam->SetPosition(pos);
-  cam->SetViewUp(vup);
+  flip_camera(cam);
 
   renderer->ResetCamera();
   renderWindowInteractor->Initialize();

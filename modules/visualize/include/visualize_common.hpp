@@ -18,23 +18,32 @@
  *
  * *******************************************************************/
 
-#ifndef VISUALIZE_SPATIAL_GRAPH_HPP
-#define VISUALIZE_SPATIAL_GRAPH_HPP
-#include "spatial_graph.hpp"
-#include <vtkGraphLayoutView.h>
+#ifndef VISUALIZE_COMMON_HPP
+#define VISUALIZE_COMMON_HPP
+#include <vtkCamera.h>
+#include <vtkActor.h>
+#include <vtkSmartPointer.h>
 
 namespace SG {
-
-vtkSmartPointer<vtkGraphLayoutView>
-create_graph_layout_view_from_spatial_graph(const GraphType & sg);
 /**
- * Visualize sg with a vtk graph layout view.
- * Use: visualize_spatial_graph->GetInteractor()->Start();
+ * Flip camera because VTK-ITK different corner for origin.
  *
- * @param sg
+ * @param cam
  */
-void
-visualize_spatial_graph(const GraphType & sg);
+void flip_camera(vtkCamera *cam);
 
-} // namespace SG
+/**
+ * Create an actor to visualize points as cubes.
+ *
+ * @param points
+ * @param inputOpacity
+ *
+ * @return
+ */
+vtkSmartPointer<vtkActor>
+create_actor_visualize_points_as_cubes( /* const */ vtkPoints * points,
+    const double inputOpacity);
+
+
+} // end ns SG
 #endif
