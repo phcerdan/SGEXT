@@ -10,13 +10,15 @@
 
 namespace SG {
 
+vtkSmartPointer<vtkGraphLayoutView>
+create_graph_layout_view_from_spatial_graph(const GraphType & sg);
 /**
  * Visualize sg with a vtk graph layout view.
  * Use: visualize_spatial_graph->GetInteractor()->Start();
  *
  * @param sg
  */
-vtkSmartPointer<vtkGraphLayoutView>
+void
 visualize_spatial_graph(const GraphType & sg);
 
 } // namespace SG

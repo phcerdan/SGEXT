@@ -260,22 +260,22 @@ TEST_F(ContourLengthCornercase2Fixture, merge_nodes)
     EXPECT_EQ(count1degrees, 3);
     EXPECT_EQ(count0degrees, 0);
     // EXPECT_NO_THROW(SG::compute_contour_lengths(reduced_g));
-    auto renderWindowInteractor = SG::visualize_object(obj);
-    auto graphLayoutView = SG::visualize_spatial_graph(sg);
-    // From: https://www.vtk.org/Wiki/VTK/Examples/Cxx/Images/BackgroundImage
-    auto renderWindow = renderWindowInteractor->GetRenderWindow();
-    auto renderer = renderWindow->GetRenderers()->GetFirstRenderer();
-
-    graphLayoutView->ResetCamera();
-    graphLayoutView->GetRenderer()->SetLayer(1);
-    graphLayoutView->GetRenderer()->InteractiveOff();
-    graphLayoutView->GetRenderer()->SetActiveCamera( renderer->GetActiveCamera() );
-    // Don't make the z buffer transparent of the graph layout
-    graphLayoutView->GetRenderer()->EraseOff();
-    renderWindow->SetNumberOfLayers(2);
-    renderWindow->AddRenderer(graphLayoutView->GetRenderer());
-    renderer->ResetCamera();
-    // renderWindowInteractor->Initialize();
-    renderWindowInteractor->Start();
+    // auto renderWindowInteractor = SG::visualize_object(obj);
+    // auto graphLayoutView = SG::visualize_spatial_graph(sg);
+    // // From: https://www.vtk.org/Wiki/VTK/Examples/Cxx/Images/BackgroundImage
+    // auto renderWindow = renderWindowInteractor->GetRenderWindow();
+    // auto renderer = renderWindow->GetRenderers()->GetFirstRenderer();
+    //
+    // graphLayoutView->ResetCamera();
+    // graphLayoutView->GetRenderer()->SetLayer(1);
+    // graphLayoutView->GetRenderer()->InteractiveOff();
+    // graphLayoutView->GetRenderer()->SetActiveCamera( renderer->GetActiveCamera() );
+    // // Don't make the z buffer transparent of the graph layout
+    // graphLayoutView->GetRenderer()->EraseOff();
+    // renderWindow->SetNumberOfLayers(2);
+    // renderWindow->AddRenderer(graphLayoutView->GetRenderer());
+    // renderer->ResetCamera();
+    // // renderWindowInteractor->Initialize();
+    // renderWindowInteractor->Start();
 }
 
