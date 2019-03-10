@@ -12,12 +12,13 @@
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderer.h>
 #include <vtkSmartPointer.h>
+#include "visualize_common.hpp"
 
 #include "convert_to_vtk_graph.hpp"
 namespace SG {
 
 vtkSmartPointer<vtkGraphLayoutView>
-visualize_spatial_graph(const GraphType & sg)
+create_graph_layout_view_from_spatial_graph(const GraphType & sg)
 {
     vtkSmartPointer<vtkMutableUndirectedGraph> vtk_graph =
         convert_to_vtk_graph(sg);
@@ -29,25 +30,23 @@ visualize_spatial_graph(const GraphType & sg)
     auto style = vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New(); // like paraview
     graphLayoutView->SetInteractorStyle(style) ;
     graphLayoutView->SetColorVertices(true);
+    // graphLayoutView->SetGlyphType(7);
 
     // Flip camera because VTK-ITK different corner for origin.
-    double pos[3];
-    double vup[3];
-    vtkCamera *cam = graphLayoutView->GetRenderer()->GetActiveCamera();
-    cam->GetPosition(pos);
-    cam->GetViewUp(vup);
-    for ( unsigned int i = 0; i < 3; ++i )
-    {
-        pos[i] = -pos[i];
-        vup[i] = -vup[i];
-    }
-    cam->SetPosition(pos);
-    cam->SetViewUp(vup);
+    flip_camera(graphLayoutView->GetRenderer()->GetActiveCamera());
 
     graphLayoutView->ResetCamera();
     // graphLayoutView->Render();
     // graphLayoutView->GetInteractor()->Start();
     return graphLayoutView;
+}
+
+void
+visualize_spatial_graph(const GraphType & sg)
+{
+    auto graphLayoutView = create_graph_layout_view_from_spatial_graph(sg);
+    graphLayoutView->Render();
+    graphLayoutView->GetInteractor()->Start();
 }
 
 } // end namespace

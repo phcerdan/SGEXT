@@ -20,9 +20,11 @@ endif()
 set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
     ${qt_sources}
     convert_to_vtk_graph.cpp
+    visualize_common.cpp
+    visualize_object.cpp
     visualize_spatial_graph.cpp
     visualize_spatial_graph_with_image.cpp
-    visualize_object.cpp
+    vtkInteractorStyleTrackballCameraGraph.cpp
     )
 list(TRANSFORM SG_MODULE_${SG_MODULE_NAME}_SOURCES PREPEND "src/")
 add_library(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} ${SG_MODULE_${SG_MODULE_NAME}_SOURCES})
@@ -35,9 +37,13 @@ target_include_directories(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} PUBLIC
   ${ITK_INCLUDE_DIRS}
   )
 target_link_libraries(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY}
+  PUBLIC
   ${SG_MODULE_${SG_MODULE_NAME}_DEPENDS}
   )
-add_dependencies(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} ${SG_MODULE_INTERNAL_DEPENDS})
+target_link_libraries(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY}
+  PUBLIC
+  ${SG_MODULE_INTERNAL_DEPENDS}
+  )
 
 if(SG_BUILD_TESTING)
   add_subdirectory(test)
