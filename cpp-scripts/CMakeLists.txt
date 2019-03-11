@@ -6,6 +6,7 @@ set(_scripts_targets
     create_distance_map
     mask_distance_map_with_thin_image
     merge_low_high_info_graphs
+    fill_holes_binary
     )
 
 set(_scripts_targets_visualize
@@ -13,6 +14,14 @@ set(_scripts_targets_visualize
     visualize_histograms_from_file
     visualize_graph_and_image
     )
+
+add_executable(fill_holes_binary fill_holes_binary.cpp)
+target_link_libraries(fill_holes_binary ${Boost_LIBRARIES} )
+target_link_libraries(fill_holes_binary ${ITK_LIBRARIES} )
+if(VISUALIZE)
+    target_compile_definitions(fill_holes_binary PUBLIC VISUALIZE)
+endif()
+
 add_executable(thin thin.cpp)
 target_link_libraries(thin ${Boost_LIBRARIES} )
 target_link_libraries(thin ${ITK_LIBRARIES} )
