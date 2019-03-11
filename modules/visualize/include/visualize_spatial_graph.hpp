@@ -25,6 +25,10 @@ visualize_spatial_graph(const GraphType & sg);
 void
 visualize_spatial_graph_with_points(const GraphType & sg,
     vtkPoints * points,
-    const double pointsOpacity = 0.8);
+    const double pointsOpacity = 0.8,
+    const double lengthX = 1.0,
+    const double lengthY = 1.0,
+    const double lengthZ = 1.0
+    );
 } // namespace SG
 #endif
