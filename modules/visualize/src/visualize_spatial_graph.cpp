@@ -69,7 +69,11 @@ visualize_spatial_graph(const GraphType & sg)
 void
 visualize_spatial_graph_with_points(const GraphType & sg,
     vtkPoints * points,
-    const double pointsOpacity)
+    const double pointsOpacity,
+    const double lengthX,
+    const double lengthY,
+    const double lengthZ
+    )
 {
 
     // Create a renderer, render window, and interactor
@@ -82,7 +86,11 @@ visualize_spatial_graph_with_points(const GraphType & sg,
     renderWindowInteractor->SetInteractorStyle(style);
 
     // Add actor for points
-    auto pointsActor = create_actor_visualize_points_as_cubes(points, pointsOpacity);
+    auto pointsActor = create_actor_visualize_points_as_cubes(points,
+            pointsOpacity,
+            lengthX,
+            lengthY,
+            lengthZ);
     renderer->AddActor(pointsActor);
 
     // TODO maybe think about using a GraphItem in a Context instead of the graphLayoutView

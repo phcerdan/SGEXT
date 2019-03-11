@@ -43,8 +43,13 @@ void flip_camera(vtkCamera * cam)
 }
 
 vtkSmartPointer<vtkActor>
-create_actor_visualize_points_as_cubes(/* const */ vtkPoints * points,
-        const double inputOpacity)
+create_actor_visualize_points_as_cubes(
+    /* const */ vtkPoints * points,
+        const double inputOpacity,
+        const double lengthX,
+        const double lengthY,
+        const double lengthZ
+        )
 {
   vtkSmartPointer<vtkPolyData> polydata =
     vtkSmartPointer<vtkPolyData>::New();
@@ -56,9 +61,9 @@ create_actor_visualize_points_as_cubes(/* const */ vtkPoints * points,
   // Create anything you want here, we will use a cube for the demo.
   vtkSmartPointer<vtkCubeSource> cubeSource =
     vtkSmartPointer<vtkCubeSource>::New();
-  cubeSource->SetXLength(1.0);
-  cubeSource->SetYLength(1.0);
-  cubeSource->SetZLength(1.0);
+  cubeSource->SetXLength(lengthX);
+  cubeSource->SetYLength(lengthY);
+  cubeSource->SetZLength(lengthZ);
 
   vtkSmartPointer<vtkGlyph3DMapper> glyph3Dmapper =
     vtkSmartPointer<vtkGlyph3DMapper>::New();

@@ -43,6 +43,7 @@
 
 #include "visualize_spatial_graph.hpp"
 #include "visualize_spatial_graph_with_image.hpp"
+#include <cmath> // for std::abs
 
 using namespace std;
 namespace po = boost::program_options;
@@ -58,6 +59,7 @@ int main(int argc, char* const argv[]){
     ( "inputImage,i", po::value<string>()->default_value(""), "Input Binary Image. Skeletonized or not. If inputImage and thinImage are not provided, only the graph will be visualized." )
     ( "useSerialized,u", po::bool_switch()->default_value(true), "Use stored serialized graphs. If off, it will require .dot graphviz files.")
     ( "thinImage,s", po::value<string>()->default_value(""), "Input Thin Image (Skeletonized). If inputImage and thinImage are not provided, only the graph will be visualized." )
+    ( "opacity,o", po::value<double>()->default_value(0.8), "Opacity value." )
     ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output." );
 
   po::variables_map vm;
@@ -77,6 +79,7 @@ int main(int argc, char* const argv[]){
   string filenameImage = vm["inputImage"].as<string>();
   string filenameGraph = vm["inputGraph"].as<string>();
   string filenameThinImage = vm["thinImage"].as<string>();
+  double opacity = vm["opacity"].as<double>();
   bool verbose = vm["verbose"].as<bool>();
   if(verbose){
     std::cout <<"Filename Input Image: " << filenameImage << std::endl;
@@ -135,20 +138,31 @@ int main(int argc, char* const argv[]){
   if(image_is_thin) {
     reader->SetFileName(filenameThinImage);
     reader->Update();
+    auto image = reader->GetOutput();
     // Get the points different than zero
     itk::ImageRegionIteratorWithIndex<ItkImageType> imageIterator(
-        reader->GetOutput(), reader->GetOutput()->GetLargestPossibleRegion());
+        image, image->GetLargestPossibleRegion());
     auto points = vtkSmartPointer<vtkPoints>::New();
     while(!imageIterator.IsAtEnd()) {
       if(imageIterator.Get() > 0) {
         ItkImageType::PointType physical_point;
-        reader->GetOutput()->TransformIndexToPhysicalPoint(
+        image->TransformIndexToPhysicalPoint(
             imageIterator.GetIndex(), physical_point);
         points->InsertNextPoint(physical_point[0], physical_point[1], physical_point[2]);
       }
       ++imageIterator;
     }
-    SG::visualize_spatial_graph_with_points(sg, points);
+    ItkImageType::IndexType index0;
+    index0.Fill(0);
+    ItkImageType::PointType physical_point0;
+    image->TransformIndexToPhysicalPoint(index0, physical_point0);
+    ItkImageType::IndexType index1;
+    index1.Fill(1);
+    ItkImageType::PointType physical_point1;
+    image->TransformIndexToPhysicalPoint( index1, physical_point1);
+    auto rotated_length = physical_point1 - physical_point0;
+    SG::visualize_spatial_graph_with_points(sg, points, opacity,
+        std::abs(rotated_length[0]), std::abs(rotated_length[1]), std::abs(rotated_length[2]));
   } else {
     reader->SetFileName(filenameImage);
     reader->Update();
