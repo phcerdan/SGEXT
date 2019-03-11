@@ -35,6 +35,7 @@
 #include <boost/filesystem.hpp>
 
 #include <itkImageFileReader.h>
+#include <itkImageRegionIteratorWithIndex.h>
 // Reduce graph via dfs:
 #include "spatial_graph.hpp"
 #include "spatial_graph_utilities.hpp"
@@ -54,8 +55,9 @@ int main(int argc, char* const argv[]){
   general_opt.add_options()
     ( "help,h", "display this message." )
     ( "inputGraph,g", po::value<string>()->required(), "Input graph." )
-    ( "inputImage,i", po::value<string>()->default_value(""), "Input Binary Image. Skeletonized or not. If not provided, only the graph will be visualized." )
+    ( "inputImage,i", po::value<string>()->default_value(""), "Input Binary Image. Skeletonized or not. If inputImage and thinImage are not provided, only the graph will be visualized." )
     ( "useSerialized,u", po::bool_switch()->default_value(true), "Use stored serialized graphs. If off, it will require .dot graphviz files.")
+    ( "thinImage,s", po::value<string>()->default_value(""), "Input Thin Image (Skeletonized). If inputImage and thinImage are not provided, only the graph will be visualized." )
     ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output." );
 
   po::variables_map vm;
@@ -74,9 +76,11 @@ int main(int argc, char* const argv[]){
 
   string filenameImage = vm["inputImage"].as<string>();
   string filenameGraph = vm["inputGraph"].as<string>();
+  string filenameThinImage = vm["thinImage"].as<string>();
   bool verbose = vm["verbose"].as<bool>();
   if(verbose){
     std::cout <<"Filename Input Image: " << filenameImage << std::endl;
+    std::cout <<"Filename Thin Image: " << filenameThinImage << std::endl;
     std::cout <<"Filename Input Graph: " << filenameGraph << std::endl;
   }
   bool useSerialized = vm["useSerialized"].as<bool>();
@@ -112,21 +116,43 @@ int main(int argc, char* const argv[]){
   // Make the comparison between low and high and take the result
 
   bool image_provided = false;
-  if(filenameImage != "") {
+  bool image_is_thin = false;
+  if(filenameThinImage != "")
+    image_is_thin = true;
+  if(filenameImage != "" || image_is_thin) {
     image_provided = true;
   }
-  if(image_provided)
+  if(!image_provided)
   {
-    const unsigned int Dim = 3;
-    using PixelType = unsigned char ;
-    using ItkImageType = itk::Image<PixelType, Dim> ;
-    using ReaderType = itk::ImageFileReader<ItkImageType> ;
-    auto reader = ReaderType::New();
+    SG::visualize_spatial_graph(sg);
+    return EXIT_SUCCESS;
+  }
+  const unsigned int Dim = 3;
+  using PixelType = unsigned char ;
+  using ItkImageType = itk::Image<PixelType, Dim> ;
+  using ReaderType = itk::ImageFileReader<ItkImageType> ;
+  auto reader = ReaderType::New();
+  if(image_is_thin) {
+    reader->SetFileName(filenameThinImage);
+    reader->Update();
+    // Get the points different than zero
+    itk::ImageRegionIteratorWithIndex<ItkImageType> imageIterator(
+        reader->GetOutput(), reader->GetOutput()->GetLargestPossibleRegion());
+    auto points = vtkSmartPointer<vtkPoints>::New();
+    while(!imageIterator.IsAtEnd()) {
+      if(imageIterator.Get() > 0) {
+        ItkImageType::PointType physical_point;
+        reader->GetOutput()->TransformIndexToPhysicalPoint(
+            imageIterator.GetIndex(), physical_point);
+        points->InsertNextPoint(physical_point[0], physical_point[1], physical_point[2]);
+      }
+      ++imageIterator;
+    }
+    SG::visualize_spatial_graph_with_points(sg, points);
+  } else {
     reader->SetFileName(filenameImage);
     reader->Update();
     SG::visualize_spatial_graph_with_image(sg, reader->GetOutput());
-  } else {
-    SG::visualize_spatial_graph(sg);
   }
 
 } // end main

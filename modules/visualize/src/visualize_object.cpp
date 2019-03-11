@@ -32,15 +32,21 @@
 #include <vtkRenderer.h>
 namespace SG {
 
+vtkSmartPointer<vtkPoints>
+points_from_object(const DGtal::Z3i::Object26_6 & obj)
+{
+  auto points = vtkSmartPointer<vtkPoints>::New();
+  for(const auto &p : obj.pointSet()) {
+    points->InsertNextPoint(p[0], p[1], p[2]);
+  }
+  return points;
+}
+
 vtkSmartPointer<vtkActor>
 create_actor_visualize_object(const DGtal::Z3i::Object26_6 & obj,
         const double inputOpacity)
 {
-  vtkSmartPointer<vtkPoints> points =
-    vtkSmartPointer<vtkPoints>::New();
-  for(const auto &p : obj.pointSet()) {
-    points->InsertNextPoint(p[0], p[1], p[2]);
-  }
+  auto points = points_from_object(obj);
   return create_actor_visualize_points_as_cubes(points, inputOpacity);
 }
 
