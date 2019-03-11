@@ -7,9 +7,11 @@
 
 #include <vtkCamera.h>
 #include <vtkInteractorStyleTrackballCamera.h>
+#include "vtkInteractorStyleTrackballCameraGraph.h"
 #include <vtkMutableUndirectedGraph.h>
 #include <vtkPoints.h>
 #include <vtkRenderWindowInteractor.h>
+#include <vtkRenderWindow.h>
 #include <vtkRenderer.h>
 #include <vtkSmartPointer.h>
 #include "visualize_common.hpp"
@@ -49,4 +51,37 @@ visualize_spatial_graph(const GraphType & sg)
     graphLayoutView->GetInteractor()->Start();
 }
 
+void
+visualize_spatial_graph_with_points(const GraphType & sg,
+    vtkPoints * points,
+    const double pointsOpacity)
+{
+
+    // Create a renderer, render window, and interactor
+    auto renderer = vtkSmartPointer<vtkRenderer>::New();
+    auto renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
+    renderWindow->AddRenderer(renderer);
+    auto renderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
+    renderWindowInteractor->SetRenderWindow(renderWindow);
+    auto style = vtkSmartPointer<vtkInteractorStyleTrackballCameraGraph>::New(); // like paraview
+    renderWindowInteractor->SetInteractorStyle(style);
+
+    // Add actor for points
+    auto pointsActor = create_actor_visualize_points_as_cubes(points, pointsOpacity);
+    renderer->AddActor(pointsActor);
+
+    // TODO maybe think about using a GraphItem in a Context instead of the graphLayoutView
+    auto graphLayoutView = create_graph_layout_view_from_spatial_graph(sg);
+    graphLayoutView->GetRenderer()->SetLayer(1);
+    graphLayoutView->GetRenderer()->InteractiveOff();
+    graphLayoutView->GetRenderer()->SetActiveCamera( renderer->GetActiveCamera() );
+    // Don't make the z buffer transparent of the graph layout
+    graphLayoutView->GetRenderer()->EraseOff();
+
+    renderWindow->SetNumberOfLayers(2);
+
+    renderWindow->AddRenderer(graphLayoutView->GetRenderer());
+    renderer->ResetCamera();
+    renderWindowInteractor->Start();
+}
 } // end namespace

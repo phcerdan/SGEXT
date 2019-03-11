@@ -8,9 +8,20 @@
 
 #include <vtkSmartPointer.h>
 #include <vtkActor.h>
+#include <vtkPoints.h>
 #include <DGtal/helpers/StdDefs.h>
 
 namespace SG {
+
+/**
+ * Copy the DGtal object into vtkPoints
+ *
+ * @param obj
+ *
+ * @return
+ */
+vtkSmartPointer<vtkPoints>
+points_from_object(const DGtal::Z3i::Object26_6 & obj);
 
 /**
  * Create an actor to visualize the default 3D DGtal::Object
