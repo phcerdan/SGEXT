@@ -75,10 +75,11 @@ int main(int argc, char* const argv[]){
     ( "ignoreAngleBetweenParallelEdges,g", po::bool_switch()->default_value(false), "Don't compute angles between parallel edges." )
     ( "ignoreEdgesShorterThan,s", po::value<size_t>()->default_value(0), "Ignore distance and angles between edges shorter than this value." )
     ( "ignoreEdgesToEndNodes,x", po::bool_switch()->default_value(false), "Ignore distance and angles between edges to/from end nodes (degree = 1)." )
-    ( "transformToPhysicalPoints,p", po::bool_switch()->default_value(true), "Positions in Spatial Graph takes into account metadata of the (origin,spacing,direction) itk image." )
+    ( "avoid_avoid_transformToPhysicalPoints,p", po::bool_switch()->default_value(false), "Positions in Spatial Graph takes into account metadata of the (origin,spacing,direction) itk image." )
     ( "spacing", po::value<string>()->default_value(""), "Provide external spacing between voxels. Ignores metadata of itk image and apply it." )
+    ( "output_filename_simple,z",  po::bool_switch()->default_value(false), "Filename does not contain the parameters used for this filter." )
     ( "exportReducedGraph,o", po::value<string>(), "Write .dot file with the reduced spatial graph." )
-    ( "exportData,z", po::value<string>(), "Write degrees, ete_distances, contour_lengths, etc. Histograms can be generated from these files afterwards." )
+    ( "exportData,d", po::value<string>(), "Write degrees, ete_distances, contour_lengths, etc. Histograms can be generated from these files afterwards." )
     ( "exportSerialized,u", po::value<string>(), "Write serialized graph with the reduced spatial graph." )
 #ifdef VISUALIZE
     ( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal. Requires VISUALIZE option enabled at build.")
@@ -108,8 +109,9 @@ int main(int argc, char* const argv[]){
   bool verbose = vm["verbose"].as<bool>();
   if(verbose)
     std::cout <<"Filename: " << filename << std::endl;
+  bool output_filename_simple = vm["output_filename_simple"].as<bool>();
   bool reduceGraph = vm["reduceGraph"].as<bool>();
-  bool transformToPhysicalPoints = vm["transformToPhysicalPoints"].as<bool>();
+  bool avoid_transformToPhysicalPoints = vm["avoid_transformToPhysicalPoints"].as<bool>();
   string spacing = vm["spacing"].as<string>();
   bool removeExtraEdges = vm["removeExtraEdges"].as<bool>();
   bool mergeThreeConnectedNodes = vm["mergeThreeConnectedNodes"].as<bool>();
@@ -132,7 +134,7 @@ int main(int argc, char* const argv[]){
   // Get filename without extension (and without folders).
   const fs::path input_stem = fs::path(filename).stem();
   const fs::path output_file_path = fs::path(
-      input_stem.string() + "_reduced");
+      input_stem.string() + "_REDUCED");
 
   using Domain = Z3i::Domain ;
   using Image = ImageContainerByITKImage<Domain, unsigned char> ;
@@ -253,7 +255,7 @@ int main(int argc, char* const argv[]){
 
     ItkImageType::SpacingType itk_spacing;
     itk_spacing.Fill(1.0);
-    if(transformToPhysicalPoints)
+    if(!avoid_transformToPhysicalPoints)
     {
       if(verbose)
       {
@@ -313,12 +315,14 @@ int main(int argc, char* const argv[]){
         if(!fs::exists(output_folder_path)) {
             throw std::runtime_error("output folder doesn't exist : " + output_folder_path.string());
         }
-        fs::path output_full_path = output_folder_path / fs::path(
-            output_file_path.string() +
-            ( "_sp" + sp_string ) +
+        std::string output_full_string = output_file_path.string();
+        if(!output_filename_simple) {
+          output_full_string +=
+             "_sp" + sp_string  +
             ( removeExtraEdges ? "_c" : "")   +
-            ( mergeThreeConnectedNodes ? "_m" : "")   +
-            ".dot");
+            ( mergeThreeConnectedNodes ? "_m" : "");
+        }
+        fs::path output_full_path = output_folder_path / fs::path( output_full_string + ".dot");
         std::ofstream out;
         out.open(output_full_path.string().c_str());
 
@@ -335,12 +339,15 @@ int main(int argc, char* const argv[]){
       if(!fs::exists(output_folder_path)) {
         throw std::runtime_error("output folder doesn't exist : " + output_folder_path.string());
       }
-      fs::path output_full_path = output_folder_path / fs::path(
-          output_file_path.string() +
-          ( "_sp" + sp_string ) +
+
+      std::string output_full_string = output_file_path.string();
+      if(!output_filename_simple) {
+        output_full_string +=
+          "_sp" + sp_string  +
           ( removeExtraEdges ? "_c" : "")   +
-          ( mergeThreeConnectedNodes ? "_m" : "")   +
-          ".txt");
+          ( mergeThreeConnectedNodes ? "_m" : "");
+      }
+      fs::path output_full_path = output_folder_path / fs::path( output_full_string + ".txt");
       SG::write_serialized_graph(reduced_g, output_full_path.string());
       if(verbose)
         std::cout << "Output reduced graph (serialized) to: " << output_full_path.string() << std::endl;
@@ -382,16 +389,19 @@ int main(int argc, char* const argv[]){
       if(!fs::exists(data_output_folder_path)) {
           throw std::runtime_error("data_output folder doesn't exist : " + data_output_folder_path.string());
       }
-      fs::path data_output_full_path = data_output_folder_path/ fs::path(
-          output_file_path.string() +
+
+      std::string data_output_full_string = output_file_path.string() + "_DATA";
+      if(!output_filename_simple) {
+        data_output_full_string +=
           ( "_sp" + sp_string ) +
           ( removeExtraEdges ? "_c" : "")   +
           ( mergeThreeConnectedNodes ? "_m" : "")   +
           ( ignoreAngleBetweenParallelEdges ? "_iPA" : "")   +
           ( ignoreEdgesToEndNodes ? "_x" : "")   +
           ( ignoreEdgesShorterThan ?
-             "_iShort" + std::to_string(ignoreEdgesShorterThan)  : "") +
-          ".txt");
+             "_iShort" + std::to_string(ignoreEdgesShorterThan)  : "");
+      }
+      fs::path data_output_full_path = data_output_folder_path / fs::path( data_output_full_string + ".txt");
       std::ofstream data_out;
       data_out.setf(std::ios_base::fixed, std::ios_base::floatfield);
       data_out.open(data_output_full_path.string().c_str());

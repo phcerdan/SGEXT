@@ -85,6 +85,7 @@ int main(int argc, char* const argv[]){
     ( "profile",  po::bool_switch()->default_value(false), "profile algorithm" )
     ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output" )
     ( "visualize,t", po::bool_switch()->default_value(false), "Visualize thin result. Requires VISUALIZE option at build")
+    ( "output_filename_simple,z",  po::bool_switch()->default_value(false), "Filename does not contain the parameters used for this filter." )
     ( "exportSDP,e", po::value<std::string>(), "Folder to export the resulting set of points in a simple (sequence of discrete point (sdp)).")
     ( "exportImage,o", po::value<std::string>(), "Folder to export the resulting set of points as an ITK Image.")
     ( "inputDistanceMapImageFilename,d", po::value<string>(), "Input 3D Distance Map Image from script create_distance_map. Used with option --select=dmax" );
@@ -106,6 +107,7 @@ int main(int argc, char* const argv[]){
   //Parse options
   string filename = vm["input"].as<string>();
   bool verbose = vm["verbose"].as<bool>();
+  bool output_filename_simple = vm["output_filename_simple"].as<bool>();
   bool profile = vm["profile"].as<bool>();
   int thresholdMin = vm["thresholdMin"].as<int>();
   int thresholdMax = vm["thresholdMax"].as<int>();
@@ -174,9 +176,11 @@ int main(int argc, char* const argv[]){
   /*-------------- End of parse -----------------------------*/
   // Get filename without extension (and without folders).
   const fs::path input_stem = fs::path(filename).stem();
-  const fs::path output_file_path = fs::path(
-      input_stem.string() +
-      "_SKEL_" + select_string + "_" + sk_string + "_p" + std::to_string(persistence));
+  std::string output_file_string = input_stem.string() + "_SKEL";
+  if(!output_filename_simple){
+      output_file_string += "_" + select_string + "_" + sk_string + "_p" + std::to_string(persistence);
+  }
+  const fs::path output_file_path = fs::path(output_file_string);
 
   using Domain = Z3i::Domain ;
   using Image = ImageContainerByITKImage<Domain, unsigned char> ;
