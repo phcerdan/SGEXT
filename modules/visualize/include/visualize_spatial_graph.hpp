@@ -7,6 +7,7 @@
 #define VISUALIZE_SPATIAL_GRAPH_HPP
 #include "spatial_graph.hpp"
 #include <vtkGraphLayoutView.h>
+#include <vtkPoints.h>
 
 namespace SG {
 
@@ -21,5 +22,9 @@ create_graph_layout_view_from_spatial_graph(const GraphType & sg);
 void
 visualize_spatial_graph(const GraphType & sg);
 
+void
+visualize_spatial_graph_with_points(const GraphType & sg,
+    vtkPoints * points,
+    const double pointsOpacity = 0.8);
 } // namespace SG
 #endif
