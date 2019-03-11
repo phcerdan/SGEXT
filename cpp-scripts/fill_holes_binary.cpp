@@ -33,7 +33,7 @@ int main(int argc, char* const argv[]){
         ( "majority",  po::value<int>()->default_value(3), "Majority needed in the neighborhood to switch pixel to ON" )
         ( "radius",  po::value<int>()->default_value(1), "Radius to define the neighborhood" )
         ( "iterations",  po::value<size_t>()->default_value(1000), "Number of max iterations" )
-        ( "filename_with_parameters,z",  po::bool_switch()->default_value(false), "Filename contains the parameters used for this filter." )
+    ( "output_filename_simple,z",  po::bool_switch()->default_value(false), "Filename does not contain the parameters used for this filter." )
         ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output" )
         ( "outputFolder,o", po::value<std::string>()->required(), "Folder to export the resulting binary image.")
         ( "outputFilename,e", po::value<std::string>(), "FileName of the output (needs outputFolder).")
@@ -59,7 +59,7 @@ int main(int argc, char* const argv[]){
     int radius = vm["radius"].as<int>();
     size_t iterations = vm["iterations"].as<size_t>();
     bool verbose = vm["verbose"].as<bool>();
-    bool filename_with_parameters = vm["filename_with_parameters"].as<bool>();
+    bool output_filename_simple = vm["output_filename_simple"].as<bool>();
     int thresholdMin = vm["thresholdMin"].as<int>();
     int thresholdMax = vm["thresholdMax"].as<int>();
     std::string foreground = vm["foreground"].as<std::string>();
@@ -94,8 +94,8 @@ int main(int argc, char* const argv[]){
         output_full_path = output_folder_path / fs::path(output_file_path.string());
     } else {
         std::string output_file_string =
-                input_stem.string() + "_filled";
-        if(filename_with_parameters) {
+                input_stem.string() + "_FILLED";
+        if(!output_filename_simple) {
             output_file_string +=
                 "_M" + std::to_string(majority) +
                 "_R" + std::to_string(radius) +
