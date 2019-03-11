@@ -90,7 +90,7 @@ int main(int argc, char* const argv[]){
     ( "ignoreAngleBetweenParallelEdges,g", po::bool_switch()->default_value(false), "Don't compute angles between parallel edges." )
     ( "ignoreEdgesShorterThan,s", po::value<size_t>()->default_value(0), "Ignore distance and angles between edges shorter than this value." )
     ( "ignoreEdgesToEndNodes,x", po::bool_switch()->default_value(false), "Ignore distance and angles between edges to/from end nodes (degree = 1)." )
-    ( "avoid_avoid_transformToPhysicalPoints,p", po::bool_switch()->default_value(false), "Positions in Spatial Graph takes into account metadata of the (origin,spacing,direction) itk image." )
+    ( "avoid_transformToPhysicalPoints,p", po::bool_switch()->default_value(false), "Positions in Spatial Graph takes into account metadata of the (origin,spacing,direction) itk image." )
     ( "spacing", po::value<string>()->default_value(""), "Provide external spacing between voxels. Ignores metadata of itk image and apply it." )
     ( "output_filename_simple,z",  po::bool_switch()->default_value(false), "Filename does not contain the parameters used for this filter." )
     ( "exportReducedGraph,o", po::value<string>(), "Write .dot file with the reduced spatial graph." )
