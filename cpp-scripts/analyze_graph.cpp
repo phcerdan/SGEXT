@@ -86,6 +86,8 @@ int main(int argc, char* const argv[]){
     ( "reduceGraph,r", po::bool_switch()->default_value(false), "Reduce obj graph into a new SpatialGraph, converting chain nodes (degree=2) into edge_points.")
     ( "removeExtraEdges,c", po::bool_switch()->default_value(false), "Remove extra edges created because connectivity of object.")
     ( "mergeThreeConnectedNodes,m", po::bool_switch()->default_value(false), "Merge three connected nodes (between themselves) into one node.")
+    ( "mergeFourConnectedNodes,q", po::bool_switch()->default_value(false), "Merge 4 connected nodes (between themselves) into one node.")
+    ( "mergeTwoThreeConnectedNodes,l", po::bool_switch()->default_value(false), "Merge 2 connected nodes of degree 3 (and edge with no points) into one node.")
     ( "checkParallelEdges,e", po::bool_switch()->default_value(false), "Check and print info about parallel edges in the graph. Use verbose option for output.")
     ( "ignoreAngleBetweenParallelEdges,g", po::bool_switch()->default_value(false), "Don't compute angles between parallel edges." )
     ( "ignoreEdgesShorterThan,s", po::value<size_t>()->default_value(0), "Ignore distance and angles between edges shorter than this value." )
@@ -130,6 +132,8 @@ int main(int argc, char* const argv[]){
   string spacing = vm["spacing"].as<string>();
   bool removeExtraEdges = vm["removeExtraEdges"].as<bool>();
   bool mergeThreeConnectedNodes = vm["mergeThreeConnectedNodes"].as<bool>();
+  bool mergeFourConnectedNodes = vm["mergeFourConnectedNodes"].as<bool>();
+  bool mergeTwoThreeConnectedNodes = vm["mergeTwoThreeConnectedNodes"].as<bool>();
   bool checkParallelEdges = vm["checkParallelEdges"].as<bool>();
   size_t ignoreEdgesShorterThan = vm["ignoreEdgesShorterThan"].as<size_t>();
   bool ignoreAngleBetweenParallelEdges = vm["ignoreAngleBetweenParallelEdges"].as<bool>();
@@ -232,15 +236,41 @@ int main(int argc, char* const argv[]){
     }
     SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs(sg);
 
+    bool inPlace = true;
     if(mergeThreeConnectedNodes)
     {
       if(verbose){
         std::cout <<  "Merging three connecting nodes... " << std::endl;
       }
-      bool inPlace = true;
       auto nodes_merged = SG::merge_three_connected_nodes(reduced_g, inPlace);
       if(verbose){
-        std::cout << nodes_merged <<  " nodes were merged. Those nodes have now degree 0 if inPlace is not set" << std::endl;
+        std::cout << nodes_merged <<  " interconnected nodes with degree 3 were merged."
+          "Those nodes have now degree 0 if inPlace is not set" << std::endl;
+      }
+    }
+
+    if(mergeFourConnectedNodes)
+    {
+      if(verbose){
+        std::cout <<  "Merging four connecting nodes... " << std::endl;
+      }
+      auto nodes_merged = SG::merge_four_connected_nodes(reduced_g, inPlace);
+      if(verbose){
+        std::cout << nodes_merged <<  " interconnected nodes with degree 4 were merged."
+          "Those nodes have now degree 0 if inPlace is not set" << std::endl;
+      }
+    }
+
+    if(mergeTwoThreeConnectedNodes)
+    {
+      if(verbose){
+        std::cout <<  "Merging two degree 3 nodes... " << std::endl;
+      }
+      auto nodes_merged = SG::merge_two_three_connected_nodes(reduced_g, inPlace);
+      if(verbose){
+        std::cout << nodes_merged <<  " two interconnected nodes with degree 3 "
+          "and no edge points between them  were merged. "
+          "Those nodes have now degree 0 if inPlace is not set" << std::endl;
       }
     }
 
