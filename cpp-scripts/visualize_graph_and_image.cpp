@@ -89,7 +89,7 @@ int main(int argc, char* const argv[]){
 
   auto repeated_points_sg = SG::check_unique_points_in_graph(sg);
   if(repeated_points_sg.second) {
-    std::cout << "Warning: duplicated points exist in low info graph (sg)"
+    std::cout << "Warning: duplicated points exist in the graph (sg)"
       "Repeated Points: " << repeated_points_sg.first.size() << std::endl;
     for(const auto & p : repeated_points_sg.first) {
       SG::print_pos(std::cout, p);
