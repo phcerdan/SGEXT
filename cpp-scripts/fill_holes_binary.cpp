@@ -10,6 +10,7 @@
 #include <itkImageFileWriter.h>
 #include <itkInvertIntensityImageFilter.h>
 #include <itkVotingBinaryIterativeHoleFillingImageFilter.h> // Module ITKLabelVoting
+#include <itkStatisticsImageFilter.h>
 // boost::program_options
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
@@ -38,6 +39,11 @@ int main(int argc, char* const argv[]){
         ( "outputFolder,o", po::value<std::string>()->required(), "Folder to export the resulting binary image.")
         ( "outputFilename,e", po::value<std::string>(), "FileName of the output (needs outputFolder).")
         ( "visualize,t", po::bool_switch()->default_value(false), "Visualize thin result. Requires VISUALIZE option at build");
+
+    //  Majority is the number of pixels in the neighborhood of an OFF pixel, to turn it into ON.
+    //  By default majority = 1, this means that an off pixel will be turned on if in the neighborhood (set by radius) there are at least 50% + 1 pixels ON.
+    //  If radius = 1,1,1, neighborhood size will be 3x3 = 9 pixels.
+    //  if 5 pixels around an OFF pixel are ON, then it will be switched.
 
     po::variables_map vm;
     try {
@@ -132,11 +138,26 @@ int main(int argc, char* const argv[]){
     using FillingFilterType = itk::VotingBinaryIterativeHoleFillingImageFilter<ImageType>;
     auto filler = FillingFilterType::New();
     filler->SetInput(image);
+    if(verbose) {
+        std::cout << "Majority: " << majority << std::endl;
+        std::cout << "Iterations: " << iterations << std::endl;
+        std::cout << "Radius: (" << radius <<", " << radius << ", " << radius <<")" << std::endl;
+    }
+    typedef itk::StatisticsImageFilter< ImageType > StatisticsImageFilterType;
+    typename StatisticsImageFilterType::Pointer statsFilter = StatisticsImageFilterType::New();
+    statsFilter->SetInput(image);
+    statsFilter->Update();
+    statsFilter->UpdateLargestPossibleRegion();
+    auto min_intensity = statsFilter->GetMinimum();
+    auto max_intensity = statsFilter->GetMaximum();
+
+    filler->SetForegroundValue(max_intensity);
     filler->SetMajorityThreshold(majority);
     filler->SetMaximumNumberOfIterations(iterations);
     FillingFilterType::InputSizeType radius_array;
     radius_array.Fill(radius);
     filler->SetRadius(radius_array);
+    filler->Update();
 
     using WriterType = itk::ImageFileWriter<ImageType>;
     auto writer = WriterType::New();
