@@ -58,7 +58,7 @@ int main(int argc, char* const argv[]){
     ( "highInfoGraph,i", po::value<string>()->required(), "Input high info graph." )
     ( "lowInfoGraph,l", po::value<string>()->required(), "Input low info graph ." )
     ( "useSerialized,u", po::bool_switch()->default_value(false), "Use stored serialized graphs. If off, it will require .dot graphviz files.")
-    ( "exportMergedGraph,o", po::value<string>()->required(), "Write .dot file with the merged spatial graph." )
+    ( "exportMergedGraph,o", po::value<string>()->required(), "Write .dot file with the merged spatial graph or .txt file if --useSerialized is on." )
 #ifdef VISUALIZE
     ( "visualize,t", po::bool_switch()->default_value(false), "Visualize. Requires VISUALIZE option enabled at build.")
 #endif
@@ -94,7 +94,7 @@ int main(int argc, char* const argv[]){
   // Get filenameHigh without extension (and without folders).
   const fs::path input_stem = fs::path(filenameHigh).stem();
   const fs::path output_file_path = fs::path(
-      input_stem.string() + "_low_high_merged");
+      input_stem.string() + "_MERGED");
 
   SG::GraphType g0; // lowGraph
   SG::GraphType g1; // highGraph
