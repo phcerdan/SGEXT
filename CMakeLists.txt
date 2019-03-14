@@ -9,6 +9,10 @@ project(SGEXT
   LANGUAGES CXX)
 message(STATUS "SGEXT version: ${SGEXT_VERSION}")
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_CXX_STANDARD 14)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+
 include(CMakeDependentOption)
 option(SG_BUILD_SCRIPTS "Build cpp-scripts." ON)
 option(SG_BUILD_TESTING "Enable Tests" ON)
@@ -24,22 +28,16 @@ if(VISUALIZE OR SG_MODULE_VISUALIZE OR SG_MODULE_LOCATE OR SG_MODULE_COMPARE)
   set(SG_REQUIRES_VTK TRUE)
 endif()
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_CXX_STANDARD 14)
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
-
 find_package(Boost COMPONENTS
         program_options
         filesystem
         graph
         serialization
         REQUIRED)
-include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 # Requires version with this PR in: https://github.com/DGtal-team/DGtal/pull/1369
 # Merged in DGtal 1.0.beta
 find_package(DGtal REQUIRED 1.0)
 message(STATUS "DGtal version: ${DGtal_VERSION}")
-include_directories(SYSTEM ${DGTAL_INCLUDE_DIRS})
 
 find_package(ITK CONFIG REQUIRED)
 include(${ITK_USE_FILE})
@@ -73,7 +71,6 @@ find_package(ITK REQUIRED COMPONENTS
 )
 message(STATUS "ITK version: ${ITK_VERSION}")
 include(${ITK_USE_FILE})
-# include_directories(SYSTEM ${ITK_INCLUDE_DIRS})
 if(SG_MODULE_VISUALIZE_ENABLE_QT)
   find_package(Qt5 REQUIRED
     Widgets
@@ -107,7 +104,6 @@ if(SG_REQUIRES_VTK)
   # USE_FILE is deprecated? Keep it. This is the cause of AUTOINIT warnings
   # https://gitlab.kitware.com/vtk/vtk/issues/15895
   include(${VTK_USE_FILE})
-  # include_directories(SYSTEM ${VTK_INCLUDE_DIRS})
 endif()
 
 set(HISTO_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/histo/include
