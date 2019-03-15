@@ -101,6 +101,7 @@ if(SG_REQUIRES_VTK)
     CONFIG
     )
   message(STATUS "VTK version: ${VTK_VERSION}")
+  message(STATUS "VTK_DIR: ${VTK_DIR}")
   # USE_FILE is deprecated? Keep it. This is the cause of AUTOINIT warnings
   # https://gitlab.kitware.com/vtk/vtk/issues/15895
   include(${VTK_USE_FILE})
