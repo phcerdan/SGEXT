@@ -35,6 +35,7 @@ target_include_directories(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} PUBLIC
 target_include_directories(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} PUBLIC
   ${VTK_INCLUDE_DIRS}
   ${ITK_INCLUDE_DIRS}
+  ${DGTAL_INCLUDE_DIRS}
   )
 target_link_libraries(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY}
   PUBLIC

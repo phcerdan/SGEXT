@@ -15,6 +15,8 @@ macro(SG_add_gtests)
     target_link_libraries(${test_name} PRIVATE
       ${SG_MODULE_${SG_MODULE_NAME}_TEST_DEPENDS}
       )
+    target_include_directories(${test_name} SYSTEM PRIVATE
+      ${SG_MODULE_${SG_MODULE_NAME}_TEST_SYSTEM_INCLUDE_DIRS})
     gtest_discover_tests(
       ${test_name}
       TEST_PREFIX ${SG_MODULE_NAME}||${test_name}||
