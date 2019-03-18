@@ -7,21 +7,21 @@
 #include <DGtal/base/Common.h>
 #include <DGtal/helpers/StdDefs.h>
 #include <DGtal/images/ImageContainerByITKImage.h>
-#include "DGtal/images/imagesSetsUtils/SetFromImage.h"
-#include "DGtal/images/imagesSetsUtils/ImageFromSet.h"
+#include <DGtal/images/imagesSetsUtils/SetFromImage.h>
+#include <DGtal/images/imagesSetsUtils/ImageFromSet.h>
 #include <DGtal/io/readers/ITKReader.h>
-#include "DGtal/io/writers/ITKWriter.h"
+#include <DGtal/io/writers/ITKWriter.h>
 
-#include "DGtal/geometry/volumes/distance/ExactPredicateLpSeparableMetric.h"
-#include "DGtal/geometry/volumes/distance/DistanceTransformation.h"
-#include "DGtal/images/SimpleThresholdForegroundPredicate.h"
+#include <DGtal/geometry/volumes/distance/ExactPredicateLpSeparableMetric.h>
+#include <DGtal/geometry/volumes/distance/DistanceTransformation.h>
+#include <DGtal/images/SimpleThresholdForegroundPredicate.h>
 
 // Invert
-#include "itkInvertIntensityImageFilter.h"
+#include <itkInvertIntensityImageFilter.h>
 
 // ITKWriter
-#include "itkImageFileWriter.h"
-#include "itkChangeInformationImageFilter.h"
+#include <itkImageFileWriter.h>
+#include <itkChangeInformationImageFilter.h>
 
 // boost::program_options
 #include <boost/program_options/options_description.hpp>
@@ -39,21 +39,20 @@ namespace fs = boost::filesystem;
 int main(int argc, char* const argv[]){
 
   /*-------------- Parse command line -----------------------------*/
-  po::options_description general_opt ( "Allowed options are: " );
-  general_opt.add_options()
-    ( "help,h", "display this message." )
-    ( "input,i", po::value<string>()->required(), "Input thin image." )
-    ( "outputFolder,o", po::value<string>()->required(), "Output folder for the distance map." )
-    // ( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal. Requires VISUALIZE option enabled at build.")
-    ( "foreground,f",  po::value<string>()->default_value("white"), "foreground color in binary image [black|white]" )
-    ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output." );
+  po::options_description opt_desc ( "Allowed options are: " );
+  opt_desc.add_options() ( "help,h", "display this message." );
+  opt_desc.add_options()( "input,i", po::value<string>()->required(), "Input thin image." );
+  opt_desc.add_options()( "outputFolder,o", po::value<string>()->required(), "Output folder for the distance map." );
+  // opt_desc.add_options()( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal. Requires VISUALIZE option enabled at build.");
+  opt_desc.add_options()( "foreground,f",  po::value<string>()->default_value("white"), "foreground color in binary image [black|white]" );
+  opt_desc.add_options()( "verbose,v",  po::bool_switch()->default_value(false), "verbose output." );
 
   po::variables_map vm;
   try {
-    po::store(po::parse_command_line(argc, argv, general_opt), vm);
+    po::store(po::parse_command_line(argc, argv, opt_desc), vm);
     if (vm.count ( "help" ) || argc<=1 )
     {
-      std::cout << "Basic usage:\n" << general_opt << "\n";
+      std::cout << "Basic usage:\n" << opt_desc << "\n";
       return EXIT_SUCCESS;
     }
     po::notify ( vm );
