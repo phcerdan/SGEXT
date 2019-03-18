@@ -6,9 +6,9 @@
 #include <DGtal/io/readers/GenericReader.h>
 #include <DGtal/io/readers/ITKReader.h>
 #include <DGtal/images/ImageContainerByITKImage.h>
-#include "DGtal/images/imagesSetsUtils/SetFromImage.h"
-// #include "DGtal/images/SimpleThresholdForegroundPredicate.h"
-#include "DGtal/images/ImageSelector.h"
+#include <DGtal/images/imagesSetsUtils/SetFromImage.h>
+// #include <DGtal/images/SimpleThresholdForegroundPredicate.h>
+#include <DGtal/images/ImageSelector.h>
 
 #include <DGtal/topology/SurfelAdjacency.h>
 #include <DGtal/io/boards/Board2D.h>
@@ -17,10 +17,10 @@
 
 #include <DGtal/topology/VoxelComplex.h>
 #include <DGtal/topology/VoxelComplexFunctions.h>
-#include "DGtal/topology/NeighborhoodConfigurations.h"
-#include "DGtal/topology/tables/NeighborhoodTables.h"
+#include <DGtal/topology/NeighborhoodConfigurations.h>
+#include <DGtal/topology/tables/NeighborhoodTables.h>
 // Invert
-#include "itkInvertIntensityImageFilter.h"
+#include <itkInvertIntensityImageFilter.h>
 #include <DGtal/io/viewers/Viewer3D.h>
 #include <itkConstantPadImageFilter.h>
 #include <itkNumericTraits.h>
@@ -29,15 +29,15 @@
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
 // Distance Map
-#include "DGtal/kernel/BasicPointPredicates.h"
-#include "DGtal/images/SimpleThresholdForegroundPredicate.h"
-#include "DGtal/geometry/volumes/distance/ExactPredicateLpSeparableMetric.h"
-#include "DGtal/geometry/volumes/distance/VoronoiMap.h"
-#include "DGtal/geometry/volumes/distance/DistanceTransformation.h"
+#include <DGtal/kernel/BasicPointPredicates.h>
+#include <DGtal/images/SimpleThresholdForegroundPredicate.h>
+#include <DGtal/geometry/volumes/distance/ExactPredicateLpSeparableMetric.h>
+#include <DGtal/geometry/volumes/distance/VoronoiMap.h>
+#include <DGtal/geometry/volumes/distance/DistanceTransformation.h>
 
 // Boost Graph:
-#include "DGtal/topology/Object.h"
-#include "DGtal/graph/ObjectBoostGraphInterface.h"
+#include <DGtal/topology/Object.h>
+#include <DGtal/graph/ObjectBoostGraphInterface.h>
 #include <boost/graph/graph_concepts.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/filtered_graph.hpp>
@@ -49,18 +49,17 @@ namespace po = boost::program_options;
 int main(int argc, char* const argv[]){
 
   /*-------------- Parse command line -----------------------------*/
-  po::options_description general_opt ( "Allowed options are: " );
-  general_opt.add_options()
-    ( "help,h", "display this message." )
-    ( "input,i", po::value<string>()->required(), "Input sdp file." )
-    ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output" )
-    ( "exportSDP,e", po::value<std::string>(), "Export the resulting set of points in a simple (sequence of discrete point (sdp)).")
-    ( "exportGraph,g", po::value<std::string>(), "Export the resulting set of points as a graph. It saves a list of nodes (.nod) and a list of edges (.edg)");
+  po::options_description opt_desc ( "Allowed options are: " );
+  opt_desc.add_options()( "help,h", "display this message." );
+  opt_desc.add_options()( "input,i", po::value<string>()->required(), "Input sdp file." );
+  opt_desc.add_options()( "verbose,v",  po::bool_switch()->default_value(false), "verbose output" );
+  opt_desc.add_options()( "exportSDP,e", po::value<std::string>(), "Export the resulting set of points in a simple (sequence of discrete point (sdp)).");
+  opt_desc.add_options()( "exportGraph,g", po::value<std::string>(), "Export the resulting set of points as a graph. It saves a list of nodes (.nod) and a list of edges (.edg)");
   bool parseOK=true;
   po::variables_map vm;
 
   try {
-    po::store(po::parse_command_line(argc, argv, general_opt), vm);
+    po::store(po::parse_command_line(argc, argv, opt_desc), vm);
   } catch(const exception& ex) {
     parseOK=false;
     trace.info()<< "Error checking program options: "<< ex.what()<< endl;
@@ -73,7 +72,7 @@ int main(int argc, char* const argv[]){
     << endl << "Basic usage: "<< endl
     << "perfect_thin -i <sdp file>"
     " [-e <export result as sdp file>" << endl
-    << general_opt << "\n";
+    << opt_desc << "\n";
     return 0;
   }
   //Parse options

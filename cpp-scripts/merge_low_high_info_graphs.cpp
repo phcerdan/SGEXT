@@ -37,24 +37,23 @@ namespace fs = boost::filesystem;
 int main(int argc, char* const argv[]){
 
   /*-------------- Parse command line -----------------------------*/
-  po::options_description general_opt ( "Allowed options are: " );
-  general_opt.add_options()
-    ( "help,h", "display this message." )
-    ( "highInfoGraph,i", po::value<string>()->required(), "Input high info graph." )
-    ( "lowInfoGraph,l", po::value<string>()->required(), "Input low info graph ." )
-    ( "useSerialized,u", po::bool_switch()->default_value(false), "Use stored serialized graphs. If off, it will require .dot graphviz files.")
-    ( "exportMergedGraph,o", po::value<string>()->required(), "Write .dot file with the merged spatial graph or .txt file if --useSerialized is on." )
+  po::options_description opt_desc ( "Allowed options are: " );
+  opt_desc.add_options()( "help,h", "display this message." );
+  opt_desc.add_options()( "highInfoGraph,i", po::value<string>()->required(), "Input high info graph." );
+  opt_desc.add_options()( "lowInfoGraph,l", po::value<string>()->required(), "Input low info graph ." );
+  opt_desc.add_options()( "useSerialized,u", po::bool_switch()->default_value(false), "Use stored serialized graphs. If off, it will require .dot graphviz files.");
+  opt_desc.add_options()( "exportMergedGraph,o", po::value<string>()->required(), "Write .dot file with the merged spatial graph or .txt file if --useSerialized is on." );
 #ifdef VISUALIZE
-    ( "visualize,t", po::bool_switch()->default_value(false), "Visualize. Requires VISUALIZE option enabled at build.")
+  opt_desc.add_options()( "visualize,t", po::bool_switch()->default_value(false), "Visualize. Requires VISUALIZE option enabled at build.");
 #endif
-    ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output." );
+  opt_desc.add_options()( "verbose,v",  po::bool_switch()->default_value(false), "verbose output." );
 
   po::variables_map vm;
   try {
-    po::store(po::parse_command_line(argc, argv, general_opt), vm);
+    po::store(po::parse_command_line(argc, argv, opt_desc), vm);
     if (vm.count ( "help" ) || argc<=1 )
     {
-      std::cout << "Basic usage:\n" << general_opt << "\n";
+      std::cout << "Basic usage:\n" << opt_desc << "\n";
       return EXIT_SUCCESS;
     }
     po::notify ( vm );
