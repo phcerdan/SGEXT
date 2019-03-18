@@ -19,7 +19,9 @@ $BINARY_FOLDER/thin -i $DATA_FOLDER/results/${INPUT_LABEL}_FILLED.nrrd -o $DATA_
     -s 1isthmus -c dmax -d ${DATA_FOLDER}/results/${INPUT_LABEL}_FILLED_DMAP.nrrd -v -z && \
 echo "STARTING analyze_graph" && \
 $BINARY_FOLDER/analyze_graph -i $DATA_FOLDER/results/${INPUT_LABEL}_FILLED_SKEL.nrrd -o $DATA_FOLDER/results -u $DATA_FOLDER/results \
-   --reduceGraph --removeExtraEdges --mergeThreeConnectedNodes -v -z && \
+   --reduceGraph --removeExtraEdges \
+   --mergeThreeConnectedNodes --mergeFourConnectedNodes --mergeTwoThreeConnectedNodes \
+   -v -z && \
 echo "PIPELINE FINISHED SUCCESFULLY"
 
 
