@@ -8,15 +8,14 @@
 #include <sstream>
 #include <algorithm>
 
-TEST(IO, print_and_read_graph_data)
-{
-    // Setup data
-    std::vector<double> degrees({1, 2, 3, 4});
-    std::string header = "degrees";
-    std::stringstream buffer;
-    SG::print_graph_data(header, degrees, buffer);
-    // Read data
-    auto head_data = SG::read_graph_data(buffer);
-    EXPECT_EQ(head_data.first, header);
-    EXPECT_EQ(head_data.second, degrees);
+TEST(IO, print_and_read_graph_data) {
+  // Setup data
+  std::vector<double> degrees({1, 2, 3, 4});
+  std::string header = "degrees";
+  std::stringstream buffer;
+  SG::print_graph_data(header, degrees, buffer);
+  // Read data
+  auto head_data = SG::read_graph_data(buffer);
+  EXPECT_EQ(head_data.first, header);
+  EXPECT_EQ(head_data.second, degrees);
 }

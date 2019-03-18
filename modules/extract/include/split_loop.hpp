@@ -32,10 +32,9 @@ namespace SG {
  * @param input_sg input graph
  *
  */
-void split_loop(
-    GraphType::vertex_descriptor loop_vertex_id,
-    const boost::edge_bundle_type<GraphType>::type &sg_edge,
-    GraphType &input_sg);
+void split_loop(GraphType::vertex_descriptor loop_vertex_id,
+                const boost::edge_bundle_type<GraphType>::type &sg_edge,
+                GraphType &input_sg);
 
-} // end namespace
+}  // namespace SG
 #endif

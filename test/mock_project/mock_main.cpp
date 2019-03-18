@@ -7,9 +7,8 @@
 #include "spatial_graph.hpp"
 #include "compute_graph_properties.hpp"
 
-int main()
-{
-    SG::GraphType g(2);
-    SG::compute_degrees(g);
-    std::cout << "Finished!" << std::endl;
+int main() {
+  SG::GraphType g(2);
+  SG::compute_degrees(g);
+  std::cout << "Finished!" << std::endl;
 }

@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include <utility> // pair
+#include <utility>  // pair
 namespace SG {
 
 /**
@@ -20,7 +20,8 @@ namespace SG {
  * @param data input data
  * @param os ostream to print the data into
  */
-void print_graph_data(const std::string & name, const std::vector<double> & data, std::ostream & os);
+void print_graph_data(const std::string &name, const std::vector<double> &data,
+                      std::ostream &os);
 
 /**
  * Read data form a graph_data 2 lines of format:
@@ -32,5 +33,5 @@ void print_graph_data(const std::string & name, const std::vector<double> & data
  * @return vector of pair [string, vector<double>]
  */
 std::pair<std::string, std::vector<double> > read_graph_data(std::istream &is);
-} // end namespace
+}  // namespace SG
 #endif

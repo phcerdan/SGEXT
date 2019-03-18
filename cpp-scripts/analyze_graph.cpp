@@ -66,11 +66,11 @@ int main(int argc, char* const argv[]) {
   po::options_description opt_desc("Allowed options are: ");
   opt_desc.add_options()("help,h", "display this message.");
   opt_desc.add_options()("input,i", po::value<string>()->required(),
-                        "Input thin image.");
+                         "Input thin image.");
   opt_desc.add_options()("reduceGraph,r",
-                        po::bool_switch()->default_value(false),
-                        "Reduce obj graph into a new SpatialGraph, converting "
-                        "chain nodes (degree=2) into edge_points.");
+                         po::bool_switch()->default_value(false),
+                         "Reduce obj graph into a new SpatialGraph, converting "
+                         "chain nodes (degree=2) into edge_points.");
   opt_desc.add_options()(
       "removeExtraEdges,c", po::bool_switch()->default_value(false),
       "Remove extra edges created because connectivity of object.");
@@ -80,37 +80,37 @@ int main(int argc, char* const argv[]) {
   opt_desc.add_options()(
       "mergeFourConnectedNodes,q", po::bool_switch()->default_value(false),
       "Merge 4 connected nodes (between themselves) into one node.");
-  opt_desc.add_options()("mergeTwoThreeConnectedNodes,l",
-                        po::bool_switch()->default_value(false),
-                        "Merge 2 connected nodes of degree 3 (and edge with no "
-                        "points) into one node.");
+  opt_desc.add_options()(
+      "mergeTwoThreeConnectedNodes,l", po::bool_switch()->default_value(false),
+      "Merge 2 connected nodes of degree 3 (and edge with no "
+      "points) into one node.");
   opt_desc.add_options()("checkParallelEdges,e",
-                        po::bool_switch()->default_value(false),
-                        "Check and print info about parallel edges in the "
-                        "graph. Use verbose option for output.");
+                         po::bool_switch()->default_value(false),
+                         "Check and print info about parallel edges in the "
+                         "graph. Use verbose option for output.");
   opt_desc.add_options()("ignoreAngleBetweenParallelEdges,g",
-                        po::bool_switch()->default_value(false),
-                        "Don't compute angles between parallel edges.");
+                         po::bool_switch()->default_value(false),
+                         "Don't compute angles between parallel edges.");
   opt_desc.add_options()(
       "ignoreEdgesShorterThan,s", po::value<size_t>()->default_value(0),
       "Ignore distance and angles between edges shorter than this value.");
   opt_desc.add_options()("ignoreEdgesToEndNodes,x",
-                        po::bool_switch()->default_value(false),
-                        "Ignore distance and angles between edges to/from end "
-                        "nodes (degree = 1).");
+                         po::bool_switch()->default_value(false),
+                         "Ignore distance and angles between edges to/from end "
+                         "nodes (degree = 1).");
   opt_desc.add_options()(
       "avoid_transformToPhysicalPoints,p",
       po::bool_switch()->default_value(false),
       "Positions in Spatial Graph takes into account metadata of the "
       "(origin,spacing,direction) itk image.");
   opt_desc.add_options()("spacing", po::value<string>()->default_value(""),
-                        "Provide external spacing between voxels. Ignores "
-                        "metadata of itk image and apply it.");
+                         "Provide external spacing between voxels. Ignores "
+                         "metadata of itk image and apply it.");
   opt_desc.add_options()(
       "output_filename_simple,z", po::bool_switch()->default_value(false),
       "Filename does not contain the parameters used for this filter.");
   opt_desc.add_options()("exportReducedGraph,o", po::value<string>(),
-                        "Write .dot file with the reduced spatial graph.");
+                         "Write .dot file with the reduced spatial graph.");
   opt_desc.add_options()(
       "exportData,d", po::value<string>(),
       "Write degrees, ete_distances, contour_lengths, etc. Histograms can be "
@@ -120,8 +120,8 @@ int main(int argc, char* const argv[]) {
       "Write serialized graph with the reduced spatial graph.");
 #ifdef VISUALIZE
   opt_desc.add_options()("visualize,t", po::bool_switch()->default_value(false),
-                        "Visualize object with DGtal. Requires VISUALIZE "
-                        "option enabled at build.");
+                         "Visualize object with DGtal. Requires VISUALIZE "
+                         "option enabled at build.");
 #endif
   // ( "exportHistograms,e", po::value<string>(), "Export histogram." )
   // ( "binsHistoDegrees,d", po::value<size_t>()->default_value(0), "Bins for
@@ -136,7 +136,7 @@ int main(int argc, char* const argv[]) {
   // the histogram of cosines .Use 0 for automatic computation of breaks (not
   // recommended)" )
   opt_desc.add_options()("verbose,v", po::bool_switch()->default_value(false),
-                        "verbose output.");
+                         "verbose output.");
 
   po::variables_map vm;
   try {

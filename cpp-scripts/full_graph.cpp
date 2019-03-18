@@ -59,57 +59,89 @@ using namespace DGtal::Z3i;
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 
-int main(int argc, char* const argv[]){
-
+int main(int argc, char* const argv[]) {
   /*-------------- Parse command line -----------------------------*/
-  po::options_description opt_desc ( "Allowed options are: " );
-  opt_desc.add_options()( "help,h", "display this message." );
-  opt_desc.add_options()( "input,i", po::value<string>()->required(), "Input thin image." );
-  opt_desc.add_options()( "removeExtraEdges,c", po::bool_switch()->default_value(false), "Remove extra edges created because connectivity of object.");
-  opt_desc.add_options()( "mergeThreeConnectedNodes,m", po::bool_switch()->default_value(false), "Merge three connected nodes (between themselves) into one node.");
-  opt_desc.add_options()( "checkParallelEdges,e", po::bool_switch()->default_value(false), "Check and print info about parallel edges in the graph. Use verbose option for output.");
-  opt_desc.add_options()( "ignoreAngleBetweenParallelEdges,g", po::bool_switch()->default_value(false), "Don't compute angles between parallel edges." );
-  opt_desc.add_options()( "ignoreEdgesShorterThan,s", po::value<size_t>()->default_value(0), "Ignore distance and angles between edges shorter than this value." );
-  opt_desc.add_options()( "ignoreEdgesToEndNodes,x", po::bool_switch()->default_value(false), "Ignore distance and angles between edges to/from end nodes (degree = 1)." );
-  opt_desc.add_options()( "transformToPhysicalPoints,p", po::bool_switch()->default_value(true), "Positions in Spatial Graph takes into account metadata of the (origin,spacing,direction) itk image." );
-  opt_desc.add_options()( "spacing", po::value<string>()->default_value(""), "Provide external spacing between voxels. Ignores metadata of itk image and apply it." );
-  opt_desc.add_options()( "exportReducedGraph,o", po::value<string>(), "Write .dot file with the reduced spatial graph." );
-  opt_desc.add_options()( "exportData,z", po::value<string>(), "Write degrees, ete_distances, contour_lengths, etc. Histograms can be generated from these files afterwards." );
+  po::options_description opt_desc("Allowed options are: ");
+  opt_desc.add_options()("help,h", "display this message.");
+  opt_desc.add_options()("input,i", po::value<string>()->required(),
+                         "Input thin image.");
+  opt_desc.add_options()(
+      "removeExtraEdges,c", po::bool_switch()->default_value(false),
+      "Remove extra edges created because connectivity of object.");
+  opt_desc.add_options()(
+      "mergeThreeConnectedNodes,m", po::bool_switch()->default_value(false),
+      "Merge three connected nodes (between themselves) into one node.");
+  opt_desc.add_options()("checkParallelEdges,e",
+                         po::bool_switch()->default_value(false),
+                         "Check and print info about parallel edges in the "
+                         "graph. Use verbose option for output.");
+  opt_desc.add_options()("ignoreAngleBetweenParallelEdges,g",
+                         po::bool_switch()->default_value(false),
+                         "Don't compute angles between parallel edges.");
+  opt_desc.add_options()(
+      "ignoreEdgesShorterThan,s", po::value<size_t>()->default_value(0),
+      "Ignore distance and angles between edges shorter than this value.");
+  opt_desc.add_options()("ignoreEdgesToEndNodes,x",
+                         po::bool_switch()->default_value(false),
+                         "Ignore distance and angles between edges to/from end "
+                         "nodes (degree = 1).");
+  opt_desc.add_options()(
+      "transformToPhysicalPoints,p", po::bool_switch()->default_value(true),
+      "Positions in Spatial Graph takes into account metadata of the "
+      "(origin,spacing,direction) itk image.");
+  opt_desc.add_options()("spacing", po::value<string>()->default_value(""),
+                         "Provide external spacing between voxels. Ignores "
+                         "metadata of itk image and apply it.");
+  opt_desc.add_options()("exportReducedGraph,o", po::value<string>(),
+                         "Write .dot file with the reduced spatial graph.");
+  opt_desc.add_options()(
+      "exportData,z", po::value<string>(),
+      "Write degrees, ete_distances, contour_lengths, etc. Histograms can be "
+      "generated from these files afterwards.");
 #ifdef VISUALIZE
-  opt_desc.add_options()( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal. Requires VISUALIZE option enabled at build.");
+  opt_desc.add_options()("visualize,t", po::bool_switch()->default_value(false),
+                         "Visualize object with DGtal. Requires VISUALIZE "
+                         "option enabled at build.");
 #endif
-    // ( "exportHistograms,e", po::value<string>(), "Export histogram." )
-    // ( "binsHistoDegrees,d", po::value<size_t>()->default_value(0), "Bins for the histogram of degrees. Default [0] get the breaks between 0 and max_degree" )
-    // ( "widthHistoDistances,l", po::value<double>()->default_value(0.3), "Width between breaks for histogram of ete distances. Use 0.0 to automatically compute breaks (not recommended)." )
-    // ( "binsHistoAngles,a", po::value<size_t>()->default_value(100), "Bins for the histogram of angles . Use 0 for automatic computation of breaks (not recommended)" )
-    // ( "binsHistoCosines,n", po::value<size_t>()->default_value(100), "Bins for the histogram of cosines .Use 0 for automatic computation of breaks (not recommended)" )
-  opt_desc.add_options()( "verbose,v",  po::bool_switch()->default_value(false), "verbose output." );
+  // ( "exportHistograms,e", po::value<string>(), "Export histogram." )
+  // ( "binsHistoDegrees,d", po::value<size_t>()->default_value(0), "Bins for
+  // the histogram of degrees. Default [0] get the breaks between 0 and
+  // max_degree" ) ( "widthHistoDistances,l",
+  // po::value<double>()->default_value(0.3), "Width between breaks for
+  // histogram of ete distances. Use 0.0 to automatically compute breaks (not
+  // recommended)." ) ( "binsHistoAngles,a",
+  // po::value<size_t>()->default_value(100), "Bins for the histogram of angles
+  // . Use 0 for automatic computation of breaks (not recommended)" ) (
+  // "binsHistoCosines,n", po::value<size_t>()->default_value(100), "Bins for
+  // the histogram of cosines .Use 0 for automatic computation of breaks (not
+  // recommended)" )
+  opt_desc.add_options()("verbose,v", po::bool_switch()->default_value(false),
+                         "verbose output.");
 
   po::variables_map vm;
   try {
     po::store(po::parse_command_line(argc, argv, opt_desc), vm);
-    if (vm.count ( "help" ) || argc<=1 )
-    {
+    if(vm.count("help") || argc <= 1) {
       std::cout << "Basic usage:\n" << opt_desc << "\n";
       return EXIT_SUCCESS;
     }
-    po::notify ( vm );
-  } catch ( const std::exception& e ) {
+    po::notify(vm);
+  } catch(const std::exception& e) {
     std::cerr << e.what() << std::endl;
     return EXIT_FAILURE;
   }
 
   string filename = vm["input"].as<string>();
   bool verbose = vm["verbose"].as<bool>();
-  if(verbose)
-    std::cout <<"Filename: " << filename << std::endl;
+  if(verbose) std::cout << "Filename: " << filename << std::endl;
   bool transformToPhysicalPoints = vm["transformToPhysicalPoints"].as<bool>();
   string spacing = vm["spacing"].as<string>();
   bool removeExtraEdges = vm["removeExtraEdges"].as<bool>();
   bool mergeThreeConnectedNodes = vm["mergeThreeConnectedNodes"].as<bool>();
   bool checkParallelEdges = vm["checkParallelEdges"].as<bool>();
   size_t ignoreEdgesShorterThan = vm["ignoreEdgesShorterThan"].as<size_t>();
-  bool ignoreAngleBetweenParallelEdges = vm["ignoreAngleBetweenParallelEdges"].as<bool>();
+  bool ignoreAngleBetweenParallelEdges =
+      vm["ignoreAngleBetweenParallelEdges"].as<bool>();
   bool ignoreEdgesToEndNodes = vm["ignoreEdgesToEndNodes"].as<bool>();
   bool exportReducedGraph = vm.count("exportReducedGraph");
   bool exportData = vm.count("exportData");
@@ -124,16 +156,15 @@ int main(int argc, char* const argv[]){
 #endif
   // Get filename without extension (and without folders).
   const fs::path input_stem = fs::path(filename).stem();
-  const fs::path output_file_path = fs::path(
-      input_stem.string() + "_reduced");
+  const fs::path output_file_path = fs::path(input_stem.string() + "_reduced");
 
-  using Domain = Z3i::Domain ;
-  using Image = ImageContainerByITKImage<Domain, unsigned char> ;
+  using Domain = Z3i::Domain;
+  using Image = ImageContainerByITKImage<Domain, unsigned char>;
   const unsigned int Dim = 3;
-  using PixelType = unsigned char ;
-  using ItkImageType = itk::Image<PixelType, Dim> ;
+  using PixelType = unsigned char;
+  using ItkImageType = itk::Image<PixelType, Dim>;
   // Read Image using ITK
-  using ReaderType = itk::ImageFileReader<ItkImageType> ;
+  using ReaderType = itk::ImageFileReader<ItkImageType>;
   auto reader = ReaderType::New();
   reader->SetFileName(filename);
   reader->Update();
@@ -142,57 +173,49 @@ int main(int argc, char* const argv[]){
   Image image(reader->GetOutput());
 
   using DigitalTopology = DT26_6;
-  using DigitalSet =
-    DGtal::DigitalSetByAssociativeContainer<Domain ,
-      std::unordered_set< typename Domain::Point> >;
-  using Object =
-    DGtal::Object<DigitalTopology, DigitalSet>;
+  using DigitalSet = DGtal::DigitalSetByAssociativeContainer<
+      Domain, std::unordered_set<typename Domain::Point> >;
+  using Object = DGtal::Object<DigitalTopology, DigitalSet>;
 
-  DigitalSet image_set (image.domain());
-  SetFromImage<Z3i::DigitalSet>::append<Image>(
-      image_set, image,
-      0, 255);
+  DigitalSet image_set(image.domain());
+  SetFromImage<Z3i::DigitalSet>::append<Image>(image_set, image, 0, 255);
 
   KSpace ks;
   // Domain of kspace must be padded.
-  ks.init(image.domain().lowerBound(),
-              image.domain().upperBound(), true);
+  ks.init(image.domain().lowerBound(), image.domain().upperBound(), true);
   DigitalTopology::ForegroundAdjacency adjF;
   DigitalTopology::BackgroundAdjacency adjB;
   DigitalTopology topo(adjF, adjB, DGtal::DigitalTopologyProperties::JORDAN_DT);
-  Object obj(topo,image_set);
+  Object obj(topo, image_set);
 
 #ifdef VISUALIZE
-  if(visualize)
-  {
-      int argc(1);
-      char** argv(nullptr);
-      QApplication app(argc, argv);
-      Viewer3D<> viewer(ks);
-      viewer.show();
+  if(visualize) {
+    int argc(1);
+    char** argv(nullptr);
+    QApplication app(argc, argv);
+    Viewer3D<> viewer(ks);
+    viewer.show();
 
-      viewer.setFillColor(Color(255, 255, 255, 255));
-      viewer << image_set;
+    viewer.setFillColor(Color(255, 255, 255, 255));
+    viewer << image_set;
 
-      // All kspace voxels
-      // viewer.setFillColor(Color(40, 200, 55, 10));
-      // viewer << all_set;
+    // All kspace voxels
+    // viewer.setFillColor(Color(40, 200, 55, 10));
+    // viewer << all_set;
 
-      viewer << Viewer3D<>::updateDisplay;
+    viewer << Viewer3D<>::updateDisplay;
 
-      app.exec();
+    app.exec();
   }
 #endif
 
   using Graph = Object;
-  const Graph & graph = obj;
+  const Graph& graph = obj;
   using SpatialGraph = SG::GraphAL;
   SpatialGraph sg = SG::spatial_graph_from_object<Object, SpatialGraph>(graph);
   // Remove extra edges
-  if(removeExtraEdges)
-  {
-    if(verbose)
-      std::cout <<  "Removing extra edges" << std::endl;
+  if(removeExtraEdges) {
+    if(verbose) std::cout << "Removing extra edges" << std::endl;
     size_t iterations = 0;
     while(true) {
       bool any_edge_removed = SG::remove_extra_edges(sg);
@@ -202,84 +225,78 @@ int main(int argc, char* const argv[]){
         break;
     }
     if(verbose)
-      std::cout <<  "Removed extra edges iteratively " << iterations << " times" << std::endl;
+      std::cout << "Removed extra edges iteratively " << iterations << " times"
+                << std::endl;
   }
 
-  if(mergeThreeConnectedNodes)
-  {
-    if(verbose){
-      std::cout <<  "Merging three connecting nodes... " << std::endl;
+  if(mergeThreeConnectedNodes) {
+    if(verbose) {
+      std::cout << "Merging three connecting nodes... " << std::endl;
     }
     auto nodes_merged = SG::merge_three_connected_nodes(sg);
-    if(verbose){
-      std::cout << nodes_merged <<  " nodes were merged. Those nodes have now degree 0" << std::endl;
+    if(verbose) {
+      std::cout << nodes_merged
+                << " nodes were merged. Those nodes have now degree 0"
+                << std::endl;
     }
   }
 
-  if(checkParallelEdges)
-  {
-    if(verbose)
-      std::cout <<  "Checking parallel edges... " << std::endl;
+  if(checkParallelEdges) {
+    if(verbose) std::cout << "Checking parallel edges... " << std::endl;
 
     auto parallel_edges = SG::get_parallel_edges(sg);
-    auto equal_parallel_edges = SG::get_equal_parallel_edges(parallel_edges, sg);
-    if(verbose){
-      std::cout << "Found " << parallel_edges.size()
-        << " parallel edges. " << equal_parallel_edges.size() <<
-        " are equal!." << std::endl;
+    auto equal_parallel_edges =
+        SG::get_equal_parallel_edges(parallel_edges, sg);
+    if(verbose) {
+      std::cout << "Found " << parallel_edges.size() << " parallel edges. "
+                << equal_parallel_edges.size() << " are equal!." << std::endl;
 
-      if(!equal_parallel_edges.empty()){
+      if(!equal_parallel_edges.empty()) {
         std::cout << "Equal parallel edges between vertex:\n";
-        for (const auto & edge_pair : equal_parallel_edges)
-          std::cout
-            << boost::source(edge_pair.first, sg)
-            << "---"
-            << boost::target(edge_pair.first, sg)
-            << std::endl;
+        for(const auto& edge_pair : equal_parallel_edges)
+          std::cout << boost::source(edge_pair.first, sg) << "---"
+                    << boost::target(edge_pair.first, sg) << std::endl;
       }
     }
   }
 
   ItkImageType::SpacingType itk_spacing;
   itk_spacing.Fill(1.0);
-  if(transformToPhysicalPoints)
-  {
-    if(verbose)
-    {
+  if(transformToPhysicalPoints) {
+    if(verbose) {
       // Print metadata of itk image
       std::cout << "Origin: " << reader->GetOutput()->GetOrigin() << std::endl;
-      std::cout << "Spacing: " << reader->GetOutput()->GetSpacing() << std::endl;
-      std::cout << "Direction:\n " << reader->GetOutput()->GetDirection() << std::endl;
+      std::cout << "Spacing: " << reader->GetOutput()->GetSpacing()
+                << std::endl;
+      std::cout << "Direction:\n " << reader->GetOutput()->GetDirection()
+                << std::endl;
     }
     itk_spacing = reader->GetOutput()->GetSpacing();
-    SG::transform_graph_to_physical_space<ItkImageType>(sg, reader->GetOutput());
+    SG::transform_graph_to_physical_space<ItkImageType>(sg,
+                                                        reader->GetOutput());
   }
-  if(spacing != "")
-  {
+  if(spacing != "") {
     std::istringstream in(spacing);
     double sp;
-    for(size_t i = 0; i < ItkImageType::ImageDimension; i++)
-    {
+    for(size_t i = 0; i < ItkImageType::ImageDimension; i++) {
       in >> sp;
       itk_spacing[i] = sp;
     }
 
-    if(verbose)
-    {
+    if(verbose) {
       std::cout << "Changing Spacing to: " << itk_spacing << std::endl;
     }
 
     reader->GetOutput()->SetSpacing(itk_spacing);
     SG::transform_graph_to_physical_space<ItkImageType>(sg,
-        reader->GetOutput());
+                                                        reader->GetOutput());
   }
   // Format itk_spacing into a string:
   std::ostringstream sp_stream;
   sp_stream << itk_spacing[0] << "_" << itk_spacing[1] << "_" << itk_spacing[2];
   auto sp_string = sp_stream.str();
 
-  if(exportReducedGraph)
-  {
+  if(exportReducedGraph) {
     string exportReducedGraph_filename = vm["exportReducedGraph"].as<string>();
     boost::dynamic_properties dp;
     dp.property("node_id", boost::get(boost::vertex_index, sg));
@@ -288,38 +305,38 @@ int main(int argc, char* const argv[]){
     {
       const fs::path output_folder_path{exportReducedGraph_filename};
       if(!fs::exists(output_folder_path)) {
-        throw std::runtime_error("output folder doesn't exist : " + output_folder_path.string());
+        throw std::runtime_error("output folder doesn't exist : " +
+                                 output_folder_path.string());
       }
-      fs::path output_full_path = output_folder_path / fs::path(
-          output_file_path.string() +
-          ( "_sp" + sp_string ) +
-          ( removeExtraEdges ? "_c" : "")   +
-          ( mergeThreeConnectedNodes ? "_m" : "")   +
-          ".dot");
+      fs::path output_full_path =
+          output_folder_path /
+          fs::path(output_file_path.string() + ("_sp" + sp_string) +
+                   (removeExtraEdges ? "_c" : "") +
+                   (mergeThreeConnectedNodes ? "_m" : "") + ".dot");
       std::ofstream out;
       out.open(output_full_path.string().c_str());
       boost::write_graphviz_dp(out, sg, dp);
       if(verbose)
-        std::cout << "Output reduced graph (graphviz) to: " << output_full_path.string() << std::endl;
+        std::cout << "Output reduced graph (graphviz) to: "
+                  << output_full_path.string() << std::endl;
     }
   }
 #ifdef VISUALIZE
-  if(visualize)
-  {
+  if(visualize) {
     SG::visualize_spatial_graph(sg);
     // itk::Testing::ViewImage(reader->GetOutput());
     SG::visualize_spatial_graph_with_image(sg, reader->GetOutput());
   }
 #endif
 
-  if(exportData)
-  {
+  if(exportData) {
     fs::path data_output_folder_path = fs::path(vm["exportData"].as<string>());
 
     // string exportHistograms_filename = vm["exportHistograms"].as<string>();
     // const fs::path histo_output_folder_path{exportHistograms_filename};
     // if(!fs::exists(histo_output_folder_path)) {
-    //     throw std::runtime_error("histo_output folder doesn't exist : " + histo_output_folder_path.string());
+    //     throw std::runtime_error("histo_output folder doesn't exist : " +
+    //     histo_output_folder_path.string());
     // }
     // fs::path histo_output_full_path = histo_output_folder_path / fs::path(
     //     output_file_path.string() +
@@ -338,18 +355,20 @@ int main(int argc, char* const argv[]){
     // histo_out.open(histo_output_full_path.string().c_str());
 
     if(!fs::exists(data_output_folder_path)) {
-      throw std::runtime_error("data_output folder doesn't exist : " + data_output_folder_path.string());
+      throw std::runtime_error("data_output folder doesn't exist : " +
+                               data_output_folder_path.string());
     }
-    fs::path data_output_full_path = data_output_folder_path/ fs::path(
-        output_file_path.string() +
-        ( "_sp" + sp_string ) +
-        ( removeExtraEdges ? "_c" : "")   +
-        ( mergeThreeConnectedNodes ? "_m" : "")   +
-        ( ignoreAngleBetweenParallelEdges ? "_iPA" : "")   +
-        ( ignoreEdgesToEndNodes ? "_x" : "")   +
-        ( ignoreEdgesShorterThan ?
-          "_iShort" + std::to_string(ignoreEdgesShorterThan)  : "") +
-        ".txt");
+    fs::path data_output_full_path =
+        data_output_folder_path /
+        fs::path(output_file_path.string() + ("_sp" + sp_string) +
+                 (removeExtraEdges ? "_c" : "") +
+                 (mergeThreeConnectedNodes ? "_m" : "") +
+                 (ignoreAngleBetweenParallelEdges ? "_iPA" : "") +
+                 (ignoreEdgesToEndNodes ? "_x" : "") +
+                 (ignoreEdgesShorterThan
+                      ? "_iShort" + std::to_string(ignoreEdgesShorterThan)
+                      : "") +
+                 ".txt");
     std::ofstream data_out;
     data_out.setf(std::ios_base::fixed, std::ios_base::floatfield);
     data_out.open(data_output_full_path.string().c_str());
@@ -359,56 +378,66 @@ int main(int argc, char* const argv[]){
       // auto histo_degrees = SG::histogram_degrees(degrees, binsHistoDegrees);
       // SG::print_histogram(histo_degrees, histo_out);
       {
-        data_out.precision(std::numeric_limits< decltype(degrees)::value_type >::max_digits10);
+        data_out.precision(
+            std::numeric_limits<decltype(degrees)::value_type>::max_digits10);
         data_out << "# degrees" << std::endl;
-        std::ostream_iterator<decltype(degrees)::value_type> out_iter(data_out, " ");
+        std::ostream_iterator<decltype(degrees)::value_type> out_iter(data_out,
+                                                                      " ");
         std::copy(std::begin(degrees), std::end(degrees), out_iter);
         data_out << std::endl;
       }
     }
     // EndToEnd Distances
     {
-      auto ete_distances = SG::compute_ete_distances(sg,
-          ignoreEdgesShorterThan, ignoreEdgesToEndNodes);
+      auto ete_distances = SG::compute_ete_distances(sg, ignoreEdgesShorterThan,
+                                                     ignoreEdgesToEndNodes);
 
-      auto range_ptr = std::minmax_element(ete_distances.begin(), ete_distances.end());
-      if(verbose)
-      {
+      auto range_ptr =
+          std::minmax_element(ete_distances.begin(), ete_distances.end());
+      if(verbose) {
         std::cout << "Min Distance: " << *range_ptr.first << std::endl;
         std::cout << "Max Distance: " << *range_ptr.second << std::endl;
       }
-      // auto histo_ete_distances = SG::histogram_ete_distances(ete_distances, widthHistoDistances);
-      // SG::print_histogram(histo_ete_distances, histo_out);
+      // auto histo_ete_distances = SG::histogram_ete_distances(ete_distances,
+      // widthHistoDistances); SG::print_histogram(histo_ete_distances,
+      // histo_out);
       {
-        data_out.precision(std::numeric_limits< decltype(ete_distances)::value_type >::max_digits10);
+        data_out.precision(std::numeric_limits<decltype(
+                               ete_distances)::value_type>::max_digits10);
         data_out << "# ete_distances" << std::endl;
-        std::ostream_iterator<decltype(ete_distances)::value_type> out_iter(data_out, " ");
+        std::ostream_iterator<decltype(ete_distances)::value_type> out_iter(
+            data_out, " ");
         std::copy(std::begin(ete_distances), std::end(ete_distances), out_iter);
         data_out << std::endl;
       }
     }
     // Angles between adjacent edges
     {
-      auto angles = SG::compute_angles(sg,
-          ignoreEdgesShorterThan, ignoreAngleBetweenParallelEdges, ignoreEdgesToEndNodes);
+      auto angles = SG::compute_angles(sg, ignoreEdgesShorterThan,
+                                       ignoreAngleBetweenParallelEdges,
+                                       ignoreEdgesToEndNodes);
       // auto histo_angles = SG::histogram_angles( angles, binsHistoAngles );
       // SG::print_histogram(histo_angles, histo_out);
       {
-        data_out.precision(std::numeric_limits< decltype(angles)::value_type >::max_digits10);
+        data_out.precision(
+            std::numeric_limits<decltype(angles)::value_type>::max_digits10);
         data_out << "# angles" << std::endl;
-        std::ostream_iterator<decltype(angles)::value_type> out_iter(data_out, " ");
+        std::ostream_iterator<decltype(angles)::value_type> out_iter(data_out,
+                                                                     " ");
         std::copy(std::begin(angles), std::end(angles), out_iter);
         data_out << std::endl;
       }
       // Cosines of those angles
       {
         auto cosines = SG::compute_cosines(angles);
-        // auto histo_cosines = SG::histogram_cosines( cosines, binsHistoCosines );
-        // SG::print_histogram(histo_cosines, histo_out);
+        // auto histo_cosines = SG::histogram_cosines( cosines, binsHistoCosines
+        // ); SG::print_histogram(histo_cosines, histo_out);
         {
-          data_out.precision(std::numeric_limits< decltype(cosines)::value_type >::max_digits10);
+          data_out.precision(
+              std::numeric_limits<decltype(cosines)::value_type>::max_digits10);
           data_out << "# cosines" << std::endl;
-          std::ostream_iterator<decltype(cosines)::value_type> out_iter(data_out, " ");
+          std::ostream_iterator<decltype(cosines)::value_type> out_iter(
+              data_out, " ");
           std::copy(std::begin(cosines), std::end(cosines), out_iter);
           data_out << std::endl;
         }
@@ -416,23 +445,27 @@ int main(int argc, char* const argv[]){
     }
     // Contour length
     {
-      auto contour_lengths = SG::compute_contour_lengths(sg,
-          ignoreEdgesShorterThan, ignoreEdgesToEndNodes);
-      // auto histo_contour_lengths = SG::histogram_contour_lengths(contour_lengths, widthHistoDistances);
+      auto contour_lengths = SG::compute_contour_lengths(
+          sg, ignoreEdgesShorterThan, ignoreEdgesToEndNodes);
+      // auto histo_contour_lengths =
+      // SG::histogram_contour_lengths(contour_lengths, widthHistoDistances);
       // SG::print_histogram(histo_contour_lengths, histo_out);
       {
-        data_out.precision(std::numeric_limits< decltype(contour_lengths)::value_type >::max_digits10);
+        data_out.precision(std::numeric_limits<decltype(
+                               contour_lengths)::value_type>::max_digits10);
         data_out << "# contour_lengths" << std::endl;
-        std::ostream_iterator<decltype(contour_lengths)::value_type> out_iter(data_out, " ");
-        std::copy(std::begin(contour_lengths), std::end(contour_lengths), out_iter);
+        std::ostream_iterator<decltype(contour_lengths)::value_type> out_iter(
+            data_out, " ");
+        std::copy(std::begin(contour_lengths), std::end(contour_lengths),
+                  out_iter);
         data_out << std::endl;
       }
     }
-    if(verbose)
-    {
-      std::cout << "Output data to: " << data_output_full_path.string() << std::endl;
-      // std::cout << "Output histograms to: " << histo_output_full_path.string() << std::endl;
+    if(verbose) {
+      std::cout << "Output data to: " << data_output_full_path.string()
+                << std::endl;
+      // std::cout << "Output histograms to: " <<
+      // histo_output_full_path.string() << std::endl;
     }
-  } // end export histograms
-
+  }  // end export histograms
 }

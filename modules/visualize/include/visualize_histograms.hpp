@@ -12,7 +12,8 @@ namespace SG {
  *
  * @param input_histograms
  */
-void visualize_histograms(const std::vector<histo::Histo<double>> & input_histograms);
+void visualize_histograms(
+    const std::vector<histo::Histo<double>>& input_histograms);
 
-}
+}  // namespace SG
 #endif

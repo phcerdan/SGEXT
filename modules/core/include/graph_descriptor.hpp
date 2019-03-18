@@ -10,10 +10,10 @@
 namespace SG {
 
 /**
- * Structure holding GraphType descriptors to localize a geometrical point in the graph.
- * The point can be in a node: vertex_descriptor,
- * or in an edge: edge_d + edge_points_index
- * This graph_descriptor is used to map a vtk point to differents graphs.
+ * Structure holding GraphType descriptors to localize a geometrical point in
+ * the graph. The point can be in a node: vertex_descriptor, or in an edge:
+ * edge_d + edge_points_index This graph_descriptor is used to map a vtk point
+ * to differents graphs.
  */
 struct graph_descriptor {
   /** the point exist in the graph */
@@ -30,16 +30,18 @@ struct graph_descriptor {
   std::size_t edge_points_index;
 };
 
-inline void print_graph_descriptor(const graph_descriptor & descriptor, const std::string& label = "graph_descriptor")
-{
+inline void print_graph_descriptor(
+    const graph_descriptor& descriptor,
+    const std::string& label = "graph_descriptor") {
   std::cout << label << ":" << std::endl;
   std::cout << " exist: " << descriptor.exist << std::endl;
   std::cout << " is_vertex: " << descriptor.is_vertex << std::endl;
   std::cout << " is_edge: " << descriptor.is_edge << std::endl;
   std::cout << " vertex_d: " << descriptor.vertex_d << std::endl;
   std::cout << " edge_d: " << descriptor.edge_d << std::endl;
-  std::cout << " edge_points_index: " << descriptor.edge_points_index << std::endl;
+  std::cout << " edge_points_index: " << descriptor.edge_points_index
+            << std::endl;
 }
 
-} // ns SG
+}  // namespace SG
 #endif
