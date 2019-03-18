@@ -11,12 +11,10 @@
 
 namespace SG {
 
-
 /**
  * print/write histogram to any ostream in the following format.
- *  os << "# " << histo.name << ": L0:centers of bins, L1:counts, L2:breaks" << std::endl;
- *  histo.PrintCenters(os);
- *  histo.PrintCounts(os);
+ *  os << "# " << histo.name << ": L0:centers of bins, L1:counts, L2:breaks" <<
+ * std::endl; histo.PrintCenters(os); histo.PrintCounts(os);
  *  histo.PrintBreaks(os);
  *
  * Use @read_histogram as the complementary function to read the histogram.
@@ -24,7 +22,7 @@ namespace SG {
  * @param histo input histo
  * @param os
  */
-void print_histogram(const histo::Histo<double> & histo, std::ostream & os);
+void print_histogram(const histo::Histo<double> &histo, std::ostream &os);
 
 /**
  * read histogram from istream after being printed in the format
@@ -34,7 +32,7 @@ void print_histogram(const histo::Histo<double> & histo, std::ostream & os);
  *
  * @return  histo<double>
  */
-histo::Histo<double> read_histogram(std::istream & is);
+histo::Histo<double> read_histogram(std::istream &is);
 /**
  * Create histogram of degrees.
  * @sa compute_ete_distances
@@ -48,14 +46,12 @@ histo::Histo<double> read_histogram(std::istream & is);
  * @return  histogram of degrees
  */
 histo::Histo<double> histogram_degrees(
-        const std::vector<unsigned int> & degrees,
-        size_t bins = 0,
-        const std::string &histo_name = "degrees");
+    const std::vector<unsigned int> &degrees, size_t bins = 0,
+    const std::string &histo_name = "degrees");
 
 histo::Histo<double> histogram_degrees(
-        const std::vector<double> & degrees,
-        size_t bins = 0,
-        const std::string &histo_name = "degrees");
+    const std::vector<double> &degrees, size_t bins = 0,
+    const std::string &histo_name = "degrees");
 
 /**
  * Create histogram of End to End distances between nodes.
@@ -68,9 +64,9 @@ histo::Histo<double> histogram_degrees(
  *
  * @return histogram
  */
-histo::Histo<double> histogram_distances(const std::vector<double> & distances,
-                double width = 0.0,
-                const std::string & histo_name = "distances");
+histo::Histo<double> histogram_distances(
+    const std::vector<double> &distances, double width = 0.0,
+    const std::string &histo_name = "distances");
 
 /**
  * helper. Calls @histogram_distances with histo_name = "ete_distances"
@@ -80,8 +76,8 @@ histo::Histo<double> histogram_distances(const std::vector<double> & distances,
  *
  * @return histogram
  */
-histo::Histo<double> histogram_ete_distances(const std::vector<double> & distances,
-                double width = 0.0);
+histo::Histo<double> histogram_ete_distances(
+    const std::vector<double> &distances, double width = 0.0);
 
 /**
  * helper. Calls @histogram_distances with histo_name = "contour_lengths"
@@ -91,9 +87,8 @@ histo::Histo<double> histogram_ete_distances(const std::vector<double> & distanc
  *
  * @return histogram
  */
-histo::Histo<double> histogram_contour_lengths(const std::vector<double> & distances,
-                double width = 0.0);
-
+histo::Histo<double> histogram_contour_lengths(
+    const std::vector<double> &distances, double width = 0.0);
 
 /**
  * Histogram between -pi, pi
@@ -105,10 +100,9 @@ histo::Histo<double> histogram_contour_lengths(const std::vector<double> & dista
  *
  * @return histo
  */
-histo::Histo<double> histogram_angles(const std::vector<double> & angles,
-                size_t bins = 100,
-                const std::string & histo_name = "angles");
-
+histo::Histo<double> histogram_angles(const std::vector<double> &angles,
+                                      size_t bins = 100,
+                                      const std::string &histo_name = "angles");
 
 /**
  * Histogram between -1.0, 1.0
@@ -119,8 +113,8 @@ histo::Histo<double> histogram_angles(const std::vector<double> & angles,
  * if bins == 0, the breaks are generated using Scott method.
  * @return histo
  */
-histo::Histo<double> histogram_cosines(const std::vector<double> & cosines,
-                size_t bins = 100,
-                const std::string & histo_name = "cosines");
-} // end namespace
+histo::Histo<double> histogram_cosines(
+    const std::vector<double> &cosines, size_t bins = 100,
+    const std::string &histo_name = "cosines");
+}  // namespace SG
 #endif

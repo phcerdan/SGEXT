@@ -19,6 +19,6 @@ namespace SG {
  * @return vtkGraph
  */
 vtkSmartPointer<vtkMutableUndirectedGraph> convert_to_vtk_graph(
-        const GraphType & sg);
-} // end namespace
+    const GraphType& sg);
+}  // namespace SG
 #endif

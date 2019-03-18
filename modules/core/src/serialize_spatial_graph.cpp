@@ -11,21 +11,19 @@
 
 namespace SG {
 
-void write_serialized_graph(GraphType & sg, const std::string & absolute_path)
-{
-    std::ofstream out;
-    out.open(absolute_path.c_str());
-    boost::archive::text_oarchive arch(out);
-    arch << sg;
+void write_serialized_graph(GraphType& sg, const std::string& absolute_path) {
+  std::ofstream out;
+  out.open(absolute_path.c_str());
+  boost::archive::text_oarchive arch(out);
+  arch << sg;
 };
 
-GraphType read_serialized_graph(const std::string & absolute_path)
-{
-    GraphType sg;
-    std::ifstream in;
-    in.open(absolute_path.c_str());
-    boost::archive::text_iarchive arch(in);
-    arch >> sg;
-    return sg;
+GraphType read_serialized_graph(const std::string& absolute_path) {
+  GraphType sg;
+  std::ifstream in;
+  in.open(absolute_path.c_str());
+  boost::archive::text_iarchive arch(in);
+  arch >> sg;
+  return sg;
 };
-} // ns SG
+}  // namespace SG

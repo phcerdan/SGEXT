@@ -15,10 +15,9 @@ namespace SG {
 // if source, target of edge are not are already added, add them and the edge.
 // This includes SpatialNode and SpatialEdge.
 // TODO
-GraphType trim_graph(const GraphType & input_sg) {
-    auto histo = histogram_degrees(compute_degrees(input_sg));
-    return GraphType(0);
+GraphType trim_graph(const GraphType& input_sg) {
+  auto histo = histogram_degrees(compute_degrees(input_sg));
+  return GraphType(0);
 }
 
-
-} // end namespace SG
+}  // end namespace SG
