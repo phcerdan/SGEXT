@@ -17,6 +17,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * *******************************************************************/
+#ifndef COMPARE_GRAPHS_HPP
+#define COMPARE_GRAPHS_HPP
 
 #include "spatial_graph.hpp"
 #include "filter_spatial_graph.hpp"
@@ -33,3 +35,5 @@ GraphType compare_low_and_high_info_graphs(const GraphType& g0,
                                            const GraphType& g1,
                                            const double radius = 2.0);
 }  // namespace SG
+
+#endif
