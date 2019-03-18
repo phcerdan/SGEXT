@@ -39,21 +39,20 @@ namespace fs = boost::filesystem;
 int main(int argc, char* const argv[]){
 
     /*-------------- Parse command line -----------------------------*/
-    po::options_description general_opt ( "Allowed options are: " );
-    general_opt.add_options()
-        ( "help,h", "display this message." )
-        ( "input,i", po::value<std::string>()->required(), "Input 3D binary image file." )
-        ( "foreground,f",  po::value<std::string>()->default_value("white"), "foreground color in binary image. [black|white]" )
-        ( "thresholdMin,m",  po::value<int>()->default_value(0), "threshold min (excluded) to define binary shape" )
-        ( "thresholdMax,M",  po::value<int>()->default_value(255), "threshold max (included) to define binary shape" )
-        ( "majority",  po::value<int>()->default_value(3), "Majority needed in the neighborhood to switch pixel to ON" )
-        ( "radius",  po::value<int>()->default_value(1), "Radius to define the neighborhood" )
-        ( "iterations",  po::value<size_t>()->default_value(1000), "Number of max iterations" )
-    ( "output_filename_simple,z",  po::bool_switch()->default_value(false), "Filename does not contain the parameters used for this filter." )
-        ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output" )
-        ( "outputFolder,o", po::value<std::string>()->required(), "Folder to export the resulting binary image.")
-        ( "outputFilename,e", po::value<std::string>(), "FileName of the output (needs outputFolder).")
-        ( "visualize,t", po::bool_switch()->default_value(false), "Visualize thin result. Requires VISUALIZE option at build");
+    po::options_description opt_desc ( "Allowed options are: " );
+    opt_desc.add_options()( "help,h", "display this message." );
+    opt_desc.add_options()( "input,i", po::value<std::string>()->required(), "Input 3D binary image file." );
+    opt_desc.add_options()( "foreground,f",  po::value<std::string>()->default_value("white"), "foreground color in binary image. [black|white]" );
+    opt_desc.add_options()( "thresholdMin,m",  po::value<int>()->default_value(0), "threshold min (excluded) to define binary shape" );
+    opt_desc.add_options()( "thresholdMax,M",  po::value<int>()->default_value(255), "threshold max (included) to define binary shape" );
+    opt_desc.add_options()( "majority",  po::value<int>()->default_value(3), "Majority needed in the neighborhood to switch pixel to ON" );
+    opt_desc.add_options()( "radius",  po::value<int>()->default_value(1), "Radius to define the neighborhood" );
+    opt_desc.add_options()( "iterations",  po::value<size_t>()->default_value(1000), "Number of max iterations" );
+    opt_desc.add_options()( "output_filename_simple,z",  po::bool_switch()->default_value(false), "Filename does not contain the parameters used for this filter." );
+    opt_desc.add_options()( "verbose,v",  po::bool_switch()->default_value(false), "verbose output" );
+    opt_desc.add_options()( "outputFolder,o", po::value<std::string>()->required(), "Folder to export the resulting binary image.");
+    opt_desc.add_options()( "outputFilename,e", po::value<std::string>(), "FileName of the output (needs outputFolder).");
+    opt_desc.add_options()( "visualize,t", po::bool_switch()->default_value(false), "Visualize thin result. Requires VISUALIZE option at build");
 
     //  Majority is the number of pixels in the neighborhood of an OFF pixel, to turn it into ON.
     //  By default majority = 1, this means that an off pixel will be turned on if in the neighborhood (set by radius) there are at least 50% + 1 pixels ON.
@@ -62,10 +61,10 @@ int main(int argc, char* const argv[]){
 
     po::variables_map vm;
     try {
-        po::store(po::parse_command_line(argc, argv, general_opt), vm);
+        po::store(po::parse_command_line(argc, argv, opt_desc), vm);
         if (vm.count ( "help" ) || argc<=1 )
         {
-            std::cout << "Basic usage:\n" << general_opt << "\n";
+            std::cout << "Basic usage:\n" << opt_desc << "\n";
             return EXIT_SUCCESS;
         }
         po::notify ( vm );

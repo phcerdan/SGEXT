@@ -27,8 +27,8 @@
 #include <DGtal/io/readers/GenericReader.h>
 #include <DGtal/io/readers/ITKReader.h>
 #include <DGtal/images/ImageContainerByITKImage.h>
-#include "DGtal/images/imagesSetsUtils/SetFromImage.h"
-#include "DGtal/images/imagesSetsUtils/ImageFromSet.h"
+#include <DGtal/images/imagesSetsUtils/SetFromImage.h>
+#include <DGtal/images/imagesSetsUtils/ImageFromSet.h>
 // boost::program_options
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
@@ -38,9 +38,9 @@
 #include <boost/filesystem.hpp>
 
 // Viewer
-#include "DGtal/io/Color.h"
-#include "DGtal/io/colormaps/GradientColorMap.h"
-#include "DGtal/io/DrawWithDisplay3DModifier.h"
+#include <DGtal/io/Color.h>
+#include <DGtal/io/colormaps/GradientColorMap.h>
+#include <DGtal/io/DrawWithDisplay3DModifier.h>
 #include <DGtal/io/viewers/Viewer3D.h>
 
 using namespace DGtal;
@@ -52,22 +52,21 @@ namespace fs = boost::filesystem;
 int main(int argc, char* const argv[]){
 
   /*-------------- Parse command line -----------------------------*/
-  po::options_description general_opt ( "Allowed options are: " );
-  general_opt.add_options()
-    ( "help,h", "display this message." )
-    ( "input,i", po::value<string>()->required(), "Input thin image." )
-    ( "exportSDP,o", po::value<string>(), "Write .sdp file the digital set points." )
-    ( "highlightRedPoints,p", po::value<string>(), "Give a string of points to highlight them in RED (require visualize ON). Example: \"1 3 4, 43 45 53\" " )
-    ( "highlightBluePoints,b", po::value<string>(), "Give a string of points to highlight them n BLUE (require visualize ON). Example: \"1 3 4, 43 45 53\" " )
-    ( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal.")
-    ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output." );
+  po::options_description opt_desc ( "Allowed options are: " );
+  opt_desc.add_options() ( "help,h", "display this message." );
+  opt_desc.add_options()( "input,i", po::value<string>()->required(), "Input thin image." );
+  opt_desc.add_options()( "exportSDP,o", po::value<string>(), "Write .sdp file the digital set points." );
+  opt_desc.add_options()( "highlightRedPoints,p", po::value<string>(), "Give a string of points to highlight them in RED (require visualize ON). Example: \"1 3 4, 43 45 53\" " );
+  opt_desc.add_options()( "highlightBluePoints,b", po::value<string>(), "Give a string of points to highlight them n BLUE (require visualize ON). Example: \"1 3 4, 43 45 53\" " );
+  opt_desc.add_options()( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal.");
+  opt_desc.add_options()( "verbose,v",  po::bool_switch()->default_value(false), "verbose output." );
 
   po::variables_map vm;
   try {
-    po::store(po::parse_command_line(argc, argv, general_opt), vm);
+    po::store(po::parse_command_line(argc, argv, opt_desc), vm);
     if (vm.count ( "help" ) || argc<=1 )
     {
-      std::cout << "Basic usage:\n" << general_opt << "\n";
+      std::cout << "Basic usage:\n" << opt_desc << "\n";
       return EXIT_SUCCESS;
     }
     po::notify ( vm );

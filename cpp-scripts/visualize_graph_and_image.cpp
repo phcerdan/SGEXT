@@ -52,22 +52,21 @@ namespace fs = boost::filesystem;
 int main(int argc, char* const argv[]){
 
   /*-------------- Parse command line -----------------------------*/
-  po::options_description general_opt ( "Allowed options are: " );
-  general_opt.add_options()
-    ( "help,h", "display this message." )
-    ( "inputGraph,g", po::value<string>()->required(), "Input graph." )
-    ( "inputImage,i", po::value<string>()->default_value(""), "Input Binary Image. Skeletonized or not. If inputImage and thinImage are not provided, only the graph will be visualized." )
-    ( "useSerialized,u", po::bool_switch()->default_value(true), "Use stored serialized graphs. If off, it will require .dot graphviz files.")
-    ( "thinImage,s", po::value<string>()->default_value(""), "Input Thin Image (Skeletonized). If inputImage and thinImage are not provided, only the graph will be visualized." )
-    ( "opacity,o", po::value<double>()->default_value(0.8), "Opacity value." )
-    ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output." );
+  po::options_description opt_desc ( "Allowed options are: " );
+  opt_desc.add_options()( "help,h", "display this message." );
+  opt_desc.add_options()( "inputGraph,g", po::value<string>()->required(), "Input graph." );
+  opt_desc.add_options()( "inputImage,i", po::value<string>()->default_value(""), "Input Binary Image. Skeletonized or not. If inputImage and thinImage are not provided, only the graph will be visualized." );
+  opt_desc.add_options()( "useSerialized,u", po::bool_switch()->default_value(true), "Use stored serialized graphs. If off, it will require .dot graphviz files.");
+  opt_desc.add_options()( "thinImage,s", po::value<string>()->default_value(""), "Input Thin Image (Skeletonized). If inputImage and thinImage are not provided, only the graph will be visualized." );
+  opt_desc.add_options()( "opacity,o", po::value<double>()->default_value(0.8), "Opacity value." );
+  opt_desc.add_options()( "verbose,v",  po::bool_switch()->default_value(false), "verbose output." );
 
   po::variables_map vm;
   try {
-    po::store(po::parse_command_line(argc, argv, general_opt), vm);
+    po::store(po::parse_command_line(argc, argv, opt_desc), vm);
     if (vm.count ( "help" ) || argc<=1 )
     {
-      std::cout << "Basic usage:\n" << general_opt << "\n";
+      std::cout << "Basic usage:\n" << opt_desc << "\n";
       return EXIT_SUCCESS;
     }
     po::notify ( vm );

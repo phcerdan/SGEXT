@@ -45,34 +45,24 @@ enum class DataType {
 int main(int argc, char* const argv[]){
 
   /*-------------- Parse command line -----------------------------*/
-  po::options_description general_opt ( "Allowed options are: " );
-  general_opt.add_options()
-    ( "help,h", "display this message." )
-    ( "input,i", po::value<string>()->required(),
-      "Input thin image." )
-    ( "exportHistograms,e", po::value<string>(),
-      "Export histogram." )
-    ( "binsHistoDegrees,d", po::value<size_t>()->default_value(0),
-      "Bins for the histogram of degrees. Default [0] get the breaks between 0 and max_degree" )
-    ( "binsHistoAngles,a", po::value<size_t>()->default_value(100),
-      "Bins for the histogram of angles . Use 0 for automatic computation of breaks (not recommended)" )
-    ( "binsHistoCosines,n", po::value<size_t>()->default_value(100),
-      "Bins for the histogram of cosines .Use 0 for automatic computation of breaks (not recommended)" )
-    ( "widthHistoEteDistances,l", po::value<double>()->default_value(0.3),
-      "Width between breaks for histogram of ete distances. Use 0.0 to automatically compute breaks (not recommended)." )
-    ( "widthHistoContourLengths,p", po::value<double>()->default_value(0.3),
-      "Width between breaks for histogram of contour lengths. Use 0.0 to automatically compute breaks (not recommended)." );
-    // ( "visualize,t", po::bool_switch()->default_value(false),
-    //   "Visualize object with DGtal. Requires VISUALIZE option enabled at build.")
-    // ( "verbose,v",  po::bool_switch()->default_value(false),
-    //   "verbose output." );
+  po::options_description opt_desc ( "Allowed options are: " );
+  opt_desc.add_options()( "help,h", "display this message." );
+  opt_desc.add_options()( "input,i", po::value<string>()->required(), "Input thin image." );
+  opt_desc.add_options()( "exportHistograms,e", po::value<string>(), "Export histogram." );
+  opt_desc.add_options()( "binsHistoDegrees,d", po::value<size_t>()->default_value(0), "Bins for the histogram of degrees. Default [0] get the breaks between 0 and max_degree" );
+  opt_desc.add_options()( "binsHistoAngles,a", po::value<size_t>()->default_value(100), "Bins for the histogram of angles . Use 0 for automatic computation of breaks (not recommended)" );
+  opt_desc.add_options()( "binsHistoCosines,n", po::value<size_t>()->default_value(100), "Bins for the histogram of cosines .Use 0 for automatic computation of breaks (not recommended)" );
+  opt_desc.add_options()( "widthHistoEteDistances,l", po::value<double>()->default_value(0.3), "Width between breaks for histogram of ete distances. Use 0.0 to automatically compute breaks (not recommended)." );
+  opt_desc.add_options()( "widthHistoContourLengths,p", po::value<double>()->default_value(0.3), "Width between breaks for histogram of contour lengths. Use 0.0 to automatically compute breaks (not recommended)." );
+  // opt_desc.add_options()( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal. Requires VISUALIZE option enabled at build.");
+  // opt_desc.add_options()( "verbose,v",  po::bool_switch()->default_value(false), "verbose output." );;
 
   po::variables_map vm;
   try {
-    po::store(po::parse_command_line(argc, argv, general_opt), vm);
+    po::store(po::parse_command_line(argc, argv, opt_desc), vm);
     if (vm.count ( "help" ) || argc<=1 )
     {
-      std::cout << "Basic usage:\n" << general_opt << "\n";
+      std::cout << "Basic usage:\n" << opt_desc << "\n";
       return EXIT_SUCCESS;
     }
     po::notify ( vm );

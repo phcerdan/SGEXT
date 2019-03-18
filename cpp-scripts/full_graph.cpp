@@ -26,15 +26,15 @@
 #include <DGtal/io/readers/GenericReader.h>
 #include <DGtal/io/readers/ITKReader.h>
 #include <DGtal/images/ImageContainerByITKImage.h>
-#include "DGtal/images/imagesSetsUtils/SetFromImage.h"
-#include "DGtal/images/imagesSetsUtils/ImageFromSet.h"
+#include <DGtal/images/imagesSetsUtils/SetFromImage.h>
+#include <DGtal/images/imagesSetsUtils/ImageFromSet.h>
 // boost::program_options
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
 // graph
-#include "DGtal/topology/Object.h"
-#include "DGtal/graph/ObjectBoostGraphInterface.h"
+#include <DGtal/topology/Object.h>
+#include <DGtal/graph/ObjectBoostGraphInterface.h>
 #include <boost/graph/graph_concepts.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/filtered_graph.hpp>
@@ -52,9 +52,9 @@
 
 #ifdef VISUALIZE
 // Viewer
-#include "DGtal/io/Color.h"
-#include "DGtal/io/colormaps/GradientColorMap.h"
-#include "DGtal/io/DrawWithDisplay3DModifier.h"
+#include <DGtal/io/Color.h>
+#include <DGtal/io/colormaps/GradientColorMap.h>
+#include <DGtal/io/DrawWithDisplay3DModifier.h>
 #include <DGtal/io/viewers/Viewer3D.h>
 
 #include "visualize_spatial_graph.hpp"
@@ -77,36 +77,35 @@ namespace fs = boost::filesystem;
 int main(int argc, char* const argv[]){
 
   /*-------------- Parse command line -----------------------------*/
-  po::options_description general_opt ( "Allowed options are: " );
-  general_opt.add_options()
-    ( "help,h", "display this message." )
-    ( "input,i", po::value<string>()->required(), "Input thin image." )
-    ( "removeExtraEdges,c", po::bool_switch()->default_value(false), "Remove extra edges created because connectivity of object.")
-    ( "mergeThreeConnectedNodes,m", po::bool_switch()->default_value(false), "Merge three connected nodes (between themselves) into one node.")
-    ( "checkParallelEdges,e", po::bool_switch()->default_value(false), "Check and print info about parallel edges in the graph. Use verbose option for output.")
-    ( "ignoreAngleBetweenParallelEdges,g", po::bool_switch()->default_value(false), "Don't compute angles between parallel edges." )
-    ( "ignoreEdgesShorterThan,s", po::value<size_t>()->default_value(0), "Ignore distance and angles between edges shorter than this value." )
-    ( "ignoreEdgesToEndNodes,x", po::bool_switch()->default_value(false), "Ignore distance and angles between edges to/from end nodes (degree = 1)." )
-    ( "transformToPhysicalPoints,p", po::bool_switch()->default_value(true), "Positions in Spatial Graph takes into account metadata of the (origin,spacing,direction) itk image." )
-    ( "spacing", po::value<string>()->default_value(""), "Provide external spacing between voxels. Ignores metadata of itk image and apply it." )
-    ( "exportReducedGraph,o", po::value<string>(), "Write .dot file with the reduced spatial graph." )
-    ( "exportData,z", po::value<string>(), "Write degrees, ete_distances, contour_lengths, etc. Histograms can be generated from these files afterwards." )
+  po::options_description opt_desc ( "Allowed options are: " );
+  opt_desc.add_options()( "help,h", "display this message." );
+  opt_desc.add_options()( "input,i", po::value<string>()->required(), "Input thin image." );
+  opt_desc.add_options()( "removeExtraEdges,c", po::bool_switch()->default_value(false), "Remove extra edges created because connectivity of object.");
+  opt_desc.add_options()( "mergeThreeConnectedNodes,m", po::bool_switch()->default_value(false), "Merge three connected nodes (between themselves) into one node.");
+  opt_desc.add_options()( "checkParallelEdges,e", po::bool_switch()->default_value(false), "Check and print info about parallel edges in the graph. Use verbose option for output.");
+  opt_desc.add_options()( "ignoreAngleBetweenParallelEdges,g", po::bool_switch()->default_value(false), "Don't compute angles between parallel edges." );
+  opt_desc.add_options()( "ignoreEdgesShorterThan,s", po::value<size_t>()->default_value(0), "Ignore distance and angles between edges shorter than this value." );
+  opt_desc.add_options()( "ignoreEdgesToEndNodes,x", po::bool_switch()->default_value(false), "Ignore distance and angles between edges to/from end nodes (degree = 1)." );
+  opt_desc.add_options()( "transformToPhysicalPoints,p", po::bool_switch()->default_value(true), "Positions in Spatial Graph takes into account metadata of the (origin,spacing,direction) itk image." );
+  opt_desc.add_options()( "spacing", po::value<string>()->default_value(""), "Provide external spacing between voxels. Ignores metadata of itk image and apply it." );
+  opt_desc.add_options()( "exportReducedGraph,o", po::value<string>(), "Write .dot file with the reduced spatial graph." );
+  opt_desc.add_options()( "exportData,z", po::value<string>(), "Write degrees, ete_distances, contour_lengths, etc. Histograms can be generated from these files afterwards." );
 #ifdef VISUALIZE
-    ( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal. Requires VISUALIZE option enabled at build.")
+  opt_desc.add_options()( "visualize,t", po::bool_switch()->default_value(false), "Visualize object with DGtal. Requires VISUALIZE option enabled at build.");
 #endif
     // ( "exportHistograms,e", po::value<string>(), "Export histogram." )
     // ( "binsHistoDegrees,d", po::value<size_t>()->default_value(0), "Bins for the histogram of degrees. Default [0] get the breaks between 0 and max_degree" )
     // ( "widthHistoDistances,l", po::value<double>()->default_value(0.3), "Width between breaks for histogram of ete distances. Use 0.0 to automatically compute breaks (not recommended)." )
     // ( "binsHistoAngles,a", po::value<size_t>()->default_value(100), "Bins for the histogram of angles . Use 0 for automatic computation of breaks (not recommended)" )
     // ( "binsHistoCosines,n", po::value<size_t>()->default_value(100), "Bins for the histogram of cosines .Use 0 for automatic computation of breaks (not recommended)" )
-    ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output." );
+  opt_desc.add_options()( "verbose,v",  po::bool_switch()->default_value(false), "verbose output." );
 
   po::variables_map vm;
   try {
-    po::store(po::parse_command_line(argc, argv, general_opt), vm);
+    po::store(po::parse_command_line(argc, argv, opt_desc), vm);
     if (vm.count ( "help" ) || argc<=1 )
     {
-      std::cout << "Basic usage:\n" << general_opt << "\n";
+      std::cout << "Basic usage:\n" << opt_desc << "\n";
       return EXIT_SUCCESS;
     }
     po::notify ( vm );

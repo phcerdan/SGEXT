@@ -25,44 +25,44 @@
 #include <DGtal/helpers/StdDefs.h>
 #include <DGtal/io/readers/GenericReader.h>
 #include <DGtal/io/readers/ITKReader.h>
-#include "DGtal/io/writers/ITKWriter.h"
+#include <DGtal/io/writers/ITKWriter.h>
 #include <DGtal/images/ImageContainerByITKImage.h>
-#include "DGtal/images/imagesSetsUtils/SetFromImage.h"
-#include "DGtal/images/imagesSetsUtils/ImageFromSet.h"
-// #include "DGtal/images/SimpleThresholdForegroundPredicate.h"
-#include "DGtal/images/ImageSelector.h"
+#include <DGtal/images/imagesSetsUtils/SetFromImage.h>
+#include <DGtal/images/imagesSetsUtils/ImageFromSet.h>
+// #include <DGtal/images/SimpleThresholdForegroundPredicate.h>
+#include <DGtal/images/ImageSelector.h>
 
 #include <DGtal/topology/SurfelAdjacency.h>
 #include <DGtal/io/boards/Board2D.h>
 #include <DGtal/topology/CubicalComplex.h>
 #include <DGtal/topology/CubicalComplexFunctions.h>
-#include "DGtal/topology/KhalimskyCellHashFunctions.h"
+#include <DGtal/topology/KhalimskyCellHashFunctions.h>
 
 #include <DGtal/topology/VoxelComplex.h>
 #include <DGtal/topology/VoxelComplexFunctions.h>
-#include "DGtal/topology/NeighborhoodConfigurations.h"
-#include "DGtal/topology/tables/NeighborhoodTables.h"
+#include <DGtal/topology/NeighborhoodConfigurations.h>
+#include <DGtal/topology/tables/NeighborhoodTables.h>
 // ITKWriter
-#include "itkImageFileWriter.h"
-#include "itkChangeInformationImageFilter.h"
+#include <itkImageFileWriter.h>
+#include <itkChangeInformationImageFilter.h>
 
 // Invert
-#include "itkInvertIntensityImageFilter.h"
+#include <itkInvertIntensityImageFilter.h>
 #include <itkNumericTraits.h>
 // boost::program_options
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
 // Distance Map
-#include "DGtal/kernel/BasicPointPredicates.h"
-#include "DGtal/images/SimpleThresholdForegroundPredicate.h"
-#include "DGtal/geometry/volumes/distance/ExactPredicateLpSeparableMetric.h"
-#include "DGtal/geometry/volumes/distance/VoronoiMap.h"
-#include "DGtal/geometry/volumes/distance/DistanceTransformation.h"
+#include <DGtal/kernel/BasicPointPredicates.h>
+#include <DGtal/images/SimpleThresholdForegroundPredicate.h>
+#include <DGtal/geometry/volumes/distance/ExactPredicateLpSeparableMetric.h>
+#include <DGtal/geometry/volumes/distance/VoronoiMap.h>
+#include <DGtal/geometry/volumes/distance/DistanceTransformation.h>
 
 // Boost Graph:
-#include "DGtal/topology/Object.h"
-#include "DGtal/graph/ObjectBoostGraphInterface.h"
+#include <DGtal/topology/Object.h>
+#include <DGtal/graph/ObjectBoostGraphInterface.h>
 #include <boost/graph/graph_concepts.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/filtered_graph.hpp>
@@ -71,9 +71,9 @@
 #include <boost/filesystem.hpp>
 #ifdef VISUALIZE
 // Viewer
-#include "DGtal/io/Color.h"
-#include "DGtal/io/colormaps/GradientColorMap.h"
-#include "DGtal/io/DrawWithDisplay3DModifier.h"
+#include <DGtal/io/Color.h>
+#include <DGtal/io/colormaps/GradientColorMap.h>
+#include <DGtal/io/DrawWithDisplay3DModifier.h>
 #include <DGtal/io/viewers/Viewer3D.h>
 #endif
 
@@ -87,30 +87,29 @@ namespace fs = boost::filesystem;
 int main(int argc, char* const argv[]){
 
   /*-------------- Parse command line -----------------------------*/
-  po::options_description general_opt ( "Allowed options are: " );
-  general_opt.add_options()
-    ( "help,h", "display this message." )
-    ( "input,i", po::value<string>()->required(), "Input 3D image file." )
-    ( "skel,s",  po::value<string>()->required(), "type of skeletonization. Valid: 1isthmus, isthmus, end, ulti" )
-    ( "select,c",  po::value<string>()->required(), "select method for skeletonization. Valid: dmax, random, first" )
-    ( "foreground,f",  po::value<string>()->default_value("white"), "foreground color in binary image. [black|white]" )
-    ( "thresholdMin,m",  po::value<int>()->default_value(0), "threshold min (excluded) to define binary shape" )
-    ( "thresholdMax,M",  po::value<int>()->default_value(255), "threshold max (included) to define binary shape" )
-    ( "persistence,p",  po::value<int>()->default_value(0), "persistence value, implies use of persistence algorithm if p>=1" )
-    ( "profile",  po::bool_switch()->default_value(false), "profile algorithm" )
-    ( "verbose,v",  po::bool_switch()->default_value(false), "verbose output" )
-    ( "visualize,t", po::bool_switch()->default_value(false), "Visualize thin result. Requires VISUALIZE option at build")
-    ( "output_filename_simple,z",  po::bool_switch()->default_value(false), "Filename does not contain the parameters used for this filter." )
-    ( "exportSDP,e", po::value<std::string>(), "Folder to export the resulting set of points in a simple (sequence of discrete point (sdp)).")
-    ( "exportImage,o", po::value<std::string>(), "Folder to export the resulting set of points as an ITK Image.")
-    ( "inputDistanceMapImageFilename,d", po::value<string>(), "Input 3D Distance Map Image from script create_distance_map. Used with option --select=dmax" );
+  po::options_description opt_desc ( "Allowed options are: " );
+  opt_desc.add_options()( "help,h", "display this message." );
+  opt_desc.add_options()( "input,i", po::value<string>()->required(), "Input 3D image file." );
+  opt_desc.add_options()( "skel,s",  po::value<string>()->required(), "type of skeletonization. Valid: 1isthmus, isthmus, end, ulti" );
+  opt_desc.add_options()( "select,c",  po::value<string>()->required(), "select method for skeletonization. Valid: dmax, random, first" );
+  opt_desc.add_options()( "foreground,f",  po::value<string>()->default_value("white"), "foreground color in binary image. [black|white]" );
+  opt_desc.add_options()( "thresholdMin,m",  po::value<int>()->default_value(0), "threshold min (excluded) to define binary shape" );
+  opt_desc.add_options()( "thresholdMax,M",  po::value<int>()->default_value(255), "threshold max (included) to define binary shape" );
+  opt_desc.add_options()( "persistence,p",  po::value<int>()->default_value(0), "persistence value, implies use of persistence algorithm if p>=1" );
+  opt_desc.add_options()( "profile",  po::bool_switch()->default_value(false), "profile algorithm" );
+  opt_desc.add_options()( "verbose,v",  po::bool_switch()->default_value(false), "verbose output" );
+  opt_desc.add_options()( "visualize,t", po::bool_switch()->default_value(false), "Visualize thin result. Requires VISUALIZE option at build");
+  opt_desc.add_options()( "output_filename_simple,z",  po::bool_switch()->default_value(false), "Filename does not contain the parameters used for this filter." );
+  opt_desc.add_options()( "exportSDP,e", po::value<std::string>(), "Folder to export the resulting set of points in a simple (sequence of discrete point (sdp)).");
+  opt_desc.add_options()( "exportImage,o", po::value<std::string>(), "Folder to export the resulting set of points as an ITK Image.");
+  opt_desc.add_options()( "inputDistanceMapImageFilename,d", po::value<string>(), "Input 3D Distance Map Image from script create_distance_map. Used with option --select=dmax" );
 
   po::variables_map vm;
   try {
-    po::store(po::parse_command_line(argc, argv, general_opt), vm);
+    po::store(po::parse_command_line(argc, argv, opt_desc), vm);
     if (vm.count ( "help" ) || argc<=1 )
     {
-      std::cout << "Basic usage:\n" << general_opt << "\n";
+      std::cout << "Basic usage:\n" << opt_desc << "\n";
       return EXIT_SUCCESS;
     }
     po::notify ( vm );
