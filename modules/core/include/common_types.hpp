@@ -25,7 +25,7 @@
 #include <vector>
 
 namespace SG {
-  using PointType = ArrayUtilities::Array3D;
-  using PointContainer = std::vector<PointType>;
-} // ns SG
+using PointType = ArrayUtilities::Array3D;
+using PointContainer = std::vector<PointType>;
+}  // namespace SG
 #endif

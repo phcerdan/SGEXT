@@ -55,39 +55,36 @@
 namespace SG {
 template <typename TImage>
 void visualize_spatial_graph_with_image(
-        const GraphType & sg,
-        const TImage* img,
-        const std::string& win_title = "itkViewGraph",
-        size_t win_x = 600,
-        size_t win_y = 600 )
-{
-  typedef itk::ImageToVTKImageFilter< TImage > ConnectorType;
+    const GraphType& sg, const TImage* img,
+    const std::string& win_title = "itkViewGraph", size_t win_x = 600,
+    size_t win_y = 600) {
+  typedef itk::ImageToVTKImageFilter<TImage> ConnectorType;
   typename ConnectorType::Pointer connector = ConnectorType::New();
   connector->SetInput(img);
   connector->Update();
   connector->UpdateLargestPossibleRegion();
 
   // Setup renderers
-  vtkSmartPointer< vtkRenderer > renderer = vtkSmartPointer< vtkRenderer >::New();
+  vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
 
   // Setup render window
-  vtkSmartPointer< vtkRenderWindow > renderWindow = vtkSmartPointer< vtkRenderWindow >::New();
+  vtkSmartPointer<vtkRenderWindow> renderWindow =
+      vtkSmartPointer<vtkRenderWindow>::New();
   renderWindow->SetWindowName(win_title.c_str());
   renderWindow->SetSize(win_x, win_y);
   renderWindow->AddRenderer(renderer);
 
   // Setup render window interactor
-  vtkSmartPointer< vtkRenderWindowInteractor > renderWindowInteractor =
-    vtkSmartPointer< vtkRenderWindowInteractor >::New();
-  vtkSmartPointer< vtkInteractorStyleRubberBand3D > style =
-    vtkSmartPointer< vtkInteractorStyleRubberBand3D >::New();
+  vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor =
+      vtkSmartPointer<vtkRenderWindowInteractor>::New();
+  vtkSmartPointer<vtkInteractorStyleRubberBand3D> style =
+      vtkSmartPointer<vtkInteractorStyleRubberBand3D>::New();
   renderWindowInteractor->SetInteractorStyle(style);
 
   // Render and start interaction
   renderWindowInteractor->SetRenderWindow(renderWindow);
 
-
-  typedef itk::StatisticsImageFilter< TImage > FilterType;
+  typedef itk::StatisticsImageFilter<TImage> FilterType;
   typename FilterType::Pointer filter = FilterType::New();
   filter->SetInput(img);
   filter->Update();
@@ -96,7 +93,7 @@ void visualize_spatial_graph_with_image(
   double max_intensity = filter->GetMaximum();
 
   auto volumeMapper = vtkSmartPointer<vtkSmartVolumeMapper>::New();
-  volumeMapper->SetBlendModeToIsoSurface(); // only supported in GPU OpenGL2
+  volumeMapper->SetBlendModeToIsoSurface();  // only supported in GPU OpenGL2
   volumeMapper->SetInputData(connector->GetOutput());
 
   auto opacityFun = vtkSmartPointer<vtkPiecewiseFunction>::New();
@@ -118,8 +115,8 @@ void visualize_spatial_graph_with_image(
 
   auto volumeProperty = vtkSmartPointer<vtkVolumeProperty>::New();
   // volumeProperty->SetIndependentComponents(independentComponents);
-  volumeProperty->SetColor( colorFun );
-  volumeProperty->SetScalarOpacity( opacityFun );
+  volumeProperty->SetColor(colorFun);
+  volumeProperty->SetScalarOpacity(opacityFun);
   volumeProperty->GetIsoSurfaceValues()->SetNumberOfContours(1);
   // volumeProperty->GetIsoSurfaceValues()->SetValue(0, 1);
   volumeProperty->GetIsoSurfaceValues()->SetValue(0, max_intensity);
@@ -134,20 +131,19 @@ void visualize_spatial_graph_with_image(
   // Here we take care of position and orientation
   // so that volume is in DICOM patient physical space
   auto direction = img->GetDirection();
-  auto mat = vtkSmartPointer<vtkMatrix4x4>::New(); //start with identity matrix
-  for (int i=0; i<3; i++)
-      for (int k=0; k<3; k++)
-          mat->SetElement(i,k, direction(i,k));
+  auto mat = vtkSmartPointer<vtkMatrix4x4>::New();  // start with identity
+                                                    // matrix
+  for(int i = 0; i < 3; i++)
+    for(int k = 0; k < 3; k++) mat->SetElement(i, k, direction(i, k));
 
   // Counteract the built-in translation by origin
   auto origin = img->GetOrigin();
   volume->SetPosition(-origin[0], -origin[1], -origin[2]);
 
   // Add translation to the user matrix
-  for (int i=0; i<3; i++)
-    {
-    mat->SetElement(i,3, origin[i]);
-    }
+  for(int i = 0; i < 3; i++) {
+    mat->SetElement(i, 3, origin[i]);
+  }
   volume->SetUserMatrix(mat);
 
   // moved to the bottom
@@ -159,7 +155,7 @@ void visualize_spatial_graph_with_image(
   // From: https://www.vtk.org/Wiki/VTK/Examples/Cxx/Images/BackgroundImage
   graphLayoutView->GetRenderer()->SetLayer(1);
   graphLayoutView->GetRenderer()->InteractiveOff();
-  graphLayoutView->GetRenderer()->SetActiveCamera( renderer->GetActiveCamera() );
+  graphLayoutView->GetRenderer()->SetActiveCamera(renderer->GetActiveCamera());
 
   renderWindow->SetNumberOfLayers(2);
   // renderer->SetLayer(0); // This is the default
@@ -170,12 +166,12 @@ void visualize_spatial_graph_with_image(
   renderer->AddViewProp(volume);
 
   // Flip camera because VTK-ITK different corner for origin.
-  vtkCamera *cam = renderer->GetActiveCamera();
+  vtkCamera* cam = renderer->GetActiveCamera();
   flip_camera(cam);
 
   renderer->ResetCamera();
   renderWindowInteractor->Initialize();
   renderWindowInteractor->Start();
 }
-} // end namespace
+}  // namespace SG
 #endif

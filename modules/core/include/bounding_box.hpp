@@ -21,7 +21,7 @@
 #ifndef BOUNDING_BOX_HPP
 #define BOUNDING_BOX_HPP
 
-#include "common_types.hpp" // PointType typedef
+#include "common_types.hpp"  // PointType typedef
 #include <vector>
 
 namespace SG {
@@ -33,11 +33,12 @@ struct BoundingBox {
   BoundingBox() = default;
   BoundingBox(const BoundingBox &) = default;
   BoundingBox(BoundingBox &&) = default;
-  BoundingBox & operator=(const BoundingBox &) = default;
-  BoundingBox & operator=(BoundingBox &&) = default;
+  BoundingBox &operator=(const BoundingBox &) = default;
+  BoundingBox &operator=(BoundingBox &&) = default;
 
-  BoundingBox(const PointType & input_ini, const PointType & input_end);
-  BoundingBox(const PointType & center, const std::array<size_t, 3> & radius, const bool use_center_and_radius);
+  BoundingBox(const PointType &input_ini, const PointType &input_end);
+  BoundingBox(const PointType &center, const std::array<size_t, 3> &radius,
+              const bool use_center_and_radius);
   BoundingBox(const PointType &center, size_t radius);
   /**
    * VTK interface
@@ -50,10 +51,10 @@ struct BoundingBox {
    * @param bounds[6]
    */
   BoundingBox(const double bounds[6]);
-  BoundingBox(double xMin, double xMax, double yMin,
-              double yMax, double zMin, double zMax);
-  void SetBounds(double xMin, double xMax, double yMin,
-                 double yMax, double zMin, double zMax);
+  BoundingBox(double xMin, double xMax, double yMin, double yMax, double zMin,
+              double zMax);
+  void SetBounds(double xMin, double xMax, double yMin, double yMax,
+                 double zMin, double zMax);
   void SetBounds(const double b[6]);
   /**
    * Caller needs to allocate bounds before calling this method.
@@ -63,21 +64,22 @@ struct BoundingBox {
    *
    * @param bounds
    */
-  void GetBounds(double * bounds) const;
-  static BoundingBox BuildEnclosingBox(const std::vector<double *> & bounds_vector);
+  void GetBounds(double *bounds) const;
+  static BoundingBox BuildEnclosingBox(
+      const std::vector<double *> &bounds_vector);
   PointType GetSize() const;
   PointType GetRadius() const;
   PointType GetCenter() const;
-  bool is_point_inside(const PointType & input_point) const;
-  bool are_bounds_inside(double * external_bounds) const;
-  void Print(double * bounds, const std::string & label = "BoundingBox") const;
-  void Print(const std::string & label = "BoundingBox") const;
+  bool is_point_inside(const PointType &input_point) const;
+  bool are_bounds_inside(double *external_bounds) const;
+  void Print(double *bounds, const std::string &label = "BoundingBox") const;
+  void Print(const std::string &label = "BoundingBox") const;
 };
 
-inline bool is_inside(const PointType & input, const BoundingBox & box) {
+inline bool is_inside(const PointType &input, const BoundingBox &box) {
   return box.is_point_inside(input);
 };
 
-} // end ns SG
+}  // namespace SG
 
 #endif

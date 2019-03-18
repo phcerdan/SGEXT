@@ -33,7 +33,8 @@ namespace SG {
  * Note that this doesn't include the nodes the spatial edge connects. Use
  * @contour_distance for that.
  *
- * PRECONDITION: the edge points should be ordered/connected as they are after DFS.
+ * PRECONDITION: the edge points should be ordered/connected as they are after
+ * DFS.
  *
  * @param se input spatial edge
  *
@@ -42,7 +43,8 @@ namespace SG {
 double edge_points_length(const SG::SpatialEdge &se);
 
 /**
- * Compute the contour length of the edge points, including the distance to the end
+ * Compute the contour length of the edge points, including the distance to the
+ end
  * of the edge points to their source and target nodes.
  *
  * This takes an edge descriptor instead of a SpatialEdge to get access to the
@@ -50,7 +52,8 @@ double edge_points_length(const SG::SpatialEdge &se);
  *
  * Uses @sa edge_points_length
  *
- * PRECONDITION: the edge points should be ordered/connected as they are after DFS.
+ * PRECONDITION: the edge points should be ordered/connected as they are after
+ DFS.
 
  * @param e edge descriptor of the edge.
  * @param sg input graph
@@ -58,13 +61,15 @@ double edge_points_length(const SG::SpatialEdge &se);
  * @return contour distance between source and target of input edge.
  */
 double contour_length(const SG::GraphType::edge_descriptor e,
-    const SG::GraphType & sg);
+                      const SG::GraphType &sg);
 
 /**
  * Insert point in the input container.
- * The input container is a list of points ordered by connectvity, consecutive points in the container are connected.
+ * The input container is a list of points ordered by connectvity, consecutive
+ * points in the container are connected.
  *
- * This computes the distance of the new_point with all the existing edge_points.
+ * This computes the distance of the new_point with all the existing
+ * edge_points.
  * TODO, an optimization would be to only compute it against first and last.
  *
  * PRECONDITION: edge_points are already ordered.
@@ -74,9 +79,9 @@ double contour_length(const SG::GraphType::edge_descriptor e,
  * @param new_point point to intert.
  */
 void insert_unique_edge_point_with_distance_order(
-        SG::SpatialEdge::PointContainer & edge_points,
-        const SG::SpatialEdge::PointType & new_point);
+    SG::SpatialEdge::PointContainer &edge_points,
+    const SG::SpatialEdge::PointType &new_point);
 
-} //end namespace
+}  // namespace SG
 
 #endif

@@ -26,7 +26,7 @@
 
 namespace SG {
 
-size_t num_edge_points(const GraphType & sg);
+size_t num_edge_points(const GraphType &sg);
 
 void print_pos(std::ostream &out, const SG::SpatialNode::PointType &pos);
 
@@ -43,7 +43,7 @@ void print_spatial_edges(const GraphType &graph);
  *
  * @return repeated_points, true|false
  */
-std::pair<std::set<PointType>, bool>
-check_unique_points_in_graph(const GraphType & sg);
-} //end namespace
+std::pair<std::set<PointType>, bool> check_unique_points_in_graph(
+    const GraphType &sg);
+}  // namespace SG
 #endif

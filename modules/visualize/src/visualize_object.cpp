@@ -32,9 +32,8 @@
 #include <vtkRenderer.h>
 namespace SG {
 
-vtkSmartPointer<vtkPoints>
-points_from_object(const DGtal::Z3i::Object26_6 & obj)
-{
+vtkSmartPointer<vtkPoints> points_from_object(
+    const DGtal::Z3i::Object26_6 &obj) {
   auto points = vtkSmartPointer<vtkPoints>::New();
   for(const auto &p : obj.pointSet()) {
     points->InsertNextPoint(p[0], p[1], p[2]);
@@ -42,27 +41,26 @@ points_from_object(const DGtal::Z3i::Object26_6 & obj)
   return points;
 }
 
-vtkSmartPointer<vtkActor>
-create_actor_visualize_object(const DGtal::Z3i::Object26_6 & obj,
-        const double inputOpacity)
-{
+vtkSmartPointer<vtkActor> create_actor_visualize_object(
+    const DGtal::Z3i::Object26_6 &obj, const double inputOpacity) {
   auto points = points_from_object(obj);
   return create_actor_visualize_points_as_cubes(points, inputOpacity);
 }
 
-void
-visualize_object(const DGtal::Z3i::Object26_6 & obj,
-        const double inputOpacity)
-{
+void visualize_object(const DGtal::Z3i::Object26_6 &obj,
+                      const double inputOpacity) {
   auto actor = create_actor_visualize_object(obj, inputOpacity);
 
   // Create a renderer, render window, and interactor
   auto renderer = vtkSmartPointer<vtkRenderer>::New();
   auto renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
   renderWindow->AddRenderer(renderer);
-  auto renderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
+  auto renderWindowInteractor =
+      vtkSmartPointer<vtkRenderWindowInteractor>::New();
   renderWindowInteractor->SetRenderWindow(renderWindow);
-  auto style = vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New(); // like paraview
+  auto style =
+      vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New();  // like
+                                                                  // paraview
   renderWindowInteractor->SetInteractorStyle(style);
 
   // Add the actor to the scene
@@ -73,5 +71,4 @@ visualize_object(const DGtal::Z3i::Object26_6 & obj,
   renderWindowInteractor->Start();
 }
 
-
-} // end namespace
+}  // namespace SG

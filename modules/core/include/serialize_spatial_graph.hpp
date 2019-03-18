@@ -26,7 +26,7 @@
 
 namespace SG {
 
-void write_serialized_graph(GraphType & sg, const std::string & absolute_path);
-GraphType read_serialized_graph(const std::string & absolute_path);
-} // ns SG
+void write_serialized_graph(GraphType& sg, const std::string& absolute_path);
+GraphType read_serialized_graph(const std::string& absolute_path);
+}  // namespace SG
 #endif

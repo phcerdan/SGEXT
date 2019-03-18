@@ -37,14 +37,15 @@
 
 namespace SG {
 
-template <typename Graph, class Enable = void> struct edge_hash {
-    typedef typename boost::graph_traits<Graph>::edge_descriptor Edge;
-    std::size_t operator()(const Edge &e) const {
-        std::size_t hash = 0;
-        boost::hash_combine(hash, std::min(e.m_source, e.m_target));
-        boost::hash_combine(hash, std::max(e.m_source, e.m_target));
-        return hash;
-    }
+template <typename Graph, class Enable = void>
+struct edge_hash {
+  typedef typename boost::graph_traits<Graph>::edge_descriptor Edge;
+  std::size_t operator()(const Edge &e) const {
+    std::size_t hash = 0;
+    boost::hash_combine(hash, std::min(e.m_source, e.m_target));
+    boost::hash_combine(hash, std::max(e.m_source, e.m_target));
+    return hash;
+  }
 };
 
 template <typename Graph>
@@ -52,15 +53,15 @@ struct edge_hash<Graph,
                  typename std::enable_if<std::is_same<
                      typename boost::graph_traits<Graph>::directed_category,
                      boost::directed_tag>::value>::type> {
-    typedef typename boost::graph_traits<Graph>::edge_descriptor Edge;
-    std::size_t operator()(const Edge &e) const {
-        std::size_t hash = 0;
-        boost::hash_combine(hash, e.m_source);
-        boost::hash_combine(hash, e.m_target);
-        return hash;
-    }
+  typedef typename boost::graph_traits<Graph>::edge_descriptor Edge;
+  std::size_t operator()(const Edge &e) const {
+    std::size_t hash = 0;
+    boost::hash_combine(hash, e.m_source);
+    boost::hash_combine(hash, e.m_target);
+    return hash;
+  }
 };
 
-} // end ns SG
+}  // namespace SG
 
 #endif

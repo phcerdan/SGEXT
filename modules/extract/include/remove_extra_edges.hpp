@@ -23,13 +23,13 @@
 
 #include "spatial_graph.hpp"
 
-namespace SG
-{
+namespace SG {
 /**
  * Objects in DGtal with a 26_6 topology consider as adjacent vertices those
  * in diagonals. We are interested in keeping that topology, but it generates
  * spurious edges that confuses further analysis.
- * We remove the "diagonal" edges when there are shorter ones. Better an example:
+ * We remove the "diagonal" edges when there are shorter ones. Better an
+ * example:
  *
  * o                  o
  * |\                 |
@@ -47,8 +47,8 @@ namespace SG
  * @return boolean, true if any edge has been removed
  * false otherwhise.
  */
-bool remove_extra_edges(GraphType & sg);
+bool remove_extra_edges(GraphType& sg);
 
-} //end namespace
+}  // namespace SG
 
 #endif

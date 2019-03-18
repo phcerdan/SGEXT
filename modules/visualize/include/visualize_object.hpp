@@ -35,8 +35,8 @@ namespace SG {
  *
  * @return
  */
-vtkSmartPointer<vtkPoints>
-points_from_object(const DGtal::Z3i::Object26_6 & obj);
+vtkSmartPointer<vtkPoints> points_from_object(
+    const DGtal::Z3i::Object26_6& obj);
 
 /**
  * Create an actor to visualize the default 3D DGtal::Object
@@ -46,9 +46,8 @@ points_from_object(const DGtal::Z3i::Object26_6 & obj);
  *
  * @return
  */
-vtkSmartPointer<vtkActor>
-create_actor_visualize_object( const DGtal::Z3i::Object26_6 & obj,
-    const double inputOpacity = 0.8);
+vtkSmartPointer<vtkActor> create_actor_visualize_object(
+    const DGtal::Z3i::Object26_6& obj, const double inputOpacity = 0.8);
 
 /**
  * Render object
@@ -58,8 +57,7 @@ create_actor_visualize_object( const DGtal::Z3i::Object26_6 & obj,
  * @param obj
  * @param inputOpacity
  */
-void
-visualize_object( const DGtal::Z3i::Object26_6 & obj,
-    const double inputOpacity = 0.8);
-} // end namespace SG
+void visualize_object(const DGtal::Z3i::Object26_6& obj,
+                      const double inputOpacity = 0.8);
+}  // end namespace SG
 #endif
