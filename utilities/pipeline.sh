@@ -2,6 +2,14 @@
 echo "DATA_FOLDER=${DATA_FOLDER}"
 echo "INPUT_LABEL=${INPUT_LABEL}"
 echo "BINARY_FOLDER=${BINARY_FOLDER}"
+if [[ -z "${IN_PHYSICAL_SPACE}" ]]; then
+   export IN_PHYSICAL_SPACE=1
+fi
+echo "IN_PHYSICAL_SPACE=${IN_PHYSICAL_SPACE}"
+export _analyze_extra_args=''
+if [[ ${IN_PHYSICAL_SPACE}==0 ]]; then
+   _analyze_extra_args='--avoid_transformToPhysicalPoints'
+fi
 # DATA_FOLDER=~/Data
 # INPUT_LABEL=file_name_without_extension
 # BINARY_FOLDER=~/repository_local/object_to_spatial_graph/build-debug/cpp-scripts
@@ -21,6 +29,7 @@ echo "STARTING analyze_graph" && \
 $BINARY_FOLDER/analyze_graph -i $DATA_FOLDER/results/${INPUT_LABEL}_FILLED_SKEL.nrrd -o $DATA_FOLDER/results -u $DATA_FOLDER/results \
    --reduceGraph --removeExtraEdges \
    --mergeThreeConnectedNodes --mergeFourConnectedNodes --mergeTwoThreeConnectedNodes \
+   ${_analyze_extra_args} \
    -v -z && \
 echo "PIPELINE FINISHED SUCCESFULLY"
 

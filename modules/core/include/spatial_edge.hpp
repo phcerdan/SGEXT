@@ -25,6 +25,7 @@
 #include "common_types.hpp"
 #include <boost/serialization/array.hpp>
 #include <boost/serialization/vector.hpp>
+#include <iostream>
 
 namespace SG {
 struct SpatialEdge {
@@ -34,22 +35,36 @@ struct SpatialEdge {
   PointContainer edge_points;
 };
 
+/**
+ * Print edge points with default precission.
+ * Use the << operator on a spatial edge for an uniform precission.
+ *
+ * print_edge_points(edge_points, std::cout);
+ * std::cout << std::endl; // flush to show
+ *
+ * @param edge_points
+ * @param os any ostream
+ */
+inline void print_edge_points(const PointContainer & edge_points,
+    std::ostream &os) {
+  auto size = edge_points.size();
+  os << "[";
+  for(size_t i = 0; i + 1 < size; ++i) {
+    os << "{" << edge_points[i][0] << " " << edge_points[i][1] << " "
+       << edge_points[i][2] << "},";
+  }
+  if(size > 0) {
+    os << "{" << edge_points[size - 1][0] << " "
+       << edge_points[size - 1][1] << " " << edge_points[size - 1][2]
+       << "}";
+  }
+  os << "]";
+}
 /* Stream operators */
 inline static std::ostream &operator<<(std::ostream &os,
                                        const SpatialEdge &se) {
   os.precision(100);
-  auto size = se.edge_points.size();
-  os << "[";
-  for(size_t i = 0; i + 1 < size; ++i) {
-    os << "{" << se.edge_points[i][0] << " " << se.edge_points[i][1] << " "
-       << se.edge_points[i][2] << "},";
-  }
-  if(size > 0) {
-    os << "{" << se.edge_points[size - 1][0] << " "
-       << se.edge_points[size - 1][1] << " " << se.edge_points[size - 1][2]
-       << "}";
-  }
-  os << "]";
+  print_edge_points(se.edge_points, os);
   return os;
 }
 inline static std::istream &operator>>(std::istream &is, SpatialEdge &se) {

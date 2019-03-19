@@ -31,7 +31,7 @@ namespace SG {
  * returning 0.0 if there are less than two points in the edge.
  *
  * Note that this doesn't include the nodes the spatial edge connects. Use
- * @contour_distance for that.
+ * \ref contour_length for that.
  *
  * PRECONDITION: the edge points should be ordered/connected as they are after
  * DFS.
@@ -40,7 +40,7 @@ namespace SG {
  *
  * @return the length between first and last edge_points
  */
-double edge_points_length(const SG::SpatialEdge &se);
+double edge_points_length(const SpatialEdge &se);
 
 /**
  * Compute the contour length of the edge points, including the distance to the
@@ -60,8 +60,8 @@ double edge_points_length(const SG::SpatialEdge &se);
  *
  * @return contour distance between source and target of input edge.
  */
-double contour_length(const SG::GraphType::edge_descriptor e,
-                      const SG::GraphType &sg);
+double contour_length(const GraphType::edge_descriptor e,
+                      const GraphType &sg);
 
 /**
  * Insert point in the input container.
@@ -79,8 +79,8 @@ double contour_length(const SG::GraphType::edge_descriptor e,
  * @param new_point point to intert.
  */
 void insert_unique_edge_point_with_distance_order(
-    SG::SpatialEdge::PointContainer &edge_points,
-    const SG::SpatialEdge::PointType &new_point);
+    SpatialEdge::PointContainer &edge_points,
+    const SpatialEdge::PointType &new_point);
 
 }  // namespace SG
 
