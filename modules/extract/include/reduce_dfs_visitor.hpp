@@ -122,7 +122,12 @@ protected:
   bool m_already_started = false;
 
 public:
-  // Commented out to avoid clutter of the output.
+  /**
+   * invoked when a vertex is encountered for the first time.
+   *
+   * @param u
+   * @param input_sg
+   */
   void discover_vertex(vertex_descriptor u,
                        const SpatialGraph &input_sg) {  // check!
     auto degree = boost::out_degree(u, input_sg);
@@ -204,6 +209,12 @@ public:
     }  // degree check
   }
 
+  /**
+   * invoked on each edge as it becomes a member of the edges that form the search tree.
+   *
+   * @param e
+   * @param input_sg
+   */
   void tree_edge(edge_descriptor e, const SpatialGraph &input_sg) {
     auto target = boost::target(e, input_sg);
 
@@ -220,9 +231,17 @@ public:
 
     m_sg_edge.edge_points.push_back(input_sg[target].pos);
   }
-  // Used only for loops. The ending vertex of the loop doesn't use tree_edge.
-  // This gets called even after hitting finish_on_junction, because the
-  // recursive nature of dfs_visit.
+
+  /**
+   * Invoked on the back edges in the graph.
+   *
+   * Used only for loops. The ending vertex of the loop doesn't use tree_edge.
+   * This gets called even after hitting finish_on_junction,
+   * because the recursive nature of dfs_visit.
+   *
+   * @param e
+   * @param input_sg
+   */
   void back_edge(edge_descriptor e, const SpatialGraph &input_sg) {
     auto target = boost::target(e, input_sg);
     if(m_verbose)
@@ -242,6 +261,14 @@ public:
     }
   }
 
+  /**
+   * Invoked on a vertex after all of its out edges have been added to the search tree
+   * and all of the adjacent vertices have been discovered
+   * (but before their out-edges have been examined).
+   *
+   * @param u
+   * @param input_sg
+   */
   void finish_vertex(vertex_descriptor u, const SpatialGraph &input_sg) {
     using Color = typename boost::color_traits<typename ColorMap::mapped_type>;
     using adjacency_iterator =

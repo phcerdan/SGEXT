@@ -140,9 +140,7 @@ void append_new_graph_points(
   }
 };
 
-std::pair<vtkSmartPointer<vtkMergePoints>,
-          std::unordered_map<vtkIdType, std::vector<graph_descriptor>>>
-get_vtk_points_from_graphs(
+MergePointsIdMapPair get_vtk_points_from_graphs(
     const std::vector<std::reference_wrapper<const GraphType>> &graphs,
     const BoundingBox *box) {
   assert(graphs.size() > 0);

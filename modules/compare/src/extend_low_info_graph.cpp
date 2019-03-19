@@ -20,11 +20,16 @@
 
 #include "extend_low_info_graph.hpp"
 #include "extend_low_info_graph_visitor.hpp"
+#include <tuple>  // For std::tie
 
 namespace SG {
+
 GraphType extend_low_info_graph_via_dfs(
     const std::vector<std::reference_wrapper<const GraphType>>& graphs,
+    std::unordered_map<vtkIdType, std::vector<graph_descriptor>>& idMap,
+    vtkOctreePointLocator * octree,
     bool verbose) {
+  const GraphType & input_sg = graphs[0];
   GraphType sg;
   using vertex_descriptor = boost::graph_traits<GraphType>::vertex_descriptor;
   using vertex_iterator = boost::graph_traits<GraphType>::vertex_iterator;
@@ -38,8 +43,30 @@ GraphType extend_low_info_graph_via_dfs(
   VertexMap vertex_map;
 
   ExtendLowInfoGraphVisitor<GraphType, VertexMap, ColorMap> vis(
-      sg, graphs, colorMap, vertex_map, verbose);
+      sg, graphs, idMap, octree, colorMap, vertex_map, verbose);
+
+  // Mark as unvisited (white) all the vertices
+  vertex_iterator ui, ui_end;
+  for(std::tie(ui, ui_end) = boost::vertices(input_sg); ui != ui_end; ++ui) {
+    put(propColorMap, *ui, Color::white());
+  }
+
+  vertex_iterator vi, vi_end;
+  std::tie(vi, vi_end) = boost::vertices(input_sg);
+  auto vi_start = vi;
+  auto start = *vi;
+
+  for(; vi != vi_end; ++vi) {
+    auto degree = boost::out_degree(*vi, input_sg);
+    start = *vi;
+    if(verbose)
+      std::cout << "ExtendLowInfoGraphVisitor Visit: start: " << start << " : "
+                << ArrayUtilities::to_string(input_sg[start].pos)
+                << ". Degree: " << degree << std::endl;
+    boost::depth_first_visit(input_sg, start, vis, propColorMap);
+  }
 
   return sg;
 };
+
 }  // end namespace SG
