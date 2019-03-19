@@ -12,6 +12,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
     filter_spatial_graph.cpp
     graph_data.cpp
     serialize_spatial_graph.cpp
+    shortest_path.cpp
     spatial_graph_utilities.cpp
     )
 list(TRANSFORM SG_MODULE_${SG_MODULE_NAME}_SOURCES PREPEND "src/")
