@@ -4,6 +4,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_TEST_DEPENDS
   ${GTEST_LIBRARIES})
 set(SG_MODULE_${SG_MODULE_NAME}_TESTS
   test_compare_graphs.cpp
+  test_extend_low_info_graph.cpp
   )
 # Fixture defined in test/fixtures
 list(APPEND SG_MODULE_${SG_MODULE_NAME}_TEST_DEPENDS FixtureMatchingGraphs)
