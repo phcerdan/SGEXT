@@ -9,6 +9,40 @@
 
 namespace SG {
 
+SpatialEdge create_edge_from_path(
+    const std::vector<GraphType::vertex_descriptor> & vertex_path,
+    const GraphType & input_g)
+{
+  SpatialEdge sg_edge;
+  auto & sg_edge_points = sg_edge.edge_points;
+  using vertex_descriptor = GraphType::vertex_descriptor;
+  using edge_descriptor = GraphType::edge_descriptor;
+  // Check that vertex_path is connected
+  for(size_t index = 1; index < vertex_path.size(); ++index){
+    vertex_descriptor target = vertex_path[index];
+    vertex_descriptor source = vertex_path[index - 1];
+    const auto edge_between = boost::edge(source, target, input_g);
+    if(!edge_between.second)
+      throw("create_edge_from_path: edge does not exist between consecutive "
+          "vertices in the input path");
+    const auto ed = edge_between.first;
+    const auto & edge_points = input_g[ed].edge_points;
+    if(index == 1) {
+      sg_edge_points = edge_points;
+      continue;
+    } else {
+      // Add the position of the node into the edge_points
+      SG::PointType merge_node_pos = input_g[source].pos;
+      SG::insert_unique_edge_point_with_distance_order( sg_edge_points, merge_node_pos);
+      // TODO this could be slow... optimization welcome to append the whole vector
+      for(const auto & p : edge_points) {
+        SG::insert_unique_edge_point_with_distance_order( sg_edge_points, p);
+      }
+    }
+  }
+  return sg_edge;
+}
+
 std::vector<GraphType::vertex_descriptor> compute_shortest_path(
     GraphType::vertex_descriptor start_vertex,
     GraphType::vertex_descriptor end_vertex, const GraphType &input_g,
