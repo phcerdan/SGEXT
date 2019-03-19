@@ -7,6 +7,10 @@ set(SG_MODULE_${SG_MODULE_NAME}_TESTS
   test_extend_low_info_graph.cpp
   )
 # Fixture defined in test/fixtures
-list(APPEND SG_MODULE_${SG_MODULE_NAME}_TEST_DEPENDS FixtureMatchingGraphs)
+list(APPEND SG_MODULE_${SG_MODULE_NAME}_TEST_DEPENDS
+  FixtureMatchingGraphs
+  SGLocate
+  SGVisualize
+  )
 
 SG_add_gtests()
