@@ -9,6 +9,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_TESTS
   test_filter_spatial_graph.cpp
   test_graph_data.cpp
   test_graphviz_io.cpp
+  test_shortest_path.cpp
   test_transform_to_physical_point.cpp
   # test_merge_nodes.cpp
   # test_spatial_graph_reduction.cpp
