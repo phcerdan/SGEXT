@@ -56,7 +56,7 @@ struct ShortestPathFixture : public ::testing::Test {
   }
 };
 
-TEST_F(ShortestPathFixture, works) {
+TEST_F(ShortestPathFixture, compute_shortest_path) {
   // Setup data
   vertex_descriptor start_vertex = 0;
   vertex_descriptor end_vertex = 2;
@@ -70,4 +70,19 @@ TEST_F(ShortestPathFixture, works) {
   EXPECT_EQ(shortest_path.size(), 3);
   std::vector<vertex_descriptor> expected_shortest_path = {0,1,2};
   EXPECT_EQ(shortest_path, expected_shortest_path);
+}
+
+TEST_F(ShortestPathFixture, create_edge_from_path) {
+  // Setup data
+  vertex_descriptor start_vertex = 0;
+  vertex_descriptor end_vertex = 2;
+  bool verbose = true;
+  auto shortest_path =
+      SG::compute_shortest_path(start_vertex, end_vertex, g, verbose);
+  auto sg_edge = SG::create_edge_from_path(shortest_path, g);
+  std::cout << "Edge From shortest path 0-2" << std::endl;
+  std::cout << sg_edge << std::endl;
+  std::vector<SG::PointType> expected_sg_edge_points =
+  {{1.5, 0, 0}, {1,0,0}, {0.5,0,0}};
+  EXPECT_EQ(sg_edge.edge_points, expected_sg_edge_points);
 }

@@ -42,7 +42,10 @@ std::vector<GraphType::vertex_descriptor> compute_shortest_path(
     GraphType::vertex_descriptor end_vertex,
     const GraphType& input_g,
     bool verbose = false);
-}
+
+SpatialEdge create_edge_from_path(
+    const std::vector<GraphType::vertex_descriptor> & vertex_path,
+    const GraphType & input_g);
 
 /**
  * Abort when reaching destination
@@ -69,5 +72,7 @@ private:
   vertex_descriptor destination;
   size_t& visited;
 };
+
+} // end namespace SG
 
 #endif
