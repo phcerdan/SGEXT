@@ -43,6 +43,11 @@ int main(int argc, char* const argv[]) {
   opt_desc.add_options()("exportSDP,o", po::value<string>(),
                          "Write .sdp file the digital set points.");
   opt_desc.add_options()(
+      "avoid_transformToPhysicalPoints,a",
+      po::bool_switch()->default_value(false),
+      "Positions in Spatial Graph takes into account metadata of the "
+      "(origin,spacing,direction) itk image.");
+  opt_desc.add_options()(
       "highlightRedPoints,p", po::value<string>(),
       "Give a string of points to highlight them in RED (require visualize "
       "ON). Example: \"1 3 4, 43 45 53\" ");
@@ -71,6 +76,8 @@ int main(int argc, char* const argv[]) {
   string filename = vm["input"].as<string>();
   bool verbose = vm["verbose"].as<bool>();
   bool visualize = vm["visualize"].as<bool>();
+  bool avoid_transformToPhysicalPoints =
+      vm["avoid_transformToPhysicalPoints"].as<bool>();
   bool highlightRedPoints = vm.count("highlightRedPoints");
   string highlightRedPoints_input =
       highlightRedPoints ? vm["highlightRedPoints"].as<string>() : "";
@@ -131,6 +138,11 @@ int main(int argc, char* const argv[]) {
         p[0] = itk_index[0];
         p[1] = itk_index[1];
         p[2] = itk_index[2];
+        if(avoid_transformToPhysicalPoints) {
+          p[0] = itk_point[0];
+          p[1] = itk_point[1];
+          p[2] = itk_point[2];
+        }
         std::cout << p << std::endl;
         highlight_red_set.insert(p);
       }
@@ -158,6 +170,11 @@ int main(int argc, char* const argv[]) {
         p[0] = itk_index[0];
         p[1] = itk_index[1];
         p[2] = itk_index[2];
+        if(avoid_transformToPhysicalPoints) {
+          p[0] = itk_point[0];
+          p[1] = itk_point[1];
+          p[2] = itk_point[2];
+        }
         std::cout << p << std::endl;
         highlight_blue_set.insert(p);
       }
