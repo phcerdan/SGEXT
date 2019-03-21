@@ -73,6 +73,8 @@ int main(int argc, char* const argv[]) {
       "visualize,t", po::bool_switch()->default_value(false),
       "Visualize. Requires VISUALIZE option enabled at build.");
 #endif
+  opt_desc.add_options()("radius,r", po::value<double>()->default_value(4.0),
+                         "Radius to use in the extend_low_info_graph visitor.");
   opt_desc.add_options()("verbose,v", po::bool_switch()->default_value(false),
                          "verbose output.");
 
@@ -91,6 +93,7 @@ int main(int argc, char* const argv[]) {
 
   string filenameHigh = vm["highInfoGraph"].as<string>();
   string filenameLow = vm["lowInfoGraph"].as<string>();
+  double radius = vm["radius"].as<double>();
   bool verbose = vm["verbose"].as<bool>();
   if(verbose) {
     std::cout << "Filename High Info Graph: " << filenameHigh << std::endl;
@@ -173,7 +176,7 @@ int main(int argc, char* const argv[]) {
   auto& mergePoints = merger_map_pair.first;
   auto& idMap = merger_map_pair.second;
   auto octree = SG::build_octree_locator(merger_map_pair.first->GetPoints());
-  auto merged_g = extend_low_info_graph_via_dfs(graphs, idMap, octree, verbose);
+  auto merged_g = extend_low_info_graph_via_dfs(graphs, idMap, octree, radius, verbose);
 
   // auto merged_g = SG::compare_low_and_high_info_graphs(g0, g1);
   auto nvertices_merged = boost::num_vertices(merged_g);

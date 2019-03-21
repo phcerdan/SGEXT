@@ -38,7 +38,8 @@ TEST_F(FixtureCloseGraphs, works) {
   auto& mergePoints = merger_map_pair.first;
   auto& idMap = merger_map_pair.second;
   auto octree = SG::build_octree_locator(merger_map_pair.first->GetPoints());
-  auto extended_g = extend_low_info_graph_via_dfs(graphs, idMap, octree, verbose);
+  double radius = 10.0;
+  auto extended_g = extend_low_info_graph_via_dfs(graphs, idMap, octree, radius, verbose);
   EXPECT_EQ(boost::num_vertices(extended_g), boost::num_vertices(moved_g0));
 
   auto points_map_pair = SG::get_vtk_points_from_graph(extended_g);
