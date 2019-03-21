@@ -13,6 +13,7 @@ GraphType extend_low_info_graph_via_dfs(
     const std::vector<std::reference_wrapper<const GraphType>>& graphs,
     std::unordered_map<vtkIdType, std::vector<graph_descriptor>>& idMap,
     vtkOctreePointLocator * octree,
+    double radius,
     bool verbose) {
   const GraphType & input_sg = graphs[0];
   GraphType sg;
@@ -28,7 +29,7 @@ GraphType extend_low_info_graph_via_dfs(
   VertexMap vertex_map;
 
   ExtendLowInfoGraphVisitor<GraphType, VertexMap, ColorMap> vis(
-      sg, graphs, idMap, octree, colorMap, vertex_map, verbose);
+      sg, graphs, idMap, octree, radius, colorMap, vertex_map, verbose);
 
   // Mark as unvisited (white) all the vertices
   vertex_iterator ui, ui_end;
