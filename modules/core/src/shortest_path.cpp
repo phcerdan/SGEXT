@@ -15,6 +15,7 @@ SpatialEdge create_edge_from_path(
 {
   SpatialEdge sg_edge;
   auto & sg_edge_points = sg_edge.edge_points;
+  // Add node for keeping a sensible order, it will be removed at the end.
   sg_edge_points.push_back(input_g[vertex_path[0]].pos);
   using vertex_descriptor = GraphType::vertex_descriptor;
   using edge_descriptor = GraphType::edge_descriptor;
@@ -28,30 +29,34 @@ SpatialEdge create_edge_from_path(
           "vertices in the input path");
     const auto ed = edge_between.first;
     auto eps = input_g[ed].edge_points; // copied, might be modified
-    double dist_last  = 0.0;
-    double dist_first = 0.0;
-    if(!eps.empty()) {
+
+    if(!eps.empty()) { // sg_edge_points is never empty
+      double dist_last  = 0.0;
+      double dist_first = 0.0;
       dist_first = ArrayUtilities::distance(sg_edge_points.back(), eps[0]);
       dist_last = ArrayUtilities::distance(sg_edge_points.back(), eps.back());
+      // Because the graph is undirected, source and target might be switced.
+      // The new edge will have an order, based on the position of the first node in the path.
+      // We reverse the order of the elements if needed.
+      if(dist_last < dist_first) std::reverse(eps.begin(),eps.end());
     }
-    // Because the graph is undirected, source and target might be switced.
-    // The new edge will have an order, based on the position of the first node in the path.
-    // We reverse the order of the elements if needed.
-    if(dist_last < dist_first) std::reverse(eps.begin(),eps.end());
 
-    // Add also first node pos to keep an order, it will be removed at the end
-    // The last node won't be added here (index starts at 1)
-    SG::PointType merge_node_pos = input_g[source].pos;
-    std::cout << "...About to add vertex position..." << std::endl;
-    SG::insert_unique_edge_point_with_distance_order( sg_edge_points, merge_node_pos);
+    // The first or the last node won't be added here
+    if(index != 1) {
+      std::cout << "...About to add vertex position..." << std::endl;
+      SG::insert_unique_edge_point_with_distance_order( sg_edge_points, input_g[source].pos);
+    }
 
     // TODO this could be slow... optimization welcome to append the whole vector
     for(const auto & p : eps) {
       SG::insert_unique_edge_point_with_distance_order( sg_edge_points, p);
     }
   }
-  // Remove the first node pos added just for keeping a sensible order
-  sg_edge_points.erase(sg_edge_points.begin());
+  // Remove the  node pos added just for keeping a sensible order.
+  // That added node might be at the beggining or at the end on the final vector.
+  sg_edge_points.erase(
+      std::remove(sg_edge_points.begin(), sg_edge_points.end(), input_g[vertex_path[0]].pos),
+      sg_edge_points.end());
   return sg_edge;
 }
 
@@ -81,8 +86,8 @@ std::vector<GraphType::vertex_descriptor> compute_shortest_path(
     // return ArrayUtilities::distance(input_g[source].pos,
     // input_g[target].pos);
     auto cl = SG::contour_length(ed, input_g);
-    std::cout << ed << std::endl;
-    std::cout << "contour_length: " << cl << std::endl;
+    // std::cout << ed << std::endl;
+    // std::cout << "contour_length: " << cl << std::endl;
     return cl;
   };
 
