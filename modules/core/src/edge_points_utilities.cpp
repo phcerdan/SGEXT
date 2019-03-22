@@ -95,13 +95,12 @@ double contour_length(const GraphType::edge_descriptor e,
 void insert_unique_edge_point_with_distance_order(
     SpatialEdge::PointContainer &edge_points,
     const SpatialEdge::PointType &new_point) {
-  bool verbose = true; // TODO remove verbosity here
-  std::cout << "-- point to add: "; print_pos(std::cout, new_point);
-  std::cout << std::endl;
+  // std::cout << "-- point to add: "; print_pos(std::cout, new_point);
+  // std::cout << std::endl;
   if(edge_points.empty()) {
     edge_points.push_back(new_point);
-    std::cout << "--- After insertion: "; print_edge_points(edge_points, std::cout);
-    std::cout << std::endl;
+    // std::cout << "--- After insertion: "; print_edge_points(edge_points, std::cout);
+    // std::cout << std::endl;
     return;
   }
   // Insert it between closer points.
@@ -146,14 +145,14 @@ void insert_unique_edge_point_with_distance_order(
   auto min_index = std::distance(std::begin(distances_to_in_point), min_it);
   if(min_index == 0) {
     edge_points.insert(std::begin(edge_points), new_point);
-    std::cout << "--- After insertion: "; print_edge_points(edge_points, std::cout);
-    std::cout << std::endl;
+    // std::cout << "--- After insertion: "; print_edge_points(edge_points, std::cout);
+    // std::cout << std::endl;
   } else if(static_cast<unsigned int>(min_index) ==
           distances_to_in_point.size() - 1) {  // This is safe, as vector is not empty.
     // edge_points.insert(std::end(edge_points), new_point);
     edge_points.push_back(new_point);
-    std::cout << "--- After insertion: "; print_edge_points(edge_points, std::cout);
-    std::cout << std::endl;
+    // std::cout << "--- After insertion: "; print_edge_points(edge_points, std::cout);
+    // std::cout << std::endl;
   } else {  // illogical error
     print_edge_points(edge_points, std::cerr);
     std::cerr << std::endl;
