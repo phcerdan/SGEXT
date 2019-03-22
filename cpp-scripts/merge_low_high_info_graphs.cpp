@@ -23,6 +23,7 @@
 #include "spatial_graph.hpp"
 #include "spatial_graph_utilities.hpp"
 #include "compare_graphs.hpp"
+#include "add_graph_peninsulas.hpp"
 #include "serialize_spatial_graph.hpp"
 
 #include "extend_low_info_graph.hpp"
@@ -38,6 +39,46 @@ using namespace std;
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 
+void export_graph_merge_low_high_info(
+    SG::GraphType & output_g, // write_serialized_graph --graph cannot be const--
+    const std::string folder_path,
+    const fs::path &output_filename_path,
+    bool useSerialized,
+    bool verbose,
+    const std::string &graph_title) {
+
+  const fs::path output_folder_path{folder_path};
+    if(!fs::exists(output_folder_path)) {
+      throw std::runtime_error("output folder doesn't exist : " +
+                               output_folder_path.string());
+    }
+
+    if(!useSerialized) {
+      boost::dynamic_properties dp_merged;
+      dp_merged.property("node_id", boost::get(boost::vertex_index, output_g));
+      dp_merged.property("spatial_node",
+                         boost::get(boost::vertex_bundle, output_g));
+      dp_merged.property("spatial_edge",
+                         boost::get(boost::edge_bundle, output_g));
+      fs::path output_full_path =
+          output_folder_path / fs::path(output_filename_path.string() + ".dot");
+      std::ofstream out;
+      out.open(output_full_path.string().c_str());
+      boost::write_graphviz_dp(out, output_g, dp_merged);
+      if(verbose)
+        std::cout << graph_title + ": graph (graphviz) output stored in: "
+                  << output_full_path.string() << std::endl;
+    } else {
+      fs::path output_full_path =
+          output_folder_path / fs::path(output_filename_path.string() + ".txt");
+      SG::write_serialized_graph(output_g, output_full_path.string());
+      if(verbose)
+        std::cout << graph_title + ": graph (serialize) output stored in: "
+                  << output_full_path.string() << std::endl;
+    }
+
+};
+
 int main(int argc, char* const argv[]) {
   /*-------------- Parse command line -----------------------------*/
   po::options_description opt_desc("Allowed options are: ");
@@ -50,8 +91,11 @@ int main(int argc, char* const argv[]) {
                          po::bool_switch()->default_value(false),
                          "Use stored serialized graphs. If off, it will "
                          "require .dot graphviz files.");
+  opt_desc.add_options()("exportExtendedLowInfoGraph,e", po::value<string>()->required(),
+                         "Write .dot file with the extended low info spatial graph or "
+                         ".txt file if --useSerialized is on.");
   opt_desc.add_options()("exportMergedGraph,o", po::value<string>()->required(),
-                         "Write .dot file with the merged spatial graph or "
+                         "Write .dot file with the final graph (with pensinsulas added) or "
                          ".txt file if --useSerialized is on.");
 #ifdef VISUALIZE
   opt_desc.add_options()(
@@ -84,6 +128,7 @@ int main(int argc, char* const argv[]) {
     std::cout << "Filename High Info Graph: " << filenameHigh << std::endl;
     std::cout << "Filename Low Info Graph: " << filenameLow << std::endl;
   }
+  bool exportExtendedLowInfoGraph = vm.count("exportExtendedLowInfoGraph");
   bool exportMergedGraph = vm.count("exportMergedGraph");
   bool useSerialized = vm["useSerialized"].as<bool>();
 
@@ -92,7 +137,8 @@ int main(int argc, char* const argv[]) {
 #endif
   // Get filenameHigh without extension (and without folders).
   const fs::path input_stem = fs::path(filenameHigh).stem();
-  const fs::path output_file_path = fs::path(input_stem.string() + "_MERGED");
+  const fs::path output_file_path_extended = fs::path(input_stem.string() + "_EXTENDED");
+  const fs::path output_file_path_merged = fs::path(input_stem.string() + "_MERGED");
 
   SG::GraphType g0;     // lowGraph
   SG::GraphType g1;     // highGraph
@@ -161,47 +207,73 @@ int main(int argc, char* const argv[]) {
   auto& mergePoints = merger_map_pair.first;
   auto& idMap = merger_map_pair.second;
   auto octree = SG::build_octree_locator(merger_map_pair.first->GetPoints());
-  auto merged_g = extend_low_info_graph_via_dfs(graphs, idMap, octree, radius, verbose);
+  auto extended_g = extend_low_info_graph_via_dfs(graphs, idMap, octree, radius, verbose);
 
-  // auto merged_g = SG::compare_low_and_high_info_graphs(g0, g1);
+  // auto extended_g = SG::compare_low_and_high_info_graphs(g0, g1);
+  auto nvertices_extended = boost::num_vertices(extended_g);
+  auto nedges_extended = boost::num_edges(extended_g);
+  std::cout << "** GExtended:  vertices: " << nvertices_extended
+            << ". edges: " << nedges_extended << std::endl;
+
+  if(exportExtendedLowInfoGraph) {
+    string exportExtendedLowInfoGraph_filename =
+        vm["exportExtendedLowInfoGraph"].as<string>();
+    export_graph_merge_low_high_info(
+        extended_g,
+        exportExtendedLowInfoGraph_filename,
+        output_file_path_extended,
+        useSerialized,
+        verbose,
+        "Extended");
+  }
+
+#ifdef VISUALIZE
+  if(visualize) {
+    SG::visualize_spatial_graph(extended_g);
+  }
+#endif
+
+  std::vector<std::reference_wrapper<const SG::GraphType>> graphs_merged;
+  graphs_merged.reserve(2);
+  graphs_merged.push_back(std::cref(extended_g));
+  graphs_merged.push_back(std::cref(g1));
+  auto merger_map_pair_merged = SG::get_vtk_points_from_graphs(graphs_merged);
+  auto& mergePoints_merged = merger_map_pair_merged.first;
+  auto& idMap_merged = merger_map_pair_merged.second;
+  auto octree_merged = SG::build_octree_locator(merger_map_pair_merged.first->GetPoints());
+
+  // auto extended_g_points_map_pair = SG::get_vtk_points_from_graph(extended_g);
+  // SG::append_new_graph_points(
+  //     extended_g_points_map_pair.first, extended_g_points_map_pair.second, mergePoints, idMap);
+  size_t extended_graph_index = 0;
+  size_t high_info_graph_index = 1;
+  double radius_touch = radius;
+  auto merged_g = SG::add_graph_peninsulas(
+      graphs_merged,
+      extended_graph_index,
+      high_info_graph_index,
+      idMap_merged,
+      octree_merged,
+      radius_touch,
+      verbose);
+
   auto nvertices_merged = boost::num_vertices(merged_g);
   auto nedges_merged = boost::num_edges(merged_g);
   std::cout << "** GMerged:  vertices: " << nvertices_merged
             << ". edges: " << nedges_merged << std::endl;
 
   if(exportMergedGraph) {
-    string exportMergedGraph_filename_merged =
+    string exportMergedGraph_filename =
         vm["exportMergedGraph"].as<string>();
-    const fs::path output_folder_path{exportMergedGraph_filename_merged};
-    if(!fs::exists(output_folder_path)) {
-      throw std::runtime_error("output folder doesn't exist : " +
-                               output_folder_path.string());
-    }
-
-    if(!useSerialized) {
-      boost::dynamic_properties dp_merged;
-      dp_merged.property("node_id", boost::get(boost::vertex_index, merged_g));
-      dp_merged.property("spatial_node",
-                         boost::get(boost::vertex_bundle, merged_g));
-      dp_merged.property("spatial_edge",
-                         boost::get(boost::edge_bundle, merged_g));
-      fs::path output_full_path =
-          output_folder_path / fs::path(output_file_path.string() + ".dot");
-      std::ofstream out;
-      out.open(output_full_path.string().c_str());
-      boost::write_graphviz_dp(out, merged_g, dp_merged);
-      if(verbose)
-        std::cout << "Output merged graph (graphviz) to: "
-                  << output_full_path.string() << std::endl;
-    } else {
-      fs::path output_full_path =
-          output_folder_path / fs::path(output_file_path.string() + ".txt");
-      SG::write_serialized_graph(merged_g, output_full_path.string());
-      if(verbose)
-        std::cout << "Output merged graph (serialize) to: "
-                  << output_full_path.string() << std::endl;
-    }
+    export_graph_merge_low_high_info(
+        merged_g,
+        exportMergedGraph_filename,
+        output_file_path_merged,
+        useSerialized,
+        verbose,
+        "Merged");
   }
+
 #ifdef VISUALIZE
   if(visualize) {
     SG::visualize_spatial_graph(merged_g);
