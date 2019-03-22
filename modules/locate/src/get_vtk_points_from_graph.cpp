@@ -106,8 +106,8 @@ void append_new_graph_points(
     // present)
     int is_new_point_inserted = mergePoints->InsertUniquePoint(
         new_graph_points->GetPoint(point_index), lastPtId);
-    // if the point already exists push_back the graph_descriptor for the new
-    // graph if it is new, first push the graph descriptors of previous graphs.
+    // If the point already exists push_back the graph_descriptor for the new
+    // graph. If it is new, first push the graph descriptors of previous graphs.
     assert(new_graph_id_map.at(point_index).size() == 1);
     const auto &current_graph_gdesc = new_graph_id_map.at(point_index)[0];
     if(!is_new_point_inserted) {
