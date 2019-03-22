@@ -6,6 +6,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_DEPENDS
   ${SG_MODULE_INTERNAL_DEPENDS}
   )
 set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
+  add_graph_peninsulas.cpp
   compare_graphs.cpp
   extend_low_info_graph.cpp
   )
