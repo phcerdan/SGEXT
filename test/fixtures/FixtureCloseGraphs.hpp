@@ -18,6 +18,9 @@
  *
  * *******************************************************************/
 
+#ifndef FIXTURE_CLOSE_GRAPHS_HPP
+#define FIXTURE_CLOSE_GRAPHS_HPP
+
 #include "gmock/gmock.h"
 #include "spatial_graph.hpp"
 #include "FixtureMatchingGraphs.hpp"
@@ -60,3 +63,4 @@ struct FixtureCloseGraphs : public FixtureMatchingGraphs {
   // void CreateMovedGR();
   void SetUp() override;
 };
+#endif
