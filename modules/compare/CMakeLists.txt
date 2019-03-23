@@ -9,6 +9,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
   add_graph_peninsulas.cpp
   compare_graphs.cpp
   extend_low_info_graph.cpp
+  spatial_graph_difference.cpp
   )
 list(TRANSFORM SG_MODULE_${SG_MODULE_NAME}_SOURCES PREPEND "src/")
 add_library(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} ${SG_MODULE_${SG_MODULE_NAME}_SOURCES})
