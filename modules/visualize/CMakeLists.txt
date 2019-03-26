@@ -17,14 +17,23 @@ set(qt_sources "")
 if(SG_MODULE_VISUALIZE_ENABLE_QT)
     set(qt_sources visualize_histograms.cpp)
 endif()
+
+set(modern_vtk_sources)
+if(${_modern_VTK_available})
+  set(modern_vtk_sources
+    # Requires OpenGL2
+    visualize_spatial_graph_with_image.cpp
+    )
+endif()
+
 set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
     ${qt_sources}
     convert_to_vtk_graph.cpp
     visualize_common.cpp
     visualize_object.cpp
     visualize_spatial_graph.cpp
-    visualize_spatial_graph_with_image.cpp
     vtkInteractorStyleTrackballCameraGraph.cpp
+    ${modern_vtk_sources}
     )
 list(TRANSFORM SG_MODULE_${SG_MODULE_NAME}_SOURCES PREPEND "src/")
 add_library(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} ${SG_MODULE_${SG_MODULE_NAME}_SOURCES})
