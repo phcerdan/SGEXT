@@ -71,6 +71,7 @@ find_package(ITK REQUIRED COMPONENTS
 )
 message(STATUS "ITK version: ${ITK_VERSION}")
 include(${ITK_USE_FILE})
+set(vtk_qt_components)
 if(SG_MODULE_VISUALIZE_ENABLE_QT)
   find_package(Qt5 REQUIRED
     Widgets
@@ -81,6 +82,9 @@ if(SG_MODULE_VISUALIZE_ENABLE_QT)
   if(Qt5_POSITION_INDEPENDENT_CODE)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
   endif()
+  set(vtk_qt_components
+    vtkGUISupportQt # QVTKWidget.h
+    )
 endif()
 
 if(SG_REQUIRES_VTK)
@@ -97,7 +101,7 @@ if(SG_REQUIRES_VTK)
     vtkViewsContext2D
     vtkInteractionWidgets
     vtkViewsInfovis
-    vtkGUISupportQt # QVTKWidget.h
+    ${vtk_qt_components}
     CONFIG
     )
   message(STATUS "VTK version: ${VTK_VERSION}")
