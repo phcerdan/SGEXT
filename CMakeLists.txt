@@ -87,6 +87,7 @@ if(SG_MODULE_VISUALIZE_ENABLE_QT)
     )
 endif()
 
+set(_modern_VTK_available 0)
 if(SG_REQUIRES_VTK)
   # VTK components to handle external dependency histo-header
   find_package(VTK REQUIRED COMPONENTS
@@ -109,6 +110,9 @@ if(SG_REQUIRES_VTK)
   # USE_FILE is deprecated? Keep it. This is the cause of AUTOINIT warnings
   # https://gitlab.kitware.com/vtk/vtk/issues/15895
   include(${VTK_USE_FILE})
+  if("${VTK_VERSION}" VERSION_GREATER "8.1") # Requires OpenGL2
+    set(_modern_VTK_available 1)
+  endif()
 endif()
 
 set(HISTO_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/histo/include
