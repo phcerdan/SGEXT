@@ -28,7 +28,7 @@ target_link_libraries(thin ${ITK_LIBRARIES} )
 target_link_libraries(thin ${DGTAL_LIBRARIES} )
 target_include_directories(thin PRIVATE ${DGTAL_INCLUDE_DIRS})
 if(VISUALIZE)
-    target_link_libraries(thin Qt5::Widgets Qt5::Xml )
+    # target_link_libraries(thin Qt5::Widgets Qt5::Xml )
     target_link_libraries(thin ${VTK_LIBRARIES} )
     target_compile_definitions(thin PUBLIC VISUALIZE)
 endif()
@@ -49,7 +49,7 @@ target_link_libraries(analyze_graph ${DGTAL_LIBRARIES} )
 target_include_directories(analyze_graph PRIVATE ${DGTAL_INCLUDE_DIRS} )
 if(VISUALIZE)
     target_link_libraries(analyze_graph SGVisualize )
-    target_link_libraries(analyze_graph Qt5::Widgets Qt5::Xml )
+    # target_link_libraries(analyze_graph Qt5::Widgets Qt5::Xml )
     target_compile_definitions(analyze_graph PUBLIC VISUALIZE)
 endif()
 
@@ -62,7 +62,7 @@ target_link_libraries(full_graph
 target_include_directories(full_graph PRIVATE ${DGTAL_INCLUDE_DIRS})
 if(VISUALIZE)
     target_link_libraries(full_graph SGVisualize )
-    target_link_libraries(full_graph Qt5::Widgets Qt5::Xml )
+    # target_link_libraries(full_graph Qt5::Widgets Qt5::Xml )
     target_compile_definitions(full_graph PUBLIC VISUALIZE)
 endif()
 
@@ -87,22 +87,23 @@ if(VISUALIZE)
     target_link_libraries(highlight_image_points ${Boost_LIBRARIES} )
     target_link_libraries(highlight_image_points ${ITK_LIBRARIES} )
     target_link_libraries(highlight_image_points ${DGTAL_LIBRARIES} )
-    target_link_libraries(highlight_image_points Qt5::Widgets Qt5::Xml )
+    # target_link_libraries(highlight_image_points Qt5::Widgets Qt5::Xml )
     target_link_libraries(highlight_image_points ${VTK_LIBRARIES} )
     target_include_directories(highlight_image_points PRIVATE ${DGTAL_INCLUDE_DIRS} )
 
-    add_executable(visualize_histograms_from_file
-        visualize_histograms_from_file.cpp
-        # ${SG_SRC_WITH_VTK_AND_QT}
-        )
-    target_link_libraries(visualize_histograms_from_file SGAnalyze SGVisualize )
-    target_link_libraries(visualize_histograms_from_file ${ITK_LIBRARIES} )
-    target_link_libraries(visualize_histograms_from_file Qt5::Widgets Qt5::Xml )
-
+    if(SG_MODULE_VISUALIZE_ENABLE_QT)
+        add_executable(visualize_histograms_from_file
+            visualize_histograms_from_file.cpp
+            # ${SG_SRC_WITH_VTK_AND_QT}
+            )
+        target_link_libraries(visualize_histograms_from_file SGAnalyze SGVisualize )
+        target_link_libraries(visualize_histograms_from_file ${ITK_LIBRARIES} )
+        target_link_libraries(visualize_histograms_from_file Qt5::Widgets Qt5::Xml )
+    endif()
     add_executable(visualize_graph_and_image visualize_graph_and_image.cpp)
     target_link_libraries(visualize_graph_and_image SGVisualize)
     target_link_libraries(visualize_graph_and_image ${ITK_LIBRARIES} )
-    target_link_libraries(visualize_graph_and_image Qt5::Widgets Qt5::Xml )
+    # target_link_libraries(visualize_graph_and_image Qt5::Widgets Qt5::Xml )
 endif()
 
 if(VISUALIZE)
