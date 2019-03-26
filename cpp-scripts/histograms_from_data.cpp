@@ -29,6 +29,7 @@
 
 #include "spatial_histograms.hpp"
 #include "graph_data.hpp"
+#include <fstream>
 
 using namespace std;
 namespace po = boost::program_options;
