@@ -7,6 +7,7 @@ set(_scripts_targets
     mask_distance_map_with_thin_image
     merge_low_high_info_graphs
     fill_holes_binary
+    graph_to_vtp
     )
 
 set(_scripts_targets_visualize # Using VTK
@@ -23,6 +24,10 @@ if(VISUALIZE AND SG_MODULE_VISUALIZE_ENABLE_QT)
     set(VISUALIZE_USING_QT 1)
 endif()
 
+add_executable(graph_to_vtp graph_to_vtp.cpp)
+target_link_libraries(graph_to_vtp SGLocate )
+target_link_libraries(graph_to_vtp ${Boost_LIBRARIES} )
+target_link_libraries(graph_to_vtp ${VTK_LIBRARIES} )
 
 add_executable(fill_holes_binary fill_holes_binary.cpp)
 target_link_libraries(fill_holes_binary ${Boost_LIBRARIES} )
