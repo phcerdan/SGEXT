@@ -42,14 +42,15 @@ message(STATUS "DGtal version: ${DGtal_VERSION}")
 find_package(ITK CONFIG REQUIRED)
 include(${ITK_USE_FILE})
 
-set(ITKImageIOModule "")
+set(ITKImageIOModule)
 if(${ITK_VERSION} VERSION_LESS "4.13.0")
-# Create list of avaialble image formats
-foreach(ImageFormat ${LIST_OF_IMAGEIO_FORMATS})
-  if (NOT ${ImageFormat}_image_module_name )
-    list(APPEND ITKImageIOModule ITKIO${ImageFormat})
-  endif()
-endforeach()
+  # Create list of avaialble image formats
+  # From: https://discourse.itk.org/t/find-all-available-modules-from-groupio/351/5
+  foreach( mod IN LISTS ITK_MODULES_ENABLED)
+    if( ${mod} MATCHES "IO")
+      list(APPEND ITKImageIOModule ${mod})
+    endif()
+  endforeach()
 else()
   set(ITKImageIOModule ITKImageIO)
 endif()
