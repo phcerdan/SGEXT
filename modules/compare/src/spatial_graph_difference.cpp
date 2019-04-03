@@ -6,13 +6,14 @@
 #include "spatial_graph_difference.hpp"
 #include "spatial_graph_difference_visitor.hpp"
 #include "graph_points_locator.hpp"
+#include "print_locator_points.hpp"
 #include <vtkIdList.h>
 #include <tuple>  // For std::tie
 
 namespace SG {
 
-GraphType spatial_graph_difference(GraphType& minuend_sg,
-                                   GraphType& substraend_sg,
+GraphType spatial_graph_difference(const GraphType& minuend_sg,
+                                   const GraphType& substraend_sg,
                                    double radius_touch, bool verbose) {
   // We are going to build on top of the extended graph
   GraphType diff_sg;
@@ -46,6 +47,11 @@ GraphType spatial_graph_difference(GraphType& minuend_sg,
   auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs);
   auto& idMap = merger_map_pair.second;
   auto octree = SG::build_octree_locator(merger_map_pair.first->GetPoints());
+  SG::print_id_graph_descriptor_map(idMap);
+  // std::cout << "Points" << std::endl;
+  // SG::print_points(merger_map_pair.first->GetPoints());
+  // std::cout << "Octree Points" << std::endl;
+  // SG::print_locator_points(octree);
 
   SpatialGraphDifferenceVisitor<GraphType, VertexMap, ColorMap> vis(
       diff_sg, substraend_sg, idMap, octree, radius_touch, colorMap, vertex_map,
