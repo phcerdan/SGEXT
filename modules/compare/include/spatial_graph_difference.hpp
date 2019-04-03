@@ -45,8 +45,8 @@ namespace SG {
  *
  * @return
  */
-GraphType spatial_graph_difference(GraphType& minuend_sg,
-                                   GraphType& substraend_sg,
+GraphType spatial_graph_difference(const GraphType& minuend_sg,
+                                   const GraphType& substraend_sg,
                                    double radius_touch,
                                    bool verbose);
 }  // end namespace SG
