@@ -15,7 +15,7 @@ namespace SG {
  *
  * @param locator input locator with points
  */
-void print_locator_points(vtkAbstractPointLocator* locator);
+void print_locator_points(vtkAbstractPointLocator* pointLocator);
 
 /**
  * Print the positions of all the points
@@ -31,6 +31,7 @@ void print_points(vtkPoints* points);
  * @param points
  */
 void print_point_from_id(const vtkIdType id, vtkPoints* points);
+void print_point_from_id(const vtkIdType id, vtkAbstractPointLocator* pointLocator);
 
 /**
  * Utility function to print the ids of a list
@@ -40,5 +41,6 @@ void print_point_from_id(const vtkIdType id, vtkPoints* points);
  * @param points
  */
 void print_point_list(vtkIdList* idList, vtkPoints* points);
+void print_point_list(vtkIdList* idList, vtkAbstractPointLocator* pointLocator);
 }  // namespace SG
 #endif
