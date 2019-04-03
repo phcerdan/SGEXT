@@ -21,8 +21,16 @@
 #include "get_vtk_points_from_graph.hpp"
 #include <unordered_map>
 #include "spatial_graph_utilities.hpp"
+#include <iostream>
 
 namespace SG {
+
+void print_id_graph_descriptor_map(const IdGraphDescriptorMap & idMap) {
+  std::cout << "idMap: Id --> vector.size()" << std::endl;
+  for(const auto &elem : idMap) {
+    std::cout << elem.first << " --> " << elem.second.size() <<"\n";
+  }
+}
 
 PointsIdMapPair get_vtk_points_from_graph(const GraphType &sg) {
   using vertex_descriptor = boost::graph_traits<GraphType>::vertex_descriptor;
@@ -127,16 +135,25 @@ void append_new_graph_points(
     const auto &current_graph_gdesc = new_graph_id_map.at(point_index)[0];
     if(!is_new_point_inserted) {
       assert(unique_id_map.at(lastPtId).size() == number_of_previous_graphs);
-      unique_id_map[lastPtId].push_back(current_graph_gdesc);
     } else {
       std::vector<graph_descriptor> gdescs_non_existant(
           number_of_previous_graphs);
       unique_id_map[lastPtId] = gdescs_non_existant;
-      // And at the end push_back the current_graph descriptor
       assert(unique_id_map.at(lastPtId).size() == number_of_previous_graphs);
-      unique_id_map[lastPtId].push_back(current_graph_gdesc);
     }
+    // And at the end push_back the current_graph descriptor
+    unique_id_map[lastPtId].push_back(current_graph_gdesc);
     assert(unique_id_map.at(lastPtId).size() == number_of_previous_graphs + 1);
+  }
+
+  for(auto &elem : unique_id_map) {
+    auto & graph_descriptors = elem.second;
+    assert(graph_descriptors.size() >= number_of_previous_graphs);
+    // This will happen when the first graph has different points than the appended graph
+    // We append an empty descriptor
+    if(graph_descriptors.size() == number_of_previous_graphs) {
+      graph_descriptors.push_back(graph_descriptor());
+    }
   }
 };
 

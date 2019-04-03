@@ -65,6 +65,14 @@ void print_point_from_id(const vtkIdType id, vtkPoints* points) {
   std::cout << std::endl;
 }
 
+void print_point_from_id(const vtkIdType id, vtkAbstractPointLocator* pointLocator) {
+  auto a_point = pointLocator->GetDataSet()->GetPoint(id);
+  std::cout << id << ": ";
+  std::cout << "(" << a_point[0] << ", " << a_point[1] << ", " << a_point[2]
+            << ")";
+  std::cout << std::endl;
+}
+
 void print_point_list(vtkIdList* idList, vtkPoints* points) {
   auto num_ids = idList->GetNumberOfIds();
   if(!num_ids) {
@@ -74,6 +82,18 @@ void print_point_list(vtkIdList* idList, vtkPoints* points) {
 
   for(auto idIndex = 0; idIndex < num_ids; ++idIndex) {
     print_point_from_id(idList->GetId(idIndex), points);
+  }
+}
+
+void print_point_list(vtkIdList* idList, vtkAbstractPointLocator * pointLocator) {
+  auto num_ids = idList->GetNumberOfIds();
+  if(!num_ids) {
+    std::cout << "point list is EMPTY" << std::endl;
+    return;
+  }
+
+  for(auto idIndex = 0; idIndex < num_ids; ++idIndex) {
+    print_point_from_id(idList->GetId(idIndex), pointLocator);
   }
 }
 

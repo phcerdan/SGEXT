@@ -40,6 +40,7 @@ using PointsIdMapPair =
 using MergePointsIdMapPair =
     std::pair<vtkSmartPointer<vtkMergePoints>, IdGraphDescriptorMap>;
 
+void print_id_graph_descriptor_map(const IdGraphDescriptorMap &);
 /**
  * Get vtkPoints extracted from the input spatial graph.
  *
