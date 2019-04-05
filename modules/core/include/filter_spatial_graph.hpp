@@ -29,6 +29,7 @@ using FilteredGraphType =
     boost::filtered_graph<GraphType,
                           std::function<bool(GraphType::edge_descriptor)>,
                           std::function<bool(GraphType::vertex_descriptor)>>;
+using ComponentGraphType = FilteredGraphType;
 
 using VertexDescriptorUnorderedSet =
     std::unordered_set<GraphType::vertex_descriptor>;
@@ -60,5 +61,25 @@ FilteredGraphType filter_by_sets_no_copy(
 GraphType filter_by_sets(const EdgeDescriptorUnorderedSet& remove_edges,
                          const VertexDescriptorUnorderedSet& remove_nodes,
                          const GraphType& g);
+
+/**
+ * Return all the different components of the input graph as a vector
+ * of filtered graphs.
+ *
+ * Filtered graphs are views of the original graph, they share the same
+ * vertex and edge descriptors.
+ * However, num_edges and num_vertices of a filtered graph returns the numbers on
+ * the original graph.
+ * Note that there is no copy, so the inputGraph has to outlive the filtered graph
+ *
+ * @param inputGraph
+ *
+ * @return
+ */
+std::vector<ComponentGraphType> filter_component_graphs(const GraphType & inputGraph);
+std::vector<ComponentGraphType> filter_component_graphs(
+    const GraphType & inputGraph,
+    const size_t num_of_components,
+    const std::unordered_map<GraphType::vertex_descriptor, int> &components_map);
 }  // namespace SG
 #endif
