@@ -32,7 +32,7 @@ template<typename GraphType>
 size_t num_edge_points(const GraphType &sg)
 {
   auto edges = boost::edges(sg);
-  size_t num_points;
+  size_t num_points = 0;
   for(auto ei = edges.first; ei != edges.second; ++ei) {
     for(auto &ep : sg[*ei].edge_points) {
       ++num_points;
