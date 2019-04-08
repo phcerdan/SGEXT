@@ -36,9 +36,27 @@ struct SplitEdge {
   std::vector<typename SpatialGraphType::edge_descriptor> edge_descriptors_added;
 };
 
+
+/**
+ * Given a position or an index, a edge_descriptor, and a graph.
+ * This functions splits the edge into two new edges and a new vertex at
+ * the split location.
+ * The old edge is removed.
+ *
+ * A--------B
+ * becomes:
+ * A---C----B
+ *
+ * @tparam SpatialGraphType spatial graph type
+ * @param pos position
+ * @param ed edge_descriptor
+ * @param graph input/output graph (modified in place)
+ *
+ * @return SplitEdge struct with information about the new vertex and edges.
+ */
 template<typename SpatialGraphType>
 SplitEdge<SpatialGraphType> split_edge(const PointType & pos,
-    typename SpatialGraphType::edge_descriptor &ed,
+    const typename SpatialGraphType::edge_descriptor &ed,
     SpatialGraphType & graph)
 {
   const auto & ep = graph[ed].edge_points;
@@ -55,7 +73,7 @@ SplitEdge<SpatialGraphType> split_edge(const PointType & pos,
 
 template<typename SpatialGraphType>
 SplitEdge<SpatialGraphType> split_edge(const size_t edge_point_index,
-    typename SpatialGraphType::edge_descriptor &ed,
+    const typename SpatialGraphType::edge_descriptor &ed,
     SpatialGraphType & graph)
 {
   auto & ep = graph[ed].edge_points;
