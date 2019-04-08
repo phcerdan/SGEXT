@@ -227,7 +227,7 @@ struct SpatialGraphDifferenceVisitor : public boost::default_dfs_visitor {
     // At least one of the nodes is in the result graph
 
     // If one of nodes of the edge exist, but not the other.
-    // And edge does not in substraend graph,
+    // And edge does not exist in substraend graph,
     // then add the edge
     if(only_one_source_or_target_is_in_result_graph) {
       bool substraend_edge_exists = false;
@@ -331,10 +331,6 @@ private:
     // The idMap should be constructed with the first index corresponding to the
     // input graph (minuend_sg) and the last index corresponding to
     // substraend_sg
-    std::cerr << "m_point_id_graphs_map size: "
-              << m_point_id_graphs_map.cbegin()->second.size() << std::endl;
-    std::cerr << "descriptor vector size: "
-              << closest_existing_descriptor_by_graph.size() << std::endl;
     assert(closest_existing_descriptor_by_graph.size() == 2);
     // SG::print_graph_descriptor(
     //     closest_existing_descriptor_by_graph[0].descriptor, "gdesc_minuend");
