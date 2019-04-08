@@ -93,7 +93,7 @@ void append_new_graph_points(
     std::unordered_map<vtkIdType, std::vector<graph_descriptor>>
         &unique_id_map) {
   const auto number_of_previous_graphs = unique_id_map.cbegin()->second.size();
-  auto unique_points = mergePoints->GetPoints();
+  // auto unique_points = mergePoints->GetPoints();
   // const auto & g = inputGraph;
   // const auto points_map_pair = get_vtk_points_from_graph(g);
   BoundingBox box(mergePoints->GetBounds());
@@ -118,17 +118,16 @@ void append_new_graph_points(
     // graph. If it is new, first push the graph descriptors of previous graphs.
     assert(new_graph_id_map.at(point_index).size() == 1);
     const auto &current_graph_gdesc = new_graph_id_map.at(point_index)[0];
-    if(!is_new_point_inserted) {
-      assert(unique_id_map.at(lastPtId).size() == number_of_previous_graphs);
-    } else {
+    if(is_new_point_inserted) {
       std::vector<graph_descriptor> gdescs_non_existant(
           number_of_previous_graphs);
       unique_id_map[lastPtId] = gdescs_non_existant;
-      assert(unique_id_map.at(lastPtId).size() == number_of_previous_graphs);
+      // assert(unique_id_map.at(lastPtId).size() == number_of_previous_graphs);
     }
     // And at the end push_back the current_graph descriptor
-    unique_id_map[lastPtId].push_back(current_graph_gdesc);
-    assert(unique_id_map.at(lastPtId).size() == number_of_previous_graphs + 1);
+    auto & graph_descriptors = unique_id_map.at(lastPtId);
+    assert(graph_descriptors.size() == number_of_previous_graphs);
+    graph_descriptors.push_back(current_graph_gdesc);
   }
 
   for(auto &elem : unique_id_map) {
@@ -139,6 +138,7 @@ void append_new_graph_points(
     if(graph_descriptors.size() == number_of_previous_graphs) {
       graph_descriptors.push_back(graph_descriptor());
     }
+    assert(graph_descriptors.size() == number_of_previous_graphs + 1);
   }
 };
 
