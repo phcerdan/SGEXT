@@ -16,7 +16,7 @@ GraphType extend_low_info_graph_via_dfs(
     double radius,
     bool verbose) {
   const GraphType & input_sg = graphs[0];
-  GraphType sg;
+  GraphType result_sg;
   using vertex_descriptor = boost::graph_traits<GraphType>::vertex_descriptor;
   using vertex_iterator = boost::graph_traits<GraphType>::vertex_iterator;
 
@@ -29,7 +29,7 @@ GraphType extend_low_info_graph_via_dfs(
   VertexMap vertex_map;
 
   ExtendLowInfoGraphVisitor<GraphType, VertexMap, ColorMap> vis(
-      sg, graphs, idMap, octree, radius, colorMap, vertex_map, verbose);
+     result_sg, graphs, idMap, octree, radius, colorMap, vertex_map, verbose);
 
   // Mark as unvisited (white) all the vertices
   vertex_iterator ui, ui_end;
@@ -52,7 +52,7 @@ GraphType extend_low_info_graph_via_dfs(
     boost::depth_first_visit(input_sg, start, vis, propColorMap);
   }
 
-  return sg;
+  return result_sg;
 };
 
 }  // end namespace SG

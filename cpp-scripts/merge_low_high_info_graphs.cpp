@@ -166,7 +166,7 @@ int main(int argc, char* const argv[]) {
 
   auto repeated_points_g0 = SG::check_unique_points_in_graph(g0);
   if(repeated_points_g0.second) {
-    std::cout << "Warning: duplicated points exist in low info graph (g0)"
+    std::cout << "Warning: duplicated points exist in low info graph (g0). "
                  "Repeated Points: "
               << repeated_points_g0.first.size() << std::endl;
     for(const auto& p : repeated_points_g0.first) {
@@ -176,7 +176,7 @@ int main(int argc, char* const argv[]) {
   }
   auto repeated_points_g1 = SG::check_unique_points_in_graph(g1);
   if(repeated_points_g1.second) {
-    std::cout << "Warning: duplicated points exist in high info graph (g1)"
+    std::cout << "Warning: duplicated points exist in high info graph (g1). "
                  "Repeated Points: "
               << repeated_points_g1.first.size() << std::endl;
     for(const auto& p : repeated_points_g1.first) {
@@ -209,6 +209,17 @@ int main(int argc, char* const argv[]) {
   auto octree = SG::build_octree_locator(merger_map_pair.first->GetPoints());
   auto extended_g = extend_low_info_graph_via_dfs(graphs, idMap, octree, radius, verbose);
 
+  auto repeated_points_extended_g = SG::check_unique_points_in_graph(extended_g);
+  if(repeated_points_extended_g.second) {
+    std::cout << "Warning: duplicated points exist in extended_low_info graph (extended_g). "
+                 "Repeated Points: "
+              << repeated_points_extended_g.first.size() << std::endl;
+    for(const auto& p : repeated_points_extended_g.first) {
+      SG::print_pos(std::cout, p);
+      std::cout << std::endl;
+    }
+  }
+
   // auto extended_g = SG::compare_low_and_high_info_graphs(g0, g1);
   auto nvertices_extended = boost::num_vertices(extended_g);
   auto nedges_extended = boost::num_edges(extended_g);
@@ -240,7 +251,6 @@ int main(int argc, char* const argv[]) {
   auto merger_map_pair_merged = SG::get_vtk_points_from_graphs(graphs_merged);
   auto& mergePoints_merged = merger_map_pair_merged.first;
   auto& idMap_merged = merger_map_pair_merged.second;
-  auto octree_merged = SG::build_octree_locator(merger_map_pair_merged.first->GetPoints());
 
   // auto extended_g_points_map_pair = SG::get_vtk_points_from_graph(extended_g);
   // SG::append_new_graph_points(
@@ -248,14 +258,16 @@ int main(int argc, char* const argv[]) {
   size_t extended_graph_index = 0;
   size_t high_info_graph_index = 1;
   double radius_touch = radius;
-  auto merged_g = SG::add_graph_peninsulas(
+  auto add_graph_peninsulas_result = SG::add_graph_peninsulas(
       graphs_merged,
       extended_graph_index,
       high_info_graph_index,
+      mergePoints_merged,
       idMap_merged,
-      octree_merged,
       radius_touch,
       verbose);
+  auto & merged_g = add_graph_peninsulas_result.graph;
+  auto & octree_merged = add_graph_peninsulas_result.octree;
 
   auto nvertices_merged = boost::num_vertices(merged_g);
   auto nedges_merged = boost::num_edges(merged_g);
