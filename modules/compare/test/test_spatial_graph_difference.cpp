@@ -51,3 +51,6 @@ TEST_F(FixtureSquareCrossGraph, spatial_graph_difference_SquareCrossMinusSquare)
   auto points_map_pair = SG::get_vtk_points_from_graph(g_diff);
   SG::visualize_spatial_graph_with_points(g_diff, points_map_pair.first, 0.8);
 }
+
+// TEST_F(FixtureSquareCrossGraph, spatial_graph_difference_SquareCrossMinusCross_withExtraBanches) {
+// }

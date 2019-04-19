@@ -40,11 +40,11 @@
 namespace SG {
 
 /**
- * The original idea of this visitor is to create a result (m_sg) graph with the
+ * The original idea of this visitor is to create a result (m_result_sg) graph with the
  * same amount of nodes and edges than the low info graph, but where info from
  * high info graphs is gathered to move the end-points, and extend the edges.
  *
- * The resulting m_sg will be the first step to build the final result,
+ * The resulting m_result_sg will be the first step to build the final result,
  * where high information is integrated, but
  * the graph should be still precise with high
  * confidence.
@@ -79,7 +79,7 @@ struct ExtendLowInfoGraphVisitor : public boost::default_dfs_visitor {
       IdGraphDescriptorMap & point_id_graphs_map, vtkOctreePointLocator* octree,
       double &radius,
       ColorMap &color_map, VertexMap &vertex_map, bool &verbose)
-      : m_sg(sg),
+      : m_result_sg(sg),
         m_graphs(graphs),
         m_point_id_graphs_map(point_id_graphs_map),
         m_octree(octree),
@@ -89,7 +89,7 @@ struct ExtendLowInfoGraphVisitor : public boost::default_dfs_visitor {
         m_verbose(verbose) {}
 
   /// The resulting graph
-  SpatialGraph &m_sg;
+  SpatialGraph &m_result_sg;
   /// The array of graphs ordered from low to high info.
   const std::vector<std::reference_wrapper<const SpatialGraph>> &m_graphs;
   IdGraphDescriptorMap & m_point_id_graphs_map;
@@ -108,6 +108,8 @@ struct ExtendLowInfoGraphVisitor : public boost::default_dfs_visitor {
   size_t m_number_edge_points_to_ignore_low_info_noisy_branch = 10;
   ResultToOriginalVertexMap m_result_to_original_vertex_map;
   bool &m_verbose;
+  // TODO Debug variable, remove
+  bool m_verbose_extra = false;
 
   /**
    * invoked when a vertex is encountered for the first time.
@@ -173,12 +175,12 @@ We use a shortest path search for finding that path.
                 << ArrayUtilities::to_string(input_sg[target].pos) << std::endl;
 
     std::array<vertex_descriptor, 2> nodes = {source, target};
-    std::array<vertex_descriptor, 2> sg_nodes;
+    std::array<vertex_descriptor, 2> result_sg_nodes;
     for(size_t source_or_target_index = 0; source_or_target_index < nodes.size();
         ++source_or_target_index ) {
       const auto & u = nodes[source_or_target_index];
       if(m_verbose) std::cout << "PROCESSING low info u: " << u << std::endl;
-      // Check if vertex has been added to the m_sg (Check VertexMap)
+      // Check if vertex has been added to the m_result_sg (Check VertexMap)
       vertex_descriptor sg_vertex_descriptor;
       bool sg_vertex_exists = false;
       auto vertex_search = m_vertex_map.find(u);
@@ -191,7 +193,7 @@ We use a shortest path search for finding that path.
           std::cout << "ALREADY ADDED u->m_vertex_map[u]: "
             << u <<"->" <<m_vertex_map[u] << std::endl;
         }
-        sg_nodes[source_or_target_index] = m_vertex_map[u];
+        result_sg_nodes[source_or_target_index] = m_vertex_map[u];
         continue;  // already added
       }
       // Find the vertices in the other graphs associated to this vertex
@@ -293,15 +295,15 @@ We use a shortest path search for finding that path.
         vertex_descriptor sg_vertex_descriptor;
         if(!vertex_exists_close_by_in_high_info_graphs) {
           sg_vertex_descriptor = boost::add_vertex(
-            m_graphs[high_graph_index].get()[close_desc.descriptor.vertex_d], this->m_sg);
+            m_graphs[high_graph_index].get()[close_desc.descriptor.vertex_d], this->m_result_sg);
           add_to_map_result_to_original(sg_vertex_descriptor, close_desc.descriptor.vertex_d, high_graph_index);
         } else {
           sg_vertex_descriptor = boost::add_vertex(
-            m_graphs[high_graph_index].get()[close_vertex_desc.descriptor.vertex_d], this->m_sg);
+            m_graphs[high_graph_index].get()[close_vertex_desc.descriptor.vertex_d], this->m_result_sg);
           add_to_map_result_to_original(sg_vertex_descriptor, close_vertex_desc.descriptor.vertex_d, high_graph_index);
         }
         m_vertex_map.emplace(u, sg_vertex_descriptor);
-        sg_nodes[source_or_target_index] = sg_vertex_descriptor;
+        result_sg_nodes[source_or_target_index] = sg_vertex_descriptor;
         add_to_map_result_to_original(sg_vertex_descriptor, u, low_graph_index);
       } else { // low info vertex is an edge in high info graph
         if(m_verbose) std::cout << u << " IS AN EDGE in high graph" << std::endl;
@@ -320,9 +322,9 @@ We use a shortest path search for finding that path.
 
         auto sg_vertex_descriptor = boost::add_vertex(
             m_graphs[high_graph_index].get()[chosen_high_graph_node],
-            this->m_sg);
+            this->m_result_sg);
         m_vertex_map.emplace(u, sg_vertex_descriptor);
-        sg_nodes[source_or_target_index] = sg_vertex_descriptor;
+        result_sg_nodes[source_or_target_index] = sg_vertex_descriptor;
         add_to_map_result_to_original(sg_vertex_descriptor, u, low_graph_index);
         add_to_map_result_to_original(sg_vertex_descriptor, chosen_high_graph_node, high_graph_index);
       }
@@ -334,32 +336,30 @@ We use a shortest path search for finding that path.
       std::cout << "Map of nodes between graphs:" << std::endl;
       std::cout <<"source: nodes[0]: " << nodes[0] << std::endl;
       std::cout <<"target: nodes[1]: " << nodes[1] << std::endl;
-      std::cout <<"source: sg_nodes[0]: " << sg_nodes[0] << std::endl;
-      std::cout <<"target: sg_nodes[1]: " << sg_nodes[1] << std::endl;
-      std::cout <<"source: sg_nodes[0]: " << sg_nodes[0] <<
-        " -> g0: " << m_result_to_original_vertex_map.at(sg_nodes[0])[low_graph_index] <<
-        "; g1: " << m_result_to_original_vertex_map.at(sg_nodes[0])[high_graph_index] << std::endl;
-      std::cout <<"source: sg_nodes[1]: " << sg_nodes[1] <<
-        " -> g0: " << m_result_to_original_vertex_map.at(sg_nodes[1])[low_graph_index] <<
-        "; g1: " << m_result_to_original_vertex_map.at(sg_nodes[1])[high_graph_index] << std::endl;
+      std::cout <<"source: result_sg_nodes[0]: " << result_sg_nodes[0] <<
+        " -> g0: " << m_result_to_original_vertex_map.at(result_sg_nodes[0])[low_graph_index] <<
+        "; g1: " << m_result_to_original_vertex_map.at(result_sg_nodes[0])[high_graph_index] << std::endl;
+      std::cout <<"source: result_sg_nodes[1]: " << result_sg_nodes[1] <<
+        " -> g0: " << m_result_to_original_vertex_map.at(result_sg_nodes[1])[low_graph_index] <<
+        "; g1: " << m_result_to_original_vertex_map.at(result_sg_nodes[1])[high_graph_index] << std::endl;
       std::cout << "...About to add edges..." << std::endl;
     }
 
-    // Add edges, use shortest_path get the path from sg_nodes[0] to sg_nodes[1]
+    // Add edges, use shortest_path get the path from result_sg_nodes[0] to result_sg_nodes[1]
     // We query the high info graph
     // It might happen that the high info graph has branches between the original
     // source and target, but we ignore them with approach.
 
     auto high_graph_source =
-      m_result_to_original_vertex_map.at(sg_nodes[0])[high_graph_index];
+      m_result_to_original_vertex_map.at(result_sg_nodes[0])[high_graph_index];
     auto high_graph_target =
-      m_result_to_original_vertex_map.at(sg_nodes[1])[high_graph_index];
+      m_result_to_original_vertex_map.at(result_sg_nodes[1])[high_graph_index];
     SpatialEdge sg_edge = create_spatial_edge_from_shortest_path(
         high_graph_source, high_graph_target, high_graph_index);
 
-    auto any_edge_exist = boost::edge(sg_nodes[0], sg_nodes[1], m_sg);
+    auto any_edge_exist = boost::edge(result_sg_nodes[0], result_sg_nodes[1], m_result_sg);
     if(!any_edge_exist.second) {
-      auto added_edge = boost::add_edge(sg_nodes[0], sg_nodes[1], sg_edge, m_sg);
+      auto added_edge = boost::add_edge(result_sg_nodes[0], result_sg_nodes[1], sg_edge, m_result_sg);
     }
 
   }
@@ -422,15 +422,17 @@ private:
         if(!edge_pair.second) std::cout << "WHAAAT? edge doesn't exist? "<< std::endl;
         shortest_path_edge_descriptors.push_back(edge_pair.first);
       }
-      for(const auto & ed : shortest_path_edge_descriptors) {
-        std::cout << "edge: " << ed << " --> ";
-        std::cout << m_graphs[high_graph_index].get()[ed] << std::endl;
+      if(m_verbose_extra) {
+        for(const auto & ed : shortest_path_edge_descriptors) {
+          std::cout << "edge: " << ed << " --> ";
+          std::cout << m_graphs[high_graph_index].get()[ed] << std::endl;
+        }
       }
     }
     if(m_verbose) std::cout << "CREATING EDGE FROM SHORTEST_PATH...." << std::endl;
     SpatialEdge sg_edge = SG::create_edge_from_path(shortest_path, m_graphs[high_graph_index].get());
     if(m_verbose) std::cout << "EDGE FROM SHORTEST_PATH CREATED:" << std::endl;
-    if(m_verbose) std::cout << sg_edge << std::endl;
+    if(m_verbose_extra) std::cout << sg_edge << std::endl;
 
     return sg_edge;
   }

@@ -27,8 +27,15 @@
 #include <unordered_map>
 #include <vector>
 #include <vtkOctreePointLocator.h>
+#include <vtkPointLocator.h>
+#include <vtkSmartPointer.h>
 
 namespace SG {
+
+struct AddGraphPeninsulasResult {
+  GraphType graph;
+  vtkSmartPointer<vtkOctreePointLocator> octree;
+};
 
 /**
  * A peninsula is any subgraph from graphs[high_info_graph_index] only contacting the result graph
@@ -42,12 +49,12 @@ namespace SG {
  * @param radius_touch
  * @param verbose
  */
-GraphType add_graph_peninsulas(
+AddGraphPeninsulasResult add_graph_peninsulas(
     const std::vector<std::reference_wrapper<const GraphType>>& graphs,
     size_t extended_graph_index,
     size_t high_info_graph_index,
+    vtkPointLocator* mergePoints,
     std::unordered_map<vtkIdType, std::vector<graph_descriptor>>& idMap,
-    vtkOctreePointLocator * octree,
     double radius_touch,
     bool verbose);
 
