@@ -116,6 +116,8 @@ if(SG_REQUIRES_VTK)
   endif()
 endif()
 
+set(sgext_export_file "${PROJECT_BINARY_DIR}/SGEXTTargets.cmake")
+
 set(HISTO_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/histo/include
         CACHE PATH "histo include directory")
 install(DIRECTORY ${HISTO_INCLUDE_DIR}/ DESTINATION include/sgext)
@@ -131,6 +133,11 @@ target_include_directories(histo INTERFACE
 install(TARGETS histo
   EXPORT SGEXTTargets
   DESTINATION include)
+
+# export to the build tree
+export(TARGETS histo
+  NAMESPACE SGEXT::
+  APPEND FILE ${sgext_export_file})
 
 if(SG_BUILD_TESTING)
   enable_testing()
@@ -157,7 +164,6 @@ if(SG_BUILD_TESTING)
 endif()
 
 set(SG_LIBRARIES "")
-set(sgext_export_file "${PROJECT_BINARY_DIR}/SGEXTTargets.cmake")
 include(SGModuleMacros) # module macros
 add_subdirectory(modules/core)
 add_subdirectory(modules/extract)
