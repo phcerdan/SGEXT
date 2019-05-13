@@ -97,6 +97,10 @@ int main(int argc, char* const argv[]) {
   opt_desc.add_options()("exportMergedGraph,o", po::value<string>()->required(),
                          "Write .dot file with the final graph (with pensinsulas added) or "
                          ".txt file if --useSerialized is on.");
+  opt_desc.add_options()("computePeninsulas,p",
+                         po::bool_switch()->default_value(false),
+                         "Perform the full analysis adding isolated components with "
+                         "zero or one touching point with the extensted graph.");
 #ifdef VISUALIZE
   opt_desc.add_options()(
       "visualize,t", po::bool_switch()->default_value(false),
@@ -131,6 +135,7 @@ int main(int argc, char* const argv[]) {
   bool exportExtendedLowInfoGraph = vm.count("exportExtendedLowInfoGraph");
   bool exportMergedGraph = vm.count("exportMergedGraph");
   bool useSerialized = vm["useSerialized"].as<bool>();
+  bool computePeninsulas = vm["computePeninsulas"].as<bool>();
 
 #ifdef VISUALIZE
   bool visualize = vm["visualize"].as<bool>();
@@ -243,6 +248,11 @@ int main(int argc, char* const argv[]) {
     SG::visualize_spatial_graph(extended_g);
   }
 #endif
+
+  // Return early if user not interested in full analysis.
+  if(!computePeninsulas) {
+    return EXIT_SUCCESS;
+  }
 
   std::vector<std::reference_wrapper<const SG::GraphType>> graphs_merged;
   graphs_merged.reserve(2);
