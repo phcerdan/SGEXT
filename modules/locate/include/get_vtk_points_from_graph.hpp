@@ -18,13 +18,14 @@
 
 namespace SG {
 
+using IdGraphDescriptorMap =
+    std::unordered_map<vtkIdType, std::vector<graph_descriptor>>;
 using PointsIdMapPair =
-    std::pair<vtkSmartPointer<vtkPoints>,
-              std::unordered_map<vtkIdType, std::vector<graph_descriptor>>>;
+    std::pair<vtkSmartPointer<vtkPoints>, IdGraphDescriptorMap>;
 using MergePointsIdMapPair =
-    std::pair<vtkSmartPointer<vtkMergePoints>,
-              std::unordered_map<vtkIdType, std::vector<graph_descriptor>>>;
+    std::pair<vtkSmartPointer<vtkMergePoints>, IdGraphDescriptorMap>;
 
+void print_id_graph_descriptor_map(const IdGraphDescriptorMap &);
 /**
  * Get vtkPoints extracted from the input spatial graph.
  *

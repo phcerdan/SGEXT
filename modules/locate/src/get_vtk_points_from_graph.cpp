@@ -6,8 +6,16 @@
 #include "get_vtk_points_from_graph.hpp"
 #include <unordered_map>
 #include "spatial_graph_utilities.hpp"
+#include <iostream>
 
 namespace SG {
+
+void print_id_graph_descriptor_map(const IdGraphDescriptorMap & idMap) {
+  std::cout << "idMap: Id --> vector.size()" << std::endl;
+  for(const auto &elem : idMap) {
+    std::cout << elem.first << " --> " << elem.second.size() <<"\n";
+  }
+}
 
 PointsIdMapPair get_vtk_points_from_graph(const GraphType &sg) {
   using vertex_descriptor = boost::graph_traits<GraphType>::vertex_descriptor;
@@ -85,7 +93,7 @@ void append_new_graph_points(
     std::unordered_map<vtkIdType, std::vector<graph_descriptor>>
         &unique_id_map) {
   const auto number_of_previous_graphs = unique_id_map.cbegin()->second.size();
-  auto unique_points = mergePoints->GetPoints();
+  // auto unique_points = mergePoints->GetPoints();
   // const auto & g = inputGraph;
   // const auto points_map_pair = get_vtk_points_from_graph(g);
   BoundingBox box(mergePoints->GetBounds());
@@ -106,28 +114,35 @@ void append_new_graph_points(
     // present)
     int is_new_point_inserted = mergePoints->InsertUniquePoint(
         new_graph_points->GetPoint(point_index), lastPtId);
-    // if the point already exists push_back the graph_descriptor for the new
-    // graph if it is new, first push the graph descriptors of previous graphs.
+    // If the point already exists push_back the graph_descriptor for the new
+    // graph. If it is new, first push the graph descriptors of previous graphs.
     assert(new_graph_id_map.at(point_index).size() == 1);
     const auto &current_graph_gdesc = new_graph_id_map.at(point_index)[0];
-    if(!is_new_point_inserted) {
-      assert(unique_id_map.at(lastPtId).size() == number_of_previous_graphs);
-      unique_id_map[lastPtId].push_back(current_graph_gdesc);
-    } else {
+    if(is_new_point_inserted) {
       std::vector<graph_descriptor> gdescs_non_existant(
           number_of_previous_graphs);
       unique_id_map[lastPtId] = gdescs_non_existant;
-      // And at the end push_back the current_graph descriptor
-      assert(unique_id_map.at(lastPtId).size() == number_of_previous_graphs);
-      unique_id_map[lastPtId].push_back(current_graph_gdesc);
+      // assert(unique_id_map.at(lastPtId).size() == number_of_previous_graphs);
     }
-    assert(unique_id_map.at(lastPtId).size() == number_of_previous_graphs + 1);
+    // And at the end push_back the current_graph descriptor
+    auto & graph_descriptors = unique_id_map.at(lastPtId);
+    assert(graph_descriptors.size() == number_of_previous_graphs);
+    graph_descriptors.push_back(current_graph_gdesc);
+  }
+
+  for(auto &elem : unique_id_map) {
+    auto & graph_descriptors = elem.second;
+    assert(graph_descriptors.size() >= number_of_previous_graphs);
+    // This will happen when the first graph has different points than the appended graph
+    // We append an empty descriptor
+    if(graph_descriptors.size() == number_of_previous_graphs) {
+      graph_descriptors.push_back(graph_descriptor());
+    }
+    assert(graph_descriptors.size() == number_of_previous_graphs + 1);
   }
 };
 
-std::pair<vtkSmartPointer<vtkMergePoints>,
-          std::unordered_map<vtkIdType, std::vector<graph_descriptor>>>
-get_vtk_points_from_graphs(
+MergePointsIdMapPair get_vtk_points_from_graphs(
     const std::vector<std::reference_wrapper<const GraphType>> &graphs,
     const BoundingBox *box) {
   assert(graphs.size() > 0);

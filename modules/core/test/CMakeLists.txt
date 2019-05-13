@@ -11,10 +11,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_TESTS
   test_graphviz_io.cpp
   test_shortest_path.cpp
   test_transform_to_physical_point.cpp
-  # test_merge_nodes.cpp
-  # test_spatial_graph_reduction.cpp
-  # test_split_loop.cpp
-  # test_trim_graph.cpp
+  test_split_edge.cpp
   )
 
 SG_add_gtests()
