@@ -42,14 +42,15 @@ message(STATUS "DGtal version: ${DGtal_VERSION}")
 find_package(ITK CONFIG REQUIRED)
 include(${ITK_USE_FILE})
 
-set(ITKImageIOModule "")
+set(ITKImageIOModule)
 if(${ITK_VERSION} VERSION_LESS "4.13.0")
-# Create list of avaialble image formats
-foreach(ImageFormat ${LIST_OF_IMAGEIO_FORMATS})
-  if (NOT ${ImageFormat}_image_module_name )
-    list(APPEND ITKImageIOModule ITKIO${ImageFormat})
-  endif()
-endforeach()
+  # Create list of avaialble image formats
+  # From: https://discourse.itk.org/t/find-all-available-modules-from-groupio/351/5
+  foreach( mod IN LISTS ITK_MODULES_ENABLED)
+    if( ${mod} MATCHES "IO")
+      list(APPEND ITKImageIOModule ${mod})
+    endif()
+  endforeach()
 else()
   set(ITKImageIOModule ITKImageIO)
 endif()
@@ -71,6 +72,7 @@ find_package(ITK REQUIRED COMPONENTS
 )
 message(STATUS "ITK version: ${ITK_VERSION}")
 include(${ITK_USE_FILE})
+set(vtk_qt_components)
 if(SG_MODULE_VISUALIZE_ENABLE_QT)
   find_package(Qt5 REQUIRED
     Widgets
@@ -81,8 +83,12 @@ if(SG_MODULE_VISUALIZE_ENABLE_QT)
   if(Qt5_POSITION_INDEPENDENT_CODE)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
   endif()
+  set(vtk_qt_components
+    vtkGUISupportQt # QVTKWidget.h
+    )
 endif()
 
+set(_modern_VTK_available 0)
 if(SG_REQUIRES_VTK)
   # VTK components to handle external dependency histo-header
   find_package(VTK REQUIRED COMPONENTS
@@ -97,7 +103,7 @@ if(SG_REQUIRES_VTK)
     vtkViewsContext2D
     vtkInteractionWidgets
     vtkViewsInfovis
-    vtkGUISupportQt # QVTKWidget.h
+    ${vtk_qt_components}
     CONFIG
     )
   message(STATUS "VTK version: ${VTK_VERSION}")
@@ -105,7 +111,12 @@ if(SG_REQUIRES_VTK)
   # USE_FILE is deprecated? Keep it. This is the cause of AUTOINIT warnings
   # https://gitlab.kitware.com/vtk/vtk/issues/15895
   include(${VTK_USE_FILE})
+  if("${VTK_VERSION}" VERSION_GREATER "8.1") # Requires OpenGL2
+    set(_modern_VTK_available 1)
+  endif()
 endif()
+
+set(sgext_export_file "${PROJECT_BINARY_DIR}/SGEXTTargets.cmake")
 
 set(HISTO_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/histo/include
         CACHE PATH "histo include directory")
@@ -122,6 +133,11 @@ target_include_directories(histo INTERFACE
 install(TARGETS histo
   EXPORT SGEXTTargets
   DESTINATION include)
+
+# export to the build tree
+export(TARGETS histo
+  NAMESPACE SGEXT::
+  APPEND FILE ${sgext_export_file})
 
 if(SG_BUILD_TESTING)
   enable_testing()
@@ -148,7 +164,6 @@ if(SG_BUILD_TESTING)
 endif()
 
 set(SG_LIBRARIES "")
-set(sgext_export_file "${PROJECT_BINARY_DIR}/SGEXTTargets.cmake")
 include(SGModuleMacros) # module macros
 add_subdirectory(modules/core)
 add_subdirectory(modules/extract)

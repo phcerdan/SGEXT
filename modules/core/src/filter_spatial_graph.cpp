@@ -7,6 +7,7 @@
 #include "spatial_node.hpp"
 #include "spatial_edge.hpp"
 #include <boost/graph/copy.hpp>
+#include <boost/graph/connected_components.hpp>
 
 namespace SG {
 
@@ -76,4 +77,35 @@ GraphType filter_by_sets(const EdgeDescriptorUnorderedSet& remove_edges,
   boost::copy_graph(filtered_view, out_filtered_graph);
   return out_filtered_graph;
 };
+
+
+std::vector<ComponentGraphType> filter_component_graphs(
+    const GraphType & inputGraph,
+    const size_t num_of_components,
+    const std::unordered_map<GraphType::vertex_descriptor, int> &components_map)
+{
+  std::vector<ComponentGraphType> component_graphs;
+  for (size_t comp_index = 0; comp_index < num_of_components; comp_index++)
+    component_graphs.emplace_back(inputGraph,
+        // edge_lambda
+        [components_map, comp_index, &inputGraph](GraphType::edge_descriptor e) {
+        return components_map.at(source(e,inputGraph))==comp_index ||
+               components_map.at(target(e,inputGraph))==comp_index;
+        },
+        // vertex_lambda
+        [components_map, comp_index](GraphType::vertex_descriptor v) {
+        return components_map.at(v)==comp_index;
+        });
+
+  return component_graphs;
+}
+
+std::vector<ComponentGraphType> filter_component_graphs(
+    const GraphType & inputGraph)
+{
+  std::unordered_map<GraphType::vertex_descriptor, int> components_map;
+  auto num_of_components = boost::connected_components(inputGraph,
+      boost::make_assoc_property_map(components_map));
+  return filter_component_graphs(inputGraph, num_of_components, components_map);
+}
 }  // namespace SG

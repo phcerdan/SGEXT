@@ -10,3 +10,13 @@ target_link_libraries(FixtureMatchingGraphs
   ${Boost_LIBRARIES}
   ${GTEST_LIBRARIES}
   )
+
+add_library(FixtureSquareCrossGraph
+  FixtureSquareCrossGraph.cpp
+  )
+target_include_directories(FixtureSquareCrossGraph PUBLIC .)
+target_link_libraries(FixtureSquareCrossGraph
+  SGCore
+  ${Boost_LIBRARIES}
+  ${GTEST_LIBRARIES}
+  )

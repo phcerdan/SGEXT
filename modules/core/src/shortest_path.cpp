@@ -15,9 +15,11 @@ SpatialEdge create_edge_from_path(
 {
   SpatialEdge sg_edge;
   auto & sg_edge_points = sg_edge.edge_points;
+  // Add node for keeping a sensible order, it will be removed at the end.
+  sg_edge_points.push_back(input_g[vertex_path[0]].pos);
   using vertex_descriptor = GraphType::vertex_descriptor;
   using edge_descriptor = GraphType::edge_descriptor;
-  // Check that vertex_path is connected
+  // TODO: Check that vertex_path is connected
   for(size_t index = 1; index < vertex_path.size(); ++index){
     vertex_descriptor target = vertex_path[index];
     vertex_descriptor source = vertex_path[index - 1];
@@ -26,20 +28,50 @@ SpatialEdge create_edge_from_path(
       throw("create_edge_from_path: edge does not exist between consecutive "
           "vertices in the input path");
     const auto ed = edge_between.first;
-    const auto & edge_points = input_g[ed].edge_points;
-    if(index == 1) {
-      sg_edge_points = edge_points;
-      continue;
-    } else {
-      // Add the position of the node into the edge_points
-      SG::PointType merge_node_pos = input_g[source].pos;
-      SG::insert_unique_edge_point_with_distance_order( sg_edge_points, merge_node_pos);
-      // TODO this could be slow... optimization welcome to append the whole vector
-      for(const auto & p : edge_points) {
-        SG::insert_unique_edge_point_with_distance_order( sg_edge_points, p);
+    auto eps = input_g[ed].edge_points; // copied, might be modified
+
+    if(!eps.empty()) { // sg_edge_points is never empty
+      double dist_first_to_back = 0.0;
+      double dist_back_to_back = 0.0;
+      double dist_first_to_first = 0.0;
+      double dist_back_to_first = 0.0;
+      dist_first_to_back = ArrayUtilities::distance(sg_edge_points[0], eps.back());
+      dist_back_to_back = ArrayUtilities::distance(sg_edge_points.back(), eps.back());
+      dist_first_to_first = ArrayUtilities::distance(sg_edge_points[0], eps[0]);
+      dist_back_to_first = ArrayUtilities::distance(sg_edge_points.back(), eps[0]);
+      // Because the graph is undirected, source and target might be switced.
+      // The new edge will have an order, based on the position of the first node in the path.
+      // We reverse the order of the elements if needed.
+      const std::vector< std::reference_wrapper<const double>> dists {
+        std::cref(dist_first_to_back),
+        std::cref(dist_back_to_back),
+        std::cref(dist_first_to_first),
+        std::cref(dist_back_to_first)
+      };
+      const auto result_it = std::min_element(dists.begin(), dists.end());
+      // If the min distance is any of the _to_back (indices: 0 and 1)
+      // reverse the edge points of the edge that is about to be added.
+      if(std::distance(std::begin(dists), result_it) < 2) {
+        std::reverse(eps.begin(),eps.end());
       }
     }
+    // The first or the last node won't be added here
+    if(index != 1) {
+      // std::cout << "...About to add vertex position..." << std::endl;
+      auto vertex_pos = input_g[source].pos;
+      SG::insert_unique_edge_point_with_distance_order( sg_edge_points, vertex_pos);
+    }
+
+    // TODO this could be slow... optimization welcome to append the whole vector
+    for(const auto & p : eps) {
+      SG::insert_unique_edge_point_with_distance_order( sg_edge_points, p);
+    }
   }
+  // Remove the  node pos added just for keeping a sensible order.
+  // That added node might be at the beggining or at the end on the final vector.
+  sg_edge_points.erase(
+      std::remove(sg_edge_points.begin(), sg_edge_points.end(), input_g[vertex_path[0]].pos),
+      sg_edge_points.end());
   return sg_edge;
 }
 
@@ -68,7 +100,10 @@ std::vector<GraphType::vertex_descriptor> compute_shortest_path(
     // auto target = boost::target(ed, input_g);
     // return ArrayUtilities::distance(input_g[source].pos,
     // input_g[target].pos);
-    return SG::contour_length(ed, input_g);
+    auto cl = SG::contour_length(ed, input_g);
+    // std::cout << ed << std::endl;
+    // std::cout << "contour_length: " << cl << std::endl;
+    return cl;
   };
 
   auto weightmap =
@@ -84,20 +119,20 @@ std::vector<GraphType::vertex_descriptor> compute_shortest_path(
                                        .distance_map(distmap)
                                        .predecessor_map(predmap)
                                        .weight_map(weightmap));
-    // .weight_map(boost::make_constant_property<edge_descriptor>(1ul)));
+      // .weight_map(boost::make_constant_property<edge_descriptor>(1ul)));
   } catch(shortest_path_visitor::done &) {
     if(verbose)
       std::cout << "Completed. Percentage visited: "
         << (100.0 * visited / boost::num_vertices(input_g)) << "%\n";
   }
 
-  size_t distance = distmap[end_vertex];
+  size_t dist = distmap[end_vertex];
   if(verbose)
     std::cout << "Distance from #" << start_vertex << " to #" << end_vertex
-      << ": " << distance << "\n";
+      << ": " << dist << "\n";
 
   std::vector<vertex_descriptor> path_out;
-  if(distance != size_t(-1)) {
+  if(dist != size_t(-1)) {
     std::deque<vertex_descriptor> path;
     for(vertex_descriptor current = end_vertex;
         current != input_g.null_vertex() && predmap[current] != current &&

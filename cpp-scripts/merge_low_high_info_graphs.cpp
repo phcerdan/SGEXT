@@ -23,7 +23,12 @@
 #include "spatial_graph.hpp"
 #include "spatial_graph_utilities.hpp"
 #include "compare_graphs.hpp"
+#include "add_graph_peninsulas.hpp"
 #include "serialize_spatial_graph.hpp"
+
+#include "extend_low_info_graph.hpp"
+#include "graph_points_locator.hpp"
+#include "get_vtk_points_from_graph.hpp"
 
 #ifdef VISUALIZE
 #include "visualize_spatial_graph.hpp"
@@ -33,6 +38,46 @@
 using namespace std;
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
+
+void export_graph_merge_low_high_info(
+    SG::GraphType & output_g, // write_serialized_graph --graph cannot be const--
+    const std::string folder_path,
+    const fs::path &output_filename_path,
+    bool useSerialized,
+    bool verbose,
+    const std::string &graph_title) {
+
+  const fs::path output_folder_path{folder_path};
+    if(!fs::exists(output_folder_path)) {
+      throw std::runtime_error("output folder doesn't exist : " +
+                               output_folder_path.string());
+    }
+
+    if(!useSerialized) {
+      boost::dynamic_properties dp_merged;
+      dp_merged.property("node_id", boost::get(boost::vertex_index, output_g));
+      dp_merged.property("spatial_node",
+                         boost::get(boost::vertex_bundle, output_g));
+      dp_merged.property("spatial_edge",
+                         boost::get(boost::edge_bundle, output_g));
+      fs::path output_full_path =
+          output_folder_path / fs::path(output_filename_path.string() + ".dot");
+      std::ofstream out;
+      out.open(output_full_path.string().c_str());
+      boost::write_graphviz_dp(out, output_g, dp_merged);
+      if(verbose)
+        std::cout << graph_title + ": graph (graphviz) output stored in: "
+                  << output_full_path.string() << std::endl;
+    } else {
+      fs::path output_full_path =
+          output_folder_path / fs::path(output_filename_path.string() + ".txt");
+      SG::write_serialized_graph(output_g, output_full_path.string());
+      if(verbose)
+        std::cout << graph_title + ": graph (serialize) output stored in: "
+                  << output_full_path.string() << std::endl;
+    }
+
+};
 
 int main(int argc, char* const argv[]) {
   /*-------------- Parse command line -----------------------------*/
@@ -46,14 +91,23 @@ int main(int argc, char* const argv[]) {
                          po::bool_switch()->default_value(false),
                          "Use stored serialized graphs. If off, it will "
                          "require .dot graphviz files.");
-  opt_desc.add_options()("exportMergedGraph,o", po::value<string>()->required(),
-                         "Write .dot file with the merged spatial graph or "
+  opt_desc.add_options()("exportExtendedLowInfoGraph,e", po::value<string>()->required(),
+                         "Write .dot file with the extended low info spatial graph or "
                          ".txt file if --useSerialized is on.");
+  opt_desc.add_options()("exportMergedGraph,o", po::value<string>()->required(),
+                         "Write .dot file with the final graph (with pensinsulas added) or "
+                         ".txt file if --useSerialized is on.");
+  opt_desc.add_options()("computePeninsulas,p",
+                         po::bool_switch()->default_value(false),
+                         "Perform the full analysis adding isolated components with "
+                         "zero or one touching point with the extensted graph.");
 #ifdef VISUALIZE
   opt_desc.add_options()(
       "visualize,t", po::bool_switch()->default_value(false),
       "Visualize. Requires VISUALIZE option enabled at build.");
 #endif
+  opt_desc.add_options()("radius,r", po::value<double>()->default_value(4.0),
+                         "Radius to use in the extend_low_info_graph visitor.");
   opt_desc.add_options()("verbose,v", po::bool_switch()->default_value(false),
                          "verbose output.");
 
@@ -72,20 +126,24 @@ int main(int argc, char* const argv[]) {
 
   string filenameHigh = vm["highInfoGraph"].as<string>();
   string filenameLow = vm["lowInfoGraph"].as<string>();
+  double radius = vm["radius"].as<double>();
   bool verbose = vm["verbose"].as<bool>();
   if(verbose) {
     std::cout << "Filename High Info Graph: " << filenameHigh << std::endl;
     std::cout << "Filename Low Info Graph: " << filenameLow << std::endl;
   }
+  bool exportExtendedLowInfoGraph = vm.count("exportExtendedLowInfoGraph");
   bool exportMergedGraph = vm.count("exportMergedGraph");
   bool useSerialized = vm["useSerialized"].as<bool>();
+  bool computePeninsulas = vm["computePeninsulas"].as<bool>();
 
 #ifdef VISUALIZE
   bool visualize = vm["visualize"].as<bool>();
 #endif
   // Get filenameHigh without extension (and without folders).
   const fs::path input_stem = fs::path(filenameHigh).stem();
-  const fs::path output_file_path = fs::path(input_stem.string() + "_MERGED");
+  const fs::path output_file_path_extended = fs::path(input_stem.string() + "_EXTENDED");
+  const fs::path output_file_path_merged = fs::path(input_stem.string() + "_MERGED");
 
   SG::GraphType g0;     // lowGraph
   SG::GraphType g1;     // highGraph
@@ -113,7 +171,7 @@ int main(int argc, char* const argv[]) {
 
   auto repeated_points_g0 = SG::check_unique_points_in_graph(g0);
   if(repeated_points_g0.second) {
-    std::cout << "Warning: duplicated points exist in low info graph (g0)"
+    std::cout << "Warning: duplicated points exist in low info graph (g0). "
                  "Repeated Points: "
               << repeated_points_g0.first.size() << std::endl;
     for(const auto& p : repeated_points_g0.first) {
@@ -123,7 +181,7 @@ int main(int argc, char* const argv[]) {
   }
   auto repeated_points_g1 = SG::check_unique_points_in_graph(g1);
   if(repeated_points_g1.second) {
-    std::cout << "Warning: duplicated points exist in high info graph (g1)"
+    std::cout << "Warning: duplicated points exist in high info graph (g1). "
                  "Repeated Points: "
               << repeated_points_g1.first.size() << std::endl;
     for(const auto& p : repeated_points_g1.first) {
@@ -145,45 +203,99 @@ int main(int argc, char* const argv[]) {
   }
 
   // Make the comparison between low and high and take the result
-  auto merged_g = SG::compare_low_and_high_info_graphs(g0, g1);
+  // Use extend_low_info_graph
+  std::vector<std::reference_wrapper<const SG::GraphType>> graphs;
+  graphs.reserve(2);
+  graphs.push_back(std::cref(g0));
+  graphs.push_back(std::cref(g1));
+  auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs);
+  auto& mergePoints = merger_map_pair.first;
+  auto& idMap = merger_map_pair.second;
+  auto octree = SG::build_octree_locator(merger_map_pair.first->GetPoints());
+  auto extended_g = extend_low_info_graph_via_dfs(graphs, idMap, octree, radius, verbose);
+
+  auto repeated_points_extended_g = SG::check_unique_points_in_graph(extended_g);
+  if(repeated_points_extended_g.second) {
+    std::cout << "Warning: duplicated points exist in extended_low_info graph (extended_g). "
+                 "Repeated Points: "
+              << repeated_points_extended_g.first.size() << std::endl;
+    for(const auto& p : repeated_points_extended_g.first) {
+      SG::print_pos(std::cout, p);
+      std::cout << std::endl;
+    }
+  }
+
+  // auto extended_g = SG::compare_low_and_high_info_graphs(g0, g1);
+  auto nvertices_extended = boost::num_vertices(extended_g);
+  auto nedges_extended = boost::num_edges(extended_g);
+  std::cout << "** GExtended:  vertices: " << nvertices_extended
+            << ". edges: " << nedges_extended << std::endl;
+
+  if(exportExtendedLowInfoGraph) {
+    string exportExtendedLowInfoGraph_filename =
+        vm["exportExtendedLowInfoGraph"].as<string>();
+    export_graph_merge_low_high_info(
+        extended_g,
+        exportExtendedLowInfoGraph_filename,
+        output_file_path_extended,
+        useSerialized,
+        verbose,
+        "Extended");
+  }
+
+#ifdef VISUALIZE
+  if(visualize) {
+    SG::visualize_spatial_graph(extended_g);
+  }
+#endif
+
+  // Return early if user not interested in full analysis.
+  if(!computePeninsulas) {
+    return EXIT_SUCCESS;
+  }
+
+  std::vector<std::reference_wrapper<const SG::GraphType>> graphs_merged;
+  graphs_merged.reserve(2);
+  graphs_merged.push_back(std::cref(extended_g));
+  graphs_merged.push_back(std::cref(g1));
+  auto merger_map_pair_merged = SG::get_vtk_points_from_graphs(graphs_merged);
+  auto& mergePoints_merged = merger_map_pair_merged.first;
+  auto& idMap_merged = merger_map_pair_merged.second;
+
+  // auto extended_g_points_map_pair = SG::get_vtk_points_from_graph(extended_g);
+  // SG::append_new_graph_points(
+  //     extended_g_points_map_pair.first, extended_g_points_map_pair.second, mergePoints, idMap);
+  size_t extended_graph_index = 0;
+  size_t high_info_graph_index = 1;
+  double radius_touch = radius;
+  auto add_graph_peninsulas_result = SG::add_graph_peninsulas(
+      graphs_merged,
+      extended_graph_index,
+      high_info_graph_index,
+      mergePoints_merged,
+      idMap_merged,
+      radius_touch,
+      verbose);
+  auto & merged_g = add_graph_peninsulas_result.graph;
+  auto & octree_merged = add_graph_peninsulas_result.octree;
+
   auto nvertices_merged = boost::num_vertices(merged_g);
   auto nedges_merged = boost::num_edges(merged_g);
   std::cout << "** GMerged:  vertices: " << nvertices_merged
             << ". edges: " << nedges_merged << std::endl;
 
   if(exportMergedGraph) {
-    string exportMergedGraph_filename_merged =
+    string exportMergedGraph_filename =
         vm["exportMergedGraph"].as<string>();
-    const fs::path output_folder_path{exportMergedGraph_filename_merged};
-    if(!fs::exists(output_folder_path)) {
-      throw std::runtime_error("output folder doesn't exist : " +
-                               output_folder_path.string());
-    }
-
-    if(!useSerialized) {
-      boost::dynamic_properties dp_merged;
-      dp_merged.property("node_id", boost::get(boost::vertex_index, merged_g));
-      dp_merged.property("spatial_node",
-                         boost::get(boost::vertex_bundle, merged_g));
-      dp_merged.property("spatial_edge",
-                         boost::get(boost::edge_bundle, merged_g));
-      fs::path output_full_path =
-          output_folder_path / fs::path(output_file_path.string() + ".dot");
-      std::ofstream out;
-      out.open(output_full_path.string().c_str());
-      boost::write_graphviz_dp(out, merged_g, dp_merged);
-      if(verbose)
-        std::cout << "Output merged graph (graphviz) to: "
-                  << output_full_path.string() << std::endl;
-    } else {
-      fs::path output_full_path =
-          output_folder_path / fs::path(output_file_path.string() + ".txt");
-      SG::write_serialized_graph(merged_g, output_full_path.string());
-      if(verbose)
-        std::cout << "Output merged graph (serialize) to: "
-                  << output_full_path.string() << std::endl;
-    }
+    export_graph_merge_low_high_info(
+        merged_g,
+        exportMergedGraph_filename,
+        output_file_path_merged,
+        useSerialized,
+        verbose,
+        "Merged");
   }
+
 #ifdef VISUALIZE
   if(visualize) {
     SG::visualize_spatial_graph(merged_g);
