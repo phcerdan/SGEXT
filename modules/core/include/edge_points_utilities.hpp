@@ -6,8 +6,8 @@
 #ifndef EDGE_POINTS_UTILITIES_HPP
 #define EDGE_POINTS_UTILITIES_HPP
 
-#include "spatial_graph.hpp"
 #include "spatial_edge.hpp"
+#include "spatial_graph.hpp"
 
 namespace SG {
 
@@ -45,8 +45,7 @@ double edge_points_length(const SpatialEdge &se);
  *
  * @return contour distance between source and target of input edge.
  */
-double contour_length(const GraphType::edge_descriptor e,
-                      const GraphType &sg);
+double contour_length(const GraphType::edge_descriptor e, const GraphType &sg);
 
 /**
  * Insert point in the input container.
@@ -64,9 +63,9 @@ double contour_length(const GraphType::edge_descriptor e,
  * @param new_point point to intert.
  */
 void insert_unique_edge_point_with_distance_order(
-    SpatialEdge::PointContainer &edge_points,
-    const SpatialEdge::PointType &new_point);
+        SpatialEdge::PointContainer &edge_points,
+        const SpatialEdge::PointType &new_point);
 
-}  // namespace SG
+} // namespace SG
 
 #endif

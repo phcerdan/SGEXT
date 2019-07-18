@@ -6,12 +6,12 @@
 #ifndef SERIALIZE_SPATIAL_GRAPH_HPP
 #define SERIALIZE_SPATIAL_GRAPH_HPP
 
-#include <string>
 #include "spatial_graph.hpp"
+#include <string>
 
 namespace SG {
 
-void write_serialized_graph(GraphType& sg, const std::string& absolute_path);
-GraphType read_serialized_graph(const std::string& absolute_path);
-}  // namespace SG
+void write_serialized_graph(GraphType &sg, const std::string &absolute_path);
+GraphType read_serialized_graph(const std::string &absolute_path);
+} // namespace SG
 #endif
