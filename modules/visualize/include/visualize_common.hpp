@@ -5,8 +5,8 @@
 
 #ifndef VISUALIZE_COMMON_HPP
 #define VISUALIZE_COMMON_HPP
-#include <vtkCamera.h>
 #include <vtkActor.h>
+#include <vtkCamera.h>
 #include <vtkSmartPointer.h>
 
 namespace SG {
@@ -26,9 +26,11 @@ void flip_camera(vtkCamera *cam);
  * @return
  */
 vtkSmartPointer<vtkActor> create_actor_visualize_points_as_cubes(
-    /* const */ vtkPoints *points, const double inputOpacity = 0.8,
-    const double lengthX = 1.0, const double lengthY = 1.0,
-    const double lengthZ = 1.0);
+        /* const */ vtkPoints *points,
+        const double inputOpacity = 0.8,
+        const double lengthX = 1.0,
+        const double lengthY = 1.0,
+        const double lengthZ = 1.0);
 
-}  // namespace SG
+} // namespace SG
 #endif

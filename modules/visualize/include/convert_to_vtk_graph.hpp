@@ -6,8 +6,8 @@
 #ifndef CONVERT_TO_VTK_GRAPH_HPP
 #define CONVERT_TO_VTK_GRAPH_HPP
 #include "spatial_graph.hpp"
-#include <vtkSmartPointer.h>
 #include <vtkMutableUndirectedGraph.h>
+#include <vtkSmartPointer.h>
 
 namespace SG {
 
@@ -18,7 +18,7 @@ namespace SG {
  *
  * @return vtkGraph
  */
-vtkSmartPointer<vtkMutableUndirectedGraph> convert_to_vtk_graph(
-    const GraphType& sg);
-}  // namespace SG
+vtkSmartPointer<vtkMutableUndirectedGraph>
+convert_to_vtk_graph(const GraphType &sg);
+} // namespace SG
 #endif
