@@ -18,13 +18,11 @@
  *
  * *******************************************************************/
 
-#include "gmock/gmock.h"
 #include "spatial_graph_utilities.hpp"
+#include "gmock/gmock.h"
 
 struct CoreUtilitiesFixture : public ::testing::Test {
-    void SetUp() override {
-        this->CreateGraph();
-    }
+    void SetUp() override { this->CreateGraph(); }
     void CreateGraph() {
         g = SG::GraphType(3);
         p0 = SG::PointType{{0.0, 0.0, 0.0}};
@@ -40,8 +38,10 @@ struct CoreUtilitiesFixture : public ::testing::Test {
     SG::PointType p0, p1, p2;
 };
 
-TEST_F(CoreUtilitiesFixture, get_adjacent_vertices_positions_works_for_vertex0) {
-    auto adjacent_vertices_positions = SG::get_adjacent_vertices_positions(0, g);
+TEST_F(CoreUtilitiesFixture,
+       get_adjacent_vertices_positions_works_for_vertex0) {
+    auto adjacent_vertices_positions =
+            SG::get_adjacent_vertices_positions(0, g);
     auto descs = adjacent_vertices_positions.neighbours_descriptors;
     EXPECT_EQ(descs.size(), 1);
     auto positions = adjacent_vertices_positions.neighbours_positions;
@@ -49,8 +49,10 @@ TEST_F(CoreUtilitiesFixture, get_adjacent_vertices_positions_works_for_vertex0) 
     EXPECT_EQ(descs[0], 1);
     EXPECT_EQ(positions[0], p1);
 }
-TEST_F(CoreUtilitiesFixture, get_adjacent_vertices_positions_works_for_vertex1) {
-    auto adjacent_vertices_positions = SG::get_adjacent_vertices_positions(1, g);
+TEST_F(CoreUtilitiesFixture,
+       get_adjacent_vertices_positions_works_for_vertex1) {
+    auto adjacent_vertices_positions =
+            SG::get_adjacent_vertices_positions(1, g);
     auto descs = adjacent_vertices_positions.neighbours_descriptors;
     EXPECT_EQ(descs.size(), 2);
     auto positions = adjacent_vertices_positions.neighbours_positions;
@@ -60,8 +62,10 @@ TEST_F(CoreUtilitiesFixture, get_adjacent_vertices_positions_works_for_vertex1) 
     EXPECT_EQ(descs[1], 2);
     EXPECT_EQ(positions[1], p2);
 }
-TEST_F(CoreUtilitiesFixture, get_adjacent_vertices_positions_works_for_vertex2) {
-    auto adjacent_vertices_positions = SG::get_adjacent_vertices_positions(2, g);
+TEST_F(CoreUtilitiesFixture,
+       get_adjacent_vertices_positions_works_for_vertex2) {
+    auto adjacent_vertices_positions =
+            SG::get_adjacent_vertices_positions(2, g);
     auto descs = adjacent_vertices_positions.neighbours_descriptors;
     EXPECT_EQ(descs.size(), 1);
     auto positions = adjacent_vertices_positions.neighbours_positions;
@@ -69,4 +73,3 @@ TEST_F(CoreUtilitiesFixture, get_adjacent_vertices_positions_works_for_vertex2) 
     EXPECT_EQ(descs[0], 1);
     EXPECT_EQ(positions[0], p1);
 }
-

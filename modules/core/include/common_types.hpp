@@ -29,5 +29,5 @@ using PointType = ArrayUtilities::Array3D;
 using PointContainer = std::vector<PointType>;
 /// Help reader to differentiate a point from a vector
 using VectorType = ArrayUtilities::Array3D;
-}  // namespace SG
+} // namespace SG
 #endif

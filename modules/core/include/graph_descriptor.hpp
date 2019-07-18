@@ -31,32 +31,33 @@ namespace SG {
  * to differents graphs.
  */
 struct graph_descriptor {
-  /** the point exist in the graph */
-  bool exist = false;
-  /** the point is in an edge of the graph */
-  bool is_edge = false;
-  /** the point is in a vertex of the graph */
-  bool is_vertex = false;
-  /** vertex_descriptor where point is located */
-  GraphType::vertex_descriptor vertex_d;
-  /** edge_descriptor where point is located */
-  GraphType::edge_descriptor edge_d;
-  /** index of the edge_points vector where point is located inside the edge */
-  std::size_t edge_points_index;
+    /** the point exist in the graph */
+    bool exist = false;
+    /** the point is in an edge of the graph */
+    bool is_edge = false;
+    /** the point is in a vertex of the graph */
+    bool is_vertex = false;
+    /** vertex_descriptor where point is located */
+    GraphType::vertex_descriptor vertex_d;
+    /** edge_descriptor where point is located */
+    GraphType::edge_descriptor edge_d;
+    /** index of the edge_points vector where point is located inside the edge
+     */
+    std::size_t edge_points_index;
 };
 
-inline void print_graph_descriptor(
-    const graph_descriptor& descriptor,
-    const std::string& label = "graph_descriptor") {
-  std::cout << label << ":" << std::endl;
-  std::cout << " exist: " << descriptor.exist << std::endl;
-  std::cout << " is_vertex: " << descriptor.is_vertex << std::endl;
-  std::cout << " is_edge: " << descriptor.is_edge << std::endl;
-  std::cout << " vertex_d: " << descriptor.vertex_d << std::endl;
-  std::cout << " edge_d: " << descriptor.edge_d << std::endl;
-  std::cout << " edge_points_index: " << descriptor.edge_points_index
-            << std::endl;
+inline void
+print_graph_descriptor(const graph_descriptor &descriptor,
+                       const std::string &label = "graph_descriptor") {
+    std::cout << label << ":" << std::endl;
+    std::cout << " exist: " << descriptor.exist << std::endl;
+    std::cout << " is_vertex: " << descriptor.is_vertex << std::endl;
+    std::cout << " is_edge: " << descriptor.is_edge << std::endl;
+    std::cout << " vertex_d: " << descriptor.vertex_d << std::endl;
+    std::cout << " edge_d: " << descriptor.edge_d << std::endl;
+    std::cout << " edge_points_index: " << descriptor.edge_points_index
+              << std::endl;
 }
 
-}  // namespace SG
+} // namespace SG
 #endif

@@ -44,28 +44,28 @@ namespace SG {
  * @param func
  */
 template <typename TFuncPos>
-void operate_in_node_pos(SpatialNode& node, TFuncPos func) {
-  func(node.pos);
+void operate_in_node_pos(SpatialNode &node, TFuncPos func) {
+    func(node.pos);
 };
 
 template <typename TFuncPos>
-void operate_in_edge_points_pos(SpatialEdge& edge, TFuncPos func) {
-  for(auto& ep : edge.edge_points) {
-    func(ep);
-  }
+void operate_in_edge_points_pos(SpatialEdge &edge, TFuncPos func) {
+    for (auto &ep : edge.edge_points) {
+        func(ep);
+    }
 };
 
 template <typename TFuncPos>
-void operate_in_graph_pos(GraphType& sg, TFuncPos func) {
-  auto verts = boost::vertices(sg);
-  for(auto&& vi = verts.first; vi != verts.second; ++vi) {
-    operate_in_node_pos(sg[*vi], func);
-  }
-  auto edges = boost::edges(sg);
-  for(auto ei = edges.first; ei != edges.second; ++ei) {
-    operate_in_edge_points_pos(sg[*ei], func);
-  }
+void operate_in_graph_pos(GraphType &sg, TFuncPos func) {
+    auto verts = boost::vertices(sg);
+    for (auto &&vi = verts.first; vi != verts.second; ++vi) {
+        operate_in_node_pos(sg[*vi], func);
+    }
+    auto edges = boost::edges(sg);
+    for (auto ei = edges.first; ei != edges.second; ++ei) {
+        operate_in_edge_points_pos(sg[*ei], func);
+    }
 };
-}  // namespace SG
+} // namespace SG
 
 #endif

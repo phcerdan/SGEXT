@@ -20,10 +20,10 @@
 
 #ifndef graph_data_HPP
 #define graph_data_HPP
-#include <string>
-#include <vector>
 #include <iostream>
-#include <utility>  // pair
+#include <string>
+#include <utility> // pair
+#include <vector>
 namespace SG {
 
 /**
@@ -35,7 +35,8 @@ namespace SG {
  * @param data input data
  * @param os ostream to print the data into
  */
-void print_graph_data(const std::string &name, const std::vector<double> &data,
+void print_graph_data(const std::string &name,
+                      const std::vector<double> &data,
                       std::ostream &os);
 
 /**
@@ -48,5 +49,5 @@ void print_graph_data(const std::string &name, const std::vector<double> &data,
  * @return vector of pair [string, vector<double>]
  */
 std::pair<std::string, std::vector<double> > read_graph_data(std::istream &is);
-}  // namespace SG
+} // namespace SG
 #endif
