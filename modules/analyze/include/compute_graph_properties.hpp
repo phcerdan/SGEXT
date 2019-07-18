@@ -32,7 +32,7 @@ namespace SG {
  *
  * @return vector with degrees
  */
-std::vector<unsigned int> compute_degrees(const SG::GraphAL& sg);
+std::vector<unsigned int> compute_degrees(const SG::GraphAL &sg);
 
 /**
  * Compute end to end distances of nodes
@@ -45,7 +45,7 @@ std::vector<unsigned int> compute_degrees(const SG::GraphAL& sg);
  *
  * @return vector with distances.
  */
-std::vector<double> compute_ete_distances(const SG::GraphAL& sg,
+std::vector<double> compute_ete_distances(const SG::GraphAL &sg,
                                           const size_t minimum_size_edges = 0,
                                           bool ignore_end_nodes = false);
 
@@ -59,7 +59,7 @@ std::vector<double> compute_ete_distances(const SG::GraphAL& sg,
  *
  * @return vector with distances.
  */
-std::vector<double> compute_contour_lengths(const SG::GraphAL& sg,
+std::vector<double> compute_contour_lengths(const SG::GraphAL &sg,
                                             const size_t minimum_size_edges = 0,
                                             bool ignore_end_nodes = false);
 
@@ -76,7 +76,7 @@ std::vector<double> compute_contour_lengths(const SG::GraphAL& sg,
  *
  * @return  vector with angles.
  */
-std::vector<double> compute_angles(const SG::GraphAL& sg,
+std::vector<double> compute_angles(const SG::GraphAL &sg,
                                    const size_t minimum_size_edges = 0,
                                    const bool ignore_parallel_edges = false,
                                    const bool ignore_end_nodes = false);
@@ -88,6 +88,6 @@ std::vector<double> compute_angles(const SG::GraphAL& sg,
  *
  * @return vector with cosines of angles
  */
-std::vector<double> compute_cosines(const std::vector<double>& angles);
-}  // namespace SG
+std::vector<double> compute_cosines(const std::vector<double> &angles);
+} // namespace SG
 #endif

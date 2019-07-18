@@ -21,8 +21,8 @@
 #ifndef SPATIAL_HISTOGRAMS_HPP
 #define SPATIAL_HISTOGRAMS_HPP
 
-#include "spatial_graph.hpp"
 #include "histo.hpp"
+#include "spatial_graph.hpp"
 
 namespace SG {
 
@@ -60,13 +60,15 @@ histo::Histo<double> read_histogram(std::istream &is);
  *
  * @return  histogram of degrees
  */
-histo::Histo<double> histogram_degrees(
-    const std::vector<unsigned int> &degrees, size_t bins = 0,
-    const std::string &histo_name = "degrees");
+histo::Histo<double>
+histogram_degrees(const std::vector<unsigned int> &degrees,
+                  size_t bins = 0,
+                  const std::string &histo_name = "degrees");
 
-histo::Histo<double> histogram_degrees(
-    const std::vector<double> &degrees, size_t bins = 0,
-    const std::string &histo_name = "degrees");
+histo::Histo<double>
+histogram_degrees(const std::vector<double> &degrees,
+                  size_t bins = 0,
+                  const std::string &histo_name = "degrees");
 
 /**
  * Create histogram of End to End distances between nodes.
@@ -79,9 +81,10 @@ histo::Histo<double> histogram_degrees(
  *
  * @return histogram
  */
-histo::Histo<double> histogram_distances(
-    const std::vector<double> &distances, double width = 0.0,
-    const std::string &histo_name = "distances");
+histo::Histo<double>
+histogram_distances(const std::vector<double> &distances,
+                    double width = 0.0,
+                    const std::string &histo_name = "distances");
 
 /**
  * helper. Calls @histogram_distances with histo_name = "ete_distances"
@@ -91,8 +94,9 @@ histo::Histo<double> histogram_distances(
  *
  * @return histogram
  */
-histo::Histo<double> histogram_ete_distances(
-    const std::vector<double> &distances, double width = 0.0);
+histo::Histo<double>
+histogram_ete_distances(const std::vector<double> &distances,
+                        double width = 0.0);
 
 /**
  * helper. Calls @histogram_distances with histo_name = "contour_lengths"
@@ -102,8 +106,9 @@ histo::Histo<double> histogram_ete_distances(
  *
  * @return histogram
  */
-histo::Histo<double> histogram_contour_lengths(
-    const std::vector<double> &distances, double width = 0.0);
+histo::Histo<double>
+histogram_contour_lengths(const std::vector<double> &distances,
+                          double width = 0.0);
 
 /**
  * Histogram between -pi, pi
@@ -128,8 +133,9 @@ histo::Histo<double> histogram_angles(const std::vector<double> &angles,
  * if bins == 0, the breaks are generated using Scott method.
  * @return histo
  */
-histo::Histo<double> histogram_cosines(
-    const std::vector<double> &cosines, size_t bins = 100,
-    const std::string &histo_name = "cosines");
-}  // namespace SG
+histo::Histo<double>
+histogram_cosines(const std::vector<double> &cosines,
+                  size_t bins = 100,
+                  const std::string &histo_name = "cosines");
+} // namespace SG
 #endif
