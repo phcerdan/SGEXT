@@ -33,13 +33,13 @@
 namespace SG {
 
 struct AddGraphPeninsulasResult {
-  GraphType graph;
-  vtkSmartPointer<vtkOctreePointLocator> octree;
+    GraphType graph;
+    vtkSmartPointer<vtkOctreePointLocator> octree;
 };
 
 /**
- * A peninsula is any subgraph from graphs[high_info_graph_index] only contacting the result graph
- * in one point.
+ * A peninsula is any subgraph from graphs[high_info_graph_index] only
+ * contacting the result graph in one point.
  *
  * @param graphs
  * @param high_info_graph_index
@@ -50,13 +50,13 @@ struct AddGraphPeninsulasResult {
  * @param verbose
  */
 AddGraphPeninsulasResult add_graph_peninsulas(
-    const std::vector<std::reference_wrapper<const GraphType>>& graphs,
-    size_t extended_graph_index,
-    size_t high_info_graph_index,
-    vtkPointLocator* mergePoints,
-    std::unordered_map<vtkIdType, std::vector<graph_descriptor>>& idMap,
-    double radius_touch,
-    bool verbose);
+        const std::vector<std::reference_wrapper<const GraphType>> &graphs,
+        size_t extended_graph_index,
+        size_t high_info_graph_index,
+        vtkPointLocator *mergePoints,
+        std::unordered_map<vtkIdType, std::vector<graph_descriptor>> &idMap,
+        double radius_touch,
+        bool verbose);
 
 } // end namespace SG
 #endif

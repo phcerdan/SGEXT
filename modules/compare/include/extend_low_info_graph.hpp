@@ -30,11 +30,11 @@
 namespace SG {
 
 GraphType extend_low_info_graph_via_dfs(
-    const std::vector<std::reference_wrapper<const GraphType>>& graphs,
-    std::unordered_map<vtkIdType, std::vector<graph_descriptor>>& idMap,
-    vtkOctreePointLocator * octree,
-    double radius,
-    bool verbose = false);
+        const std::vector<std::reference_wrapper<const GraphType>> &graphs,
+        std::unordered_map<vtkIdType, std::vector<graph_descriptor>> &idMap,
+        vtkOctreePointLocator *octree,
+        double radius,
+        bool verbose = false);
 
 } // end namespace SG
 #endif
