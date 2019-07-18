@@ -51,5 +51,5 @@ void split_loop(GraphType::vertex_descriptor loop_vertex_id,
                 const boost::edge_bundle_type<GraphType>::type &sg_edge,
                 GraphType &input_sg);
 
-}  // namespace SG
+} // namespace SG
 #endif

@@ -39,7 +39,7 @@ namespace SG {
  *
  * @return new trimmed graph with no degree < 3
  */
-GraphType trim_graph(const GraphType& input_sg);
+GraphType trim_graph(const GraphType &input_sg);
 
-}  // namespace SG
+} // namespace SG
 #endif
