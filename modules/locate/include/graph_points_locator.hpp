@@ -29,9 +29,9 @@
 namespace SG {
 
 struct IdWithGraphDescriptor {
-  bool exist = false;
-  vtkIdType id;
-  graph_descriptor descriptor;
+    bool exist = false;
+    vtkIdType id;
+    graph_descriptor descriptor;
 };
 
 /**
@@ -50,8 +50,9 @@ struct IdWithGraphDescriptor {
  * @return vector of graph_descriptos with id
  */
 std::vector<IdWithGraphDescriptor> closest_existing_descriptors_by_graph(
-    vtkIdList *closeIdList,
-    const std::unordered_map<vtkIdType, std::vector<graph_descriptor>> &idMap);
+        vtkIdList *closeIdList,
+        const std::unordered_map<vtkIdType, std::vector<graph_descriptor>>
+                &idMap);
 
 /**
  * Similar to \ref closest_existing_descriptors_by_graph but returns the closest
@@ -63,8 +64,9 @@ std::vector<IdWithGraphDescriptor> closest_existing_descriptors_by_graph(
  * @return
  */
 std::vector<IdWithGraphDescriptor> closest_existing_vertex_by_graph(
-    vtkIdList *closeIdList,
-    const std::unordered_map<vtkIdType, std::vector<graph_descriptor>> &idMap);
+        vtkIdList *closeIdList,
+        const std::unordered_map<vtkIdType, std::vector<graph_descriptor>>
+                &idMap);
 
 /**
  * Builds a octree from input points
@@ -73,8 +75,8 @@ std::vector<IdWithGraphDescriptor> closest_existing_vertex_by_graph(
  *
  * @return the octree point locator
  */
-vtkSmartPointer<vtkOctreePointLocator> build_octree_locator(
-    vtkPoints *inputPoints);
+vtkSmartPointer<vtkOctreePointLocator>
+build_octree_locator(vtkPoints *inputPoints);
 
 /**
  * False if any gdesc.exist == false;
@@ -85,7 +87,7 @@ vtkSmartPointer<vtkOctreePointLocator> build_octree_locator(
  */
 bool all_graph_descriptors_exist(const std::vector<graph_descriptor> &gdescs);
 bool all_graph_descriptors_exist(
-    const std::vector<IdWithGraphDescriptor> &gdescs);
+        const std::vector<IdWithGraphDescriptor> &gdescs);
 
 /**
  * Use the octree point locator and the idMap from a set of graphs to query a
@@ -96,14 +98,18 @@ bool all_graph_descriptors_exist(
  * @param
  */
 vtkSmartPointer<vtkIdList> graph_closest_n_points_locator(
-    const PointType &queryPoint, vtkOctreePointLocator *octree,
-    const std::unordered_map<vtkIdType, std::vector<graph_descriptor>> &idMap,
-    const int closest_n_points = 5);
+        const PointType &queryPoint,
+        vtkOctreePointLocator *octree,
+        const std::unordered_map<vtkIdType, std::vector<graph_descriptor>>
+                &idMap,
+        const int closest_n_points = 5);
 
 vtkSmartPointer<vtkIdList> graph_closest_points_by_radius_locator(
-    const PointType &queryPoint, vtkOctreePointLocator *octree,
-    const std::unordered_map<vtkIdType, std::vector<graph_descriptor>> &idMap,
-    double radius);
+        const PointType &queryPoint,
+        vtkOctreePointLocator *octree,
+        const std::unordered_map<vtkIdType, std::vector<graph_descriptor>>
+                &idMap,
+        double radius);
 
-}  // namespace SG
+} // namespace SG
 #endif
