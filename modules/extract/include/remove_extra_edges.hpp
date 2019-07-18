@@ -32,8 +32,8 @@ namespace SG {
  * @return boolean, true if any edge has been removed
  * false otherwhise.
  */
-bool remove_extra_edges(GraphType& sg);
+bool remove_extra_edges(GraphType &sg);
 
-}  // namespace SG
+} // namespace SG
 
 #endif
