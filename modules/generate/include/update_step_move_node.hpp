@@ -1,36 +1,27 @@
-#ifndef UPDATESTEP_MOVENODE_HPP
-#define UPDATESTEP_MOVENODE_HPP
+#ifndef UPDATE_STEP_MOVE_NODE_HPP
+#define UPDATE_STEP_MOVE_NODE_HPP
 
-#include "array_utilities.hpp"
-#include "boundary_conditions.hpp"
-#include "generate_common.hpp"
-#include "spatial_graph.hpp"
-#include "spatial_graph_utilities.hpp"
-#include "spatial_node.hpp"
+#include "generate_common.hpp" // for Histogram
 #include "update_step.hpp"
-#include <iostream>
 
 namespace SG {
-class update_step_move_node : public update_step {
-  public:
-    update_step_move_node() = delete;
-    update_step_move_node(GraphType &graph_input,
-                          Histogram &histo_distances_input,
-                          Histogram &histo_cosines_input)
-            : graph_(graph_input), histo_distances_(histo_distances_input),
-              histo_cosines_(histo_cosines_input){};
+class update_step_move_node
+        : public update_step_with_distance_and_cosine_histograms {
+  protected:
+    using parent_class = update_step_with_distance_and_cosine_histograms;
 
+  public:
+    // inherit constructors
+    using parent_class::parent_class;
     inline void set_input_parameters(const double &max_step_distance) {
         max_step_distance_ = max_step_distance;
     }
 
-    void clear_stored_parameters(PointType &old_node_position,
-                                 PointType &new_node_position,
-                                 GraphType::vertex_descriptor &selected_node,
-                                 std::vector<double> &old_distances,
-                                 std::vector<double> &old_cosines,
-                                 std::vector<double> &new_distances,
-                                 std::vector<double> &new_cosines) const;
+    void clear_move_node_parameters(
+            PointType &old_node_position,
+            PointType &new_node_position,
+            GraphType::vertex_descriptor &selected_node) const;
+
     void undo(
             // in/out parameters
             Histogram &histo_distances,
@@ -89,29 +80,13 @@ class update_step_move_node : public update_step {
                       new_node_position_, old_distances_, old_cosines_,
                       new_distances_, new_cosines_);
     }
-    /**
-     * Remove old distances and add new from histogram.
-     *
-     * @param histo_distances
-     * @param old_distances
-     * @param new_distances
-     */
-    void
-    update_distances_histogram(Histogram &histo_distances,
-                               const std::vector<double> &old_distances,
-                               const std::vector<double> &new_distances) const;
-    /**
-     * Remove old cosines and add new ones from histogram.
-     *
-     * @param histo_cosines
-     * @param old_cosines
-     * @param new_cosines
-     */
-    void update_cosines_histogram(Histogram &histo_cosines,
-                                  const std::vector<double> &old_cosines,
-                                  const std::vector<double> &new_cosines) const;
 
     void update_graph() override {
+        if (selected_node_ ==
+            std::numeric_limits<decltype(selected_node_)>::max()) {
+            throw std::logic_error("update_graph() has to be called after "
+                                   "perform(), not before.");
+        }
         this->update_graph(graph_, selected_node_, new_node_position_);
     };
     /**
@@ -124,20 +99,13 @@ class update_step_move_node : public update_step {
     void update_graph(GraphType &graph,
                       const GraphType::vertex_descriptor &node_id,
                       const PointType &new_node_position) const;
-    GraphType &graph_;
-    Histogram &histo_distances_;
-    Histogram &histo_cosines_;
-    double max_step_distance_ = 1.0;
-    GraphType::vertex_descriptor selected_node_;
+    /** Max distance (modulus) allowed the node to move.
+     * Modulus is random from [0, max_step_distance_) */
+    double max_step_distance_ = 0.1;
+    GraphType::vertex_descriptor selected_node_ =
+            std::numeric_limits<decltype(selected_node_)>::max();
     PointType old_node_position_;
     PointType new_node_position_;
-
-  protected:
-    // Members needed to be stored for undo capabilities
-    std::vector<double> old_distances_;
-    std::vector<double> old_cosines_;
-    std::vector<double> new_distances_;
-    std::vector<double> new_cosines_;
 };
 } // namespace SG
 #endif

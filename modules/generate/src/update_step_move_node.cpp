@@ -1,5 +1,11 @@
 #include "update_step_move_node.hpp"
+#include "array_utilities.hpp"
+#include "boundary_conditions.hpp"
 #include "generate_common.hpp"
+#include "spatial_graph.hpp"
+#include "spatial_graph_utilities.hpp"
+#include "spatial_node.hpp"
+#include <iostream>
 
 namespace SG {
 
@@ -74,21 +80,13 @@ void update_step_move_node::perform(const double &max_step_distance,
     this->update_cosines_histogram(histo_cosines, old_cosines, new_cosines);
 }
 
-void update_step_move_node::clear_stored_parameters(
+void update_step_move_node::clear_move_node_parameters(
         PointType &old_node_position,
         PointType &new_node_position,
-        GraphType::vertex_descriptor &selected_node,
-        std::vector<double> &old_distances,
-        std::vector<double> &old_cosines,
-        std::vector<double> &new_distances,
-        std::vector<double> &new_cosines) const {
+        GraphType::vertex_descriptor &selected_node) const {
     old_node_position.fill(0);
     new_node_position.fill(0);
-    selected_node = 0;
-    old_distances.clear();
-    old_cosines.clear();
-    new_distances.clear();
-    new_cosines.clear();
+    selected_node = std::numeric_limits<decltype(selected_node_)>::max();
 }
 
 void update_step_move_node::undo(
@@ -103,54 +101,12 @@ void update_step_move_node::undo(
         std::vector<double> &old_cosines,
         std::vector<double> &new_distances,
         std::vector<double> &new_cosines) const {
-
-    if (new_distances_.empty()) {
-        std::cerr << "update_step_move_node::undo called before calling "
-                     "perform(). undo call has no effect."
-                  << std::endl;
-        return;
-    }
-    // Restore histograms (new_distances are now the old_distances in the
-    // function)
-    this->update_distances_histogram(histo_distances, new_distances,
-                                     old_distances);
-    this->update_cosines_histogram(histo_cosines, new_cosines, old_cosines);
-    this->clear_stored_parameters(old_node_position, new_node_position,
-                                  selected_node, old_distances, old_cosines,
-                                  new_distances, new_cosines);
+    parent_class::undo(histo_distances, histo_cosines, old_distances,
+                       old_cosines, new_distances, new_cosines);
+    this->clear_move_node_parameters(old_node_position, new_node_position,
+                                     selected_node);
 }
 
-void update_step_move_node::update_distances_histogram(
-        Histogram &histo_distances,
-        const std::vector<double> &old_distances,
-        const std::vector<double> &new_distances) const {
-    std::cout << "OLD_DISTANCES_UPDATING_HISTOGRAM: " << old_distances.size()
-              << std::endl;
-    std::cout << "NEW_DISTANCES_UPDATING_HISTOGRAM: " << new_distances.size()
-              << std::endl;
-    for (const auto &dist : old_distances) {
-        const auto bin = histo_distances.IndexFromValue(dist);
-        std::cout << "bin: " << bin << "; old_distance: " << dist << std::endl;
-        histo_distances.counts[bin]--;
-    }
-    for (const auto &dist : new_distances) {
-        const auto bin = histo_distances.IndexFromValue(dist);
-        std::cout << "bin: " << bin << "; new_distance: " << dist << std::endl;
-        histo_distances.counts[bin]++;
-    }
-}
-void update_step_move_node::update_cosines_histogram(
-        Histogram &histo_cosines,
-        const std::vector<double> &old_cosines,
-        const std::vector<double> &new_cosines) const {
-
-    for (const auto &cosine : old_cosines) {
-        histo_cosines.counts[histo_cosines.IndexFromValue(cosine)]--;
-    }
-    for (const auto &cosine : new_cosines) {
-        histo_cosines.counts[histo_cosines.IndexFromValue(cosine)]++;
-    }
-}
 void update_step_move_node::update_graph(
         GraphType &graph,
         const GraphType::vertex_descriptor &node_id,

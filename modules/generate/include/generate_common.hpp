@@ -23,6 +23,8 @@ using Histogram = histo::Histo<double, size_t>;
  */
 GraphType::vertex_descriptor select_random_node(const GraphType &graph);
 
+GraphType::edge_descriptor select_random_edge(const GraphType &graph);
+
 /**
  * Generate a vector with modulus between 0 and max_modulus and random
  * direction.
@@ -52,6 +54,20 @@ PointType generate_random_array(const double &max_modulus);
 std::vector<double> cosine_directors_from_connected_edges(
         const std::vector<VectorType> &outgoing_edges);
 
+/**
+ * Cosine director between target edge and a vector of edges.
+ * All of this vectors should be pointing outwards if all of them are sharing a
+ * vertex.
+ *
+ * @param outgoing_edges vector of outgoing edges
+ * @param outgoing_target_edge edge from where we want to compute the
+ * cosine_directors.
+ *
+ * @return cosine directors between outgoing_edges and outgoing_target_edge
+ */
+std::vector<double> cosine_directors_between_edges_and_target_edge(
+        const std::vector<VectorType> &outgoing_edges,
+        const VectorType &outgoing_target_edge);
 /**
  * Computes the end to end distance of all the edges
  * from input graph.
