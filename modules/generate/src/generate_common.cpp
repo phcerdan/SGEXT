@@ -20,17 +20,36 @@
 
 #include "generate_common.hpp"
 #include "rng.hpp"
+#include <tuple> // for std::tie
 
 namespace SG {
 
 GraphType::vertex_descriptor select_random_node(const GraphType &graph) {
 
-    auto num_vertices = boost::num_vertices(graph);
+    const auto num_vertices = boost::num_vertices(graph);
     return RNG::rand_range_int(0, num_vertices - 1);
 }
+GraphType::edge_descriptor select_random_edge(const GraphType &graph) {
+
+    const auto num_edges = boost::num_edges(graph);
+    const auto rand_edge_num = RNG::rand_range_int(0, num_edges - 1);
+    using edge_iterator = GraphType::edge_iterator;
+
+    edge_iterator eit, eit_end; // eit_rand1, eit_rand2;
+    std::tie(eit, eit_end) = boost::edges(graph);
+    for (int count = 0; eit != eit_end; ++eit, ++count) {
+        if (count == rand_edge_num) {
+            // eit iterator points to the random edge.
+            break;
+        }
+    }
+    // return the edge descriptor of the edge
+    return *eit;
+}
+
 PointType generate_random_array(const double &max_modulus) {
 
-    double rand_modulus = RNG::rand_range(0, max_modulus);
+    const double rand_modulus = RNG::rand_range(0, max_modulus);
     return RNG::random_orientation(rand_modulus);
 }
 
@@ -48,6 +67,18 @@ std::vector<double> cosine_directors_from_connected_edges(
     }
     return cosine_directors;
 };
+
+std::vector<double> cosine_directors_between_edges_and_target_edge(
+        const std::vector<VectorType> &outgoing_edges,
+        const VectorType &outgoing_target_edge) {
+    std::vector<double> cosine_directors;
+    for (auto out_edge = outgoing_edges.begin();
+         out_edge != outgoing_edges.end(); ++out_edge) {
+        cosine_directors.push_back(
+                ArrayUtilities::cos_director(*out_edge, outgoing_target_edge));
+    }
+    return cosine_directors;
+}
 
 std::vector<double> get_all_end_to_end_distances_of_edges(
         const GraphType &g, const ArrayUtilities::boundary_condition &bc) {

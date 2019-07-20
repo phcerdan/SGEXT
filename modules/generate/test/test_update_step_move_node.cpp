@@ -1,12 +1,19 @@
 #include "common_types.hpp"
 #include "generate_common.hpp"
+#include "rng.hpp"
 #include "spatial_graph.hpp"
 #include "spatial_graph_utilities.hpp"
 #include "update_step_move_node.hpp"
 #include "gmock/gmock.h"
 
+using namespace ::testing;
+
 struct UpdateStepMoveNodeFixture : public ::testing::Test {
     void SetUp() override {
+        // Fix seed in static local thread engine for this test
+        // Avoiding the chances of not moving the position if the random
+        // generated modulus is zero.
+        RNG::engine().seed(9999);
         this->CreateGraph();
         this->CreateHistograms();
     }
@@ -47,16 +54,42 @@ struct UpdateStepMoveNodeFixture : public ::testing::Test {
 
 TEST_F(UpdateStepMoveNodeFixture, constructor_works) {
     auto step = SG::update_step_move_node(g, histo_distances, histo_cosines);
+    std::cout << "Distances histogram, initial" << std::endl;
     histo_distances.PrintBreaksAndCounts(std::cout);
 }
 
 TEST_F(UpdateStepMoveNodeFixture, perform_works) {
     auto step = SG::update_step_move_node(g, histo_distances, histo_cosines);
+    step.max_step_distance_ = sqrt(3.0); // Allow big jump for test
     step.perform();
+    EXPECT_THAT(histo_distances.counts, Each(AllOf(Ge(0))));
+    std::cout << "Distances histogram after perform():" << std::endl;
     histo_distances.PrintBreaksAndCounts(std::cout);
 }
-// TEST_F(UpdateStepMoveNodeFixture, undo_works) {
-//     auto step = SG::update_step_move_node(g, histo_distances, histo_cosines);
-//     step.perform();
-//     step.undo();
-// }
+TEST_F(UpdateStepMoveNodeFixture, undo_works) {
+    auto step = SG::update_step_move_node(g, histo_distances, histo_cosines);
+    auto histo_distances_counts_initial = histo_distances.counts;
+    step.perform();
+    step.undo();
+    EXPECT_THAT(histo_distances.counts, Each(AllOf(Ge(0))));
+    EXPECT_EQ(histo_distances.counts, histo_distances_counts_initial);
+}
+
+TEST_F(UpdateStepMoveNodeFixture, update_graph_works) {
+    auto step = SG::update_step_move_node(g, histo_distances, histo_cosines);
+    // update_graph before perform()
+    EXPECT_ANY_THROW(step.update_graph());
+    step.perform();
+    EXPECT_THAT(step.selected_node_, Lt(3));
+    step.update_graph();
+    // Check that pos of the node has changed from its initial state
+    // Note that there is a non-zero chance (extremely low) for the
+    // random movement to get zero modulus. The seed is fixed in the test
+    // fixture to avoid failure.
+    if (step.selected_node_ == 0)
+        EXPECT_NE(g[step.selected_node_].pos, p0);
+    if (step.selected_node_ == 1)
+        EXPECT_NE(g[step.selected_node_].pos, p1);
+    if (step.selected_node_ == 2)
+        EXPECT_NE(g[step.selected_node_].pos, p2);
+}
