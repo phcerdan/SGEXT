@@ -10,7 +10,7 @@ project(SGEXT
 message(STATUS "SGEXT version: ${SGEXT_VERSION}")
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17) # Used in generate module at least
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 include(CMakeDependentOption)
