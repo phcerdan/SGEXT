@@ -7,6 +7,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_TESTS
   test_simulated_annealing.cpp
   test_update_step_move_node.cpp
   test_update_step_swap_edges.cpp
+  test_cramer_von_mises_test.cpp
   )
 
 SG_add_gtests()
