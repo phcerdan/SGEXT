@@ -40,9 +40,15 @@ class update_step_swap_edges
             std::vector<double> &new_cosines) const;
 
     inline void undo() override {
-        this->undo(histo_distances_, histo_cosines_, selected_edges_,
+        this->undo(*histo_distances_, *histo_cosines_, selected_edges_,
                    new_edges_, old_distances_, old_cosines_, new_distances_,
                    new_cosines_);
+    }
+    void randomize(const GraphType &graph,
+                   edge_descriptor_pair &selected_edges,
+                   bool &randomized_flag) const;
+    inline void randomize() {
+        this->randomize(*graph_, selected_edges_, randomized_flag_);
     }
 
     void perform(
@@ -50,8 +56,9 @@ class update_step_swap_edges
             GraphType &graph,
             Histogram &histo_distances,
             Histogram &histo_cosines,
-            // out parameters
             edge_descriptor_pair &selected_edges,
+            bool &randomized_flag,
+            // out parameters
             bool &is_swap_parallel,
             edge_descriptor_pair &new_edges,
             std::vector<double> &old_distances,
@@ -60,9 +67,10 @@ class update_step_swap_edges
             std::vector<double> &new_cosines) const;
 
     inline void perform() override {
-        this->perform(graph_, histo_distances_, histo_cosines_, selected_edges_,
-                      is_swap_parallel_, new_edges_, old_distances_,
-                      old_cosines_, new_distances_, new_cosines_);
+        this->perform(*graph_, *histo_distances_, *histo_cosines_,
+                      selected_edges_, randomized_flag_, is_swap_parallel_,
+                      new_edges_, old_distances_, old_cosines_, new_distances_,
+                      new_cosines_);
     }
     void update_graph() override {
         if (selected_edges_.first.m_source ==
@@ -76,7 +84,7 @@ class update_step_swap_edges
             throw std::logic_error("update_graph() has to be called after "
                                    "perform(), not before.");
         }
-        this->update_graph(graph_, selected_edges_, is_swap_parallel_);
+        this->update_graph(*graph_, selected_edges_, is_swap_parallel_);
     };
     /**
      * Update Graph, given the selected edges and if the swap is parallel. If

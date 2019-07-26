@@ -50,13 +50,13 @@ namespace SG {
  */
 inline double
 cumulative_distribution_lognormal(const double &x,
-                                  const double &normal_mean,
-                                  const double &normal_std_deviation) {
-    return (0.5 + 0.5 * std::erf((std::log(x) - normal_mean) /
-                                 (sqrt(2.) * normal_std_deviation)));
+                                  const double &log_mean,
+                                  const double &log_std_deviation) {
+    return (0.5 + 0.5 * std::erf((std::log(x) - log_mean) /
+                                 (sqrt(2.) * log_std_deviation)));
 };
 
-inline double cumulative_ditribution_truncated_power_series_3(
+inline double cumulative_distribution_truncated_power_series_3(
         const double &x, const double &b1, const double &b2, const double &b3) {
 
     // const double b3= -(3/32.) * (-1 + 2*b1 + 4*b2);
@@ -67,14 +67,23 @@ inline double cumulative_ditribution_truncated_power_series_3(
 
 template <typename TArrayType1, typename TArrayType2>
 TArrayType2
-apply_distro(TArrayType1 &X,
+apply_distro(const TArrayType1 &X,
              std::function<typename TArrayType2::value_type(
                      const typename TArrayType1::value_type &)> func) {
     auto policy = std::execution::par_unseq;
     TArrayType2 F(std::size(X));
-    std::copy(policy, std::begin(X), std::end(X), std::begin(F));
     std::transform(policy, std::begin(X), std::end(X), std::begin(F), func);
     return F;
+}
+
+template <typename TArrayType1, typename TArrayType2>
+void apply_distro(const TArrayType1 &X,
+                  TArrayType2 &F /* output*/,
+                  std::function<typename TArrayType2::value_type(
+                          const typename TArrayType1::value_type &)> func) {
+    assert(std::size(X) == std::size(F));
+    auto policy = std::execution::par_unseq;
+    std::transform(policy, std::begin(X), std::end(X), std::begin(F), func);
 }
 
 } // namespace SG

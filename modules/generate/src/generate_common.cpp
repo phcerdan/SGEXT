@@ -81,22 +81,51 @@ std::vector<double> cosine_directors_between_edges_and_target_edge(
 }
 
 std::vector<double> get_all_end_to_end_distances_of_edges(
-        const GraphType &g, const ArrayUtilities::boundary_condition &bc) {
+        const GraphType &graph, const ArrayUtilities::boundary_condition &bc) {
 
     std::vector<double> unordered_distances;
-    auto edges = boost::edges(g);
+    auto edges = boost::edges(graph);
     for (auto ei = edges.first, e_end = edges.second; ei != e_end; ++ei) {
-        auto source = boost::source(*ei, g);
-        auto target = boost::target(*ei, g);
+        auto source = boost::source(*ei, graph);
+        auto target = boost::target(*ei, graph);
         double dist;
         if (bc == ArrayUtilities::boundary_condition::NONE) {
-            dist = ArrayUtilities::distance(g[target].pos, g[source].pos);
+            dist = ArrayUtilities::distance(graph[target].pos,
+                                            graph[source].pos);
         } else if (bc == ArrayUtilities::boundary_condition::PERIODIC) {
             dist = ArrayUtilities::distance_with_boundary_condition_periodic(
-                    g[target].pos, g[source].pos);
+                    graph[target].pos, graph[source].pos);
         }
         unordered_distances.push_back(dist);
     }
     return unordered_distances;
+}
+
+std::vector<double> get_all_cosine_directors_between_connected_edges(
+        const GraphType &graph, const ArrayUtilities::boundary_condition &bc) {
+
+    std::vector<double> unordered_cosines;
+    auto [vi, vi_end] = boost::vertices(graph);
+    for (; vi != vi_end; ++vi) {
+        std::vector<VectorType> outgoing_edges;
+        auto [ei, ei_end] = boost::out_edges(*vi, graph);
+        for (; ei != ei_end; ++ei) {
+            const auto source_pos = graph[source(*ei, graph)].pos;
+            const auto target_pos = graph[target(*ei, graph)].pos;
+            auto target_image_pos = target_pos;
+            if (bc == ArrayUtilities::boundary_condition::PERIODIC) {
+                target_image_pos = ArrayUtilities::closest_image_from_reference(
+                        source_pos, target_image_pos);
+            }
+            outgoing_edges.push_back(
+                    ArrayUtilities::minus(target_image_pos, source_pos));
+        }
+        const auto cosine_directors_from_vertex =
+                cosine_directors_from_connected_edges(outgoing_edges);
+        unordered_cosines.insert(std::end(unordered_cosines),
+                                 std::begin(cosine_directors_from_vertex),
+                                 std::end(cosine_directors_from_vertex));
+    }
+    return unordered_cosines;
 }
 } // namespace SG
