@@ -4,7 +4,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "degree_viger_generator.hpp"
-#include "viger_generator_hash.hpp"
+#include "degree_viger_generator_hash.hpp"
 
 namespace SG {
 
