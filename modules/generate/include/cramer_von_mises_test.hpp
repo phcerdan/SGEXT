@@ -143,7 +143,7 @@ double cramer_von_mises_test(
     const auto num_bins = std::size(histo_counts);
     const auto S = compute_S(cumulative_counts_exclusive, F, num_bins);
     const auto T = compute_T(S, histo_counts, num_bins);
-    return reduce_T(T, num_bins);
+    return 1.0 / (12 * num_bins) + reduce_T(T, num_bins);
 }
 
 } // namespace SG

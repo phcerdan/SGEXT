@@ -25,13 +25,13 @@ class update_step {
 
 class update_step_with_distance_and_cosine_histograms : public update_step {
   public:
-    update_step_with_distance_and_cosine_histograms() = delete;
+    update_step_with_distance_and_cosine_histograms() = default;
     update_step_with_distance_and_cosine_histograms(
             GraphType &graph_input,
             Histogram &histo_distances_input,
             Histogram &histo_cosines_input)
-            : graph_(graph_input), histo_distances_(histo_distances_input),
-              histo_cosines_(histo_cosines_input){};
+            : graph_(&graph_input), histo_distances_(&histo_distances_input),
+              histo_cosines_(&histo_cosines_input){};
 
     void clear_stored_parameters(std::vector<double> &old_distances,
                                  std::vector<double> &old_cosines,
@@ -47,7 +47,7 @@ class update_step_with_distance_and_cosine_histograms : public update_step {
             std::vector<double> &new_cosines) const;
 
     inline void undo() override {
-        this->undo(histo_distances_, histo_cosines_, old_distances_,
+        this->undo(*histo_distances_, *histo_cosines_, old_distances_,
                    old_cosines_, new_distances_, new_cosines_);
     }
 
@@ -73,9 +73,17 @@ class update_step_with_distance_and_cosine_histograms : public update_step {
     void update_cosines_histogram(Histogram &histo_cosines,
                                   const std::vector<double> &old_cosines,
                                   const std::vector<double> &new_cosines) const;
-    GraphType &graph_;
-    Histogram &histo_distances_;
-    Histogram &histo_cosines_;
+    GraphType *graph_;
+    Histogram *histo_distances_;
+    Histogram *histo_cosines_;
+
+    /**
+     * Flag indicating that a random node or edge has been selected. perform()
+     * would select a random node/edge if this flag is false. Useful if multiple
+     * update_steps need to work in parallel and checking that there are not
+     * nodes/edges in common between steps.
+     */
+    bool randomized_flag_ = false;
 
   protected:
     // Members needed to be stored for undo capabilities

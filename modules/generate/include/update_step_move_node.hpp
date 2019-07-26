@@ -35,9 +35,16 @@ class update_step_move_node
             std::vector<double> &new_distances,
             std::vector<double> &new_cosines) const;
     inline void undo() override {
-        this->undo(histo_distances_, histo_cosines_, selected_node_,
+        this->undo(*histo_distances_, *histo_cosines_, selected_node_,
                    old_node_position_, new_node_position_, old_distances_,
                    old_cosines_, new_distances_, new_cosines_);
+    }
+
+    void randomize(const GraphType &graph,
+                   GraphType::vertex_descriptor &selected_node,
+                   bool &randomized_flag) const;
+    inline void randomize() {
+        this->randomize(*graph_, selected_node_, randomized_flag_);
     }
 
     /**
@@ -65,8 +72,9 @@ class update_step_move_node
             GraphType &graph,
             Histogram &histo_distances,
             Histogram &histo_cosines,
-            // out parameters
             GraphType::vertex_descriptor &selected_node,
+            bool &randomized_flag,
+            // out parameters
             PointType &old_node_position,
             PointType &new_node_position,
             std::vector<double> &old_distances,
@@ -75,10 +83,10 @@ class update_step_move_node
             std::vector<double> &new_cosines) const;
 
     inline void perform() override {
-        this->perform(max_step_distance_, graph_, histo_distances_,
-                      histo_cosines_, selected_node_, old_node_position_,
-                      new_node_position_, old_distances_, old_cosines_,
-                      new_distances_, new_cosines_);
+        this->perform(max_step_distance_, *graph_, *histo_distances_,
+                      *histo_cosines_, selected_node_, randomized_flag_,
+                      old_node_position_, new_node_position_, old_distances_,
+                      old_cosines_, new_distances_, new_cosines_);
     }
 
     void update_graph() override {
@@ -87,7 +95,7 @@ class update_step_move_node
             throw std::logic_error("update_graph() has to be called after "
                                    "perform(), not before.");
         }
-        this->update_graph(graph_, selected_node_, new_node_position_);
+        this->update_graph(*graph_, selected_node_, new_node_position_);
     };
     /**
      * Update the SpatialNode.pos of the selected node to the new_node_position.

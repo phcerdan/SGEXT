@@ -128,6 +128,17 @@ inline double random_lognormal(const double &mean, const double &s) {
 }
 
 /**
+ * Random generator for a geometric distribution
+ *
+ * @param q
+ *
+ * @return integer
+ */
+inline int random_geometric(const double &q) {
+    std::geometric_distribution<int> gd(q);
+    return gd(engine());
+}
+/**
  * Random generator from a Geometric shifted (=3) distribution.
  * /f$ f(p)=q(1-q)^(p-shift) /f$
  * @param q = 1 /(Z-2), where Z is the average valence.
