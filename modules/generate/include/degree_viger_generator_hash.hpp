@@ -2,8 +2,8 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-#ifndef VIGER_GENERATOR_HASH_HPP
-#define VIGER_GENERATOR_HASH_HPP
+#ifndef DEGREE_VIGER_GENERATOR_HASH_HPP
+#define DEGREE_VIGER_GENERATOR_HASH_HPP
 
 #include "rng.hpp"
 #include <assert.h>
