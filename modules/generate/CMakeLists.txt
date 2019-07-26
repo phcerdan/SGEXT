@@ -10,7 +10,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_DEPENDS
   histo)
 set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
     generate_common.cpp
-    simulated_annealing.cpp
+    simulated_annealing_generator.cpp
     update_step.cpp
     update_step_move_node.cpp
     update_step_swap_edges.cpp
