@@ -19,7 +19,7 @@
  * *******************************************************************/
 
 #include "degree_viger_generator.hpp"
-#include "viger_generator_hash.hpp"
+#include "degree_viger_generator_hash.hpp"
 
 namespace SG {
 

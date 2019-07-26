@@ -17,8 +17,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * *******************************************************************/
-#ifndef VIGER_GENERATOR_HASH_HPP
-#define VIGER_GENERATOR_HASH_HPP
+#ifndef DEGREE_VIGER_GENERATOR_HASH_HPP
+#define DEGREE_VIGER_GENERATOR_HASH_HPP
 
 #include "rng.hpp"
 #include <assert.h>
