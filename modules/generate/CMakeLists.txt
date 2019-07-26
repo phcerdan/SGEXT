@@ -14,6 +14,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
     update_step.cpp
     update_step_move_node.cpp
     update_step_swap_edges.cpp
+    degree_viger_generator.cpp
     )
 list(TRANSFORM SG_MODULE_${SG_MODULE_NAME}_SOURCES PREPEND "src/")
 add_library(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} ${SG_MODULE_${SG_MODULE_NAME}_SOURCES})
