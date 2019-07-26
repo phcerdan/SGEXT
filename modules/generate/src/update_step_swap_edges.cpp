@@ -10,13 +10,21 @@
 
 namespace SG {
 
+void update_step_swap_edges::randomize(const GraphType &graph,
+                                       edge_descriptor_pair &selected_edges,
+                                       bool &randomized_flag) const {
+    selected_edges = this->select_two_valid_edges(graph);
+    randomized_flag = true;
+};
+
 void update_step_swap_edges::perform(
         // in/out parameters
         GraphType &graph,
         Histogram &histo_distances,
         Histogram &histo_cosines,
-        // out parameters
         edge_descriptor_pair &selected_edges,
+        bool &randomized_flag,
+        // out parameters
         bool &is_swap_parallel,
         edge_descriptor_pair &new_edges,
         std::vector<double> &old_distances,
@@ -24,8 +32,10 @@ void update_step_swap_edges::perform(
         std::vector<double> &new_distances,
         std::vector<double> &new_cosines) const {
 
+    if (!randomized_flag) {
+        this->randomize(graph, selected_edges, randomized_flag);
+    }
     // select two valid edges to swap at random
-    selected_edges = this->select_two_valid_edges(graph);
     auto edge1 = selected_edges.first;
     auto edge2 = selected_edges.second;
     // get positions of nodes of both edges
@@ -152,6 +162,8 @@ void update_step_swap_edges::perform(
     this->update_distances_histogram(histo_distances, old_distances,
                                      new_distances);
     this->update_cosines_histogram(histo_cosines, old_cosines, new_cosines);
+    // clear flag
+    randomized_flag = false;
 }
 void update_step_swap_edges::clear_selected_edges(
         edge_descriptor_pair &selected_edges,

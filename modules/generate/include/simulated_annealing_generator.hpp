@@ -1,6 +1,8 @@
 #ifndef SIMULATEDANNEALING_HPP
 #define SIMULATEDANNEALING_HPP
 
+#include "boundary_conditions.hpp" // for boundary_condition
+#include "generate_common.hpp"     // for Histogram
 #include "update_step_move_node.hpp"
 #include "update_step_swap_edges.hpp"
 
@@ -10,9 +12,45 @@ namespace SG {
  */
 class simulated_annealing_generator {
 
-    // void von_mises_test(Histogram histo) const;
-    // void von_mises_test_distances(Histogram histo) const;
-    // void von_mises_test_director_cosines(Histogram histo) const;
+  protected:
+    using Self = simulated_annealing_generator;
+
+  public:
+    simulated_annealing_generator()
+            : step_move_node_(graph_, histo_ete_distances_, histo_cosines_),
+              step_swap_edges_(graph_, histo_ete_distances_, histo_cosines_) {}
+    simulated_annealing_generator(const Self &) = delete;
+    Self &operator=(const Self &) = delete;
+    simulated_annealing_generator(Self &&) = delete;
+    Self &operator=(const Self &&) = delete;
+    simulated_annealing_generator(const size_t &num_vertices)
+            : simulated_annealing_generator() {
+        this->init_graph_degree(num_vertices);
+        this->init_graph_vertex_positions();
+        // TODO change default number of bins
+        const size_t num_bins_ete_distances = 100;
+        const size_t num_bins_cosines = 100;
+        this->init_histograms(num_bins_ete_distances, num_bins_cosines);
+        transition_parameters.energy_initial = this->compute_energy();
+        transition_parameters.energy = transition_parameters.energy_initial;
+        physical_scaling_parameters.length_reference =
+                std::pow(num_vertices, -1.0 / 3);
+        // TODO node_density has to be defined/chosen by the user
+        physical_scaling_parameters.length_scaling_factor = std::pow(
+                num_vertices / physical_scaling_parameters.node_density,
+                1 / 3.0);
+        physical_scaling_parameters.length_normal_mean =
+                end_to_end_distances_distribution_parameters.normal_mean /
+                (physical_scaling_parameters
+                         .length_scaling_factor); // * physical_scaling_parameters.length_reference);
+        // TODO: Lindstrom parameters are wrong in the variance, they do not
+        // require extra work. But for new experimental data, they will.
+        // physical_scaling_parameters.length_normal_std_deviation =
+        //         end_to_end_distances_distribution_parameters
+        //                 .normal_std_deviation /
+        //         physical_scaling_parameters.node_density;
+    }
+
     /// Possible transitions after the move occurred updating the
     /// network in simulated_annealing. Used in checkTransition()
     enum class transition {
@@ -24,46 +62,206 @@ class simulated_annealing_generator {
         ACCEPTED_HIGH_TEMP ///< Transition is accepted. Energy/score is
                            ///< higher than before, but simulated annealing.
     };
-    /// Move occurred updating the network. Last move stored in @sa
-    /// last_movement_ .
-    enum class move {
-        NOMOVE,        ///< No move occurred.
-        NODE_MOVED,    ///< A node was moved to another position.
-        SWAP_TWO_EDGES ///< Two edges were moved.
-    };
-    void engine();
     struct transition_parameters {
 
-        double energy_;         ///< Current energy or score.
-        double energy_initial_; ///< Energy after network initialization.
+        double energy = 0.0;         ///< Current energy or score.
+        double energy_initial = 0.0; ///< Energy after network initialization.
         /** accepted transition:ACCEPTED since engine() started. */
-        size_t accepted_transitions_;
+        size_t accepted_transitions = 0;
         /** total transition::REJECTED since engine() started. */
-        size_t rejected_transitions_;
+        size_t rejected_transitions = 0;
         /** total number of transition::ACCEPTED_HIGH_TEMP since engine()
          * started. */
-        size_t high_temp_transitions_;
+        size_t high_temp_transitions = 0;
         /** maximum of consecutive failures since engine() started */
-        size_t consecutive_failures_;
+        size_t consecutive_failures = 0;
+        /** total number of failures in the simulation */
+        size_t total_failures = 0;
         /** time elapsed since engine() started. */
-        double time_elapsed_;
+        double time_elapsed = 0.0;
         /** Temperature before engine() started. Associated  with the annealing
-         * process, @sa  transition::ACCEPTED_HIGH_TEMP */
-        double temp_initial_;
+         * process, @sa  transition::ACCEPTED_HIGH_TEMP.*/
+        double temp_initial = 0.0;
         /** Current temperature. The temperature decreases with each
          * transition::ACCEPTED_HIGH_TEMP. */
-        double temp_actual_;
+        double temp_current = 0.0;
+        /** Not energitically favourable transitions are less probable over
+         * time. The analogy is that the system cools down.  */
+        double temp_cooling_rate = 1.0 - 0.5e-04;
 
-        // TODO DELETE/UNUSED
-        /** number of errors associated with 2 nodes in the same positions since
-         * engine() started. */
-        // size_t eng_error_zero_count_;
-        /** total number of moves that went out of bonds since engine()
-         * started. */
-        // size_t eng_out_of_bounds_move_;
-        /** total number of  transition::ACCEPTED_HIGH_TEMP  since engine()
-         * started. */
+        /** Max consecutive failures allowed before engine() stops.*/
+        size_t MAX_CONSECUTIVE_FAILURES = 100000000;
+        /** Max iterations of engine() if convergence has not been achieved.*/
+        // size_t MAX_ENGINE_ITERATIONS = 100000000;
+        size_t MAX_ENGINE_ITERATIONS = 100000;
+        /** Energy necessary to consider that convergence has been achieved,
+         * highly tuneable.*/
+        double ENERGY_CONVERGENCE = 0.01;
+        /** Chances that the update step is of type update_step_move_node.
+         * The other method is update_step_swap_edges.*/
+        double UPDATE_STEP_MOVE_NODE_PROBABILITY = 0.5;
+        double update_step_move_node_max_step_distance = 5.0e-2;
+        inline void print(std::ostream &os, int spaces = 30) {
+            os << "%/************TRANSITION "
+                  "PARAMETERS*****************/"
+               << '\n'
+               << '\n'
+               << std::left << std::setw(spaces) << "E= " << energy << '\n'
+               << std::left << std::setw(spaces)
+               << "E_initial= " << energy_initial << '\n'
+               << std::left << std::setw(spaces)
+               << "Energy_reduction %= " << 1. - energy / energy_initial << '\n'
+               << std::left << std::setw(spaces)
+               << "time_elapsed=" << time_elapsed << '\n'
+               << std::left << std::setw(spaces)
+               << "accepted_transitions= " << accepted_transitions << '\n'
+               << std::left << std::setw(spaces)
+               << "high_temp_transitions= " << high_temp_transitions
+               << "  %HighTempTransitions: "
+               << static_cast<double>(high_temp_transitions) /
+                            accepted_transitions
+               << '\n'
+               << std::left << std::setw(spaces)
+               << "total_failures= " << total_failures << '\n'
+               << std::left << std::setw(spaces)
+               << "consecutive_failures= " << consecutive_failures << '\n'
+               << std::left << std::setw(spaces)
+               << "temp_initial= " << temp_initial << '\n'
+               << std::left << std::setw(spaces)
+               << "temp_final= " << temp_current << '\n'
+               << std::left << std::setw(spaces)
+               << "temp_cooling_rate= " << temp_cooling_rate << '\n'
+               << std::left << std::setw(spaces)
+               << "update_step_move_node_max_step= "
+               << update_step_move_node_max_step_distance << '\n';
+        }
     } transition_parameters;
+
+    struct degree_distribution_parameters {
+        double mean = 3.379692;
+        size_t min_degree = 3;
+        size_t max_degree = 999;
+    } degree_distribution_parameters;
+
+    struct end_to_end_distances_distribution_parameters {
+        /** Experimental values, not scaled with the simulation box */
+        double normal_mean = 1.96e-6;
+        // PHC: this value is probably wrong (Lindstrom data). This should be
+        // the experimental/measured data, but this is the normalized (with
+        // num_vertices) std_deviation
+        double normal_std_deviation = 0.253;
+        double log_std_deviation =
+                log(normal_std_deviation * normal_std_deviation /
+                            (normal_mean * normal_mean) +
+                    1);
+        double log_mean = log(normal_mean) - log_std_deviation / 2.0;
+    } end_to_end_distances_distribution_parameters;
+
+    struct cosine_directors_distribution_parameters {
+        double b1 = 0.6232085;
+        double b2 = 0.01684390;
+        // b3 = -(3/32.) * (-1 + 2*b1 + 4*b2)
+        double b3 = -0.029418056250000008;
+    } cosine_directors_distribution_parameters;
+
+    struct domain_parameters {
+        ArrayUtilities::boundary_condition boundary_condition =
+                ArrayUtilities::boundary_condition::PERIODIC;
+        // Assumes x0, y0, z0 = 0.0
+        std::array<double, 3> domain = {1.0, 1.0, 1.0};
+    } domain_parameters;
+
+    struct physical_scaling_parameters {
+        /** nodes per unit of volume measured experimentally */
+        double node_density = 0.066627;
+        /** L_ref = num_vertices^(-1/3.0) */
+        double length_reference;
+        /** S = (num_vertices/node_density)^1/3 */
+        double length_scaling_factor;
+        double length_normal_mean =
+                1.96e-6 / node_density;             // L_sim = L_phys/(Lref * S)
+        double length_normal_std_deviation = 0.253; // s^2 * n^(2/3);
+        double length_log_std_deviation =
+                log(length_normal_std_deviation * length_normal_std_deviation /
+                            (length_normal_mean * length_normal_mean) +
+                    1);
+        double length_log_mean =
+                log(length_normal_mean) - length_log_std_deviation / 2.0;
+    } physical_scaling_parameters;
+
+  public:
+    GraphType graph_;
+    Histogram histo_ete_distances_;
+    Histogram histo_cosines_;
+    std::vector<double> target_cumulative_distro_histo_ete_distances_;
+    std::vector<double> target_cumulative_distro_histo_cosines_;
+    // TODO: update_steps can be a vector to parallelize the update.
+    // The only condition would be the selected randomized nodes/edges do not
+    // have neighbors in common.
+    update_step_move_node step_move_node_;
+    update_step_swap_edges step_swap_edges_;
+
+    /**
+     * Create a random graph from a degree distribution (@sa
+     * degree_distribution_parameters). For randomize the graph, it uses
+     * @create_graph_from_degree_sequence
+     *
+     * @param num_vertices number of vertices of the generated graph.
+     */
+    void init_graph_degree(const size_t &num_vertices);
+    /**
+     * Assign a random position (inside the domain_parameters) to each vertex.
+     */
+    void init_graph_vertex_positions();
+
+    void init_histograms(const size_t &num_bins_ete_distances,
+                         const size_t &num_bins_cosines);
+    /**
+     * Create an histogram with num_bins and uniformly distributed breaks to
+     * store the end-to-end distances. The min and max distance are taken from
+     * domain_parameters.domain
+     *
+     * @param num_bins of the histogram. This has an impact
+     * on performance when computing cramer-von-mises tests.
+     */
+    void init_histogram_ete_distances(const size_t &num_bins);
+    /**
+     * Create an histogram with num_bins and uniformly distributed breaks to
+     * store director cosines. The min and max are -1.0 and 1.0 respectively.
+     *
+     * @param num_bins of the histogram. This has an impact
+     * on performance when computing cramer-von-mises tests.
+     */
+    void init_histogram_cosines(const size_t &num_bins);
+    /**
+     * Reset and populate the end-to-end distances histogram with the current
+     * status of the graph.
+     */
+    void populate_histogram_ete_distances();
+    /**
+     * Reset and populate the director cosines histogram with the current status
+     * of the graph.
+     */
+    void populate_histogram_cosines();
+    void populate_target_cumulative_distro_histo_ete_distances(
+            const std::vector<double> &histo_centers);
+    void populate_target_cumulative_distro_histo_cosines(
+            const std::vector<double> &histo_centers);
+    void engine();
+
+    /**
+     * Performs cramer_von_mises_test in the histograms at the moment of
+     * execution. Ensure that you call it when histograms are updated.
+     *
+     * @sa SG::cramer_von_mises_test
+     *
+     * @return the result of the test.
+     */
+    double compute_energy() const;
+    double energy_ete_distances() const;
+    double energy_cosines() const;
+    simulated_annealing_generator::transition check_transition();
+    void print(std::ostream &os, int spaces = 30);
 };
 } // namespace SG
 #endif

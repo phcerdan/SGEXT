@@ -9,20 +9,30 @@
 
 namespace SG {
 
+void update_step_move_node::randomize(
+        const GraphType &graph,
+        GraphType::vertex_descriptor &selected_node,
+        bool &randomized_flag) const {
+    selected_node = select_random_node(graph);
+    randomized_flag = true;
+}
 void update_step_move_node::perform(const double &max_step_distance,
                                     // in/out parameters
                                     GraphType &graph,
                                     Histogram &histo_distances,
                                     Histogram &histo_cosines,
-                                    // out parameters
                                     GraphType::vertex_descriptor &selected_node,
+                                    bool &randomized_flag,
+                                    // out parameters
                                     PointType &old_node_position,
                                     PointType &new_node_position,
                                     std::vector<double> &old_distances,
                                     std::vector<double> &old_cosines,
                                     std::vector<double> &new_distances,
                                     std::vector<double> &new_cosines) const {
-    selected_node = select_random_node(graph);
+    if (!randomized_flag) {
+        selected_node = select_random_node(graph);
+    }
     // Store the old position of the node you are going to move.
     old_node_position = graph[selected_node].pos;
     // std::cout << "SELECTED_NODE: " << selected_node << std::endl;
@@ -78,6 +88,8 @@ void update_step_move_node::perform(const double &max_step_distance,
     this->update_distances_histogram(histo_distances, old_distances,
                                      new_distances);
     this->update_cosines_histogram(histo_cosines, old_cosines, new_cosines);
+    // clear flag
+    randomized_flag = false;
 }
 
 void update_step_move_node::clear_move_node_parameters(

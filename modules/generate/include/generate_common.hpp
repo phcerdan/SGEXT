@@ -56,7 +56,7 @@ std::vector<double> cosine_directors_from_connected_edges(
 
 /**
  * Cosine director between target edge and a vector of edges.
- * All of this vectors should be pointing outwards if all of them are sharing a
+ * All of these vectors should be pointing outwards if all of them are sharing a
  * vertex.
  *
  * @param outgoing_edges vector of outgoing edges
@@ -81,6 +81,9 @@ std::vector<double> cosine_directors_between_edges_and_target_edge(
  * @return vector with all the distances (unordered)
  */
 std::vector<double> get_all_end_to_end_distances_of_edges(
-        const GraphType &g, const ArrayUtilities::boundary_condition &bc);
+        const GraphType &graph, const ArrayUtilities::boundary_condition &bc);
+
+std::vector<double> get_all_cosine_directors_between_connected_edges(
+        const GraphType &graph, const ArrayUtilities::boundary_condition &bc);
 } /* end namespace SG */
 #endif
