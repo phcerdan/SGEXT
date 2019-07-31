@@ -119,52 +119,20 @@ class update_step_swap_edges
                            int recursive_count = 0) const;
 
     /**
-     * Returns the edge arrays (mathematical vectors)
-     * of the adjacent edges of the edge defined from the inputs
-     * source and target.
-     * The edges are adjacent to the source, the first input
-     *
-     * @param source
-     * @param target
-     * @param graph
-     *
-     * @return
-     */
-    std::vector<VectorType>
-    get_adjacent_edges_from_source(const GraphType::vertex_descriptor source,
-                                   const GraphType::vertex_descriptor target,
-                                   const GraphType &graph) const;
-
-    /**
-     * Compute cosine_directors of all the edges adjacent to source (except
-     * the one specied by ignore_node) versus the vector defined by:
-     * target_pos - source_pos.
-     *
-     * For old_cosines computations ignore_node is equal to target, but for
-     * new_cosines the graph is still unchanged, so ignore_node corresponds to
-     * the target of the old_edge
-     *
-     * @param source
-     * @param ignore_node
-     * @param source_pos
-     * @param target_pos
-     * @param graph
-     *
-     * @return  vector with cosine_directors values
-     */
-    std::vector<double> compute_cosine_directors_from_source(
-            const GraphType::vertex_descriptor source,
-            const GraphType::vertex_descriptor ignore_node,
-            const PointType source_pos,
-            const PointType target_pos,
-            const GraphType &graph) const;
-
-    /**
      * Depending on the boolean is_swap_parallel returns the source and targets
      * of the new edges.
      * The return order is:
      * {new_edge1_source, new_edge1_target, new_edge2_source, new_edge2_target}
      *
+     *
+     *
+        S1 --- T1  |  S1       S1-\
+                   |  |    or      .
+                   |  S2            \_T2
+        ---------------------------------------------
+        S2 --- T2  |  T1            /-T1
+                   |  |    or      .
+                   |  T2       S2_/
      * @param is_swap_parallel
      * @param edge1
      * @param edge2
