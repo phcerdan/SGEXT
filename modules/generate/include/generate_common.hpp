@@ -68,6 +68,49 @@ std::vector<double> cosine_directors_from_connected_edges(
 std::vector<double> cosine_directors_between_edges_and_target_edge(
         const std::vector<VectorType> &outgoing_edges,
         const VectorType &outgoing_target_edge);
+
+/**
+ * Returns the edge arrays (mathematical vectors)
+ * of the adjacent edges of the edge defined from the inputs
+ * source and target.
+ * The edges are adjacent to the source, the first input
+ *
+ * @param source
+ * @param target
+ * @param graph
+ *
+ * @return
+ */
+std::vector<VectorType> get_adjacent_edges_from_source(
+        const GraphType::vertex_descriptor source,
+        const GraphType::vertex_descriptor target,
+        const GraphType &graph,
+        const ArrayUtilities::boundary_condition &boundary_condition);
+/**
+ * Compute cosine_directors of all the edges adjacent to source (except
+ * the one specied by ignore_node) versus the vector defined by:
+ * target_pos - source_pos.
+ *
+ * For old_cosines computations ignore_node is equal to target, but for
+ * new_cosines the graph is still unchanged, so ignore_node corresponds to
+ * the target of the old_edge
+ *
+ * @param source
+ * @param ignore_node
+ * @param source_pos
+ * @param target_pos
+ * @param graph
+ *
+ * @return  vector with cosine_directors values
+ */
+std::vector<double> compute_cosine_directors_from_source(
+        const GraphType::vertex_descriptor source,
+        const GraphType::vertex_descriptor ignore_node,
+        const PointType source_pos,
+        const PointType target_pos,
+        const GraphType &graph,
+        const ArrayUtilities::boundary_condition &boundary_condition);
+
 /**
  * Computes the end to end distance of all the edges
  * from input graph.

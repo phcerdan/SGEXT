@@ -30,6 +30,8 @@ void update_step_move_node::perform(const double &max_step_distance,
                                     std::vector<double> &old_cosines,
                                     std::vector<double> &new_distances,
                                     std::vector<double> &new_cosines) const {
+    this->clear_stored_parameters(old_distances, old_cosines, new_distances,
+                                  new_cosines);
     if (!randomized_flag) {
         selected_node = select_random_node(graph);
     }
@@ -54,7 +56,11 @@ void update_step_move_node::perform(const double &max_step_distance,
 
     std::vector<VectorType> old_edges;
     std::vector<VectorType> new_edges;
-    for (const auto &p : adjacent_vertices_positions.neighbours_positions) {
+    const auto num_neighbors =
+            adjacent_vertices_positions.neighbours_positions.size();
+    for (size_t i = 0; i < num_neighbors; i++) {
+        const auto &p = adjacent_vertices_positions.neighbours_positions[i];
+        const auto &vd = adjacent_vertices_positions.neighbours_descriptors[i];
         auto p_image_old = p;
         auto p_image_new = p;
         if (boundary_condition ==
@@ -72,16 +78,68 @@ void update_step_move_node::perform(const double &max_step_distance,
         // std::cout << "OLD_DISTANCE: " << old_distances.back() << std::endl;
         new_distances.push_back(
                 ArrayUtilities::distance(p_image_new, new_node_position));
-        // Store edges (pointing OUT selected_node_) to compute angles
-        old_edges.push_back(
-                ArrayUtilities::minus(p_image_old, old_node_position));
-        new_edges.push_back(
-                ArrayUtilities::minus(p_image_new, new_node_position));
-    }
-    // Cosines from old and new edges
-    old_cosines = cosine_directors_from_connected_edges(old_edges);
-    new_cosines = cosine_directors_from_connected_edges(new_edges);
 
+        // Cosines
+        const auto old_array =
+                ArrayUtilities::minus(p_image_old, old_node_position);
+        const auto new_array =
+                ArrayUtilities::minus(p_image_new, new_node_position);
+        // Store edges (pointing OUT selected_node_) to compute angles around
+        // the edges connected to the moved node.
+        old_edges.push_back(old_array);
+        new_edges.push_back(new_array);
+        // Moving a node affects the angles from the edges having as source the
+        // moved node, but also those edges having it as target.
+        const auto adjacent_arrays_target = get_adjacent_edges_from_source(
+                vd, selected_node /*ignore */, graph, boundary_condition);
+
+        const auto old_target_cosines =
+                cosine_directors_between_edges_and_target_edge(
+                        adjacent_arrays_target, old_array);
+        old_cosines.insert(std::end(old_cosines),
+                           std::begin(old_target_cosines),
+                           std::end(old_target_cosines));
+
+        const auto new_target_cosines =
+                cosine_directors_between_edges_and_target_edge(
+                        adjacent_arrays_target, new_array);
+        new_cosines.insert(std::end(new_cosines),
+                           std::begin(new_target_cosines),
+                           std::end(new_target_cosines));
+    }
+
+    // Cosines from old and new edges
+    const auto old_cosines_between_edges_sharing_moved_node =
+            cosine_directors_from_connected_edges(old_edges);
+    const auto new_cosines_between_edges_sharing_moved_node =
+            cosine_directors_from_connected_edges(new_edges);
+    old_cosines.insert(std::end(old_cosines),
+                       std::begin(old_cosines_between_edges_sharing_moved_node),
+                       std::end(old_cosines_between_edges_sharing_moved_node));
+    new_cosines.insert(std::end(new_cosines),
+                       std::begin(new_cosines_between_edges_sharing_moved_node),
+                       std::end(new_cosines_between_edges_sharing_moved_node));
+
+    // TODO remove
+    const bool verbose = false;
+    if (verbose) {
+        std::cout << "Old Node Position: ";
+        std::cout << ArrayUtilities::to_string(old_node_position) << std::endl;
+        std::cout << "New Node Position: ";
+        std::cout << ArrayUtilities::to_string(new_node_position) << std::endl;
+        std::cout << "Old distances: ";
+        this->print(std::cout);
+        std::cout << "Old edges: ";
+        for (const auto &v : old_edges) {
+            std::cout << "{ " << ArrayUtilities::to_string(v) << "} ,";
+        }
+        std::cout << std::endl;
+        std::cout << "New edges: ";
+        for (const auto &v : new_edges) {
+            std::cout << "{ " << ArrayUtilities::to_string(v) << "} ,";
+        }
+        std::cout << std::endl;
+    }
     // Update Histograms:
     //  Remove old_distances and old_cosines and
     //  add new_distances, new_cosines

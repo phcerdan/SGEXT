@@ -45,17 +45,17 @@ void update_step_with_distance_and_cosine_histograms::
     //           << std::endl;
     // std::cout << "NEW_DISTANCES_UPDATING_HISTOGRAM: " << new_distances.size()
     //           << std::endl;
-    for (const auto &dist : old_distances) {
-        const auto bin = histo_distances.IndexFromValue(dist);
-        // std::cout << "bin: " << bin << "; old_distance: " << dist <<
-        // std::endl;
-        histo_distances.counts[bin]--;
-    }
     for (const auto &dist : new_distances) {
         const auto bin = histo_distances.IndexFromValue(dist);
         // std::cout << "bin: " << bin << "; new_distance: " << dist <<
         // std::endl;
         histo_distances.counts[bin]++;
+    }
+    for (const auto &dist : old_distances) {
+        const auto bin = histo_distances.IndexFromValue(dist);
+        // std::cout << "bin: " << bin << "; old_distance: " << dist <<
+        // std::endl;
+        histo_distances.counts[bin]--;
     }
 }
 void update_step_with_distance_and_cosine_histograms::update_cosines_histogram(
@@ -63,12 +63,35 @@ void update_step_with_distance_and_cosine_histograms::update_cosines_histogram(
         const std::vector<double> &old_cosines,
         const std::vector<double> &new_cosines) const {
 
-    for (const auto &cosine : old_cosines) {
-        histo_cosines.counts[histo_cosines.IndexFromValue(cosine)]--;
-    }
     for (const auto &cosine : new_cosines) {
         histo_cosines.counts[histo_cosines.IndexFromValue(cosine)]++;
     }
+    for (const auto &cosine : old_cosines) {
+        histo_cosines.counts[histo_cosines.IndexFromValue(cosine)]--;
+    }
+}
+void update_step_with_distance_and_cosine_histograms::print(
+        std::ostream &os) const {
+    os << "old_distances: " << std::endl;
+    for (const auto &v : old_distances_) {
+        os << v << ", ";
+    }
+    os << std::endl;
+    os << "new_distances: " << std::endl;
+    for (const auto &v : new_distances_) {
+        os << v << ", ";
+    }
+    os << std::endl;
+    os << "old_cosines: " << std::endl;
+    for (const auto &v : old_cosines_) {
+        os << v << ", ";
+    }
+    os << std::endl;
+    os << "new_cosines: " << std::endl;
+    for (const auto &v : new_cosines_) {
+        os << v << ", ";
+    }
+    os << std::endl;
 }
 
 } // namespace SG
