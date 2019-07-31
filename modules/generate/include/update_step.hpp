@@ -73,6 +73,7 @@ class update_step_with_distance_and_cosine_histograms : public update_step {
     void update_cosines_histogram(Histogram &histo_cosines,
                                   const std::vector<double> &old_cosines,
                                   const std::vector<double> &new_cosines) const;
+    void print(std::ostream &os) const;
     GraphType *graph_;
     Histogram *histo_distances_;
     Histogram *histo_cosines_;

@@ -23,33 +23,9 @@ class simulated_annealing_generator {
     Self &operator=(const Self &) = delete;
     simulated_annealing_generator(Self &&) = delete;
     Self &operator=(const Self &&) = delete;
-    simulated_annealing_generator(const size_t &num_vertices)
-            : simulated_annealing_generator() {
-        this->init_graph_degree(num_vertices);
-        this->init_graph_vertex_positions();
-        // TODO change default number of bins
-        const size_t num_bins_ete_distances = 100;
-        const size_t num_bins_cosines = 100;
-        this->init_histograms(num_bins_ete_distances, num_bins_cosines);
-        transition_parameters.energy_initial = this->compute_energy();
-        transition_parameters.energy = transition_parameters.energy_initial;
-        physical_scaling_parameters.length_reference =
-                std::pow(num_vertices, -1.0 / 3);
-        // TODO node_density has to be defined/chosen by the user
-        physical_scaling_parameters.length_scaling_factor = std::pow(
-                num_vertices / physical_scaling_parameters.node_density,
-                1 / 3.0);
-        physical_scaling_parameters.length_normal_mean =
-                end_to_end_distances_distribution_parameters.normal_mean /
-                (physical_scaling_parameters
-                         .length_scaling_factor); // * physical_scaling_parameters.length_reference);
-        // TODO: Lindstrom parameters are wrong in the variance, they do not
-        // require extra work. But for new experimental data, they will.
-        // physical_scaling_parameters.length_normal_std_deviation =
-        //         end_to_end_distances_distribution_parameters
-        //                 .normal_std_deviation /
-        //         physical_scaling_parameters.node_density;
-    }
+    simulated_annealing_generator(const size_t &num_vertices);
+    simulated_annealing_generator(const GraphType &input_graph);
+    void set_default_parameters();
 
     /// Possible transitions after the move occurred updating the
     /// network in simulated_annealing. Used in checkTransition()
@@ -145,16 +121,33 @@ class simulated_annealing_generator {
 
     struct end_to_end_distances_distribution_parameters {
         /** Experimental values, not scaled with the simulation box */
-        double normal_mean = 1.96e-6;
-        // PHC: this value is probably wrong (Lindstrom data). This should be
-        // the experimental/measured data, but this is the normalized (with
-        // num_vertices) std_deviation
-        double normal_std_deviation = 0.253;
-        double log_std_deviation =
-                log(normal_std_deviation * normal_std_deviation /
-                            (normal_mean * normal_mean) +
-                    1);
-        double log_mean = log(normal_mean) - log_std_deviation / 2.0;
+        double physical_normal_mean = 1.96e-6;
+        double physical_normal_std_deviation;
+        double normalized_normal_mean;
+        /** v = physical_normal_std_deviation^2 * S^(2/3), where S is the scale
+         * factor. (n/physical_node_density)^1/3 */
+        double normalized_normal_std_deviation = 0.253;
+        double normalized_log_std_deviation;
+        double normalized_log_mean;
+
+        inline void set_normalized_log_std_deviation(
+                const double &input_normalized_normal_mean,
+                const double &input_normalized_normal_std_deviation) {
+            normalized_log_std_deviation =
+                    sqrt(log(input_normalized_normal_std_deviation *
+                                     input_normalized_normal_std_deviation /
+                                     (input_normalized_normal_mean *
+                                      input_normalized_normal_mean) +
+                             1));
+        };
+        inline void set_normalized_log_mean(
+                const double &input_normalized_normal_mean,
+                const double &input_normalized_log_std_deviation) {
+            normalized_log_mean = log(input_normalized_normal_mean) -
+                                  input_normalized_log_std_deviation *
+                                          input_normalized_log_std_deviation /
+                                          2.0;
+        };
     } end_to_end_distances_distribution_parameters;
 
     struct cosine_directors_distribution_parameters {
@@ -174,19 +167,8 @@ class simulated_annealing_generator {
     struct physical_scaling_parameters {
         /** nodes per unit of volume measured experimentally */
         double node_density = 0.066627;
-        /** L_ref = num_vertices^(-1/3.0) */
-        double length_reference;
         /** S = (num_vertices/node_density)^1/3 */
         double length_scaling_factor;
-        double length_normal_mean =
-                1.96e-6 / node_density;             // L_sim = L_phys/(Lref * S)
-        double length_normal_std_deviation = 0.253; // s^2 * n^(2/3);
-        double length_log_std_deviation =
-                log(length_normal_std_deviation * length_normal_std_deviation /
-                            (length_normal_mean * length_normal_mean) +
-                    1);
-        double length_log_mean =
-                log(length_normal_mean) - length_log_std_deviation / 2.0;
     } physical_scaling_parameters;
 
   public:
@@ -196,10 +178,11 @@ class simulated_annealing_generator {
     std::vector<double> target_cumulative_distro_histo_ete_distances_;
     std::vector<double> target_cumulative_distro_histo_cosines_;
     // TODO: update_steps can be a vector to parallelize the update.
-    // The only condition would be the selected randomized nodes/edges do not
-    // have neighbors in common.
+    // The only condition would be the selected randomized nodes/edges do
+    // not have neighbors in common.
     update_step_move_node step_move_node_;
     update_step_swap_edges step_swap_edges_;
+    bool verbose = false;
 
     /**
      * Create a random graph from a degree distribution (@sa
@@ -210,7 +193,8 @@ class simulated_annealing_generator {
      */
     void init_graph_degree(const size_t &num_vertices);
     /**
-     * Assign a random position (inside the domain_parameters) to each vertex.
+     * Assign a random position (inside the domain_parameters) to each
+     * vertex.
      */
     void init_graph_vertex_positions();
 
@@ -218,8 +202,8 @@ class simulated_annealing_generator {
                          const size_t &num_bins_cosines);
     /**
      * Create an histogram with num_bins and uniformly distributed breaks to
-     * store the end-to-end distances. The min and max distance are taken from
-     * domain_parameters.domain
+     * store the end-to-end distances. The min and max distance are taken
+     * from domain_parameters.domain
      *
      * @param num_bins of the histogram. This has an impact
      * on performance when computing cramer-von-mises tests.
@@ -227,20 +211,21 @@ class simulated_annealing_generator {
     void init_histogram_ete_distances(const size_t &num_bins);
     /**
      * Create an histogram with num_bins and uniformly distributed breaks to
-     * store director cosines. The min and max are -1.0 and 1.0 respectively.
+     * store director cosines. The min and max are -1.0 and 1.0
+     * respectively.
      *
      * @param num_bins of the histogram. This has an impact
      * on performance when computing cramer-von-mises tests.
      */
     void init_histogram_cosines(const size_t &num_bins);
     /**
-     * Reset and populate the end-to-end distances histogram with the current
-     * status of the graph.
+     * Reset and populate the end-to-end distances histogram with the
+     * current status of the graph.
      */
     void populate_histogram_ete_distances();
     /**
-     * Reset and populate the director cosines histogram with the current status
-     * of the graph.
+     * Reset and populate the director cosines histogram with the current
+     * status of the graph.
      */
     void populate_histogram_cosines();
     void populate_target_cumulative_distro_histo_ete_distances(

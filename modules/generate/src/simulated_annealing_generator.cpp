@@ -8,6 +8,42 @@
 #include <chrono>
 
 namespace SG {
+void simulated_annealing_generator::set_default_parameters() {
+    // TODO change default number of bins
+    const auto num_vertices = boost::num_vertices(graph_);
+    const size_t num_bins_ete_distances = 100;
+    const size_t num_bins_cosines = 100;
+    this->init_histograms(num_bins_ete_distances, num_bins_cosines);
+    transition_parameters.energy_initial = this->compute_energy();
+    transition_parameters.energy = transition_parameters.energy_initial;
+    // TODO node_density and all other parameters has to be defined/chosen by
+    // the user
+    auto &psp = physical_scaling_parameters;
+    auto &etep = end_to_end_distances_distribution_parameters;
+    psp.length_scaling_factor =
+            std::pow(num_vertices / psp.node_density, 1 / 3.0);
+    etep.normalized_normal_mean =
+            etep.physical_normal_mean / psp.length_scaling_factor;
+    etep.set_normalized_log_std_deviation(etep.normalized_normal_mean,
+                                          etep.normalized_normal_std_deviation);
+    etep.set_normalized_log_mean(etep.normalized_normal_mean,
+                                 etep.normalized_log_std_deviation);
+    print(std::cout);
+}
+simulated_annealing_generator::simulated_annealing_generator(
+        const size_t &num_vertices)
+        : simulated_annealing_generator() {
+    this->init_graph_degree(num_vertices);
+    this->init_graph_vertex_positions();
+    this->set_default_parameters();
+}
+simulated_annealing_generator::simulated_annealing_generator(
+        const GraphType &input_graph)
+        : graph_(input_graph),
+          step_move_node_(graph_, histo_ete_distances_, histo_cosines_),
+          step_swap_edges_(graph_, histo_ete_distances_, histo_cosines_) {
+    this->set_default_parameters();
+}
 void simulated_annealing_generator::init_graph_degree(
         const size_t &num_vertices) {
     const double q = 1.0 / (degree_distribution_parameters.mean - 2.0);
@@ -35,6 +71,9 @@ void simulated_annealing_generator::init_graph_degree(
     }
     // Using the valid degree_sequence, create the graph.
     graph_ = SG::create_graph_from_degree_sequence(degree_sequence);
+    assert(boost::num_vertices(graph_) == std::size(degree_sequence));
+    assert(boost::num_edges(graph_) > 0);
+    assert(boost::num_edges(graph_) <= sum);
 }
 void simulated_annealing_generator::init_graph_vertex_positions() {
 
@@ -53,8 +92,6 @@ void simulated_annealing_generator::init_histogram_ete_distances(
     std::vector<double> breaks = histo::GenerateBreaksFromRangeAndBins(
             min_distance, max_distance, num_bins);
     histo_ete_distances_ = Histogram(dummy_data, breaks);
-    this->populate_target_cumulative_distro_histo_ete_distances(
-            histo_ete_distances_.ComputeBinCenters());
 }
 
 void simulated_annealing_generator::
@@ -65,13 +102,13 @@ void simulated_annealing_generator::
     F.resize(bins);
     apply_distro(
             histo_centers, F,
-            [&distro_parameters = this->physical_scaling_parameters,
+            [&distro_parameters =
+                     this->end_to_end_distances_distribution_parameters,
              &bins = bins](const double &x) -> double {
                 return (bins * cumulative_distribution_lognormal(
-                                       x, distro_parameters.length_log_mean,
-                                       // This makes no sense, fix value of log.
+                                       x, distro_parameters.normalized_log_mean,
                                        distro_parameters
-                                               .length_normal_std_deviation) +
+                                               .normalized_log_std_deviation) +
                         0.5);
             });
 }
@@ -102,8 +139,6 @@ void simulated_annealing_generator::init_histogram_cosines(
     std::vector<double> breaks = histo::GenerateBreaksFromRangeAndBins(
             min_cosine, max_cosine, num_bins);
     histo_cosines_ = Histogram(dummy_data, breaks);
-    this->populate_target_cumulative_distro_histo_cosines(
-            histo_cosines_.ComputeBinCenters());
 }
 
 void simulated_annealing_generator::populate_histogram_ete_distances() {
@@ -120,15 +155,20 @@ void simulated_annealing_generator::populate_histogram_cosines() {
 void simulated_annealing_generator::init_histograms(
         const size_t &num_bins_ete_distances, const size_t &num_bins_cosines) {
     this->init_histogram_ete_distances(num_bins_ete_distances);
+    // if another distribution is required, change the vector
+    // target_cumulative_distro_xxx
+    this->populate_target_cumulative_distro_histo_ete_distances(
+            histo_ete_distances_.ComputeBinCenters());
     this->populate_histogram_ete_distances();
     this->init_histogram_cosines(num_bins_cosines);
+    this->populate_target_cumulative_distro_histo_cosines(
+            histo_cosines_.ComputeBinCenters());
     this->populate_histogram_cosines();
 }
 void simulated_annealing_generator::engine() {
 
     const auto t_start = std::chrono::high_resolution_clock::now();
     size_t steps = 0;
-    const bool verbose = true;
 
     while (transition_parameters.consecutive_failures !=
                    transition_parameters.MAX_CONSECUTIVE_FAILURES &&
@@ -155,14 +195,20 @@ void simulated_annealing_generator::engine() {
             // Change exception for std::optional (c++17)
             // or boost::optional from version >= 1.63
             transition = check_transition();
+            // TODO REMOVE
+            if (verbose) {
+                std::cout << "von-mises_distances= " << energy_ete_distances()
+                          << " ; ";
+                std::cout << "von-mises_cosines= " << energy_cosines()
+                          << std::endl;
+                std::cout << "******HISTOGRAMS AT STEP " << steps
+                          << " ***********" << std::endl;
+                std::cout << "******ETE_DISTANCES***********" << std::endl;
+                histo_ete_distances_.PrintBreaksAndCounts(std::cout);
+                std::cout << "******COSINES***********" << std::endl;
+                histo_cosines_.PrintBreaksAndCounts(std::cout);
+            }
             if (transition == transition::REJECTED) {
-                if (false) {
-                    std::cout
-                            << "von-mises_distances= " << energy_ete_distances()
-                            << " ; ";
-                    std::cout << "von-mises_cosines= " << energy_cosines()
-                              << std::endl;
-                }
                 step_move_node_.undo();
             } else if (transition == transition::ACCEPTED ||
                        transition == transition::ACCEPTED_HIGH_TEMP) {
@@ -176,8 +222,23 @@ void simulated_annealing_generator::engine() {
             step_swap_edges_.randomize();
             step_swap_edges_.perform();
             transition = check_transition();
+            // TODO REMOVE
+            if (verbose) {
+                std::cout << "von-mises_distances= " << energy_ete_distances()
+                          << " ; ";
+                std::cout << "von-mises_cosines= " << energy_cosines()
+                          << std::endl;
+                std::cout << "******HISTOGRAMS AT STEP " << steps
+                          << " ***********" << std::endl;
+                std::cout << "******ETE_DISTANCES***********" << std::endl;
+                histo_ete_distances_.PrintBreaksAndCounts(std::cout);
+                std::cout << "******COSINES***********" << std::endl;
+                histo_cosines_.PrintBreaksAndCounts(std::cout);
+                step_swap_edges_.print(std::cout);
+            }
             if (transition == transition::REJECTED) {
-                if (false) {
+                // TODO remove
+                if (verbose) {
                     std::cout
                             << "von-mises_distances= " << energy_ete_distances()
                             << " ; ";
@@ -201,6 +262,8 @@ void simulated_annealing_generator::engine() {
                 transition_str = "ACCEPTED_HIGH_TEMP";
             }
             std::cout << "Transition: " + transition_str << std::endl;
+            std::cout << "*******************end**************" << std::endl;
+            std::cout << std::endl;
         }
     }
 
@@ -229,11 +292,17 @@ simulated_annealing_generator::check_transition() {
 
     const double energy_new = compute_energy();
     const double energy_diff = energy_new - transition_parameters.energy;
-    std::cout << "energy_new: " << energy_new
-              << "; energy_diff: " << energy_diff << std::endl;
+    if (verbose) {
+        std::cout << "energy_new : " << energy_new << std::endl;
+        std::cout << "energy_diff: " << energy_diff << std::endl;
+    }
     if (transition_parameters.accepted_transitions == 0 &&
         transition_parameters.consecutive_failures == 0) {
-        transition_parameters.temp_initial = std::abs(energy_diff / log(0.5));
+        // transition_parameters.temp_initial = std::abs(energy_diff /
+        // log(0.5));
+        transition_parameters.temp_initial =
+                transition_parameters.energy_initial /
+                boost::num_vertices(graph_);
         transition_parameters.temp_current = transition_parameters.temp_initial;
         //      //alternative provisional definition; Dependance on num of nodes
         //      of the graph. if(T_actual_==0) T_actual_=energy_new/
@@ -298,41 +367,39 @@ void simulated_annealing_generator::print(std::ostream &os, int spaces) {
        << "PhysicalNodeDensity= " << physical_scaling_parameters.node_density
        << '\n'
        << std::left << std::setw(spaces)
-       << "PhysicalLmean= " << physical_scaling_parameters.length_normal_mean
-       << '\n'
-       << std::left << std::setw(spaces) << "PhysicalLvar= "
-       << physical_scaling_parameters.length_normal_std_deviation << '\n'
-       << std::left << std::setw(spaces)
        << "ScaleFactor_S= " << physical_scaling_parameters.length_scaling_factor
        << '\n'
-       << std::left << std::setw(spaces)
-       << "LRef (n^-1/3)= " << physical_scaling_parameters.length_reference
-       << '\n'
-       << std::left << std::setw(spaces) << "PhysicalLogLmean "
-       << physical_scaling_parameters.length_log_mean << '\n'
-       << std::left << std::setw(spaces) << "PhysicalLogLstd_deviation "
-       << physical_scaling_parameters.length_log_std_deviation << '\n'
        << "%/************END_TO_END DISTANCES DITRIBUTION "
           "PARAMETERS*****************/"
        << '\n'
-       << std::left << std::setw(spaces)
-       << "LMean= " << end_to_end_distances_distribution_parameters.normal_mean
+       << std::left << std::setw(spaces) << "physical_normal_mean= "
+       << end_to_end_distances_distribution_parameters.physical_normal_mean
        << '\n'
-       << std::left << std::setw(spaces) << "LVar= "
-       << end_to_end_distances_distribution_parameters.normal_std_deviation
+       << std::left << std::setw(spaces) << "physical_normal_std_deviation= "
+       << end_to_end_distances_distribution_parameters
+                    .physical_normal_std_deviation
        << '\n'
-       << std::left << std::setw(spaces)
-       << "LogLMean= " << end_to_end_distances_distribution_parameters.log_mean
+       << std::left << std::setw(spaces) << "normalized_mean= "
+       << end_to_end_distances_distribution_parameters.normalized_normal_mean
        << '\n'
-       << std::left << std::setw(spaces) << "LogL_std_deviation= "
-       << end_to_end_distances_distribution_parameters.log_std_deviation << '\n'
+       << std::left << std::setw(spaces) << "normalized_std_deviation= "
+       << end_to_end_distances_distribution_parameters
+                    .normalized_normal_std_deviation
+       << '\n'
+       << std::left << std::setw(spaces) << "normalized_log_mean= "
+       << end_to_end_distances_distribution_parameters.normalized_log_mean
+       << '\n'
+       << std::left << std::setw(spaces) << "normalized_log_std_deviation= "
+       << end_to_end_distances_distribution_parameters
+                    .normalized_log_std_deviation
+       << '\n'
        << "%/************DEGREE DISTRIBUTION PARAMETERS*****************/"
        << '\n'
        << '\n'
        << std::left << std::setw(spaces)
        << "MeanDegree_Z= " << degree_distribution_parameters.mean << '\n'
        << std::left << std::setw(spaces)
-       << "max_degree= " << degree_distribution_parameters.max_degree << '\n'
+       << "min_degree= " << degree_distribution_parameters.min_degree << '\n'
        << std::left << std::setw(spaces)
        << "max_degree= " << degree_distribution_parameters.max_degree << '\n'
        << '\n'

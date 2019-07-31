@@ -20,7 +20,8 @@
 
 #include "generate_common.hpp"
 #include "rng.hpp"
-#include <tuple> // for std::tie
+#include "spatial_graph_utilities.hpp" // for AdjacentVerticesPositions
+#include <tuple>                       // for std::tie
 
 namespace SG {
 
@@ -32,6 +33,7 @@ GraphType::vertex_descriptor select_random_node(const GraphType &graph) {
 GraphType::edge_descriptor select_random_edge(const GraphType &graph) {
 
     const auto num_edges = boost::num_edges(graph);
+    assert(num_edges > 1);
     const auto rand_edge_num = RNG::rand_range_int(0, num_edges - 1);
     using edge_iterator = GraphType::edge_iterator;
 
@@ -127,5 +129,51 @@ std::vector<double> get_all_cosine_directors_between_connected_edges(
                                  std::end(cosine_directors_from_vertex));
     }
     return unordered_cosines;
+}
+
+std::vector<VectorType> get_adjacent_edges_from_source(
+        const GraphType::vertex_descriptor source,
+        const GraphType::vertex_descriptor ignore_node,
+        const GraphType &graph,
+        const ArrayUtilities::boundary_condition &boundary_condition) {
+
+    std::vector<VectorType> adj_edges; // output
+
+    AdjacentVerticesPositions adjacents =
+            get_adjacent_vertices_positions(source, graph);
+    const auto source_pos = graph[source].pos;
+
+    for (size_t neigh_index = 0;
+         neigh_index < adjacents.neighbours_descriptors.size(); ++neigh_index) {
+
+        if (adjacents.neighbours_descriptors[neigh_index] == ignore_node) {
+            continue;
+        }
+
+        auto neigh_pos_image = adjacents.neighbours_positions[neigh_index];
+
+        if (boundary_condition ==
+            ArrayUtilities::boundary_condition::PERIODIC) {
+            neigh_pos_image = ArrayUtilities::closest_image_from_reference(
+                    source_pos, neigh_pos_image);
+        }
+        adj_edges.push_back(ArrayUtilities::minus(neigh_pos_image, source_pos));
+    }
+    return adj_edges;
+}
+
+std::vector<double> compute_cosine_directors_from_source(
+        const GraphType::vertex_descriptor source,
+        const GraphType::vertex_descriptor ignore_node,
+        const PointType source_pos,
+        const PointType target_pos,
+        const GraphType &graph,
+        const ArrayUtilities::boundary_condition &boundary_condition) {
+
+    const auto adj_edges = get_adjacent_edges_from_source(
+            source, ignore_node, graph, boundary_condition);
+    const VectorType fixed_edge = ArrayUtilities::minus(target_pos, source_pos);
+    return cosine_directors_between_edges_and_target_edge(adj_edges,
+                                                          fixed_edge);
 }
 } // namespace SG

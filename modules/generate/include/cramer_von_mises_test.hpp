@@ -113,12 +113,15 @@ void compute_T(TVectorFloat &T,
     assert(std::size(T) == num_bins);
     assert(std::size(T) == std::size(S));
     assert(std::size(T) == std::size(histo_counts));
+    const double inverse_square_num_bins = 1.0 / (num_bins * num_bins);
     std::transform(std::execution::par_unseq, std::begin(S), std::end(S),
                    std::begin(histo_counts), std::begin(T),
-                   [&num_bins](const double &s, const double &m) -> double {
-                       return m * (detail::one_over_six * (m + 1) *
-                                           (6 * s + 2 * m + 1) +
-                                   s * s);
+                   [&inverse_square_num_bins](const double &s,
+                                              const double &m) -> double {
+                       return inverse_square_num_bins * m *
+                              (detail::one_over_six * (m + 1) *
+                                       (6 * s + 2 * m + 1) +
+                               s * s);
                    });
 }
 template <typename TVectorFloat, typename TVectorInt>
@@ -131,8 +134,7 @@ TVectorFloat compute_T(const TVectorFloat &S,
 }
 
 /**
- * Accumulation of T, see @compute_T. Adding the factor (num_bins*num_bins) that
- * was missing from the Vector T.
+ * Accumulation of T, see @compute_T.
  *
  * @tparam TVector
  * @param T
@@ -142,8 +144,7 @@ TVectorFloat compute_T(const TVectorFloat &S,
  */
 template <typename TVector>
 double reduce_T(TVector &T, const size_t &num_bins) {
-    return std::reduce(std::execution::par_unseq, std::begin(T), std::end(T)) /
-           (num_bins * num_bins);
+    return std::reduce(std::execution::par_unseq, std::begin(T), std::end(T));
 }
 
 template <typename TVectorInt, typename TVectorFloat>

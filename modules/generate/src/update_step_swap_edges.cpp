@@ -32,6 +32,10 @@ void update_step_swap_edges::perform(
         std::vector<double> &new_distances,
         std::vector<double> &new_cosines) const {
 
+    this->clear_stored_parameters(old_distances, old_cosines, new_distances,
+                                  new_cosines);
+    const bool is_periodic = (boundary_condition ==
+                              ArrayUtilities::boundary_condition::PERIODIC);
     if (!randomized_flag) {
         this->randomize(graph, selected_edges, randomized_flag);
     }
@@ -45,39 +49,64 @@ void update_step_swap_edges::perform(
     const auto &edge2_target_pos = graph[edge2.m_target].pos;
     auto edge1_target_image_pos = edge1_target_pos;
     auto edge2_target_image_pos = edge2_target_pos;
-    if (boundary_condition == ArrayUtilities::boundary_condition::PERIODIC) {
+    auto edge1_source_image_pos = edge1_source_pos;
+    auto edge2_source_image_pos = edge2_source_pos;
+    if (is_periodic) {
         edge1_target_image_pos = ArrayUtilities::closest_image_from_reference(
                 edge1_source_pos, edge1_target_image_pos);
         edge2_target_image_pos = ArrayUtilities::closest_image_from_reference(
                 edge2_source_pos, edge2_target_image_pos);
+        edge1_source_image_pos = ArrayUtilities::closest_image_from_reference(
+                edge1_target_pos, edge1_source_image_pos);
+        edge2_source_image_pos = ArrayUtilities::closest_image_from_reference(
+                edge2_target_pos, edge2_source_image_pos);
     }
     // get old distances
     old_distances.push_back(
             ArrayUtilities::distance(edge1_source_pos, edge1_target_image_pos));
     old_distances.push_back(
             ArrayUtilities::distance(edge2_source_pos, edge2_target_image_pos));
+
+    const auto adjacent_arrays_edge1_source = get_adjacent_edges_from_source(
+            edge1.m_source, edge1.m_target, graph, boundary_condition);
+    const auto adjacent_arrays_edge1_target = get_adjacent_edges_from_source(
+            edge1.m_target, edge1.m_source, graph, boundary_condition);
+    const auto adjacent_arrays_edge2_source = get_adjacent_edges_from_source(
+            edge2.m_source, edge2.m_target, graph, boundary_condition);
+    const auto adjacent_arrays_edge2_target = get_adjacent_edges_from_source(
+            edge2.m_target, edge2.m_source, graph, boundary_condition);
+
+    const auto old_fixed_edge1_out_source =
+            ArrayUtilities::minus(edge1_target_image_pos, edge1_source_pos);
+    const auto old_fixed_edge1_out_target =
+            ArrayUtilities::minus(edge1_source_image_pos, edge1_target_pos);
+    const auto old_fixed_edge2_out_source =
+            ArrayUtilities::minus(edge2_target_image_pos, edge2_source_pos);
+    const auto old_fixed_edge2_out_target =
+            ArrayUtilities::minus(edge2_source_image_pos, edge2_target_pos);
+
     // get old cosines
-    auto old_cosines1_source = compute_cosine_directors_from_source(
-            edge1.m_source, edge1.m_target, edge1_source_pos,
-            edge1_target_image_pos, graph);
+    const auto old_cosines1_source =
+            cosine_directors_between_edges_and_target_edge(
+                    adjacent_arrays_edge1_source, old_fixed_edge1_out_source);
     old_cosines.insert(std::end(old_cosines), std::begin(old_cosines1_source),
                        std::end(old_cosines1_source));
 
-    auto old_cosines1_target = compute_cosine_directors_from_source(
-            edge1.m_target, edge1.m_source, edge1_target_image_pos,
-            edge1_source_pos, graph);
+    const auto old_cosines1_target =
+            cosine_directors_between_edges_and_target_edge(
+                    adjacent_arrays_edge1_target, old_fixed_edge1_out_target);
     old_cosines.insert(std::end(old_cosines), std::begin(old_cosines1_target),
                        std::end(old_cosines1_target));
 
-    auto old_cosines2_source = compute_cosine_directors_from_source(
-            edge2.m_source, edge2.m_target, edge2_source_pos,
-            edge2_target_image_pos, graph);
+    const auto old_cosines2_source =
+            cosine_directors_between_edges_and_target_edge(
+                    adjacent_arrays_edge2_source, old_fixed_edge2_out_source);
     old_cosines.insert(std::end(old_cosines), std::begin(old_cosines2_source),
                        std::end(old_cosines2_source));
 
-    auto old_cosines2_target = compute_cosine_directors_from_source(
-            edge2.m_target, edge2.m_source, edge2_target_image_pos,
-            edge2_source_pos, graph);
+    const auto old_cosines2_target =
+            cosine_directors_between_edges_and_target_edge(
+                    adjacent_arrays_edge2_target, old_fixed_edge2_out_target);
     old_cosines.insert(std::end(old_cosines), std::begin(old_cosines2_target),
                        std::end(old_cosines2_target));
     // swap edges
@@ -91,18 +120,12 @@ void update_step_swap_edges::perform(
     // Flip a coin to decide what kind of swap.
     is_swap_parallel = RNG::random_bool(0.5);
     // Get positions of vertices of the new edges
-    const auto new_sources_targets = get_sources_and_targets_of_new_edges(
-            is_swap_parallel, edge1, edge2);
-    auto nedge1_source = new_sources_targets[0];
-    auto nedge1_target = new_sources_targets[1];
-    auto nedge2_source = new_sources_targets[2];
-    auto nedge2_target = new_sources_targets[3];
-    const auto new_positions =
+    const auto [nedge1_source, nedge1_target, nedge2_source, nedge2_target] =
+            get_sources_and_targets_of_new_edges(is_swap_parallel, edge1,
+                                                 edge2);
+    const auto [nedge1_source_pos, nedge1_target_pos, nedge2_source_pos,
+                nedge2_target_pos] =
             get_positions_of_new_edges(is_swap_parallel, edge1, edge2, graph);
-    auto nedge1_source_pos = new_positions[0];
-    auto nedge1_target_pos = new_positions[1];
-    auto nedge2_source_pos = new_positions[2];
-    auto nedge2_target_pos = new_positions[3];
 
     // Store new edges
     auto enew1 = edge_descriptor();
@@ -116,11 +139,17 @@ void update_step_swap_edges::perform(
     // handle boundary_condition for histograms computation
     PointType nedge1_target_image_pos = nedge1_target_pos;
     PointType nedge2_target_image_pos = nedge2_target_pos;
-    if (boundary_condition == ArrayUtilities::boundary_condition::PERIODIC) {
+    PointType nedge1_source_image_pos = nedge1_source_pos;
+    PointType nedge2_source_image_pos = nedge2_source_pos;
+    if (is_periodic) {
         nedge1_target_image_pos = ArrayUtilities::closest_image_from_reference(
                 nedge1_source_pos, nedge1_target_image_pos);
         nedge2_target_image_pos = ArrayUtilities::closest_image_from_reference(
                 nedge2_source_pos, nedge2_target_image_pos);
+        nedge1_source_image_pos = ArrayUtilities::closest_image_from_reference(
+                nedge1_target_pos, nedge1_source_image_pos);
+        nedge2_source_image_pos = ArrayUtilities::closest_image_from_reference(
+                nedge2_target_pos, nedge2_source_image_pos);
     }
     // get new distances
     new_distances.push_back(ArrayUtilities::distance(nedge1_source_pos,
@@ -128,33 +157,46 @@ void update_step_swap_edges::perform(
     new_distances.push_back(ArrayUtilities::distance(nedge2_source_pos,
                                                      nedge2_target_image_pos));
     // get new cosines
-    auto ignore_node_edge1_source = edge1.m_target;
-    const auto new_cosines1_source = compute_cosine_directors_from_source(
-            nedge1_source, ignore_node_edge1_source, nedge1_source_pos,
-            nedge1_target_image_pos, graph);
+    /*
+    S1 --- T1  |  S1       S1-\
+               |  |    or      .
+               |  S2            \_T2
+    ---------------------------------------------
+    S2 --- T2  |  T1            /-T1
+               |  |    or      .
+               |  T2       S2_/
+    */
+    const auto new_fixed_edge1_out_source =
+            ArrayUtilities::minus(nedge1_target_image_pos, nedge1_source_pos);
+    const auto new_fixed_edge1_out_target =
+            ArrayUtilities::minus(nedge1_source_image_pos, nedge1_target_pos);
+    const auto new_fixed_edge2_out_source =
+            ArrayUtilities::minus(nedge2_target_image_pos, nedge2_source_pos);
+    const auto new_fixed_edge2_out_target =
+            ArrayUtilities::minus(nedge2_source_image_pos, nedge2_target_pos);
+
+    // get new cosines
+    const auto new_cosines1_source =
+            cosine_directors_between_edges_and_target_edge(
+                    adjacent_arrays_edge1_source, new_fixed_edge1_out_source);
     new_cosines.insert(std::end(new_cosines), std::begin(new_cosines1_source),
                        std::end(new_cosines1_source));
 
-    auto ignore_node_edge1_target =
-            is_swap_parallel ? edge2.m_target : edge2.m_source;
-    const auto new_cosines1_target = compute_cosine_directors_from_source(
-            nedge1_target, ignore_node_edge1_target, nedge1_target_image_pos,
-            nedge1_source_pos, graph);
+    const auto new_cosines1_target =
+            cosine_directors_between_edges_and_target_edge(
+                    adjacent_arrays_edge1_target, new_fixed_edge1_out_target);
     new_cosines.insert(std::end(new_cosines), std::begin(new_cosines1_target),
                        std::end(new_cosines1_target));
 
-    auto ignore_node_edge2_source = edge1.m_source;
-    const auto new_cosines2_source = compute_cosine_directors_from_source(
-            nedge2_source, ignore_node_edge2_source, nedge2_source_pos,
-            nedge2_target_image_pos, graph);
+    const auto new_cosines2_source =
+            cosine_directors_between_edges_and_target_edge(
+                    adjacent_arrays_edge2_source, new_fixed_edge2_out_source);
     new_cosines.insert(std::end(new_cosines), std::begin(new_cosines2_source),
                        std::end(new_cosines2_source));
 
-    auto ignore_node_edge2_target =
-            is_swap_parallel ? edge2.m_source : edge2.m_target;
-    const auto new_cosines2_target = compute_cosine_directors_from_source(
-            nedge2_target, ignore_node_edge2_target, nedge2_target_image_pos,
-            nedge2_source_pos, graph);
+    const auto new_cosines2_target =
+            cosine_directors_between_edges_and_target_edge(
+                    adjacent_arrays_edge2_target, new_fixed_edge2_out_target);
     new_cosines.insert(std::end(new_cosines), std::begin(new_cosines2_target),
                        std::end(new_cosines2_target));
 
@@ -261,51 +303,6 @@ update_step_swap_edges::select_two_valid_edges(const GraphType &graph,
     } else {
         return std::make_pair(edge1, edge2);
     }
-}
-
-std::vector<VectorType> update_step_swap_edges::get_adjacent_edges_from_source(
-        const GraphType::vertex_descriptor source,
-        const GraphType::vertex_descriptor ignore_node,
-        const GraphType &graph) const {
-
-    std::vector<VectorType> adj_edges; // output
-
-    AdjacentVerticesPositions adjacents =
-            get_adjacent_vertices_positions(source, graph);
-    const auto source_pos = graph[source].pos;
-
-    for (size_t neigh_index = 0;
-         neigh_index < adjacents.neighbours_descriptors.size(); ++neigh_index) {
-
-        if (adjacents.neighbours_descriptors[neigh_index] == ignore_node) {
-            continue;
-        }
-
-        auto neigh_pos_image = adjacents.neighbours_positions[neigh_index];
-
-        if (boundary_condition ==
-            ArrayUtilities::boundary_condition::PERIODIC) {
-            neigh_pos_image = ArrayUtilities::closest_image_from_reference(
-                    source_pos, neigh_pos_image);
-        }
-        adj_edges.push_back(ArrayUtilities::minus(neigh_pos_image, source_pos));
-    }
-    return adj_edges;
-}
-
-std::vector<double>
-update_step_swap_edges::compute_cosine_directors_from_source(
-        const GraphType::vertex_descriptor source,
-        const GraphType::vertex_descriptor ignore_node,
-        const PointType source_pos,
-        const PointType target_pos,
-        const GraphType &graph) const {
-
-    const auto adj_edges =
-            get_adjacent_edges_from_source(source, ignore_node, graph);
-    VectorType fixed_edge = ArrayUtilities::minus(target_pos, source_pos);
-    return cosine_directors_between_edges_and_target_edge(adj_edges,
-                                                          fixed_edge);
 }
 
 std::array<GraphType::vertex_descriptor, 4>
