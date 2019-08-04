@@ -1,0 +1,2 @@
+add_executable(run_simulated_annealing_generator run_simulated_annealing_generator.cpp)
+target_link_libraries(run_simulated_annealing_generator SGGenerate)

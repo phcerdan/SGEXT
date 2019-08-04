@@ -3,6 +3,8 @@
 
 #include "boundary_conditions.hpp" // for boundary_condition
 #include "generate_common.hpp"     // for Histogram
+#include "simulated_annealing_generator_config_tree.hpp"
+#include "simulated_annealing_generator_parameters.hpp"
 #include "update_step_move_node.hpp"
 #include "update_step_swap_edges.hpp"
 
@@ -26,6 +28,10 @@ class simulated_annealing_generator {
     simulated_annealing_generator(const size_t &num_vertices);
     simulated_annealing_generator(const GraphType &input_graph);
     void set_default_parameters();
+    void set_parameters_from_file(const std::string &input_file);
+    void save_parameters_to_file(const std::string &output_file);
+    void set_parameters_from_configuration_tree(
+            const simulated_annealing_generator_config_tree &tree);
 
     /// Possible transitions after the move occurred updating the
     /// network in simulated_annealing. Used in checkTransition()
@@ -38,138 +44,13 @@ class simulated_annealing_generator {
         ACCEPTED_HIGH_TEMP ///< Transition is accepted. Energy/score is
                            ///< higher than before, but simulated annealing.
     };
-    struct transition_parameters {
 
-        double energy = 0.0;         ///< Current energy or score.
-        double energy_initial = 0.0; ///< Energy after network initialization.
-        /** accepted transition:ACCEPTED since engine() started. */
-        size_t accepted_transitions = 0;
-        /** total transition::REJECTED since engine() started. */
-        size_t rejected_transitions = 0;
-        /** total number of transition::ACCEPTED_HIGH_TEMP since engine()
-         * started. */
-        size_t high_temp_transitions = 0;
-        /** maximum of consecutive failures since engine() started */
-        size_t consecutive_failures = 0;
-        /** total number of failures in the simulation */
-        size_t total_failures = 0;
-        /** time elapsed since engine() started. */
-        double time_elapsed = 0.0;
-        /** Temperature before engine() started. Associated  with the annealing
-         * process, @sa  transition::ACCEPTED_HIGH_TEMP.*/
-        double temp_initial = 0.0;
-        /** Current temperature. The temperature decreases with each
-         * transition::ACCEPTED_HIGH_TEMP. */
-        double temp_current = 0.0;
-        /** Not energitically favourable transitions are less probable over
-         * time. The analogy is that the system cools down.  */
-        double temp_cooling_rate = 1.0 - 0.5e-04;
-
-        /** Max consecutive failures allowed before engine() stops.*/
-        size_t MAX_CONSECUTIVE_FAILURES = 100000000;
-        /** Max iterations of engine() if convergence has not been achieved.*/
-        // size_t MAX_ENGINE_ITERATIONS = 100000000;
-        size_t MAX_ENGINE_ITERATIONS = 100000;
-        /** Energy necessary to consider that convergence has been achieved,
-         * highly tuneable.*/
-        double ENERGY_CONVERGENCE = 0.01;
-        /** Chances that the update step is of type update_step_move_node.
-         * The other method is update_step_swap_edges.*/
-        double UPDATE_STEP_MOVE_NODE_PROBABILITY = 0.5;
-        double update_step_move_node_max_step_distance = 5.0e-2;
-        inline void print(std::ostream &os, int spaces = 30) {
-            os << "%/************TRANSITION "
-                  "PARAMETERS*****************/"
-               << '\n'
-               << '\n'
-               << std::left << std::setw(spaces) << "E= " << energy << '\n'
-               << std::left << std::setw(spaces)
-               << "E_initial= " << energy_initial << '\n'
-               << std::left << std::setw(spaces)
-               << "Energy_reduction %= " << 1. - energy / energy_initial << '\n'
-               << std::left << std::setw(spaces)
-               << "time_elapsed=" << time_elapsed << '\n'
-               << std::left << std::setw(spaces)
-               << "accepted_transitions= " << accepted_transitions << '\n'
-               << std::left << std::setw(spaces)
-               << "high_temp_transitions= " << high_temp_transitions
-               << "  %HighTempTransitions: "
-               << static_cast<double>(high_temp_transitions) /
-                            accepted_transitions
-               << '\n'
-               << std::left << std::setw(spaces)
-               << "total_failures= " << total_failures << '\n'
-               << std::left << std::setw(spaces)
-               << "consecutive_failures= " << consecutive_failures << '\n'
-               << std::left << std::setw(spaces)
-               << "temp_initial= " << temp_initial << '\n'
-               << std::left << std::setw(spaces)
-               << "temp_final= " << temp_current << '\n'
-               << std::left << std::setw(spaces)
-               << "temp_cooling_rate= " << temp_cooling_rate << '\n'
-               << std::left << std::setw(spaces)
-               << "update_step_move_node_max_step= "
-               << update_step_move_node_max_step_distance << '\n';
-        }
-    } transition_parameters;
-
-    struct degree_distribution_parameters {
-        double mean = 3.379692;
-        size_t min_degree = 3;
-        size_t max_degree = 999;
-    } degree_distribution_parameters;
-
-    struct end_to_end_distances_distribution_parameters {
-        /** Experimental values, not scaled with the simulation box */
-        double physical_normal_mean = 1.96e-6;
-        double physical_normal_std_deviation;
-        double normalized_normal_mean;
-        /** v = physical_normal_std_deviation^2 * S^(2/3), where S is the scale
-         * factor. (n/physical_node_density)^1/3 */
-        double normalized_normal_std_deviation = 0.253;
-        double normalized_log_std_deviation;
-        double normalized_log_mean;
-
-        inline void set_normalized_log_std_deviation(
-                const double &input_normalized_normal_mean,
-                const double &input_normalized_normal_std_deviation) {
-            normalized_log_std_deviation =
-                    sqrt(log(input_normalized_normal_std_deviation *
-                                     input_normalized_normal_std_deviation /
-                                     (input_normalized_normal_mean *
-                                      input_normalized_normal_mean) +
-                             1));
-        };
-        inline void set_normalized_log_mean(
-                const double &input_normalized_normal_mean,
-                const double &input_normalized_log_std_deviation) {
-            normalized_log_mean = log(input_normalized_normal_mean) -
-                                  input_normalized_log_std_deviation *
-                                          input_normalized_log_std_deviation /
-                                          2.0;
-        };
-    } end_to_end_distances_distribution_parameters;
-
-    struct cosine_directors_distribution_parameters {
-        double b1 = 0.6232085;
-        double b2 = 0.01684390;
-        // b3 = -(3/32.) * (-1 + 2*b1 + 4*b2)
-        double b3 = -0.029418056250000008;
-    } cosine_directors_distribution_parameters;
-
-    struct domain_parameters {
-        ArrayUtilities::boundary_condition boundary_condition =
-                ArrayUtilities::boundary_condition::PERIODIC;
-        // Assumes x0, y0, z0 = 0.0
-        std::array<double, 3> domain = {1.0, 1.0, 1.0};
-    } domain_parameters;
-
-    struct physical_scaling_parameters {
-        /** nodes per unit of volume measured experimentally */
-        double node_density = 0.066627;
-        /** S = (num_vertices/node_density)^1/3 */
-        double length_scaling_factor;
-    } physical_scaling_parameters;
+    cosine_directors_distribution_parameters cosine_params;
+    degree_distribution_parameters degree_params;
+    domain_parameters domain_params;
+    end_to_end_distances_distribution_parameters ete_distance_params;
+    physical_scaling_parameters physical_scaling_params;
+    transition_parameters transition_params;
 
   public:
     GraphType graph_;
@@ -228,10 +109,32 @@ class simulated_annealing_generator {
      * status of the graph.
      */
     void populate_histogram_cosines();
+    /**
+     * Populate the target_cumulative_distro_histo_ete_distances_
+     * and the LUT_cumulative_histo_ete_distances_.
+     *
+     * Call this function with a lambda of whatever cumulative distribution
+     * function wanted.
+     *
+     * @param histo_centers
+     * @param cumulative_func
+     */
     void populate_target_cumulative_distro_histo_ete_distances(
-            const std::vector<double> &histo_centers);
+            const std::vector<double> &histo_centers,
+            const std::function<double(double)> &cumulative_func);
+    /**
+     * Populate the target_cumulative_distro_histo_cosines_
+     * and the LUT_cumulative_histo_cosines_.
+     *
+     * Call this function with a lambda of whatever cumulative distribution
+     * function wanted.
+     *
+     * @param histo_centers
+     * @param cumulative_func
+     */
     void populate_target_cumulative_distro_histo_cosines(
-            const std::vector<double> &histo_centers);
+            const std::vector<double> &histo_centers,
+            const std::function<double(double)> &cumulative_func);
     void engine();
 
     /**
@@ -247,6 +150,23 @@ class simulated_annealing_generator {
     double energy_cosines() const;
     simulated_annealing_generator::transition check_transition();
     void print(std::ostream &os, int spaces = 30);
+    void set_boundary_condition(const ArrayUtilities::boundary_condition &bc);
+    void print_histo_and_target_distribution(std::ostream &os,
+                                             const Histogram &histo,
+                                             const std::vector<double> &distro);
+    void print_histo_and_target_distribution_ete_distances(std::ostream &os);
+    void print_histo_and_target_distribution_cosines(std::ostream &os);
+    void print_graph(std::ostream &os);
+
+  private:
+    /** Used in cramer_von_mises_test computation: Modify it with
+     * populate_target_cumulative_distro_histo_ete_distances
+     * target_cumulative_distro_histo_distances_ * histo_distances_.bins + 0.5*/
+    std::vector<double> LUT_cumulative_histo_ete_distances_;
+    /** Used in cramer_von_mises_test computation: Modify it with
+     * populate_target_cumulative_distro_histo_cosines
+     * target_cumulative_distro_histo_cosines_ * histo_cosines_.bins + 0.5*/
+    std::vector<double> LUT_cumulative_histo_cosines_;
 };
 } // namespace SG
 #endif

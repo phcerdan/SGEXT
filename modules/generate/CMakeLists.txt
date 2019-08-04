@@ -11,6 +11,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_DEPENDS
 set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
     generate_common.cpp
     simulated_annealing_generator.cpp
+    simulated_annealing_generator_config_tree.cpp
     update_step.cpp
     update_step_move_node.cpp
     update_step_swap_edges.cpp
@@ -46,3 +47,7 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
 export( TARGETS ${SG_MODULE_${SG_MODULE_NAME}_LIBRARY}
   NAMESPACE SGEXT::
   APPEND FILE ${sgext_export_file})
+
+if(SG_BUILD_SCRIPTS)
+  add_subdirectory(bin)
+endif()
