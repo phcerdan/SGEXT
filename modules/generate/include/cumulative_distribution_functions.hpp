@@ -7,12 +7,92 @@
 #define SG_CUMULATIVE_DISTRIBUTION_FUNCTIONS_HPP
 
 #include <algorithm>
-#include <execution>  // std::execution::par_unseq
-#include <functional> // std::function
-#include <math.h>     // erf
+#include <boost/math/constants/constants.hpp> // for pi...
+#include <execution>                          // std::execution::par_unseq
+#include <functional>                         // std::function
+#include <math.h>                             // erf
 
 namespace SG {
 
+/**
+ * Integrate function in the interval [a,b]
+ * func takes one argument. If more are needed, use a lambda:
+ * const double a = -1.0;
+ * const double &b = x;
+ * const auto func = [&b1, &b2, &b3](const double &z) -> double {
+ *     return distribution_truncated_power_series_3(z, b1, b2, b3);
+ * };
+ * const double tolerance = 0.00001;
+ * return integral(a, b, tolerance, func);
+ *
+ * Taken from:
+ * https://www.boost.org/doc/libs/1_63_0/libs/multiprecision/doc/html/boost_multiprecision/tut/floats/fp_eg/gi.html
+ *
+ * This function is not used because there are analytical forms for the
+ * Cumulative Function Distribution of our particular functions. But that might
+ * not be the case for other distros.
+ *
+ * @tparam value_type
+ * @tparam function_type
+ * @param a
+ * @param b
+ * @param tol
+ * @param func
+ *
+ * @return
+ */
+template <typename value_type, typename function_type>
+inline value_type integral(const value_type a,
+                           const value_type b,
+                           const value_type tol,
+                           function_type func) {
+    unsigned n = 1U;
+    value_type h = (b - a);
+    value_type I = (func(a) + func(b)) * (h / 2);
+
+    for (unsigned k = 0U; k < 8U; k++) {
+        h /= 2;
+
+        value_type sum(0);
+        for (unsigned j = 1U; j <= n; j++) {
+            sum += func(a + (value_type((j * 2) - 1) * h));
+        }
+
+        const value_type I0 = I;
+        I = (I / 2) + (h * sum);
+
+        const value_type ratio = I0 / I;
+        const value_type delta = ratio - 1;
+        const value_type delta_abs = ((delta < 0) ? -delta : delta);
+
+        if ((k > 1U) && (delta_abs < tol)) {
+            break;
+        }
+
+        n *= 2U;
+    }
+    return I;
+}
+
+inline double distribution_lognormal(const double &x,
+                                     const double &log_mean,
+                                     const double &log_std_deviation) {
+    if (x == 0) {
+        return 0;
+    }
+    const auto &mu = log_mean;
+    const auto &sigma = log_std_deviation;
+    const auto pi = boost::math::constants::pi<double>();
+
+    double exponent = log(x) - mu;
+    exponent *= -exponent;
+    exponent /= 2 * sigma * sigma;
+
+    auto result = exp(exponent);
+    result /= sigma * sqrt(2 * pi) * x;
+
+    return result;
+}
 /**
  * The cumulative distribution of the lognormal_distribution.
  * See for example:
@@ -37,13 +117,22 @@ inline double
 cumulative_distribution_lognormal(const double &x,
                                   const double &log_mean,
                                   const double &log_std_deviation) {
-    return (0.5 + 0.5 * std::erf((std::log(x) - log_mean) /
-                                 (sqrt(2.) * log_std_deviation)));
+    return 0.5 * std::erfc(-(std::log(x) - log_mean) /
+                           (sqrt(2.) * log_std_deviation));
 };
 
+inline double distribution_truncated_power_series_3(const double &x,
+                                                    const double &b1,
+                                                    const double &b2,
+                                                    const double &b3) {
+    // const double b3= -(3/32.) * (-1 + 2*b1 + 4*b2);
+    const double z = 1 - x;
+    const double z3 = z * z * z;
+    const double z5 = z3 * z * z;
+    return b1 * z + b2 * z3 + b3 * z5;
+};
 inline double cumulative_distribution_truncated_power_series_3(
         const double &x, const double &b1, const double &b2, const double &b3) {
-
     // const double b3= -(3/32.) * (-1 + 2*b1 + 4*b2);
     return (-(1 / 12.) * (-3 + x) * (1 + x) *
             (6 * b1 + 3 * b2 * (5 + (-2 + x) * x) +
