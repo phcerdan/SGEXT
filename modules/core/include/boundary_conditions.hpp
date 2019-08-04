@@ -10,6 +10,32 @@ enum class boundary_condition {
              // REFLECTIVE_WALL
 };
 
+inline std::string boundary_condition_to_string(const boundary_condition &bc) {
+    if (bc == boundary_condition::NONE) {
+        return "NONE";
+    } else if (bc == boundary_condition::PERIODIC) {
+        return "PERIODIC";
+    } else {
+        throw std::domain_error(
+                "boundary_condition_to_string error: unrecognized "
+                "boundary_condition.");
+    }
+}
+
+inline boundary_condition
+string_to_boundary_condition(const std::string &bc_string) {
+    if (bc_string == "NONE") {
+        return boundary_condition::NONE;
+    } else if (bc_string == "PERIODIC") {
+        return boundary_condition::PERIODIC;
+    } else {
+        throw std::domain_error(
+                "string_to_boundary_condition error: unrecognized "
+                "string: " +
+                bc_string);
+    }
+}
+
 constexpr Array3D zeros3d = Array3D();
 constexpr Array3D ones3d = Array3D{1.0, 1.0, 1.0};
 constexpr Array3D ex = Array3D{1.0, 0.0, 0.0};
