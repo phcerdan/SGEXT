@@ -20,9 +20,11 @@ int main(int argc, char *const argv[]) {
     /*-------------- Parse command line -----------------------------*/
     po::options_description opt_desc("Allowed options are: ");
     opt_desc.add_options()("help,h", "display this message.");
-    opt_desc.add_options()("input,i", po::value<std::string>()->required(),
+    opt_desc.add_options()("input,i",
+                           po::value<std::string>()->default_value(""),
                            "Input configuration file with parameters.");
-    opt_desc.add_options()("output,o", po::value<std::string>()->required(),
+    opt_desc.add_options()("output,o",
+                           po::value<std::string>()->default_value(""),
                            "Output filename.");
     opt_desc.add_options()("verbose,v", po::bool_switch()->default_value(false),
                            "verbose output");
@@ -59,6 +61,13 @@ int main(int argc, char *const argv[]) {
                   << std::endl;
         return EXIT_SUCCESS;
     }
+    if (input_filename == "" || output_filename == "") {
+
+        std::cout << "Provide input_filename and output_filename options"
+                  << std::endl;
+        std::cout << "Basic usage:\n" << opt_desc << "\n";
+        return EXIT_FAILURE;
+    }
 
     // Output file
     const auto output_filename_parent_path =
@@ -85,8 +94,7 @@ int main(int argc, char *const argv[]) {
     gen.set_parameters_from_file(input_filename);
     gen.init_graph_degree(gen.physical_scaling_params.num_vertices);
     gen.init_graph_vertex_positions();
-    gen.set_default_parameters(); // TODO Change name of this func and/or
-                                  // integrate it into set_parameters_from_file
+    gen.init_parameters();
     gen.init_histograms(gen.ete_distance_params.num_bins,
                         gen.cosine_params.num_bins);
     gen.print(std::cout);

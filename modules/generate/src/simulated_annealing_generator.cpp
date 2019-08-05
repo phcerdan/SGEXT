@@ -44,14 +44,8 @@ void simulated_annealing_generator::set_parameters_from_configuration_tree(
     transition_params = tree.transition_params;
 }
 
-// TODO change name, or call it directly after set_parameters_from_file.
-void simulated_annealing_generator::set_default_parameters() {
-    // TODO change default number of bins
+void simulated_annealing_generator::init_parameters() {
     const auto num_vertices = boost::num_vertices(graph_);
-    transition_params.energy_initial = this->compute_energy();
-    transition_params.energy = transition_params.energy_initial;
-    // TODO node_density and all other parameters has to be defined/chosen by
-    // the user
     auto &psp = physical_scaling_params;
     auto &etep = ete_distance_params;
     psp.length_scaling_factor =
@@ -68,14 +62,14 @@ simulated_annealing_generator::simulated_annealing_generator(
         : simulated_annealing_generator() {
     this->init_graph_degree(num_vertices);
     this->init_graph_vertex_positions();
-    this->set_default_parameters();
+    this->init_parameters();
 }
 simulated_annealing_generator::simulated_annealing_generator(
         const GraphType &input_graph)
         : graph_(input_graph),
           step_move_node_(graph_, histo_ete_distances_, histo_cosines_),
           step_swap_edges_(graph_, histo_ete_distances_, histo_cosines_) {
-    this->set_default_parameters();
+    this->init_parameters();
 }
 void simulated_annealing_generator::init_graph_degree(
         const size_t &num_vertices) {
@@ -123,10 +117,11 @@ void simulated_annealing_generator::init_histogram_ete_distances(
     std::vector<double> dummy_data;
     const double min_distance = 0.0;
     // Assuming {0, 0, 0} is a corner of the simulation box:
-    // const double max_distance =
-    // ArrayUtilities::norm(domain_params.domain);
-    const double max_distance =
-            parameters.max_distance_factor * parameters.normalized_normal_mean;
+    double max_distance = ArrayUtilities::norm(domain_params.domain);
+    if (domain_params.boundary_condition ==
+        ArrayUtilities::boundary_condition::PERIODIC) {
+        max_distance /= 2.0;
+    }
     std::vector<double> breaks = histo::GenerateBreaksFromRangeAndBins(
             min_distance, max_distance, num_bins);
     histo_ete_distances_ = Histogram(dummy_data, breaks);
@@ -140,12 +135,6 @@ void simulated_annealing_generator::
     const auto bins = std::size(histo_centers);
     F.resize(bins);
     apply_distro(histo_centers, F, cumulative_func);
-    auto &LUT = LUT_cumulative_histo_ete_distances_;
-    LUT.resize(bins);
-    std::transform(std::execution::par_unseq, std::begin(F), std::end(F),
-                   std::begin(LUT), [&bins = bins](const double &x) -> double {
-                       return bins * x + 0.5;
-                   });
 }
 void simulated_annealing_generator::
         populate_target_cumulative_distro_histo_cosines(
@@ -155,12 +144,6 @@ void simulated_annealing_generator::
     const auto bins = std::size(histo_centers);
     F.resize(bins);
     apply_distro(histo_centers, F, cumulative_func);
-    auto &LUT = LUT_cumulative_histo_cosines_;
-    LUT.resize(bins);
-    std::transform(std::execution::par_unseq, std::begin(F), std::end(F),
-                   std::begin(LUT), [&bins = bins](const double &x) -> double {
-                       return bins * x + 0.5;
-                   });
 }
 
 void simulated_annealing_generator::init_histogram_cosines(
@@ -179,12 +162,40 @@ void simulated_annealing_generator::populate_histogram_ete_distances() {
     histo_ete_distances_.ResetCounts();
     histo_ete_distances_.FillCounts(get_all_end_to_end_distances_of_edges(
             graph_, domain_params.boundary_condition));
+    // Populate LUT for optimization
+    auto &LUT = LUT_cumulative_histo_ete_distances_;
+    LUT.resize(histo_ete_distances_.bins);
+    const auto total_counts =
+            std::accumulate(std::begin(histo_ete_distances_.counts),
+                            std::end(histo_ete_distances_.counts), 0);
+    std::transform(std::execution::par_unseq,
+                   std::begin(target_cumulative_distro_histo_ete_distances_),
+                   std::end(target_cumulative_distro_histo_ete_distances_),
+                   std::begin(LUT),
+                   [&total_counts = total_counts](const double &x) -> double {
+                       return total_counts * x + 0.5;
+                   });
+    total_counts_ete_distances_ = total_counts;
 }
 
 void simulated_annealing_generator::populate_histogram_cosines() {
     histo_cosines_.ResetCounts();
     histo_cosines_.FillCounts(get_all_cosine_directors_between_connected_edges(
             graph_, domain_params.boundary_condition));
+    // Populate LUT for optimization
+    auto &LUT = LUT_cumulative_histo_cosines_;
+    LUT.resize(histo_cosines_.bins);
+    const auto total_counts =
+            std::accumulate(std::begin(histo_cosines_.counts),
+                            std::end(histo_cosines_.counts), 0);
+    std::transform(std::execution::par_unseq,
+                   std::begin(target_cumulative_distro_histo_cosines_),
+                   std::end(target_cumulative_distro_histo_cosines_),
+                   std::begin(LUT),
+                   [&total_counts = total_counts](const double &x) -> double {
+                       return total_counts * x + 0.5;
+                   });
+    total_counts_cosines_ = total_counts;
 }
 void simulated_annealing_generator::init_histograms(
         const size_t &num_bins_ete_distances, const size_t &num_bins_cosines) {
@@ -260,27 +271,7 @@ void simulated_annealing_generator::engine() {
             }
             step_move_node_.randomize();
             step_move_node_.perform();
-            /*Because a edge could have leng zero after a movement (2 nodes same
-             *pos). A std::logic_error could be thrown from
-             *selectEdges(SpatialNode::distance) or from computeMovement
-             *(distance(array<double,3>) */
-            // PHC 2017, remove this try when remove exception.
-            // Change exception for std::optional (c++17)
-            // or boost::optional from version >= 1.63
             transition = check_transition();
-            // TODO REMOVE
-            if (verbose) {
-                std::cout << "von-mises_distances= " << energy_ete_distances()
-                          << " ; ";
-                std::cout << "von-mises_cosines= " << energy_cosines()
-                          << std::endl;
-                std::cout << "******HISTOGRAMS AT STEP " << steps
-                          << " ***********" << std::endl;
-                std::cout << "******ETE_DISTANCES***********" << std::endl;
-                histo_ete_distances_.PrintBreaksAndCounts(std::cout);
-                std::cout << "******COSINES***********" << std::endl;
-                histo_cosines_.PrintBreaksAndCounts(std::cout);
-            }
             if (transition == transition::REJECTED) {
                 step_move_node_.undo();
             } else if (transition == transition::ACCEPTED ||
@@ -289,35 +280,10 @@ void simulated_annealing_generator::engine() {
             }
 
         } else {
-            if (verbose) {
-                std::cout << "Step type: swap_edges" << std::endl;
-            }
             step_swap_edges_.randomize();
             step_swap_edges_.perform();
             transition = check_transition();
-            // TODO REMOVE
-            if (verbose) {
-                std::cout << "von-mises_distances= " << energy_ete_distances()
-                          << " ; ";
-                std::cout << "von-mises_cosines= " << energy_cosines()
-                          << std::endl;
-                std::cout << "******HISTOGRAMS AT STEP " << steps
-                          << " ***********" << std::endl;
-                std::cout << "******ETE_DISTANCES***********" << std::endl;
-                histo_ete_distances_.PrintBreaksAndCounts(std::cout);
-                std::cout << "******COSINES***********" << std::endl;
-                histo_cosines_.PrintBreaksAndCounts(std::cout);
-                step_swap_edges_.print(std::cout);
-            }
             if (transition == transition::REJECTED) {
-                // TODO remove
-                if (verbose) {
-                    std::cout
-                            << "von-mises_distances= " << energy_ete_distances()
-                            << " ; ";
-                    std::cout << "von-mises_cosines= " << energy_cosines()
-                              << std::endl;
-                }
                 step_swap_edges_.undo();
             } else if (transition == transition::ACCEPTED ||
                        transition == transition::ACCEPTED_HIGH_TEMP) {
@@ -325,19 +291,6 @@ void simulated_annealing_generator::engine() {
             }
         }
         steps++;
-        if (verbose) {
-            std::string transition_str;
-            if (transition == transition::REJECTED) {
-                transition_str = "REJECTED";
-            } else if (transition == transition::ACCEPTED) {
-                transition_str = "ACCEPTED";
-            } else if (transition == transition::ACCEPTED_HIGH_TEMP) {
-                transition_str = "ACCEPTED_HIGH_TEMP";
-            }
-            std::cout << "Transition: " + transition_str << std::endl;
-            std::cout << "*******************end**************" << std::endl;
-            std::cout << std::endl;
-        }
     }
 
     const auto t_final = std::chrono::high_resolution_clock::now();
@@ -346,12 +299,35 @@ void simulated_annealing_generator::engine() {
 } // namespace SG
 
 double simulated_annealing_generator::energy_ete_distances() const {
-    return cramer_von_mises_test(histo_ete_distances_.counts,
-                                 LUT_cumulative_histo_ete_distances_);
+    // return cramer_von_mises_test(histo_ete_distances_.counts,
+    //                              target_cumulative_distro_histo_ete_distances_);
+    return energy_ete_distances_extra_penalty() +
+        cramer_von_mises_test_optimized(histo_ete_distances_.counts,
+                                           LUT_cumulative_histo_ete_distances_,
+                                           total_counts_ete_distances_);
 }
+
+double simulated_annealing_generator::energy_ete_distances_extra_penalty() const {
+    // TODO: Implement average ete_distances (cheap).
+    // Hint, use the histograms and the distances stores in update_steps
+    // Or accumulate in the histograms
+    // Or, instead of average, any test of the tail of the distro.
+    return 0.0;
+}
+
 double simulated_annealing_generator::energy_cosines() const {
-    return cramer_von_mises_test(histo_cosines_.counts,
-                                 LUT_cumulative_histo_cosines_);
+    // return cramer_von_mises_test(histo_cosines_.counts,
+    //                              target_cumulative_distro_histo_cosines_);
+    // Correcting term to avoid accumulation in the last bin. The value of
+    // target_distribution_cosines_ in the last bin is zero or close by.
+    return energy_cosines_extra_penalty() +
+           cramer_von_mises_test_optimized(histo_cosines_.counts,
+                                           LUT_cumulative_histo_cosines_,
+                                           total_counts_cosines_);
+}
+double simulated_annealing_generator::energy_cosines_extra_penalty() const {
+    return histo_cosines_.counts.back() /
+                   static_cast<double>(histo_cosines_.bins);
 }
 double simulated_annealing_generator::compute_energy() const {
     const double test_ete_distances = energy_ete_distances();
@@ -363,12 +339,6 @@ simulated_annealing_generator::transition
 simulated_annealing_generator::check_transition() {
     const double energy_new = compute_energy();
     const double energy_diff = energy_new - transition_params.energy;
-    if (verbose) {
-        std::cout << "energy_new : " << energy_new << std::endl;
-        std::cout << "energy_diff: " << energy_diff << std::endl;
-    }
-    // Keep always a probability of jump-transition. Why?
-    // if(T_initial_ !=0 && T_actual_<T_minimum_) T_actual_=T_minimum_;
 
     if (energy_diff <= 0.0) {
         // Transition Accepted

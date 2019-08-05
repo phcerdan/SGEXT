@@ -117,34 +117,3 @@ TEST_F(SimulatedAnnealingGeneratorFixture, num_vertices_constructor_works) {
     gen.print_histo_and_target_distribution_cosines(std::cout);
     gen.print(std::cout);
 }
-TEST_F(SimulatedAnnealingGeneratorFixture, run_full) {
-    auto gen = SG::simulated_annealing_generator(1000);
-    gen.transition_params.MAX_ENGINE_ITERATIONS = 1000000;
-    gen.ete_distance_params.max_distance_factor = 15;
-    const size_t num_bins_ete_distances = 100;
-    const size_t num_bins_cosines = 100;
-    // gen.ete_distance_params.max_distance_factor = 15;
-    // const size_t num_bins_ete_distances = 200;
-    // const size_t num_bins_cosines = 200;
-    gen.init_histograms(num_bins_ete_distances, num_bins_cosines);
-    gen.print(std::cout);
-    gen.engine();
-    gen.print_histo_and_target_distribution_ete_distances(std::cout);
-    gen.print_histo_and_target_distribution_cosines(std::cout);
-    gen.print(std::cout);
-    // Get time for the output filename
-    std::time_t t = std::time(nullptr);
-    char timestr[120];
-    if (std::strftime(timestr, sizeof(timestr), "%Y-%m-%d-%H:%M",
-                      std::localtime(&t))) {
-        std::cout << timestr << '\n';
-    }
-    std::string file_name = "run_full_test_output_";
-    file_name += timestr;
-    file_name += ".txt";
-    std::ofstream ofile(file_name, std::ios_base::app);
-    gen.print(ofile);
-    gen.print_histo_and_target_distribution_ete_distances(ofile);
-    gen.print_histo_and_target_distribution_cosines(ofile);
-    gen.print_graph(ofile);
-}
