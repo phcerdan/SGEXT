@@ -27,7 +27,7 @@ class simulated_annealing_generator {
     Self &operator=(const Self &&) = delete;
     simulated_annealing_generator(const size_t &num_vertices);
     simulated_annealing_generator(const GraphType &input_graph);
-    void set_default_parameters();
+    void init_parameters();
     void set_parameters_from_file(const std::string &input_file);
     void save_parameters_to_file(const std::string &output_file);
     void set_parameters_from_configuration_tree(
@@ -58,9 +58,11 @@ class simulated_annealing_generator {
     Histogram histo_cosines_;
     std::vector<double> target_cumulative_distro_histo_ete_distances_;
     std::vector<double> target_cumulative_distro_histo_cosines_;
-    // TODO: update_steps can be a vector to parallelize the update.
-    // The only condition would be the selected randomized nodes/edges do
-    // not have neighbors in common.
+    // TODO(optimization): update_steps can be a vector to parallelize the update.
+    // The condition would be:
+    // - The selected randomized nodes/edges do not have neighbors in common.
+    //   In the case of move_node, this includes neighbors of all the nodes
+    //   connected to the moved node.
     update_step_move_node step_move_node_;
     update_step_swap_edges step_swap_edges_;
     bool verbose = false;
@@ -135,7 +137,6 @@ class simulated_annealing_generator {
     void populate_target_cumulative_distro_histo_cosines(
             const std::vector<double> &histo_centers,
             const std::function<double(double)> &cumulative_func);
-    void engine();
 
     /**
      * Performs cramer_von_mises_test in the histograms at the moment of
@@ -146,11 +147,41 @@ class simulated_annealing_generator {
      * @return the result of the test.
      */
     double compute_energy() const;
+    /**
+     * cramer_von_mises_test for the ete_distances histogram
+     * plus @energy_ete_distances_extra_penalty
+     *
+     * @return value of the von_mises_test + extra penalty
+     */
     double energy_ete_distances() const;
+    /**
+     * Extra penalty factor for long ete_distances.
+     * Involves computation of the mean ete_distances.
+     *
+     * @return cost to avoid long fibers
+     */
+    double energy_ete_distances_extra_penalty() const;
+    /**
+     * cramer_von_mises_test for the cosines histogram
+     * plus @energy_cosines_extra_penalty
+     *
+     * @return value of the von_mises_test + extra penalty
+     */
     double energy_cosines() const;
+    /**
+     * Extra penalty to avoid accumulation in the last bin of histo_cosines
+     * [0.9x, 1.000]. The approximation of Lindstrom et al to
+     * the cramer_von_mises_test involving histogram doesn't impose an important
+     * cost value when dealing with the last bin of the histogram.
+     *
+     * @return extra penalty to avoid many counts in the last bin
+     */
+    double energy_cosines_extra_penalty() const;
+
+    void engine();
     simulated_annealing_generator::transition check_transition();
-    void print(std::ostream &os, int spaces = 30);
     void set_boundary_condition(const ArrayUtilities::boundary_condition &bc);
+    void print(std::ostream &os, int spaces = 30);
     void print_histo_and_target_distribution(std::ostream &os,
                                              const Histogram &histo,
                                              const std::vector<double> &distro);
@@ -167,6 +198,8 @@ class simulated_annealing_generator {
      * populate_target_cumulative_distro_histo_cosines
      * target_cumulative_distro_histo_cosines_ * histo_cosines_.bins + 0.5*/
     std::vector<double> LUT_cumulative_histo_cosines_;
+    size_t total_counts_ete_distances_ = 0;
+    size_t total_counts_cosines_ = 0;
 };
 } // namespace SG
 #endif

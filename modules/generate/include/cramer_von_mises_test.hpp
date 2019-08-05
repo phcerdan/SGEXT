@@ -63,38 +63,77 @@ TVector compute_cumulative_counts(const TVector &histo_counts) {
  * @tparam TVectorInt
  * @param S
  * @param cumulative_counts_exclusive
- * @param F
- * @param num_bins
+ * @param F target_cumulative_distro_at_histogram_bin_centers;
+ * @param total_counts
  */
 template <typename TVectorFloat, typename TVectorInt>
 void compute_S(TVectorFloat &S,
                const TVectorInt &cumulative_counts_exclusive,
                const TVectorFloat &F,
-               const size_t &num_bins) {
-    assert(std::size(S) == num_bins);
+               const size_t &total_counts) {
     assert(std::size(S) == std::size(F));
     assert(std::size(cumulative_counts_exclusive) == std::size(F));
     std::transform(
             std::execution::par_unseq, std::begin(cumulative_counts_exclusive),
             std::end(cumulative_counts_exclusive), std::begin(F), std::begin(S),
-            [&num_bins](const double &M, const double &f) -> double {
-                return M - f * num_bins - 0.5;
+            [&total_counts](const double &M, const double &f) -> double {
+                return M - f * total_counts - 0.5;
             });
 }
 
 template <typename TVectorFloat, typename TVectorInt>
 TVectorFloat compute_S(const TVectorInt &cumulative_counts_exclusive,
                        const TVectorFloat &F,
-                       const size_t &num_bins) {
-    TVectorFloat S(num_bins);
-    compute_S(S, cumulative_counts_exclusive, F, num_bins);
+                       const size_t &total_counts) {
+    TVectorFloat S(std::size(F));
+    compute_S(S, cumulative_counts_exclusive, F, total_counts);
+    return S;
+}
+
+/**
+ * Intermediate value involving cumulative_counts_exclusive and F.
+ * But F is the target_cumulative_distro_at_bin_center multiplied by the
+ * total_counts of the histogram and minus 0.5.
+ *
+ * This is a micro optimization, if you are computing F,
+ * you can also compute F_optimized and use this function.
+ *
+ * @tparam TVectorFloat
+ * @tparam TVectorInt
+ * @param S
+ * @param cumulative_counts_exclusive
+ * @param F target_cumulative_distro_at_histogram_bin_centers * total_counts -
+ * 0.5
+ * @param total_counts
+ */
+template <typename TVectorFloat, typename TVectorInt>
+void compute_S_optimized(TVectorFloat &S,
+                         const TVectorInt &cumulative_counts_exclusive,
+                         const TVectorFloat &F_optimized,
+                         const size_t &) {
+    assert(std::size(S) == std::size(F_optimized));
+    assert(std::size(cumulative_counts_exclusive) == std::size(F_optimized));
+    std::transform(
+            std::execution::par_unseq, std::begin(cumulative_counts_exclusive),
+            std::end(cumulative_counts_exclusive), std::begin(F_optimized),
+            std::begin(S),
+            [](const double &M, const double &f) -> double { return M - f; });
+}
+
+template <typename TVectorFloat, typename TVectorInt>
+TVectorFloat compute_S_optimized(const TVectorInt &cumulative_counts_exclusive,
+                                 const TVectorFloat &F_optimized,
+                                 const size_t &total_counts) {
+    TVectorFloat S(std::size(F_optimized));
+    compute_S_optimized(S, cumulative_counts_exclusive, F_optimized,
+                        total_counts);
     return S;
 }
 
 /**
  * Intermediate value involving S and histo_counts. Please note that this is
- * missing a division by (num_bins* num_bins) for optimization. The factor is
- * applied in the final
+ * missing a division by (total_counts* total_counts) for optimization. The
+ * factor is applied in the final
  * @reduce_T.
  *
  * @tparam TVectorFloat
@@ -102,15 +141,13 @@ TVectorFloat compute_S(const TVectorInt &cumulative_counts_exclusive,
  * @param T
  * @param S
  * @param histo_counts
- * @param num_bins
+ * @param total_counts
  */
 template <typename TVectorFloat, typename TVectorInt>
 void compute_T(TVectorFloat &T,
                const TVectorFloat &S,
-               const TVectorInt &histo_counts,
-               const size_t &num_bins) {
+               const TVectorInt &histo_counts) {
 
-    assert(std::size(T) == num_bins);
     assert(std::size(T) == std::size(S));
     assert(std::size(T) == std::size(histo_counts));
     std::transform(std::execution::par_unseq, std::begin(S), std::end(S),
@@ -122,11 +159,9 @@ void compute_T(TVectorFloat &T,
                    });
 }
 template <typename TVectorFloat, typename TVectorInt>
-TVectorFloat compute_T(const TVectorFloat &S,
-                       const TVectorInt &histo_counts,
-                       const size_t &num_bins) {
-    TVectorFloat T(num_bins);
-    compute_T(T, S, histo_counts, num_bins);
+TVectorFloat compute_T(const TVectorFloat &S, const TVectorInt &histo_counts) {
+    TVectorFloat T(std::size(S));
+    compute_T(T, S, histo_counts);
     return T;
 }
 
@@ -135,14 +170,15 @@ TVectorFloat compute_T(const TVectorFloat &S,
  *
  * @tparam TVector
  * @param T
- * @param num_bins
+ * @param total_counts
  *
  * @return
  */
 template <typename TVector>
-double reduce_T(TVector &T, const size_t &num_bins) {
-    const double inverse_square_num_bins = 1.0 / (num_bins * num_bins);
-    return inverse_square_num_bins *
+double reduce_T(const TVector &T, const size_t &total_counts) {
+    const double inverse_square_total_counts =
+            1.0 / (total_counts * total_counts);
+    return inverse_square_total_counts *
            std::reduce(std::execution::par_unseq, std::begin(T), std::end(T));
 }
 
@@ -150,15 +186,46 @@ template <typename TVectorInt, typename TVectorFloat>
 double cramer_von_mises_test(
         const TVectorInt &histo_counts,
         const TVectorFloat &target_cumulative_distro_at_histogram_bin_centers) {
-    assert(std::size(histo_counts) ==
-           std::size(target_cumulative_distro_at_histogram_bin_centers));
-    const auto &F = target_cumulative_distro_at_histogram_bin_centers;
-    const auto cumulative_counts_exclusive =
+    const auto exclusive_cumulative_counts =
             compute_cumulative_counts(histo_counts);
-    const auto num_bins = std::size(histo_counts);
-    const auto S = compute_S(cumulative_counts_exclusive, F, num_bins);
-    const auto T = compute_T(S, histo_counts, num_bins);
-    return 1.0 / (12 * num_bins) + reduce_T(T, num_bins);
+    const auto total_counts =
+            exclusive_cumulative_counts.back() + histo_counts.back();
+    assert(std::accumulate(std::begin(histo_counts), std::end(histo_counts),
+                           0) == total_counts);
+    const auto &F = target_cumulative_distro_at_histogram_bin_centers;
+    assert(std::size(histo_counts) == std::size(F));
+    return 1.0 / (12 * total_counts) +
+           reduce_T(compute_T(compute_S(exclusive_cumulative_counts, F,
+                                        total_counts),
+                              histo_counts),
+                    total_counts);
+}
+
+/**
+ * F_optimized is target_cumulative_distro_at_histogram_bin_centers *
+ * total_counts - 0.5
+ *
+ * @tparam TVectorInt
+ * @tparam TVectorFloat
+ * @param histo_counts
+ * @param F_optimized
+ * @param total_counts
+ *
+ * @return
+ */
+template <typename TVectorInt, typename TVectorFloat>
+double cramer_von_mises_test_optimized(const TVectorInt &histo_counts,
+                                       const TVectorFloat &F_optimized,
+                                       const size_t &total_counts) {
+    assert(std::size(histo_counts) == std::size(F_optimized));
+    assert(std::accumulate(std::begin(histo_counts), std::end(histo_counts),
+                           0) == total_counts);
+    return 1.0 / (12 * total_counts) +
+           reduce_T(compute_T(compute_S_optimized(
+                                      compute_cumulative_counts(histo_counts),
+                                      F_optimized, total_counts),
+                              histo_counts),
+                    total_counts);
 }
 
 } // namespace SG

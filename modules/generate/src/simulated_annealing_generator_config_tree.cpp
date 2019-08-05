@@ -116,8 +116,6 @@ void simulated_annealing_generator_config_tree::load_ete_distance(
             tree.get<double>("ete_distance.physical_normal_mean");
     ete_distance_params.physical_normal_std_deviation =
             tree.get<double>("ete_distance.physical_normal_std_deviation");
-    ete_distance_params.max_distance_factor =
-            tree.get<double>("ete_distance.max_distance_factor");
     ete_distance_params.num_bins = tree.get<size_t>("ete_distance.num_bins");
 }
 
@@ -135,8 +133,6 @@ void simulated_annealing_generator_config_tree::save_ete_distance(
              ete_distance_params.normalized_log_mean);
     tree.put("ete_distance.normalized_log_std_deviation",
              ete_distance_params.normalized_log_std_deviation);
-    tree.put("ete_distance.max_distance_factor",
-             ete_distance_params.max_distance_factor);
     tree.put("ete_distance.num_bins", ete_distance_params.num_bins);
 }
 void simulated_annealing_generator_config_tree::load_physical_scaling(
