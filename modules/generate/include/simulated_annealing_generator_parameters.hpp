@@ -119,9 +119,6 @@ struct end_to_end_distances_distribution_parameters {
     double normalized_normal_std_deviation = 0.253;
     double normalized_log_std_deviation = 0.0;
     double normalized_log_mean = 0.0;
-    /** max_distance in histogram is max_distance_factor *
-     * normalized_normal_mean*/
-    double max_distance_factor = 6.0;
     size_t num_bins = 100;
 
     inline void set_normalized_log_std_deviation(

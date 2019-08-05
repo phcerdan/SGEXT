@@ -120,7 +120,7 @@ void update_step_move_node::perform(const double &max_step_distance,
                        std::begin(new_cosines_between_edges_sharing_moved_node),
                        std::end(new_cosines_between_edges_sharing_moved_node));
 
-    // TODO remove
+#if !defined(NDEBUG)
     const bool verbose = false;
     if (verbose) {
         std::cout << "Old Node Position: ";
@@ -140,6 +140,7 @@ void update_step_move_node::perform(const double &max_step_distance,
         }
         std::cout << std::endl;
     }
+#endif
     // Update Histograms:
     //  Remove old_distances and old_cosines and
     //  add new_distances, new_cosines
