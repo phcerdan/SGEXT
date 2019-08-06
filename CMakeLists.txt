@@ -10,7 +10,6 @@ project(SGEXT
 message(STATUS "SGEXT version: ${SGEXT_VERSION}")
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_CXX_STANDARD 17) # Used in generate module at least
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 include(CMakeDependentOption)
@@ -29,6 +28,11 @@ option(VISUALIZE "Enable visualization with VTK." OFF)
 
 if(VISUALIZE OR SG_MODULE_VISUALIZE OR SG_MODULE_LOCATE OR SG_MODULE_COMPARE)
   set(SG_REQUIRES_VTK TRUE)
+endif()
+
+set(CMAKE_CXX_STANDARD 14)
+if(SG_MODULE_GENERATE)
+  set(CMAKE_CXX_STANDARD 17) # Used in generate module at least
 endif()
 
 find_package(Boost COMPONENTS
