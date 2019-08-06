@@ -1,0 +1,6 @@
+FROM sgext/scripts as sgext-tests
+MAINTAINER Pablo Hernandez Cerdan <pablo.hernandez.cerdan@outlook.com>
+
+WORKDIR ${SGEXT_SCRIPTS_BUILD_DIR}
+
+RUN ctest -V

@@ -1,3 +1,6 @@
+
+[![Build Status](https://dev.azure.com/phcerdan/SGEXT-scripts/_apis/build/status/phcerdan.SGEXT-scripts?branchName=master)](https://dev.azure.com/phcerdan/SGEXT-scripts/_build/latest?definitionId=1&branchName=master)
+
 # SGEXT-scripts
 
 **S**patial**G**raph **Ext**ractor.

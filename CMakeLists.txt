@@ -12,7 +12,6 @@ message(STATUS "SGEXT version: ${SGEXT_VERSION}")
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
-include(CMakeDependentOption)
 option(SG_BUILD_SCRIPTS "Build cpp-scripts." ON)
 option(SG_BUILD_TESTING "Enable Tests" ON)
 option(SG_BUILD_ENABLE_VALGRIND "Enable Valgrind as a memchecker for tests (require debug symbols)" OFF)
@@ -21,9 +20,8 @@ option(SG_MODULE_ANALYZE "Analyze the graph properties." ON)
 option(SG_MODULE_COMPARE "Logic to compare and merge low and high information graphs." ON)
 option(SG_MODULE_LOCATE "Use VTK KDtree for graph point location." ON)
 option(SG_MODULE_VISUALIZE "Functions to visualize spatial graphs and histograms." ON)
+option(SG_MODULE_VISUALIZE_ENABLE_QT "Use QT for some visualizations" OFF)
 option(SG_MODULE_GENERATE "Generate a graph with desired statistical parameters using simulated annealing." ON)
-CMAKE_DEPENDENT_OPTION(SG_MODULE_VISUALIZE_ENABLE_QT "Use QT for some visualizations" ON
-  "SG_MODULE_VISUALIZE" ON)
 option(VISUALIZE "Enable visualization with VTK." OFF)
 
 if(VISUALIZE OR SG_MODULE_VISUALIZE OR SG_MODULE_LOCATE OR SG_MODULE_COMPARE)
