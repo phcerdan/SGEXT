@@ -12,6 +12,8 @@ set(SG_MODULE_${SG_MODULE_NAME}_TESTS
   test_shortest_path.cpp
   test_transform_to_physical_point.cpp
   test_split_edge.cpp
+  test_boundary_conditions.cpp
+  test_spatial_graph_utilities.cpp
   )
 
 SG_add_gtests()

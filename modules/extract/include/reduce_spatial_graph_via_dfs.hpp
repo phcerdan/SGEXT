@@ -29,5 +29,5 @@ namespace SG {
 GraphType reduce_spatial_graph_via_dfs(const GraphType &input_sg,
                                        bool verbose = false);
 
-}  // namespace SG
+} // namespace SG
 #endif
