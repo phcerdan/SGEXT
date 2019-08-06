@@ -30,9 +30,11 @@ if(VISUALIZE OR SG_MODULE_VISUALIZE OR SG_MODULE_LOCATE OR SG_MODULE_COMPARE)
   set(SG_REQUIRES_VTK TRUE)
 endif()
 
-set(CMAKE_CXX_STANDARD 14)
-if(SG_MODULE_GENERATE)
-  set(CMAKE_CXX_STANDARD 17) # Used in generate module at least
+if(NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 14)
+    if(SG_MODULE_GENERATE)
+      set(CMAKE_CXX_STANDARD 17) # Used in generate module at least
+    endif()
 endif()
 
 find_package(Boost COMPONENTS
