@@ -10,22 +10,31 @@ project(SGEXT
 message(STATUS "SGEXT version: ${SGEXT_VERSION}")
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_CXX_STANDARD 14)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 include(CMakeDependentOption)
 option(SG_BUILD_SCRIPTS "Build cpp-scripts." ON)
 option(SG_BUILD_TESTING "Enable Tests" ON)
+option(SG_BUILD_ENABLE_VALGRIND "Enable Valgrind as a memchecker for tests (require debug symbols)" OFF)
+mark_as_advanced(SG_BUILD_ENABLE_VALGRIND)
 option(SG_MODULE_ANALYZE "Analyze the graph properties." ON)
 option(SG_MODULE_COMPARE "Logic to compare and merge low and high information graphs." ON)
 option(SG_MODULE_LOCATE "Use VTK KDtree for graph point location." ON)
 option(SG_MODULE_VISUALIZE "Functions to visualize spatial graphs and histograms." ON)
+option(SG_MODULE_GENERATE "Generate a graph with desired statistical parameters using simulated annealing." ON)
 CMAKE_DEPENDENT_OPTION(SG_MODULE_VISUALIZE_ENABLE_QT "Use QT for some visualizations" ON
   "SG_MODULE_VISUALIZE" ON)
 option(VISUALIZE "Enable visualization with VTK." OFF)
 
 if(VISUALIZE OR SG_MODULE_VISUALIZE OR SG_MODULE_LOCATE OR SG_MODULE_COMPARE)
   set(SG_REQUIRES_VTK TRUE)
+endif()
+
+if(NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 14)
+    if(SG_MODULE_GENERATE)
+      set(CMAKE_CXX_STANDARD 17) # Used in generate module at least
+    endif()
 endif()
 
 find_package(Boost COMPONENTS
@@ -140,6 +149,12 @@ export(TARGETS histo
   APPEND FILE ${sgext_export_file})
 
 if(SG_BUILD_TESTING)
+  if(SG_BUILD_ENABLE_VALGRIND)
+    find_program(MEMORYCHECK_COMMAND valgrind)
+    set(MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --leak-check=full")
+    set(MEMORYCHECK_SUPPRESSIONS_FILE "${CMAKE_CURRENT_BINARY_DIR}/valgrind_suppress.txt")
+    include(Dart)
+  endif()
   enable_testing()
   set(GTEST_LIBRARIES gtest gtest_main gmock)
   include(GoogleTest)
@@ -178,6 +193,9 @@ if(SG_MODULE_COMPARE)
 endif()
 if(SG_MODULE_VISUALIZE)
   add_subdirectory(modules/visualize)
+endif()
+if(SG_MODULE_GENERATE)
+  add_subdirectory(modules/generate)
 endif()
 
 if(SG_BUILD_SCRIPTS)

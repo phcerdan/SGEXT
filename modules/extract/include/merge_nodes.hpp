@@ -6,11 +6,11 @@
 #ifndef MERGE_NODES_HPP
 #define MERGE_NODES_HPP
 
-#include <iostream>
-#include <tuple>
+#include "spatial_graph.hpp"
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graph_traits.hpp>
-#include "spatial_graph.hpp"
+#include <iostream>
+#include <tuple>
 
 namespace SG {
 
@@ -34,23 +34,24 @@ namespace SG {
  *
  * @return number of nodes merged/cleared.
  */
-size_t merge_three_connected_nodes(GraphType& sg, bool inPlace = true);
+size_t merge_three_connected_nodes(GraphType &sg, bool inPlace = true);
 // TODO: refactor/merge into merge_three_connected_nodes
-size_t merge_four_connected_nodes(GraphType& sg, bool inPlace = true);
-size_t merge_two_three_connected_nodes(GraphType& sg, bool inPlace = true);
+size_t merge_four_connected_nodes(GraphType &sg, bool inPlace = true);
+size_t merge_two_three_connected_nodes(GraphType &sg, bool inPlace = true);
 
 std::vector<std::pair<boost::graph_traits<GraphType>::edge_descriptor,
                       boost::graph_traits<GraphType>::edge_descriptor> >
-get_parallel_edges(const GraphType& sg);
+get_parallel_edges(const GraphType &sg);
 
 std::vector<std::pair<boost::graph_traits<GraphType>::edge_descriptor,
                       boost::graph_traits<GraphType>::edge_descriptor> >
 get_equal_parallel_edges(
-    const std::vector<std::pair<
-        boost::graph_traits<GraphType>::edge_descriptor,
-        boost::graph_traits<GraphType>::edge_descriptor> >& parallel_edges,
-    const GraphType& sg);
+        const std::vector<
+                std::pair<boost::graph_traits<GraphType>::edge_descriptor,
+                          boost::graph_traits<GraphType>::edge_descriptor> >
+                &parallel_edges,
+        const GraphType &sg);
 
-}  // namespace SG
+} // namespace SG
 
 #endif

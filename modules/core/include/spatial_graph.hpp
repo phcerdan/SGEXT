@@ -8,13 +8,15 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graph_traits.hpp>
 
-#include "spatial_node.hpp"
 #include "spatial_edge.hpp"
+#include "spatial_node.hpp"
 
 namespace SG {
-using GraphAL =
-    boost::adjacency_list<boost::listS, boost::vecS, boost::undirectedS,
-                          SpatialNode, SpatialEdge>;
+using GraphAL = boost::adjacency_list<boost::listS,
+                                      boost::vecS,
+                                      boost::undirectedS,
+                                      SpatialNode,
+                                      SpatialEdge>;
 using GraphType = GraphAL;
-}  // namespace SG
+} // namespace SG
 #endif

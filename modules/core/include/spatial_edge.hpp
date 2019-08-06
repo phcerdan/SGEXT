@@ -14,10 +14,10 @@
 
 namespace SG {
 struct SpatialEdge {
-  using PointType = SG::PointType;
-  using PointContainer = SG::PointContainer;
-  /// Spatial Points between the nodes of the edge.
-  PointContainer edge_points;
+    using PointType = SG::PointType;
+    using PointContainer = SG::PointContainer;
+    /// Spatial Points between the nodes of the edge.
+    PointContainer edge_points;
 };
 
 /**
@@ -30,61 +30,60 @@ struct SpatialEdge {
  * @param edge_points
  * @param os any ostream
  */
-inline void print_edge_points(const PointContainer & edge_points,
-    std::ostream &os) {
-  auto size = edge_points.size();
-  os << "[";
-  for(size_t i = 0; i + 1 < size; ++i) {
-    os << "{" << edge_points[i][0] << " " << edge_points[i][1] << " "
-       << edge_points[i][2] << "},";
-  }
-  if(size > 0) {
-    os << "{" << edge_points[size - 1][0] << " "
-       << edge_points[size - 1][1] << " " << edge_points[size - 1][2]
-       << "}";
-  }
-  os << "]";
+inline void print_edge_points(const PointContainer &edge_points,
+                              std::ostream &os) {
+    auto size = edge_points.size();
+    os << "[";
+    for (size_t i = 0; i + 1 < size; ++i) {
+        os << "{" << edge_points[i][0] << " " << edge_points[i][1] << " "
+           << edge_points[i][2] << "},";
+    }
+    if (size > 0) {
+        os << "{" << edge_points[size - 1][0] << " " << edge_points[size - 1][1]
+           << " " << edge_points[size - 1][2] << "}";
+    }
+    os << "]";
 }
 /* Stream operators */
 inline static std::ostream &operator<<(std::ostream &os,
                                        const SpatialEdge &se) {
-  os.precision(100);
-  print_edge_points(se.edge_points, os);
-  return os;
+    os.precision(100);
+    print_edge_points(se.edge_points, os);
+    return os;
 }
 inline static std::istream &operator>>(std::istream &is, SpatialEdge &se) {
-  auto &edge_points = se.edge_points;
+    auto &edge_points = se.edge_points;
 
-  std::string s(std::istreambuf_iterator<char>(is), {});
-  std::string delim_start = "{";
-  std::string delim_end = "}";
-  auto first = s.find(delim_start);
-  auto last = s.find(delim_end);
-  auto pos = first;
-  std::string clean;
-  while(pos != std::string::npos) {
-    double x = 0;
-    double y = 0;
-    double z = 0;
-    clean = s.substr(pos + delim_start.length(), last - delim_end.length());
-    std::istringstream is_clean(clean);
-    is_clean >> x >> y >> z;
-    edge_points.push_back({{x, y, z}});
-    s.erase(0, last + delim_end.length());
-    pos = s.find(delim_start);
-  }
-  // set is to the end or lexical_cast fails.
-  is.seekg(0, is.end);
-  return is;
+    std::string s(std::istreambuf_iterator<char>(is), {});
+    std::string delim_start = "{";
+    std::string delim_end = "}";
+    auto first = s.find(delim_start);
+    auto last = s.find(delim_end);
+    auto pos = first;
+    std::string clean;
+    while (pos != std::string::npos) {
+        double x = 0;
+        double y = 0;
+        double z = 0;
+        clean = s.substr(pos + delim_start.length(), last - delim_end.length());
+        std::istringstream is_clean(clean);
+        is_clean >> x >> y >> z;
+        edge_points.push_back({{x, y, z}});
+        s.erase(0, last + delim_end.length());
+        pos = s.find(delim_start);
+    }
+    // set is to the end or lexical_cast fails.
+    is.seekg(0, is.end);
+    return is;
 }
-}  // namespace SG
+} // namespace SG
 
 namespace boost {
 namespace serialization {
 template <class Archive>
 void serialize(Archive &ar, SG::SpatialEdge &se, unsigned /*version*/) {
-  ar &se.edge_points;
+    ar &se.edge_points;
 }
-}  // namespace serialization
-}  // namespace boost
+} // namespace serialization
+} // namespace boost
 #endif
