@@ -72,9 +72,9 @@ struct transition_parameters {
     double temp_cooling_rate = 1.0 - 0.5e-03;
 
     /** Max consecutive failures allowed before engine() stops.*/
-    size_t MAX_CONSECUTIVE_FAILURES = 100000000;
+    size_t MAX_CONSECUTIVE_FAILURES = 100000;
     /** Max iterations of engine() if convergence has not been achieved.*/
-    size_t MAX_ENGINE_ITERATIONS = 100000000;
+    size_t MAX_ENGINE_ITERATIONS = 1000000;
     /** Energy necessary to consider that convergence has been achieved,
      * highly tuneable.*/
     double ENERGY_CONVERGENCE = 0.01;
@@ -134,7 +134,7 @@ struct end_to_end_distances_distribution_parameters {
     double normalized_normal_std_deviation = 0.253;
     double normalized_log_std_deviation = 0.0;
     double normalized_log_mean = 0.0;
-    size_t num_bins = 100;
+    size_t num_bins = 500;
 
     inline void set_normalized_log_std_deviation(
             const double &input_normalized_normal_mean,
@@ -160,7 +160,7 @@ struct cosine_directors_distribution_parameters {
     double b2 = -0.1025;
     // b3 = -(3/32.) * (-1 + 2*b1 + 4*b2)
     double b3 = 0.0159375;
-    size_t num_bins = 100;
+    size_t num_bins = 200;
 };
 } // end namespace SG
 
