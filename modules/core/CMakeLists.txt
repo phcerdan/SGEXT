@@ -44,3 +44,7 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
 export( TARGETS ${SG_MODULE_${SG_MODULE_NAME}_LIBRARY}
   NAMESPACE SGEXT::
   APPEND FILE ${sgext_export_file})
+
+if(SG_WRAP_PYTHON)
+  add_subdirectory(wrap)
+endif()
