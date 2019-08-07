@@ -25,7 +25,7 @@ option(SG_MODULE_GENERATE "Generate a graph with desired statistical parameters 
 CMAKE_DEPENDENT_OPTION(SG_MODULE_VISUALIZE_ENABLE_QT "Use QT for some visualizations" ON
   "SG_MODULE_VISUALIZE" ON)
 option(VISUALIZE "Enable visualization with VTK." OFF)
-option(SG_PYTHON_BINDINGS "Use pybind11 to create bindings to python." OFF)
+option(SG_WRAP_PYTHON "Use pybind11 to create bindings to python." OFF)
 
 
 if(VISUALIZE OR SG_MODULE_VISUALIZE OR SG_MODULE_LOCATE OR SG_MODULE_COMPARE)
@@ -180,7 +180,7 @@ if(SG_BUILD_TESTING)
   add_subdirectory(test/fixtures)
 endif()
 
-if(SG_PYTHON_BINDINGS)
+if(SG_WRAP_PYTHON)
   # Fetch pybind11
   include(FetchContent)
   FetchContent_Declare(
