@@ -3,7 +3,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_LIBRARY "SG${SG_MODULE_NAME}")
 list(APPEND SG_LIBRARIES ${SG_MODULE_${SG_MODULE_NAME}_LIBRARY})
 set(SG_MODULE_INTERNAL_DEPENDS SGCore)
 set(qt_targets "")
-if(SG_MODULE_VISUALIZE_ENABLE_QT)
+if(VISUALIZE_ENABLE_QT)
     set(qt_targets Qt5::Widgets)
 endif()
 set(SG_MODULE_${SG_MODULE_NAME}_DEPENDS
@@ -14,7 +14,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_DEPENDS
     ${DGTAL_LIBRARIES} # For visualize_object.hpp
     histo)
 set(qt_sources "")
-if(SG_MODULE_VISUALIZE_ENABLE_QT)
+if(VISUALIZE_ENABLE_QT)
     set(qt_sources visualize_histograms.cpp)
 endif()
 

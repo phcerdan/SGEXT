@@ -12,7 +12,14 @@ list(APPEND SG_MODULE_${SG_MODULE_NAME}_TEST_DEPENDS
   FixtureMatchingGraphs
   FixtureSquareCrossGraph
   SGLocate
-  SGVisualize
   )
 
+if(SG_MODULE_VISUALIZE)
+  list(APPEND SG_MODULE_${SG_MODULE_NAME}_TEST_DEPENDS SGVisualize)
+endif()
+
 SG_add_gtests()
+
+if(SG_MODULE_VISUALIZE)
+  target_compile_definitions(test_extend_low_info_graph PUBLIC VISUALIZE)
+endif()

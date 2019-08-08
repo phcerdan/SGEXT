@@ -14,11 +14,11 @@
 // use it to check there is no exception in cornercase
 // #include "compute_graph_properties.hpp"
 // #ifdef VISUALIZE
-#include "visualize_object.hpp"
-#include "visualize_spatial_graph.hpp"
-#include <vtkRenderWindow.h>
-#include <vtkRenderer.h>
-#include <vtkRendererCollection.h>
+// #include "visualize_object.hpp"
+// #include "visualize_spatial_graph.hpp"
+// #include <vtkRenderWindow.h>
+// #include <vtkRenderer.h>
+// #include <vtkRendererCollection.h>
 // #include <DGtal/io/viewers/Viewer3D.h>
 // void display_object(const DGtal::Z3i::Object26_6 & obj,
 //                     const DGtal::Z3i::Domain & domain)

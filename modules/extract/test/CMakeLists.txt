@@ -1,6 +1,8 @@
 set(SG_MODULE_${SG_MODULE_NAME}_OPTIONAL_TEST_DEPENDS "")
-# TODO is not really optional, you just want to pass an option to VISUALIZE tests
-list(APPEND SG_MODULE_${SG_MODULE_NAME}_OPTIONAL_TEST_DEPENDS SGVisualize)
+if(SG_MODULE_VISUALIZE)
+  # TODO is not really optional, you just want to pass an option to VISUALIZE tests
+  list(APPEND SG_MODULE_${SG_MODULE_NAME}_OPTIONAL_TEST_DEPENDS SGVisualize)
+endif()
 
 set(SG_MODULE_${SG_MODULE_NAME}_TEST_DEPENDS
   ${SG_MODULE_${SG_MODULE_NAME}_LIBRARY}

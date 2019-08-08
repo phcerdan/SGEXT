@@ -20,8 +20,12 @@ set(_scripts_targets_visualize_using_qt # Using Qt (DGtal or VTK)
     )
 
 set(VISUALIZE_USING_QT 0)
-if(VISUALIZE AND SG_MODULE_VISUALIZE_ENABLE_QT)
+set(VISUALIZE_USING_VTK 0)
+if(SG_MODULE_VISUALIZE AND VISUALIZE_ENABLE_QT)
     set(VISUALIZE_USING_QT 1)
+endif()
+if(SG_MODULE_VISUALIZE AND NOT VISUALIZE_ENABLE_QT)
+    set(VISUALIZE_USING_VTK 1)
 endif()
 
 add_executable(graph_to_vtp graph_to_vtp.cpp)
@@ -116,7 +120,7 @@ endif()
 
 
 if(${_modern_VTK_available})
-    if(VISUALIZE)
+    if(VISUALIZE_USING_VTK)
         add_executable(visualize_graph_and_image visualize_graph_and_image.cpp)
         target_link_libraries(visualize_graph_and_image SGVisualize)
         target_link_libraries(visualize_graph_and_image ${ITK_LIBRARIES} )
@@ -124,7 +128,7 @@ if(${_modern_VTK_available})
     endif()
 endif()
 
-if(VISUALIZE)
+if(VISUALIZE_USING_VTK)
     list(APPEND _scripts_targets ${_scripts_targets_visualize})
 endif()
 

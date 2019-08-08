@@ -20,9 +20,8 @@ option(SG_MODULE_ANALYZE "Analyze the graph properties." ON)
 option(SG_MODULE_COMPARE "Logic to compare and merge low and high information graphs." ON)
 option(SG_MODULE_LOCATE "Use VTK KDtree for graph point location." ON)
 option(SG_MODULE_VISUALIZE "Functions to visualize spatial graphs and histograms." ON)
-option(SG_MODULE_VISUALIZE_ENABLE_QT "Use QT for some visualizations" OFF)
 option(SG_MODULE_GENERATE "Generate a graph with desired statistical parameters using simulated annealing." ON)
-option(VISUALIZE "Enable visualization with VTK." OFF)
+option(VISUALIZE_ENABLE_QT "Use QT for some visualizations" OFF)
 
 if(VISUALIZE OR SG_MODULE_VISUALIZE OR SG_MODULE_LOCATE OR SG_MODULE_COMPARE)
   set(SG_REQUIRES_VTK TRUE)
@@ -80,7 +79,7 @@ find_package(ITK REQUIRED COMPONENTS
 message(STATUS "ITK version: ${ITK_VERSION}")
 include(${ITK_USE_FILE})
 set(vtk_qt_components)
-if(SG_MODULE_VISUALIZE_ENABLE_QT)
+if(VISUALIZE_ENABLE_QT)
   find_package(Qt5 REQUIRED
     Widgets
     Xml
