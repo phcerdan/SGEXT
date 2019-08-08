@@ -10,6 +10,8 @@ ENV SGEXT_SCRIPTS_SRC_DIR ${BUILD_PATH}/${SGEXT_SCRIPTS_SRC_FOLDER_NAME}
 WORKDIR ${SGEXT_SCRIPTS_BUILD_DIR}
 COPY . ${SGEXT_SCRIPTS_SRC_DIR}
 
+# intel-tbb (installed via apt) is installed in non-default location
+ENV TBB_ROOT /opt/intel/tbb
 RUN cmake \
         -G Ninja \
         -DCMAKE_BUILD_TYPE:STRING=Release \
