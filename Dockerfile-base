@@ -39,7 +39,8 @@ RUN apt-get update && \
     libboost-timer-dev \
     libboost-tools-dev \
     libboost-type-erasure-dev \
-    libboost-wave-dev && \
+    libboost-wave-dev \
+    libtbb-dev && \
     apt-get autoremove && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
