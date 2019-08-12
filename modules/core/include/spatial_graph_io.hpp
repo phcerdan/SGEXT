@@ -13,8 +13,8 @@
 namespace SG {
 
 // Graphviz
-boost::dynamic_properties write_dynamic_properties_sg(GraphType &graph);
-boost::dynamic_properties read_dynamic_properties_sg(GraphType &graph);
+boost::dynamic_properties get_write_dynamic_properties_sg(GraphType &graph);
+boost::dynamic_properties get_read_dynamic_properties_sg(GraphType &graph);
 void write_graphviz_sg(std::ostream &os, GraphType &graph);
 void write_graphviz_sg(const std::string &output_file, GraphType &graph);
 void read_graphviz_sg(std::istream &is, GraphType &graph);
