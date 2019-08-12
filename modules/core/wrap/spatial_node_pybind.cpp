@@ -13,10 +13,10 @@ using namespace SG;
 void init_spatial_node(py::module &m) {
     py::class_<SpatialNode>(m, "spatial_node")
             .def(py::init())
-            .def_readwrite("label", &SpatialNode::label)
+            .def_readwrite("id", &SpatialNode::id)
             .def_readwrite("pos", &SpatialNode::pos)
             .def("__repr__", [](const SpatialNode &sn) {
-                return "<sgcore.spatial_node label: " + sn.label +
+                return "<sgcore.spatial_node id: " + std::to_string(sn.id) +
                        "; pos: " + ArrayUtilities::to_string(sn.pos) + ">";
             });
 }

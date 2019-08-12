@@ -22,46 +22,6 @@ struct SimulatedAnnealingGeneratorFixture : public ::testing::Test {
     SG::GraphType graph_;
 };
 
-TEST_F(SimulatedAnnealingGeneratorFixture, write_graphviz) {
-    boost::dynamic_properties dp;
-    dp.property("node_id", boost::get(boost::vertex_index, graph_));
-    dp.property("spatial_node", boost::get(boost::vertex_bundle, graph_));
-    // dp.property("spatial_edge", boost::get(boost::edge_bundle, graph_));
-    boost::write_graphviz_dp(std::cout, graph_, dp);
-    {
-        std::ofstream ofile("graphviz_simulated_annealing_test_out.dot");
-        boost::write_graphviz_dp(ofile, graph_, dp);
-    }
-}
-TEST_F(SimulatedAnnealingGeneratorFixture, read_graphviz) {
-    boost::dynamic_properties dp;
-    // This does not work:
-    // "Attempt to put a value into a const property map: " thrown in the test
-    // body:
-    // dp.property("node_id", boost::get(boost::vertex_index, graph_));
-    // use a string instead
-    dp.property("node_id", boost::get(&SG::SpatialNode::label, graph_));
-    dp.property("spatial_node", boost::get(boost::vertex_bundle, graph_));
-    std::ifstream ifile("graphviz_simulated_annealing_test_out.dot");
-    SG::GraphType graph_read(0);
-    boost::read_graphviz(ifile, graph_read, dp);
-    EXPECT_EQ(boost::num_vertices(graph_), boost::num_vertices(graph_read));
-    {
-        boost::dynamic_properties dp_write;
-        dp_write.property("node_id", boost::get(boost::vertex_index, graph_));
-        dp_write.property("spatial_node",
-                          boost::get(boost::vertex_bundle, graph_));
-        // dp_write.property("spatial_edge", boost::get(boost::edge_bundle,
-        // graph_));
-        boost::write_graphviz_dp(std::cout, graph_, dp_write);
-        {
-            std::ofstream ofile(
-                    "graphviz_simulated_annealing_test_out_after_read.dot");
-            boost::write_graphviz_dp(ofile, graph_, dp_write);
-        }
-    }
-}
-
 TEST_F(SimulatedAnnealingGeneratorFixture, default_constructor) {
     std::cout << "simulated_annealing works" << std::endl;
     auto gen = SG::simulated_annealing_generator();
@@ -79,6 +39,7 @@ TEST_F(SimulatedAnnealingGeneratorFixture, cosines_works) {
                       .counts[gen.histo_cosines_.IndexFromValue(-0.999)],
               1);
 }
+
 TEST_F(SimulatedAnnealingGeneratorFixture, update_step_move_node) {
     auto gen = SG::simulated_annealing_generator(graph_);
     const size_t num_bins_ete_distances = 100;

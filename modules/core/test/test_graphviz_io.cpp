@@ -1,8 +1,8 @@
 #include "array_utilities.hpp"
 #include "spatial_graph.hpp"
+#include "spatial_graph_io.hpp"
 #include "spatial_node.hpp"
 #include "gmock/gmock.h"
-#include <boost/graph/graphviz.hpp>
 #include <fstream>
 #include <iostream>
 
@@ -45,15 +45,8 @@ struct SpatialGraph3DFixture : public ::testing::Test {
 };
 
 TEST_F(SpatialGraph3DFixture, write_graphviz) {
-    boost::dynamic_properties dp;
-    dp.property("node_id", boost::get(boost::vertex_index, g));
-    dp.property("spatial_node", boost::get(boost::vertex_bundle, g));
-    dp.property("spatial_edge", boost::get(boost::edge_bundle, g));
-    boost::write_graphviz_dp(std::cout, g, dp);
-    {
-        std::ofstream ofile("graphviz_test_out.dot");
-        boost::write_graphviz_dp(ofile, g, dp);
-    }
+    std::ofstream ofile("graphviz_test_out.dot");
+    SG::write_graphviz_sg(ofile, g);
 }
 
 /** Please note that node_id "label" is meaningless, but required for the
@@ -63,16 +56,11 @@ TEST_F(SpatialGraph3DFixture, write_graphviz) {
  */
 TEST_F(SpatialGraph3DFixture, read_graphviz) {
     // From: http://programmingexamples.net/wiki/Boost/BGL/RelabelInputVertices
-    boost::dynamic_properties dp;
     GraphType g2;
-    dp.property("node_id", boost::get(&SG::SpatialNode::label, g2));
-    dp.property("spatial_node", boost::get(boost::vertex_bundle, g2));
-    dp.property("spatial_edge", boost::get(boost::edge_bundle, g2));
-    {
-        std::ifstream ifile("graphviz_test_out.dot");
-        boost::read_graphviz(ifile, g2, dp, "node_id");
-    }
-    boost::write_graphviz_dp(std::cout, g2, dp);
+    std::ifstream ifile("graphviz_test_out.dot");
+    SG::read_graphviz_sg(ifile, g2);
+    SG::write_graphviz_sg(std::cout, g2);
+
     EXPECT_EQ(boost::num_vertices(g), boost::num_vertices(g2));
     EXPECT_EQ(boost::num_edges(g), boost::num_edges(g2));
 }
