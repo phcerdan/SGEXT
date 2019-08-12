@@ -29,6 +29,7 @@
 #include "extend_low_info_graph.hpp"
 #include "graph_points_locator.hpp"
 #include "get_vtk_points_from_graph.hpp"
+#include "spatial_graph_io.hpp"
 
 #ifdef VISUALIZE
 #include "visualize_spatial_graph.hpp"
@@ -148,22 +149,8 @@ int main(int argc, char* const argv[]) {
   SG::GraphType g0;     // lowGraph
   SG::GraphType g1;     // highGraph
   if(!useSerialized) {  // read graphviz
-    boost::dynamic_properties dp0;
-    {
-      dp0.property("node_id", boost::get(&SG::SpatialNode::label, g0));
-      dp0.property("spatial_node", boost::get(boost::vertex_bundle, g0));
-      dp0.property("spatial_edge", boost::get(boost::edge_bundle, g0));
-      std::ifstream ifileLow(filenameLow);
-      boost::read_graphviz(ifileLow, g0, dp0, "node_id");
-    }
-    boost::dynamic_properties dp1;
-    {
-      dp1.property("node_id", boost::get(&SG::SpatialNode::label, g1));
-      dp1.property("spatial_node", boost::get(boost::vertex_bundle, g1));
-      dp1.property("spatial_edge", boost::get(boost::edge_bundle, g1));
-      std::ifstream ifileHigh(filenameHigh);
-      boost::read_graphviz(ifileHigh, g1, dp1, "node_id");
-    }
+    SG::read_graphviz_sg(filenameLow, g0);
+    SG::read_graphviz_sg(filenameHigh, g1);
   } else {
     g0 = SG::read_serialized_graph(filenameLow);
     g1 = SG::read_serialized_graph(filenameHigh);

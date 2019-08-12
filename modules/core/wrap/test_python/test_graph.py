@@ -10,7 +10,7 @@ class TestGraph(unittest.TestCase):
     def test_spatial_node(self):
         # Constructor
         sn = sgcore.spatial_node()
-        self.assertEqual(sn.label, '')
+        self.assertEqual(sn.id, 0)
         self.assertEqual(sn.pos, sgcore.array.array3d())
         norm = sgcore.array.norm(sn.pos)
         self.assertAlmostEqual(norm, 0.0)
