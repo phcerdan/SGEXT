@@ -13,7 +13,8 @@ set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
     graph_data.cpp
     serialize_spatial_graph.cpp
     shortest_path.cpp
-    spatial_graph_utilities.cpp
+    spatial_graph_utilities.cpp # Deprecated
+    spatial_graph_io.cpp
     )
 list(TRANSFORM SG_MODULE_${SG_MODULE_NAME}_SOURCES PREPEND "src/")
 add_library(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} ${SG_MODULE_${SG_MODULE_NAME}_SOURCES})
