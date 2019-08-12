@@ -20,10 +20,10 @@ class TestSpatialGraphIo(unittest.TestCase):
         sn = sgcore.spatial_node()
         sn.pos = sgcore.array.array3d(1.0,1.0,1.0)
         graph.set_vertex(1, sn)
-        sgcore.write_graphviz_sg(self.graphviz_file, graph)
+        sgcore.io.write_graphviz_sg(self.graphviz_file, graph)
 
     def test_b_read_graphviz_sg(self):
-        graph = sgcore.read_graphviz_sg(self.graphviz_file)
+        graph = sgcore.io.read_graphviz_sg(self.graphviz_file)
         self.assertEqual(graph.num_vertices(), 2)
         self.assertAlmostEqual(graph.vertex(1).pos[0], 1.0)
 
@@ -32,10 +32,10 @@ class TestSpatialGraphIo(unittest.TestCase):
         sn = sgcore.spatial_node()
         sn.pos = sgcore.array.array3d(1.0,1.0,1.0)
         graph.set_vertex(1, sn)
-        sgcore.write_serialized_sg(self.serialized_file, graph)
+        sgcore.io.write_serialized_sg(self.serialized_file, graph)
 
     def test_b_read_serialized_sg(self):
-        graph = sgcore.read_serialized_sg(self.serialized_file)
+        graph = sgcore.io.read_serialized_sg(self.serialized_file)
         self.assertEqual(graph.num_vertices(), 2)
         self.assertAlmostEqual(graph.vertex(1).pos[0], 1.0)
 
