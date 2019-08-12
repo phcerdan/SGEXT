@@ -10,11 +10,15 @@ void init_array3d(py::module &);
 void init_spatial_node(py::module &);
 void init_spatial_edge(py::module &);
 void init_spatial_graph(py::module &);
+void init_edge_points_utilities(py::module &);
+void init_spatial_graph_io(py::module &);
 
 PYBIND11_MODULE(sgcore, m) {
     m.doc() = "SGCore "; // optional module docstring
     init_array3d(m);
+    init_edge_points_utilities(m);
     init_spatial_node(m);
     init_spatial_edge(m);
     init_spatial_graph(m);
+    init_spatial_graph_io(m);
 }
