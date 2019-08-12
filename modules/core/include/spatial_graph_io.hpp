@@ -8,44 +8,25 @@
 
 #include "spatial_graph.hpp"
 #include <boost/graph/graphviz.hpp>
-#include <ostream>
+#include <iostream>
 
 namespace SG {
 
-boost::dynamic_properties write_dynamic_properties_sg(GraphType &graph) {
-    boost::dynamic_properties dp;
-    dp.property("node_id", boost::get(boost::vertex_index, graph));
-    dp.property("spatial_node", boost::get(boost::vertex_bundle, graph));
-    dp.property("spatial_edge", boost::get(boost::edge_bundle, graph));
-    return dp;
-}
-boost::dynamic_properties read_dynamic_properties_sg(GraphType &graph) {
-    boost::dynamic_properties dp;
-    dp.property("node_id", boost::get(&SpatialNode::id, graph));
-    dp.property("spatial_node", boost::get(boost::vertex_bundle, graph));
-    dp.property("spatial_edge", boost::get(boost::edge_bundle, graph));
-    return dp;
-}
+// Graphviz
+boost::dynamic_properties write_dynamic_properties_sg(GraphType &graph);
+boost::dynamic_properties read_dynamic_properties_sg(GraphType &graph);
+void write_graphviz_sg(std::ostream &os, GraphType &graph);
+void write_graphviz_sg(const std::string &output_file, GraphType &graph);
+void read_graphviz_sg(std::istream &is, GraphType &graph);
+void read_graphviz_sg(const std::string &input_file, GraphType &graph);
+GraphType read_graphviz_sg(const std::string &input_file);
 
-void write_graphviz_sg(std::ostream &os, GraphType &graph) {
-    auto dp = write_dynamic_properties_sg(graph);
-    boost::write_graphviz_dp(os, graph, dp);
-}
-void write_graphviz_sg(const std::string &output_file, GraphType &graph) {
-    auto dp = write_dynamic_properties_sg(graph);
-    std::ofstream ofile(output_file);
-    boost::write_graphviz_dp(ofile, graph, dp);
-}
-
-void read_graphviz_sg(std::istream &is, GraphType &graph) {
-    auto dp = read_dynamic_properties_sg(graph);
-    boost::read_graphviz(is, graph, dp);
-}
-void read_graphviz_sg(const std::string &input_file, GraphType &graph) {
-    auto dp = read_dynamic_properties_sg(graph);
-    std::ifstream ifile(input_file);
-    boost::read_graphviz(ifile, graph, dp);
-}
+// Serialize
+void write_serialized_sg(std::ostream &os, GraphType &graph);
+void write_serialized_sg(const std::string &output_file, GraphType &graph);
+void read_serialized_sg(std::istream &is, GraphType &graph);
+void read_serialized_sg(const std::string &input_file, GraphType &graph);
+GraphType read_serialized_sg(const std::string &input_file);
 
 } // namespace SG
 #endif
