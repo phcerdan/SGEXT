@@ -37,7 +37,6 @@
 // Reduce graph via dfs:
 #include "add_graph_peninsulas.hpp"
 #include "compare_graphs.hpp"
-#include "serialize_spatial_graph.hpp"
 #include "spatial_graph.hpp"
 #include "spatial_graph_io.hpp"
 #include "spatial_graph_utilities.hpp"
@@ -166,8 +165,8 @@ int main(int argc, char *const argv[]) {
         SG::read_graphviz_sg(filenameLow, g0);
         SG::read_graphviz_sg(filenameHigh, g1);
     } else {
-        g0 = SG::read_serialized_graph(filenameLow);
-        g1 = SG::read_serialized_graph(filenameHigh);
+        g0 = SG::read_serialized_sg(filenameLow);
+        g1 = SG::read_serialized_sg(filenameHigh);
     }
 
     auto repeated_points_g0 = SG::check_unique_points_in_graph(g0);
