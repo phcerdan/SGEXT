@@ -74,5 +74,32 @@ class TestGraph(unittest.TestCase):
         graph.set_edge(ed, ref)
         self.assertEqual(len(graph.edge(ed).edge_points), 0)
 
+    def test_get_all_points(self):
+        graph = sgcore.spatial_graph(2)
+        arr3 = sgcore.array.array3d(3,3,3)
+        v1 = graph.vertex(1)
+        v1.pos = arr3
+        graph.set_vertex(1, v1)
+        arr1 = sgcore.array.array3d(1,1,1)
+        arr2 = sgcore.array.array3d(2,2,2)
+        se2 = sgcore.spatial_edge()
+        se2.edge_points = [arr1, arr2];
+        [ed, added] = sgcore.graph.add_edge(0,1, se2, graph)
+        [points, descriptors] = sgcore.graph.get_all_points(graph)
+        num_points = 4
+        self.assertEqual(len(points), num_points)
+        self.assertAlmostEqual(points[0][0], 0.)
+        self.assertAlmostEqual(points[1][0], 3.)
+        self.assertAlmostEqual(points[2][0], 1.)
+        self.assertAlmostEqual(points[3][0], 2.)
+        self.assertEqual(len(descriptors), num_points)
+        self.assertTrue(descriptors[0].is_vertex)
+        self.assertTrue(descriptors[1].is_vertex)
+        self.assertTrue(descriptors[2].is_edge)
+        self.assertEqual(descriptors[2].edge_points_index, 0)
+        self.assertTrue(descriptors[3].is_edge)
+        self.assertEqual(descriptors[3].edge_points_index, 1)
+
+
 if __name__ == '__main__':
     unittest.main()

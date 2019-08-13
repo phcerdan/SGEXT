@@ -33,15 +33,15 @@ struct graph_descriptor {
 
 inline void
 print_graph_descriptor(const graph_descriptor &descriptor,
-                       const std::string &label = "graph_descriptor") {
-    std::cout << label << ":" << std::endl;
-    std::cout << " exist: " << descriptor.exist << std::endl;
-    std::cout << " is_vertex: " << descriptor.is_vertex << std::endl;
-    std::cout << " is_edge: " << descriptor.is_edge << std::endl;
-    std::cout << " vertex_d: " << descriptor.vertex_d << std::endl;
-    std::cout << " edge_d: " << descriptor.edge_d << std::endl;
-    std::cout << " edge_points_index: " << descriptor.edge_points_index
-              << std::endl;
+                       const std::string &label = "graph_descriptor",
+                       std::ostream &os = std::cout) {
+    os << label << ":" << std::endl;
+    os << " exist: " << descriptor.exist << std::endl;
+    os << " is_vertex: " << descriptor.is_vertex << std::endl;
+    os << " is_edge: " << descriptor.is_edge << std::endl;
+    os << " vertex_d: " << descriptor.vertex_d << std::endl;
+    os << " edge_d: " << descriptor.edge_d << std::endl;
+    os << " edge_points_index: " << descriptor.edge_points_index << std::endl;
 }
 
 } // namespace SG
