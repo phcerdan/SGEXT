@@ -21,6 +21,7 @@
 #ifndef SPATIAL_GRAPH_UTILITIES_HPP
 #define SPATIAL_GRAPH_UTILITIES_HPP
 
+#include "graph_descriptor.hpp"
 #include "spatial_graph.hpp"
 #include "spatial_node.hpp"
 
@@ -36,7 +37,23 @@ struct AdjacentVerticesPositions {
 };
 
 /**
- * Get vertex_descriptors and positions of all adjacent vertices of target node.
+ * Returns a pair, first a vector with all the points of the graph, and second
+ * a vector with the graph_descriptor, associating the points with nodes, edges,
+ * and/or the index of the edge_points
+ *
+ * Similar, but without the vtk dependency to
+ * @sa get_vtk_points_from_graph
+ *
+ * @param graph
+ *
+ * @return
+ */
+std::pair<std::vector<SpatialNode::PointType>, std::vector<graph_descriptor> >
+get_all_points(const GraphType &graph);
+
+/**
+ * Get vertex_descriptors and positions of all adjacent vertices of
+ * target node.
  *
  * @param target_node input node to compute adjacent vertices
  * @param g input spatial graph
@@ -70,7 +87,7 @@ void print_degrees(const GraphType &graph, std::ostream &os = std::cout) {
     std::tie(vi, vi_end) = boost::vertices(graph);
     for (; vi != vi_end; ++vi) {
         os << *vi << ": " << ArrayUtilities::to_string(graph[*vi].pos)
-                  << ". Degree: " << boost::out_degree(*vi, graph) << std::endl;
+           << ". Degree: " << boost::out_degree(*vi, graph) << std::endl;
     }
 }
 
@@ -109,8 +126,7 @@ void print_spatial_edges(const GraphType &graph, std::ostream &os = std::cout) {
         os << "---";
         print_pos(os, graph[target].pos);
         os << std::endl;
-        os << "edge_points: " << graph[*ei].edge_points.size()
-                  << std::endl;
+        os << "edge_points: " << graph[*ei].edge_points.size() << std::endl;
         os << graph[*ei] << std::endl;
     }
 }

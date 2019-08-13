@@ -31,8 +31,8 @@ void init_spatial_node(py::module &m) {
             .def_readwrite("id", &SpatialNode::id)
             .def_readwrite("pos", &SpatialNode::pos)
             .def("__repr__", [](const SpatialNode &sn) {
-                return "<sgcore.spatial_node id: " + std::to_string(sn.id) +
-                       "; pos: " + ArrayUtilities::to_string(sn.pos) + ">";
+                return "<spatial_node id: " + std::to_string(sn.id) +
+                       "; pos: " + ArrayUtilities::to_string(sn.pos) + " >";
             });
 }
 

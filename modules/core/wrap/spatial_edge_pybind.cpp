@@ -34,6 +34,6 @@ void init_spatial_edge(py::module &m) {
             .def("__repr__", [](const SpatialEdge &sn) {
                 std::stringstream os;
                 print_edge_points(sn.edge_points, os);
-                return "<sgcore.spatial_edge edge_points: " + os.str() + ">";
+                return "<spatial_edge: edge_points: " + os.str() + ">";
             });
 }
