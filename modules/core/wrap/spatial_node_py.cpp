@@ -18,22 +18,21 @@
  *
  * *******************************************************************/
 
-#include "sgcore_common.hpp"
-#include "spatial_edge.hpp"
+#include "sgcore_common_py.hpp"
+#include "spatial_node.hpp"
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-#include <pybind11/stl_bind.h>
 
 namespace py = pybind11;
 using namespace SG;
 
-void init_spatial_edge(py::module &m) {
-    py::class_<SpatialEdge>(m, "spatial_edge")
+void init_spatial_node(py::module &m) {
+    py::class_<SpatialNode>(m, "spatial_node")
             .def(py::init())
-            .def_readwrite("edge_points", &SpatialEdge::edge_points)
-            .def("__repr__", [](const SpatialEdge &sn) {
-                std::stringstream os;
-                print_edge_points(sn.edge_points, os);
-                return "<spatial_edge: edge_points: " + os.str() + ">";
+            .def_readwrite("id", &SpatialNode::id)
+            .def_readwrite("pos", &SpatialNode::pos)
+            .def("__repr__", [](const SpatialNode &sn) {
+                return "<spatial_node id: " + std::to_string(sn.id) +
+                       "; pos: " + ArrayUtilities::to_string(sn.pos) + " >";
             });
 }
+

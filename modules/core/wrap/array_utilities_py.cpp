@@ -19,7 +19,7 @@
  * *******************************************************************/
 
 #include "array_utilities.hpp"
-#include "sgcore_common.hpp"
+#include "sgcore_common_py.hpp"
 #include <pybind11/pybind11.h>
 // #include <pybind11/stl.h>
 

@@ -18,7 +18,7 @@
  *
  * *******************************************************************/
 
-#include "sgcore_common.hpp"
+#include "sgcore_common_py.hpp"
 #include "spatial_graph.hpp"
 #include "spatial_graph_utilities.hpp"
 #include <pybind11/pybind11.h>
