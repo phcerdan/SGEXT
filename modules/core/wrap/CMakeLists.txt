@@ -8,3 +8,6 @@ pybind11_add_module(sgcore
   edge_points_utilities_pybind.cpp
   )
 target_link_libraries(sgcore PRIVATE SGCore)
+
+install(TARGETS sgcore
+        DESTINATION python)
