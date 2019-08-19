@@ -1,4 +1,4 @@
-#include "sgcore_common.hpp"
+#include "sgcore_common_py.hpp"
 #include "spatial_graph_io.hpp"
 #include <pybind11/pybind11.h>
 
