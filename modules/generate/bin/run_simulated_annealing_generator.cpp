@@ -27,6 +27,7 @@
 #include <boost/filesystem.hpp>
 
 #include "simulated_annealing_generator.hpp"
+#include "spatial_graph_io.hpp"
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
@@ -105,20 +106,21 @@ int main(int argc, char *const argv[]) {
     final_output_filename += output_filename_extension.string();
 
     // Generator
-    auto gen = SG::simulated_annealing_generator();
-    gen.set_parameters_from_file(input_filename);
-    gen.init_graph_degree(gen.physical_scaling_params.num_vertices);
-    gen.init_graph_vertex_positions();
-    gen.init_parameters();
-    gen.init_histograms(gen.ete_distance_params.num_bins,
-                        gen.cosine_params.num_bins);
+    auto gen = SG::simulated_annealing_generator(input_filename);
+    // gen.set_parameters_from_file(input_filename);
+    // gen.init_graph_degree(gen.physical_scaling_params.num_vertices);
+    // gen.init_graph_vertex_positions();
+    // gen.init_parameters();
+    // gen.init_histograms(gen.ete_distance_params.num_bins,
+    //                     gen.cosine_params.num_bins);
     gen.print(std::cout);
     gen.engine();
     std::ofstream ofile(final_output_filename, std::ios_base::app);
     gen.print(ofile);
     gen.print_histo_and_target_distribution_ete_distances(ofile);
     gen.print_histo_and_target_distribution_cosines(ofile);
-    gen.print_graph(ofile);
+    SG::write_graphviz_sg(ofile, gen.graph_);
+
     std::string parameters_output_filename =
             (output_filename_parent_path / output_filename_without_extension)
                     .string() +
