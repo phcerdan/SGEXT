@@ -78,3 +78,15 @@ TEST_F(SimulatedAnnealingGeneratorFixture, num_vertices_constructor_works) {
     gen.print_histo_and_target_distribution_cosines(std::cout);
     gen.print(std::cout);
 }
+
+TEST_F(SimulatedAnnealingGeneratorFixture, config_tree_constructor_works) {
+    std::cout << "simulated_annealing config tree works" << std::endl;
+    auto tree = SG::simulated_annealing_generator_config_tree();
+    tree.transition_params.ENERGY_CONVERGENCE = 100;
+    tree.transition_params.UPDATE_STEP_MOVE_NODE_PROBABILITY = 0.5;
+    tree.ete_distance_params.num_bins = 100;
+    tree.cosine_params.num_bins = 100;
+    auto gen = SG::simulated_annealing_generator(tree);
+    gen.engine();
+    gen.print(std::cout);
+}

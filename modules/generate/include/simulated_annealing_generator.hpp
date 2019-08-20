@@ -18,18 +18,21 @@ class simulated_annealing_generator {
     using Self = simulated_annealing_generator;
 
   public:
-    simulated_annealing_generator()
-            : step_move_node_(graph_, histo_ete_distances_, histo_cosines_),
-              step_swap_edges_(graph_, histo_ete_distances_, histo_cosines_) {}
+    simulated_annealing_generator();
     simulated_annealing_generator(const Self &) = delete;
     Self &operator=(const Self &) = delete;
     simulated_annealing_generator(Self &&) = delete;
     Self &operator=(const Self &&) = delete;
     simulated_annealing_generator(const size_t &num_vertices);
     simulated_annealing_generator(const GraphType &input_graph);
+    simulated_annealing_generator(
+            const simulated_annealing_generator_config_tree &tree);
+    simulated_annealing_generator(const std::string &input_parameters_file);
     void init_parameters();
     void set_parameters_from_file(const std::string &input_file);
     void save_parameters_to_file(const std::string &output_file);
+    simulated_annealing_generator_config_tree
+    save_parameters_to_configuration_tree();
     void set_parameters_from_configuration_tree(
             const simulated_annealing_generator_config_tree &tree);
 
@@ -58,8 +61,8 @@ class simulated_annealing_generator {
     Histogram histo_cosines_;
     std::vector<double> target_cumulative_distro_histo_ete_distances_;
     std::vector<double> target_cumulative_distro_histo_cosines_;
-    // TODO(optimization): update_steps can be a vector to parallelize the update.
-    // The condition would be:
+    // TODO(optimization): update_steps can be a vector to parallelize the
+    // update. The condition would be:
     // - The selected randomized nodes/edges do not have neighbors in common.
     //   In the case of move_node, this includes neighbors of all the nodes
     //   connected to the moved node.
@@ -178,16 +181,28 @@ class simulated_annealing_generator {
      */
     double energy_cosines_extra_penalty() const;
 
+    /**
+     * Start the simulation
+     * Precondition: all the parameters and histograms are initialized
+     *
+     * The simulation stops when any of MAX_ENGINE_ITERATIONS,
+     * MAX_CONSECUTIVE_FAILURES, or ENERGY_CONVERGENCE criterias are met.
+     *
+     * As output, the transition parameters are populated with the
+     * simulation results and the graph_ is modified to follow the input
+     * distributions.
+     */
     void engine();
     simulated_annealing_generator::transition check_transition();
     void set_boundary_condition(const ArrayUtilities::boundary_condition &bc);
-    void print(std::ostream &os, int spaces = 30);
-    void print_histo_and_target_distribution(std::ostream &os,
-                                             const Histogram &histo,
-                                             const std::vector<double> &distro);
-    void print_histo_and_target_distribution_ete_distances(std::ostream &os);
-    void print_histo_and_target_distribution_cosines(std::ostream &os);
-    void print_graph(std::ostream &os);
+    void print(std::ostream &os, int spaces = 35) const;
+    void print_histo_and_target_distribution(
+            std::ostream &os,
+            const Histogram &histo,
+            const std::vector<double> &distro) const;
+    void
+    print_histo_and_target_distribution_ete_distances(std::ostream &os) const;
+    void print_histo_and_target_distribution_cosines(std::ostream &os) const;
 
   private:
     /** Used in cramer_von_mises_test computation: Modify it with
