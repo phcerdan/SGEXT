@@ -222,13 +222,15 @@ if(SG_BUILD_SCRIPTS)
   add_subdirectory(cpp-scripts)
 endif()
 
+set(install_cmake_dir "${CMAKE_INSTALL_LIBDIR}/cmake/sgext")
+
 install (EXPORT SGEXTTargets
   NAMESPACE SGEXT::
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/sgext )
+  DESTINATION ${install_cmake_dir} )
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/SGEXTConfig.cmake
               ${CMAKE_CURRENT_BINARY_DIR}/SGEXTConfigVersion.cmake
-              DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/sgext )
+              DESTINATION ${install_cmake_dir} )
 
 include(CMakePackageConfigHelpers)
 
@@ -241,18 +243,18 @@ set(SGEXT_TARGETS_FILE ${sgext_export_file})
 configure_package_config_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/cmake/SGEXTConfig.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/SGEXTConfig.cmake
-  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/sgext
+  INSTALL_DESTINATION ${install_cmake_dir}
   PATH_VARS SGEXT_TARGETS_FILE
   NO_CHECK_REQUIRED_COMPONENTS_MACRO # SGEXT does not provide components
   INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}
   )
 
 # Install tree
-set(SGEXT_TARGETS_FILE ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/cmake/sgext/SGEXTTargets.cmake)
+set(SGEXT_TARGETS_FILE ${CMAKE_INSTALL_PREFIX}/${install_cmake_dir}/SGEXTTargets.cmake)
 configure_package_config_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/cmake/SGEXTConfig.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/cmake/SGEXTConfig.cmake
-  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/sgext
+  INSTALL_DESTINATION ${install_cmake_dir}
   PATH_VARS SGEXT_TARGETS_FILE
   NO_CHECK_REQUIRED_COMPONENTS_MACRO # SGEXT does not provide components
   )
