@@ -18,15 +18,36 @@ struct domain_parameters {
             ArrayUtilities::boundary_condition::PERIODIC;
     // Assumes x0, y0, z0 = 0.0
     std::array<double, 3> domain = {1.0, 1.0, 1.0};
+    inline void print(std::ostream &os, int spaces = 35) const {
+        os << "%/************DOMAIN "
+              "PARAMETERS*****************/"
+           << '\n'
+           << std::left << std::setw(spaces)
+           << "domain= " << ArrayUtilities::to_string(domain) << '\n'
+           << std::left << std::setw(spaces) << "boundary_condition= "
+           << ArrayUtilities::boundary_condition_to_string(boundary_condition)
+           << std::endl;
+    }
 };
 
 struct physical_scaling_parameters {
     /** Number of vertices of the graph. */
-    size_t num_vertices = 1000;
+    size_t num_vertices = 100;
     /** nodes per unit of volume measured experimentally */
     double node_density = 0.066627e18;
     /** S = (num_vertices/node_density)^1/3 */
     double length_scaling_factor = 0.0;
+    inline void print(std::ostream &os, int spaces = 35) const {
+        os << "%/********PHYSICAL SCALING "
+              "PARAMETERS*************/"
+           << '\n'
+           << std::left << std::setw(spaces) << "num_vertices= " << num_vertices
+           << '\n'
+           << std::left << std::setw(spaces) << "node_density= " << node_density
+           << '\n'
+           << std::left << std::setw(spaces)
+           << "length_scaling_factor= " << length_scaling_factor << std::endl;
+    }
 };
 
 struct transition_parameters {
@@ -42,16 +63,14 @@ struct transition_parameters {
     size_t high_temp_transitions = 0;
     /** maximum of consecutive failures since engine() started */
     size_t consecutive_failures = 0;
-    /** total number of failures in the simulation */
-    size_t total_failures = 0;
     /** time elapsed since engine() started. */
     double time_elapsed = 0.0;
-    /** Temperature before engine() started. Associated  with the annealing
-     * process, @sa  transition::ACCEPTED_HIGH_TEMP.*/
-    double temp_initial = 0.0;
     /** Current temperature. The temperature decreases with each
      * transition::ACCEPTED_HIGH_TEMP. */
     double temp_current = 0.0;
+    /** Temperature before engine() started. Associated  with the annealing
+     * process, @sa  transition::ACCEPTED_HIGH_TEMP.*/
+    double temp_initial = 0.0;
     /** Not energitically favourable transitions are less probable over
      * time. The analogy is that the system cools down.  */
     double temp_cooling_rate = 1.0 - 0.5e-03;
@@ -67,10 +86,9 @@ struct transition_parameters {
      * The other method is update_step_swap_edges.*/
     double UPDATE_STEP_MOVE_NODE_PROBABILITY = 0.5;
     double update_step_move_node_max_step_distance = 5.0e-2;
-    inline void print(std::ostream &os, int spaces = 30) {
+    inline void print(std::ostream &os, int spaces = 35) const {
         os << "%/************TRANSITION "
               "PARAMETERS*****************/"
-           << '\n'
            << '\n'
            << std::left << std::setw(spaces) << "E= " << energy << '\n'
            << std::left << std::setw(spaces) << "E_initial= " << energy_initial
@@ -86,8 +104,6 @@ struct transition_parameters {
            << "  %HighTempTransitions: "
            << static_cast<double>(high_temp_transitions) / accepted_transitions
            << '\n'
-           << std::left << std::setw(spaces)
-           << "total_failures= " << total_failures << '\n'
            << std::left << std::setw(spaces)
            << "consecutive_failures= " << consecutive_failures << '\n'
            << std::left << std::setw(spaces) << "temp_initial= " << temp_initial
@@ -106,6 +122,16 @@ struct degree_distribution_parameters {
     double mean = 3.379692;
     size_t min_degree = 3;
     size_t max_degree = 999;
+    inline void print(std::ostream &os, int spaces = 35) const {
+        os << "%/******DEGREE DISTRIBUTION "
+              "PARAMETERS************/"
+           << '\n'
+           << std::left << std::setw(spaces) << "mean= " << mean << '\n'
+           << std::left << std::setw(spaces) << "min_degree= " << min_degree
+           << '\n'
+           << std::left << std::setw(spaces) << "max_degree= " << max_degree
+           << std::endl;
+    }
 };
 
 struct end_to_end_distances_distribution_parameters {
@@ -119,7 +145,7 @@ struct end_to_end_distances_distribution_parameters {
     double normalized_normal_std_deviation = 0.253;
     double normalized_log_std_deviation = 0.0;
     double normalized_log_mean = 0.0;
-    size_t num_bins = 500;
+    size_t num_bins = 100;
 
     inline void set_normalized_log_std_deviation(
             const double &input_normalized_normal_mean,
@@ -138,6 +164,29 @@ struct end_to_end_distances_distribution_parameters {
                               input_normalized_log_std_deviation *
                                       input_normalized_log_std_deviation / 2.0;
     }
+
+    inline void print(std::ostream &os, int spaces = 35) const {
+        os << "%/**END_TO_END DISTANCES DISTRIBUTION "
+              "PARAMETERS*****/"
+           << '\n'
+           << std::left << std::setw(spaces)
+           << "physical_normal_mean= " << physical_normal_mean << '\n'
+           << std::left << std::setw(spaces)
+           << "physical_normal_std_deviation= " << physical_normal_std_deviation
+           << '\n'
+           << std::left << std::setw(spaces)
+           << "normalized_normal_mean= " << normalized_normal_mean << '\n'
+           << std::left << std::setw(spaces)
+           << "normalized_normal_std_deviation= "
+           << normalized_normal_std_deviation << '\n'
+           << std::left << std::setw(spaces)
+           << "normalized_log_std_deviation= " << normalized_log_std_deviation
+           << '\n'
+           << std::left << std::setw(spaces)
+           << "normalized_log_mean= " << normalized_log_mean << '\n'
+           << std::left << std::setw(spaces) << "num_bins= " << num_bins
+           << std::endl;
+    }
 };
 
 struct cosine_directors_distribution_parameters {
@@ -145,7 +194,17 @@ struct cosine_directors_distribution_parameters {
     double b2 = -0.1025;
     // b3 = -(3/32.) * (-1 + 2*b1 + 4*b2)
     double b3 = 0.0159375;
-    size_t num_bins = 200;
+    size_t num_bins = 100;
+    inline void print(std::ostream &os, int spaces = 35) const {
+        os << "%/**DIRECTOR COSINES DISTRIBUTION "
+              "PARAMETERS*****/"
+           << '\n'
+           << std::left << std::setw(spaces) << "b1= " << b1 << '\n'
+           << std::left << std::setw(spaces) << "b2= " << b2 << '\n'
+           << std::left << std::setw(spaces) << "b3= " << b3 << '\n'
+           << std::left << std::setw(spaces) << "num_bins= " << num_bins
+           << std::endl;
+    }
 };
 } // end namespace SG
 

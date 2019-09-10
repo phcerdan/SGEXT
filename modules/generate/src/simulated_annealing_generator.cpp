@@ -9,6 +9,50 @@
 #include <chrono>
 
 namespace SG {
+simulated_annealing_generator::simulated_annealing_generator()
+            : step_move_node_(graph_, histo_ete_distances_, histo_cosines_),
+              step_swap_edges_(graph_, histo_ete_distances_, histo_cosines_) {}
+
+simulated_annealing_generator::simulated_annealing_generator(
+        const size_t &num_vertices)
+        : simulated_annealing_generator() {
+    this->init_graph_degree(num_vertices);
+    this->init_graph_vertex_positions();
+    this->init_parameters();
+    this->init_histograms(this->ete_distance_params.num_bins,
+                          this->cosine_params.num_bins);
+}
+simulated_annealing_generator::simulated_annealing_generator(
+        const GraphType &input_graph)
+        : graph_(input_graph),
+          step_move_node_(graph_, histo_ete_distances_, histo_cosines_),
+          step_swap_edges_(graph_, histo_ete_distances_, histo_cosines_) {
+    this->init_parameters();
+    this->init_histograms(this->ete_distance_params.num_bins,
+                          this->cosine_params.num_bins);
+}
+
+simulated_annealing_generator::simulated_annealing_generator(
+        const simulated_annealing_generator_config_tree &tree)
+        : simulated_annealing_generator() {
+    this->set_parameters_from_configuration_tree(tree);
+    this->init_graph_degree(this->physical_scaling_params.num_vertices);
+    this->init_graph_vertex_positions();
+    this->init_parameters();
+    this->init_histograms(this->ete_distance_params.num_bins,
+                          this->cosine_params.num_bins);
+}
+
+simulated_annealing_generator::simulated_annealing_generator(
+        const std::string &input_parameters_file)
+        : simulated_annealing_generator() {
+    this->set_parameters_from_file(input_parameters_file);
+    this->init_graph_degree(this->physical_scaling_params.num_vertices);
+    this->init_graph_vertex_positions();
+    this->init_parameters();
+    this->init_histograms(this->ete_distance_params.num_bins,
+                          this->cosine_params.num_bins);
+}
 
 void simulated_annealing_generator::set_boundary_condition(
         const ArrayUtilities::boundary_condition &bc) {
@@ -25,6 +69,12 @@ void simulated_annealing_generator::set_parameters_from_file(
 }
 void simulated_annealing_generator::save_parameters_to_file(
         const std::string &output_file) {
+    auto tree = save_parameters_to_configuration_tree();
+    tree.save(output_file);
+}
+
+simulated_annealing_generator_config_tree
+simulated_annealing_generator::save_parameters_to_configuration_tree() {
     simulated_annealing_generator_config_tree tree;
     tree.cosine_params = cosine_params;
     tree.degree_params = degree_params;
@@ -32,8 +82,9 @@ void simulated_annealing_generator::save_parameters_to_file(
     tree.ete_distance_params = ete_distance_params;
     tree.physical_scaling_params = physical_scaling_params;
     tree.transition_params = transition_params;
-    tree.save(output_file);
+    return tree;
 }
+
 void simulated_annealing_generator::set_parameters_from_configuration_tree(
         const simulated_annealing_generator_config_tree &tree) {
     cosine_params = tree.cosine_params;
@@ -56,20 +107,6 @@ void simulated_annealing_generator::init_parameters() {
                                           etep.normalized_normal_std_deviation);
     etep.set_normalized_log_mean(etep.normalized_normal_mean,
                                  etep.normalized_log_std_deviation);
-}
-simulated_annealing_generator::simulated_annealing_generator(
-        const size_t &num_vertices)
-        : simulated_annealing_generator() {
-    this->init_graph_degree(num_vertices);
-    this->init_graph_vertex_positions();
-    this->init_parameters();
-}
-simulated_annealing_generator::simulated_annealing_generator(
-        const GraphType &input_graph)
-        : graph_(input_graph),
-          step_move_node_(graph_, histo_ete_distances_, histo_cosines_),
-          step_swap_edges_(graph_, histo_ete_distances_, histo_cosines_) {
-    this->init_parameters();
 }
 void simulated_annealing_generator::init_graph_degree(
         const size_t &num_vertices) {
@@ -302,12 +339,13 @@ double simulated_annealing_generator::energy_ete_distances() const {
     // return cramer_von_mises_test(histo_ete_distances_.counts,
     //                              target_cumulative_distro_histo_ete_distances_);
     return energy_ete_distances_extra_penalty() +
-        cramer_von_mises_test_optimized(histo_ete_distances_.counts,
+           cramer_von_mises_test_optimized(histo_ete_distances_.counts,
                                            LUT_cumulative_histo_ete_distances_,
                                            total_counts_ete_distances_);
 }
 
-double simulated_annealing_generator::energy_ete_distances_extra_penalty() const {
+double
+simulated_annealing_generator::energy_ete_distances_extra_penalty() const {
     // TODO: Implement average ete_distances (cheap).
     // Hint, use the histograms and the distances stores in update_steps
     // Or accumulate in the histograms
@@ -327,7 +365,7 @@ double simulated_annealing_generator::energy_cosines() const {
 }
 double simulated_annealing_generator::energy_cosines_extra_penalty() const {
     return histo_cosines_.counts.back() /
-                   static_cast<double>(histo_cosines_.bins);
+           static_cast<double>(histo_cosines_.bins);
 }
 double simulated_annealing_generator::compute_energy() const {
     const double test_ete_distances = energy_ete_distances();
@@ -372,66 +410,26 @@ simulated_annealing_generator::check_transition() {
         } else {
             // Call undo? or call undo if compare()==0 in other function?
             transition_params.consecutive_failures++;
-            transition_params.total_failures++;
+            transition_params.rejected_transitions++;
             return transition::REJECTED;
         }
     }
 }
 
-void simulated_annealing_generator::print(std::ostream &os, int spaces) {
+void simulated_annealing_generator::print(std::ostream &os, int spaces) const {
     os << "%/************NETWORK PARAMETERS*****************/" << '\n'
        << '\n'
        << std::left << std::setw(spaces)
        << "Nodes_N= " << boost::num_vertices(graph_) << '\n'
        << std::left << std::setw(spaces)
        << "Edges_E= " << boost::num_edges(graph_) << '\n'
-       << std::left << std::setw(spaces)
-       << "SpatialDomain= " << domain_params.domain[0] << " , "
-       << domain_params.domain[1] << " , " << domain_params.domain[2] << '\n'
-       << "%/************PHYSICAL SCALING PARAMETERS*****************/" << '\n'
-       << '\n'
-       << std::left << std::setw(spaces)
-       << "PhysicalNodeDensity= " << physical_scaling_params.node_density
-       << '\n'
-       << std::left << std::setw(spaces)
-       << "ScaleFactor_S= " << physical_scaling_params.length_scaling_factor
-       << '\n'
-       << "%/************END_TO_END DISTANCES DITRIBUTION "
-          "PARAMETERS*****************/"
-       << '\n'
-       << std::left << std::setw(spaces)
-       << "physical_normal_mean= " << ete_distance_params.physical_normal_mean
-       << '\n'
-       << std::left << std::setw(spaces) << "physical_normal_std_deviation= "
-       << ete_distance_params.physical_normal_std_deviation << '\n'
-       << std::left << std::setw(spaces)
-       << "normalized_mean= " << ete_distance_params.normalized_normal_mean
-       << '\n'
-       << std::left << std::setw(spaces) << "normalized_std_deviation= "
-       << ete_distance_params.normalized_normal_std_deviation << '\n'
-       << std::left << std::setw(spaces)
-       << "normalized_log_mean= " << ete_distance_params.normalized_log_mean
-       << '\n'
-       << std::left << std::setw(spaces) << "normalized_log_std_deviation= "
-       << ete_distance_params.normalized_log_std_deviation << '\n'
-       << "%/************DEGREE DISTRIBUTION PARAMETERS*****************/"
-       << '\n'
-       << '\n'
-       << std::left << std::setw(spaces)
-       << "MeanDegree_Z= " << degree_params.mean << '\n'
-       << std::left << std::setw(spaces)
-       << "min_degree= " << degree_params.min_degree << '\n'
-       << std::left << std::setw(spaces)
-       << "max_degree= " << degree_params.max_degree << '\n'
-       << '\n'
-       << "%/************DIRECTOR COSINES DISTRIBUTION "
-          "PARAMETERS*****************/"
-       << '\n'
-       << std::left << std::setw(spaces) << "b1= " << cosine_params.b1 << '\n'
-       << std::left << std::setw(spaces) << "b2= " << cosine_params.b2 << '\n'
-       << std::left << std::setw(spaces) << "b3= " << cosine_params.b3 << '\n'
-       << '\n'
-       << "%/************HISTOGRAM BINS RELATED*****************/" << '\n'
+       << std::left << std::setw(spaces) << '\n';
+    domain_params.print(os, spaces);
+    physical_scaling_params.print(os, spaces);
+    ete_distance_params.print(os, spaces);
+    degree_params.print(os, spaces);
+    cosine_params.print(os, spaces);
+    os << "%/************HISTOGRAM BINS RELATED*****************/" << '\n'
        << '\n'
        << std::left << std::setw(spaces) << "DistancesNumberElements= "
        << std::accumulate(std::begin(histo_ete_distances_.counts),
@@ -461,7 +459,7 @@ void simulated_annealing_generator::print(std::ostream &os, int spaces) {
 void simulated_annealing_generator::print_histo_and_target_distribution(
         std::ostream &os,
         const Histogram &histo,
-        const std::vector<double> &distro) {
+        const std::vector<double> &distro) const {
     assert(std::size(histo.counts) == std::size(distro));
     std::ios::fmtflags os_flags(os.flags());
     os.setf(std::ios_base::fixed, std::ios_base::floatfield);
@@ -481,7 +479,8 @@ void simulated_annealing_generator::print_histo_and_target_distribution(
 }
 
 void simulated_annealing_generator::
-        print_histo_and_target_distribution_ete_distances(std::ostream &os) {
+        print_histo_and_target_distribution_ete_distances(
+                std::ostream &os) const {
     const auto &histo = histo_ete_distances_;
     const auto &distro = target_cumulative_distro_histo_ete_distances_;
     auto target_bins = distro;
@@ -496,7 +495,7 @@ void simulated_annealing_generator::
 }
 
 void simulated_annealing_generator::print_histo_and_target_distribution_cosines(
-        std::ostream &os) {
+        std::ostream &os) const {
     const auto &histo = histo_cosines_;
     const auto &distro = target_cumulative_distro_histo_cosines_;
     auto target_bins = distro;
@@ -508,13 +507,6 @@ void simulated_annealing_generator::print_histo_and_target_distribution_cosines(
         target_bins[i] = diff * N;
     }
     this->print_histo_and_target_distribution(os, histo, target_bins);
-}
-void simulated_annealing_generator::print_graph(std::ostream &os) {
-    boost::dynamic_properties dp;
-    dp.property("node_id", boost::get(boost::vertex_index, graph_));
-    dp.property("spatial_node", boost::get(boost::vertex_bundle, graph_));
-    // dp.property("spatial_edge", boost::get(boost::edge_bundle, graph_));
-    boost::write_graphviz_dp(os, graph_, dp);
 }
 
 } // namespace SG
