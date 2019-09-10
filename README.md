@@ -138,6 +138,5 @@ More options are possible, use `--help` for details.
 ## Contributors
 
 - Pablo Hernandez-Cerdan
-- Megan Chambers
 
 [1]: Couprie and Bertrand, “Asymmetric Parallel 3D Thinning Scheme and Algorithms Based on Isthmuses.” Pattern Recognition Letters. June,  2016. DOI:10.1016/j.patrec.2015.03.014
