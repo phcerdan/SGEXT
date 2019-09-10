@@ -11,6 +11,8 @@ message(STATUS "SGEXT version: ${SGEXT_VERSION}")
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+include(GNUInstallDirs) # Define CMAKE_INSTALL_xxx: LIBDIR, INCLUDEDIR
+set(CMAKE_INSTALL_PYTHONLIBDIR python) # Install folder for python libs
 
 include(CMakeDependentOption)
 option(SG_BUILD_SCRIPTS "Build cpp-scripts." ON)
@@ -25,6 +27,8 @@ option(SG_MODULE_GENERATE "Generate a graph with desired statistical parameters 
 CMAKE_DEPENDENT_OPTION(SG_MODULE_VISUALIZE_ENABLE_QT "Use QT for some visualizations" ON
   "SG_MODULE_VISUALIZE" ON)
 option(VISUALIZE "Enable visualization with VTK." OFF)
+option(SG_WRAP_PYTHON "Use pybind11 to create bindings to python." OFF)
+
 
 if(VISUALIZE OR SG_MODULE_VISUALIZE OR SG_MODULE_LOCATE OR SG_MODULE_COMPARE)
   set(SG_REQUIRES_VTK TRUE)
@@ -129,19 +133,20 @@ set(sgext_export_file "${PROJECT_BINARY_DIR}/SGEXTTargets.cmake")
 
 set(HISTO_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/histo/include
         CACHE PATH "histo include directory")
-install(DIRECTORY ${HISTO_INCLUDE_DIR}/ DESTINATION include/sgext)
+set(HISTO_INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR}/sgext)
+install(DIRECTORY ${HISTO_INCLUDE_DIR}/ DESTINATION ${HISTO_INSTALL_INCLUDE_DIR})
 
 # for convenience setup a target
 add_library(histo INTERFACE)
 target_include_directories(histo INTERFACE
     $<BUILD_INTERFACE:${HISTO_INCLUDE_DIR}>
-    $<INSTALL_INTERFACE:include/sgext>)
+    $<INSTALL_INTERFACE:${HISTO_INSTALL_INCLUDE_DIR}>)
 
 # need to export target as well
 # this exports library: histo
 install(TARGETS histo
   EXPORT SGEXTTargets
-  DESTINATION include)
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # export to the build tree
 export(TARGETS histo
@@ -178,6 +183,21 @@ if(SG_BUILD_TESTING)
   add_subdirectory(test/fixtures)
 endif()
 
+if(SG_WRAP_PYTHON)
+  # Fetch pybind11
+  include(FetchContent)
+  FetchContent_Declare(
+    pybind11
+    GIT_REPOSITORY https://github.com/pybind/pybind11
+    GIT_TAG v2.3
+  )
+  FetchContent_GetProperties(pybind11)
+  if(NOT pybind11_POPULATED)
+    FetchContent_Populate(pybind11)
+    add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR})
+  endif()
+endif()
+
 set(SG_LIBRARIES "")
 include(SGModuleMacros) # module macros
 add_subdirectory(modules/core)
@@ -202,13 +222,15 @@ if(SG_BUILD_SCRIPTS)
   add_subdirectory(cpp-scripts)
 endif()
 
+set(install_cmake_dir "${CMAKE_INSTALL_LIBDIR}/cmake/sgext")
+
 install (EXPORT SGEXTTargets
   NAMESPACE SGEXT::
-  DESTINATION lib/sgext/cmake )
+  DESTINATION ${install_cmake_dir} )
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/SGEXTConfig.cmake
               ${CMAKE_CURRENT_BINARY_DIR}/SGEXTConfigVersion.cmake
-              DESTINATION lib/sgext/cmake )
+              DESTINATION ${install_cmake_dir} )
 
 include(CMakePackageConfigHelpers)
 
@@ -221,18 +243,18 @@ set(SGEXT_TARGETS_FILE ${sgext_export_file})
 configure_package_config_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/cmake/SGEXTConfig.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/SGEXTConfig.cmake
-  INSTALL_DESTINATION lib/sgext/cmake
+  INSTALL_DESTINATION ${install_cmake_dir}
   PATH_VARS SGEXT_TARGETS_FILE
   NO_CHECK_REQUIRED_COMPONENTS_MACRO # SGEXT does not provide components
   INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}
   )
 
 # Install tree
-set(SGEXT_TARGETS_FILE ${CMAKE_INSTALL_PREFIX}/lib/sgext/cmake/SGEXTTargets.cmake)
+set(SGEXT_TARGETS_FILE ${CMAKE_INSTALL_PREFIX}/${install_cmake_dir}/SGEXTTargets.cmake)
 configure_package_config_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/cmake/SGEXTConfig.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/cmake/SGEXTConfig.cmake
-  INSTALL_DESTINATION lib/sgext/cmake
+  INSTALL_DESTINATION ${install_cmake_dir}
   PATH_VARS SGEXT_TARGETS_FILE
   NO_CHECK_REQUIRED_COMPONENTS_MACRO # SGEXT does not provide components
   )

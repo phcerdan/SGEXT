@@ -20,7 +20,7 @@ struct SpatialNode {
      * static_property_map, ref_property_map or dummy_property_map, to ignore
      * it. Don't expect that the node_id in the .dot files are the same ids than
      * in the graph after read. */
-    std::string label;
+    size_t id;
     /// Use Array to store the position.
     using PointType = ArrayUtilities::Array3D;
     /** Position of node. */
@@ -48,7 +48,7 @@ namespace boost {
 namespace serialization {
 template <class Archive>
 void serialize(Archive &ar, SG::SpatialNode &sn, unsigned /*version*/) {
-    ar &sn.label;
+    ar &sn.id;
     ar &sn.pos;
 }
 } // namespace serialization

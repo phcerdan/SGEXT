@@ -13,13 +13,14 @@ set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
     graph_data.cpp
     serialize_spatial_graph.cpp
     shortest_path.cpp
-    spatial_graph_utilities.cpp
+    spatial_graph_utilities.cpp # Deprecated
+    spatial_graph_io.cpp
     )
 list(TRANSFORM SG_MODULE_${SG_MODULE_NAME}_SOURCES PREPEND "src/")
 add_library(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} ${SG_MODULE_${SG_MODULE_NAME}_SOURCES})
 target_include_directories(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   )
 target_link_libraries(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY}
   ${SG_MODULE_${SG_MODULE_NAME}_DEPENDS}
@@ -31,16 +32,20 @@ endif()
 
 install(TARGETS ${SG_MODULE_${SG_MODULE_NAME}_LIBRARY}
         EXPORT SGEXTTargets
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         )
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
-  DESTINATION include/sgext
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sgext
   PATTERN "*.txt" EXCLUDE)
 
 # export to the build tree
 export( TARGETS ${SG_MODULE_${SG_MODULE_NAME}_LIBRARY}
   NAMESPACE SGEXT::
   APPEND FILE ${sgext_export_file})
+
+if(SG_WRAP_PYTHON)
+  add_subdirectory(wrap)
+endif()

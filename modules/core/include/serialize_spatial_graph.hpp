@@ -11,7 +11,9 @@
 
 namespace SG {
 
-void write_serialized_graph(GraphType &sg, const std::string &absolute_path);
-GraphType read_serialized_graph(const std::string &absolute_path);
+[[deprecated("Use write_serialized_sg from spatial_graph_io instead")]] void
+write_serialized_graph(GraphType &sg, const std::string &absolute_path);
+[[deprecated("Use read_serialized_sg from spatial_graph_io instead")]] GraphType
+read_serialized_graph(const std::string &absolute_path);
 } // namespace SG
 #endif

@@ -6,6 +6,7 @@
 #ifndef SPATIAL_GRAPH_UTILITIES_HPP
 #define SPATIAL_GRAPH_UTILITIES_HPP
 
+#include "graph_descriptor.hpp"
 #include "spatial_graph.hpp"
 #include "spatial_node.hpp"
 
@@ -21,7 +22,23 @@ struct AdjacentVerticesPositions {
 };
 
 /**
- * Get vertex_descriptors and positions of all adjacent vertices of target node.
+ * Returns a pair, first a vector with all the points of the graph, and second
+ * a vector with the graph_descriptor, associating the points with nodes, edges,
+ * and/or the index of the edge_points
+ *
+ * Similar, but without the vtk dependency to
+ * @sa get_vtk_points_from_graph
+ *
+ * @param graph
+ *
+ * @return
+ */
+std::pair<std::vector<SpatialNode::PointType>, std::vector<graph_descriptor> >
+get_all_points(const GraphType &graph);
+
+/**
+ * Get vertex_descriptors and positions of all adjacent vertices of
+ * target node.
  *
  * @param target_node input node to compute adjacent vertices
  * @param g input spatial graph
@@ -45,22 +62,24 @@ template <typename GraphType> size_t num_edge_points(const GraphType &sg) {
     return num_points;
 }
 
-template <typename GraphType> void print_degrees(const GraphType &graph) {
-    std::cout << "Print degrees spatial_graph:" << std::endl;
-    std::cout << "Num Vertices: " << boost::num_vertices(graph) << std::endl;
+template <typename GraphType>
+void print_degrees(const GraphType &graph, std::ostream &os = std::cout) {
+    os << "Print degrees spatial_graph:" << std::endl;
+    os << "Num Vertices: " << boost::num_vertices(graph) << std::endl;
     using vertex_iterator =
             typename boost::graph_traits<GraphType>::vertex_iterator;
     vertex_iterator vi, vi_end;
     std::tie(vi, vi_end) = boost::vertices(graph);
     for (; vi != vi_end; ++vi) {
-        std::cout << *vi << ": " << ArrayUtilities::to_string(graph[*vi].pos)
-                  << ". Degree: " << boost::out_degree(*vi, graph) << std::endl;
+        os << *vi << ": " << ArrayUtilities::to_string(graph[*vi].pos)
+           << ". Degree: " << boost::out_degree(*vi, graph) << std::endl;
     }
 }
 
-template <typename GraphType> void print_edges(const GraphType &graph) {
-    std::cout << "Print edges spatial_graph:" << std::endl;
-    std::cout << "Num Edges: " << boost::num_edges(graph) << std::endl;
+template <typename GraphType>
+void print_edges(const GraphType &graph, std::ostream &os = std::cout) {
+    os << "Print edges spatial_graph:" << std::endl;
+    os << "Num Edges: " << boost::num_edges(graph) << std::endl;
     using edge_iterator =
             typename boost::graph_traits<GraphType>::edge_iterator;
     edge_iterator ei, ei_end;
@@ -68,17 +87,18 @@ template <typename GraphType> void print_edges(const GraphType &graph) {
     for (; ei != ei_end; ++ei) {
         auto source = boost::source(*ei, graph);
         auto target = boost::target(*ei, graph);
-        std::cout << source << "---" << target << " ; ";
-        print_pos(std::cout, graph[source].pos);
-        std::cout << "---";
-        print_pos(std::cout, graph[target].pos);
-        std::cout << std::endl;
+        os << source << "---" << target << " ; ";
+        print_pos(os, graph[source].pos);
+        os << "---";
+        print_pos(os, graph[target].pos);
+        os << std::endl;
     }
 }
 
-template <typename GraphType> void print_spatial_edges(const GraphType &graph) {
-    std::cout << "Print edges spatial_graph:" << std::endl;
-    std::cout << "Num Edges: " << boost::num_edges(graph) << std::endl;
+template <typename GraphType>
+void print_spatial_edges(const GraphType &graph, std::ostream &os = std::cout) {
+    os << "Print edges spatial_graph:" << std::endl;
+    os << "Num Edges: " << boost::num_edges(graph) << std::endl;
     using edge_iterator =
             typename boost::graph_traits<GraphType>::edge_iterator;
     edge_iterator ei, ei_end;
@@ -86,14 +106,13 @@ template <typename GraphType> void print_spatial_edges(const GraphType &graph) {
     for (; ei != ei_end; ++ei) {
         auto source = boost::source(*ei, graph);
         auto target = boost::target(*ei, graph);
-        std::cout << source << "---" << target << " ; ";
-        print_pos(std::cout, graph[source].pos);
-        std::cout << "---";
-        print_pos(std::cout, graph[target].pos);
-        std::cout << std::endl;
-        std::cout << "edge_points: " << graph[*ei].edge_points.size()
-                  << std::endl;
-        std::cout << graph[*ei] << std::endl;
+        os << source << "---" << target << " ; ";
+        print_pos(os, graph[source].pos);
+        os << "---";
+        print_pos(os, graph[target].pos);
+        os << std::endl;
+        os << "edge_points: " << graph[*ei].edge_points.size() << std::endl;
+        os << graph[*ei] << std::endl;
     }
 }
 
