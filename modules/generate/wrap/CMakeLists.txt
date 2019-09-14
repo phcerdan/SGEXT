@@ -3,6 +3,7 @@ string(TOLOWER ${module_lib_} SG_MODULE_PYTHON_NAME)
 pybind11_add_module(${SG_MODULE_PYTHON_NAME}
   sggenerate_init_py.cpp
   simulated_annealing_generator_py.cpp
+  contour_length_generator_py.cpp
   )
 target_link_libraries(${SG_MODULE_PYTHON_NAME} PRIVATE ${module_lib_})
 

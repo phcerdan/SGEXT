@@ -12,7 +12,7 @@ message(STATUS "SGEXT version: ${SGEXT_VERSION}")
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 include(GNUInstallDirs) # Define CMAKE_INSTALL_xxx: LIBDIR, INCLUDEDIR
-set(CMAKE_INSTALL_PYTHONLIBDIR python) # Install folder for python libs
+set(CMAKE_INSTALL_PYTHONLIBDIR sgext) # Install folder for python libs
 
 include(CMakeDependentOption)
 option(SG_BUILD_SCRIPTS "Build cpp-scripts." ON)

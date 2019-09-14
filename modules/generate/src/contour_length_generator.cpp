@@ -18,16 +18,19 @@
  *
  * *******************************************************************/
 
-#include <pybind11/pybind11.h>
+#include "contour_length_generator.hpp"
+#include "contour_length_generator_functions.hpp"
 
-namespace py = pybind11;
-void init_simulated_annealing_generator_parameters(py::module &);
-void init_simulated_annealing_generator(py::module &);
-void init_contour_length_generator(py::module &);
+namespace SG {
 
-PYBIND11_MODULE(sggenerate, m) {
-    m.doc() = "SGGenerate "; // optional module docstring
-    init_simulated_annealing_generator_parameters(m);
-    init_simulated_annealing_generator(m);
-    init_contour_length_generator(m);
+std::pair<PointContainer, double>
+contour_length_generator::generate_contour_length(
+        const PointType &start_point,
+        const PointType &end_point,
+        const double &k_bending,
+        const size_t &monomers) const {
+    return SG::generate_contour_length(start_point, end_point, k_bending,
+                                       monomers);
 }
+} // namespace SG
+

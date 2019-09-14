@@ -51,6 +51,14 @@ void init_array3d(py::module &m) {
                  [](const Array3D &a, const Array3D &b) -> bool {
                      return a < b;
                  })
+            .def("__add__",
+                 [](const Array3D &a, const Array3D &b) {
+                     return ArrayUtilities::plus(a, b);
+                 })
+            .def("__sub__",
+                 [](const Array3D &a, const Array3D &b) {
+                     return ArrayUtilities::minus(a, b);
+                 })
             .def(
                     "__getitem__",
                     [](Array3D &a,
