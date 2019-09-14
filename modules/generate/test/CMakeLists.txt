@@ -9,6 +9,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_TESTS
   test_update_step_swap_edges.cpp
   test_cramer_von_mises_test.cpp
   test_degree_viger_generator.cpp
+  test_contour_length_generator.cpp
   )
 
 SG_add_gtests()
