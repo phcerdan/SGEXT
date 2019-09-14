@@ -36,10 +36,10 @@ void update_step_swap_edges::perform(
                                   new_cosines);
     const bool is_periodic = (boundary_condition ==
                               ArrayUtilities::boundary_condition::PERIODIC);
+    // select two valid edges to swap at random
     if (!randomized_flag) {
         this->randomize(graph, selected_edges, randomized_flag);
     }
-    // select two valid edges to swap at random
     auto edge1 = selected_edges.first;
     auto edge2 = selected_edges.second;
     // get positions of nodes of both edges
