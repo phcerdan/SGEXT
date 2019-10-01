@@ -5,7 +5,7 @@
 
 #include "contour_length_generator.hpp"
 #include "contour_length_generator_functions.hpp"
-#include "../../core/wrap/sgcore_common_py.hpp" // to make array3d opaque
+#include "../core/sgcore_common_py.hpp" // to make array3d opaque
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 

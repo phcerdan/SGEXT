@@ -10,8 +10,9 @@ void init_simulated_annealing_generator_parameters(py::module &);
 void init_simulated_annealing_generator(py::module &);
 void init_contour_length_generator(py::module &);
 
-PYBIND11_MODULE(sggenerate, m) {
-    m.doc() = "SGGenerate "; // optional module docstring
+void init_sggenerate(py::module & mparent) {
+    auto m = mparent.def_submodule("generate");
+    m.doc() = "Generate submodule"; // optional module docstring
     init_simulated_annealing_generator_parameters(m);
     init_simulated_annealing_generator(m);
     init_contour_length_generator(m);

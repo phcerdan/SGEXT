@@ -13,6 +13,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 include(GNUInstallDirs) # Define CMAKE_INSTALL_xxx: LIBDIR, INCLUDEDIR
 set(CMAKE_INSTALL_PYTHONLIBDIR sgext) # Install folder for python libs
+# Copy python libs to a single location at build time (for ease of use)
+set(CMAKE_BUILD_PYTHONLIBDIR ${PROJECT_BINARY_DIR}/sgext) # copy python libs at build time
 
 include(CMakeDependentOption)
 option(SG_BUILD_SCRIPTS "Build cpp-scripts." ON)
@@ -222,6 +224,12 @@ if(SG_BUILD_SCRIPTS)
   add_subdirectory(cpp-scripts)
 endif()
 
+# WRAPPING
+if(SG_WRAP_PYTHON)
+  add_subdirectory(wrap)
+endif()
+
+# INSTALL
 set(install_cmake_dir "${CMAKE_INSTALL_LIBDIR}/cmake/sgext")
 
 install (EXPORT SGEXTTargets
