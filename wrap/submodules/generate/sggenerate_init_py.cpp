@@ -18,19 +18,17 @@
  *
  * *******************************************************************/
 
-#include "contour_length_generator.hpp"
-#include "contour_length_generator_functions.hpp"
-#include "../../core/wrap/sgcore_common_py.hpp" // to make array3d opaque
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
 namespace py = pybind11;
-using namespace SG;
+void init_simulated_annealing_generator_parameters(py::module &);
+void init_simulated_annealing_generator(py::module &);
+void init_contour_length_generator(py::module &);
 
-void init_contour_length_generator(py::module &m) {
-    m.def("generate_contour_length",
-           &generate_contour_length);
-    py::class_<contour_length_generator>(m, "contour_length_generator")
-            .def("generate_contour_length",
-                 &contour_length_generator::generate_contour_length);
+void init_sggenerate(py::module & mparent) {
+    auto m = mparent.def_submodule("generate");
+    m.doc() = "Generate submodule"; // optional module docstring
+    init_simulated_annealing_generator_parameters(m);
+    init_simulated_annealing_generator(m);
+    init_contour_length_generator(m);
 }

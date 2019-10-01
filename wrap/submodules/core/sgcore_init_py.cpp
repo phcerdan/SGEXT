@@ -21,13 +21,20 @@
 #include <pybind11/pybind11.h>
 
 namespace py = pybind11;
-void init_simulated_annealing_generator_parameters(py::module &);
-void init_simulated_annealing_generator(py::module &);
-void init_contour_length_generator(py::module &);
+void init_array3d(py::module &);
+void init_spatial_node(py::module &);
+void init_spatial_edge(py::module &);
+void init_spatial_graph(py::module &);
+void init_edge_points_utilities(py::module &);
+void init_spatial_graph_io(py::module &);
 
-PYBIND11_MODULE(sggenerate, m) {
-    m.doc() = "SGGenerate "; // optional module docstring
-    init_simulated_annealing_generator_parameters(m);
-    init_simulated_annealing_generator(m);
-    init_contour_length_generator(m);
+void init_sgcore(py::module & mparent) {
+    auto m = mparent.def_submodule("core");
+    m.doc() = "Core submodule "; // optional module docstring
+    init_array3d(m);
+    init_edge_points_utilities(m);
+    init_spatial_node(m);
+    init_spatial_edge(m);
+    init_spatial_graph(m);
+    init_spatial_graph_io(m);
 }

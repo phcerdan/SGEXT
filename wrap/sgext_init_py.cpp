@@ -19,21 +19,13 @@
  * *******************************************************************/
 
 #include <pybind11/pybind11.h>
-
 namespace py = pybind11;
-void init_array3d(py::module &);
-void init_spatial_node(py::module &);
-void init_spatial_edge(py::module &);
-void init_spatial_graph(py::module &);
-void init_edge_points_utilities(py::module &);
-void init_spatial_graph_io(py::module &);
 
-PYBIND11_MODULE(sgcore, m) {
-    m.doc() = "SGCore "; // optional module docstring
-    init_array3d(m);
-    init_edge_points_utilities(m);
-    init_spatial_node(m);
-    init_spatial_edge(m);
-    init_spatial_graph(m);
-    init_spatial_graph_io(m);
+void init_sgcore(py::module &);
+void init_sggenerate(py::module &);
+
+PYBIND11_MODULE(_sgext, m) {
+    m.doc() = "SGEXT, Spatial Graph Extraction, Analysis and Generation";
+    init_sgcore(m);
+    init_sggenerate(m);
 }

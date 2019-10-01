@@ -16,18 +16,18 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import sgcore
+import sgext.core.array as array
 import unittest
 
 class TestArray3D(unittest.TestCase):
     ######### CONSTRUCTORS ##############
     def test_constructors(self):
-        a0 = sgcore.array.array3d()
-        a1 = sgcore.array.array3d(1, 1, 1)
-        ax = sgcore.array.array3d(1, 0, 0)
+        a0 = array.array3d()
+        a1 = array.array3d(1, 1, 1)
+        ax = array.array3d(1, 0, 0)
     ######### MEMBER FUNCTIONS ##########
     def test_member_functions(self):
-        arr = sgcore.array.array3d(1,1,1)
+        arr = array.array3d(1,1,1)
         # __get_items__ and x,y,z
         self.assertEqual(arr[0], arr.x);
         self.assertEqual(arr[1], arr.y);
@@ -43,7 +43,7 @@ class TestArray3D(unittest.TestCase):
         # len
         self.assertEqual(len(arr), 3);
         # fill
-        arr_old = sgcore.array.array3d()
+        arr_old = array.array3d()
         arr_old.fill(1)
         # eq
         self.assertFalse(arr_old == arr)
@@ -67,18 +67,18 @@ class TestArray3D(unittest.TestCase):
 
     ######### FREE FUNCTIONS ############
     def test_free_functions(self):
-        a1 = sgcore.array.array3d(1, 1, 1)
-        ax = sgcore.array.array3d(1, 0, 0)
-        sgcore.array.norm(a1)
-        sgcore.array.distance(a1,ax)
-        sgcore.array.dot_product(a1,ax)
-        sgcore.array.cross_product(a1,ax)
-        sgcore.array.angle(a1,ax)
-        sgcore.array.cos_director(a1,ax)
-        sgcore.array.plus(a1,ax)
-        sgcore.array.plus_scalar(a1, 1.0)
-        sgcore.array.minus(a1,ax)
-        sgcore.array.minus_scalar(a1, 1.0)
+        a1 = array.array3d(1, 1, 1)
+        ax = array.array3d(1, 0, 0)
+        array.norm(a1)
+        array.distance(a1,ax)
+        array.dot_product(a1,ax)
+        array.cross_product(a1,ax)
+        array.angle(a1,ax)
+        array.cos_director(a1,ax)
+        array.plus(a1,ax)
+        array.plus_scalar(a1, 1.0)
+        array.minus(a1,ax)
+        array.minus_scalar(a1, 1.0)
 
 if __name__ == '__main__':
     unittest.main()
