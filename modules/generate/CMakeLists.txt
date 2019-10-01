@@ -123,7 +123,3 @@ export( TARGETS ${SG_MODULE_${SG_MODULE_NAME}_LIBRARY}
 if(SG_BUILD_SCRIPTS)
   add_subdirectory(bin)
 endif()
-
-if(SG_WRAP_PYTHON)
-  add_subdirectory(wrap)
-endif()

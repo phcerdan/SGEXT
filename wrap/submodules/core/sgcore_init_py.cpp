@@ -13,8 +13,9 @@ void init_spatial_graph(py::module &);
 void init_edge_points_utilities(py::module &);
 void init_spatial_graph_io(py::module &);
 
-PYBIND11_MODULE(sgcore, m) {
-    m.doc() = "SGCore "; // optional module docstring
+void init_sgcore(py::module & mparent) {
+    auto m = mparent.def_submodule("core");
+    m.doc() = "Core submodule "; // optional module docstring
     init_array3d(m);
     init_edge_points_utilities(m);
     init_spatial_node(m);
