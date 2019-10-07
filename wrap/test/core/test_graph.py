@@ -3,25 +3,25 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import sgcore
+import _sgext.core as core
 import unittest
 
 class TestGraph(unittest.TestCase):
     def test_spatial_node(self):
         print("test_spatial_node")
         # Constructor
-        sn = sgcore.spatial_node()
+        sn = core.spatial_node()
         self.assertEqual(sn.id, 0)
-        self.assertEqual(sn.pos, sgcore.array.array3d())
-        norm = sgcore.array.norm(sn.pos)
+        self.assertEqual(sn.pos, core.array.array3d())
+        norm = core.array.norm(sn.pos)
         self.assertAlmostEqual(norm, 0.0)
         print(sn)
         print("end test_spatial_node")
 
     def test_spatial_edge(self):
         print("test_spatial_edge")
-        se = sgcore.spatial_edge()
-        arr1 = sgcore.array.array3d(1,1,1)
+        se = core.spatial_edge()
+        arr1 = core.array.array3d(1,1,1)
         se.edge_points = [arr1, arr1];
         self.assertEqual(len(se.edge_points),2)
         # iter works for vector and array3d
@@ -33,13 +33,13 @@ class TestGraph(unittest.TestCase):
 
     def test_edge_descriptor(self):
         print("test_edge_descriptor")
-        ed0 = sgcore.graph.edge_descriptor()
+        ed0 = core.graph.edge_descriptor()
         # self.assertNotEqual(ed0.source, 0)
         ed0.source = 2
         self.assertEqual(ed0.source, 2)
 
-        # v0 = sgcore.graph.vertex_descriptor()
-        # ed2 = sgcore.graph.edge_descriptor(2, 3)
+        # v0 = core.graph.vertex_descriptor()
+        # ed2 = core.graph.edge_descriptor(2, 3)
         # self.assertEqual(ed0.source, 2)
         # self.assertEqual(ed0.target, 3)
 
@@ -47,17 +47,17 @@ class TestGraph(unittest.TestCase):
 
     def test_spatial_graph(self):
         print("test_spatial_graph")
-        graph = sgcore.spatial_graph()
-        graph = sgcore.spatial_graph(2)
-        [ed, added] = sgcore.graph.add_edge(0,1,sgcore.spatial_edge(), graph)
+        graph = core.spatial_graph()
+        graph = core.spatial_graph(2)
+        [ed, added] = core.graph.add_edge(0,1,core.spatial_edge(), graph)
         self.assertEqual(ed.source, 0)
         self.assertEqual(ed.target, 1)
-        se2 = sgcore.spatial_edge()
-        arr0 = sgcore.array.array3d(0,0,0)
-        arr1 = sgcore.array.array3d(1,1,1)
+        se2 = core.spatial_edge()
+        arr0 = core.array.array3d(0,0,0)
+        arr1 = core.array.array3d(1,1,1)
         se2.edge_points = [arr0, arr1];
-        [ed, added] = sgcore.graph.add_edge(0,1, se2, graph)
-        num_edge_points = sgcore.graph.num_edge_points(graph)
+        [ed, added] = core.graph.add_edge(0,1, se2, graph)
+        num_edge_points = core.graph.num_edge_points(graph)
         self.assertEqual(num_edge_points, 2)
         self.assertEqual(graph.num_vertices(), 2)
         self.assertEqual(graph.num_edges(), 2)
@@ -67,46 +67,46 @@ class TestGraph(unittest.TestCase):
 
     def test_spatial_graph_source_target(self):
         print("test_spatial_graph_source_target")
-        graph = sgcore.spatial_graph(2)
-        [ed, added] = sgcore.graph.add_edge(0,1,sgcore.spatial_edge(), graph)
+        graph = core.spatial_graph(2)
+        [ed, added] = core.graph.add_edge(0,1,core.spatial_edge(), graph)
         self.assertEqual(graph.source(ed), 0)
         self.assertEqual(graph.target(ed), 1)
-        self.assertEqual(sgcore.graph.source(ed, graph), 0)
-        self.assertEqual(sgcore.graph.target(ed, graph), 1)
+        self.assertEqual(core.graph.source(ed, graph), 0)
+        self.assertEqual(core.graph.target(ed, graph), 1)
         print("end test_spatial_graph_source_target")
 
     def test_spatial_graph_vertices(self):
         print("test_spatial_graph_vertices")
-        graph = sgcore.spatial_graph(2)
-        [ed, added] = sgcore.graph.add_edge(0,1,sgcore.spatial_edge(), graph)
+        graph = core.spatial_graph(2)
+        [ed, added] = core.graph.add_edge(0,1,core.spatial_edge(), graph)
         vertices = graph.vertices()
         print(vertices)
         self.assertEqual(vertices[0], 0)
         self.assertEqual(vertices[1], 1)
-        self.assertEqual(sgcore.graph.vertices(graph), vertices)
+        self.assertEqual(core.graph.vertices(graph), vertices)
         print("end test_spatial_graph_vertices")
 
     def test_spatial_graph_edges(self):
         print("test_spatial_graph_edges")
-        graph = sgcore.spatial_graph(2)
-        [ed, added] = sgcore.graph.add_edge(0,1,sgcore.spatial_edge(), graph)
+        graph = core.spatial_graph(2)
+        [ed, added] = core.graph.add_edge(0,1,core.spatial_edge(), graph)
         edges = graph.edges()
         print(edges)
         self.assertEqual(edges[0].source, 0)
         self.assertEqual(edges[0].target, 1)
-        self.assertEqual(sgcore.graph.edges(graph), edges)
+        self.assertEqual(core.graph.edges(graph), edges)
         print("end test_spatial_graph_edges")
 
 
     def test_spatial_graph_out_edges(self):
         print("test_spatial_graph_out_edges")
-        graph = sgcore.spatial_graph(2)
-        [ed, added] = sgcore.graph.add_edge(0,1,sgcore.spatial_edge(), graph)
+        graph = core.spatial_graph(2)
+        [ed, added] = core.graph.add_edge(0,1,core.spatial_edge(), graph)
         oe = graph.out_edges(0)
         self.assertEqual(len(oe), 1)
         self.assertEqual(oe[0].source, 0)
         self.assertEqual(oe[0].target, 1)
-        oe_func = sgcore.graph.out_edges(1, graph)
+        oe_func = core.graph.out_edges(1, graph)
         self.assertEqual(len(oe_func), 1)
         self.assertEqual(oe_func[0].source, 1)
         self.assertEqual(oe_func[0].target, 0)
@@ -114,12 +114,12 @@ class TestGraph(unittest.TestCase):
 
     def test_spatial_graph_vertex_edge(self):
         print("test_spatial_graph_vertex_edge")
-        graph = sgcore.spatial_graph(2)
-        arr0 = sgcore.array.array3d(0,0,0)
-        arr1 = sgcore.array.array3d(1,1,1)
-        se2 = sgcore.spatial_edge()
+        graph = core.spatial_graph(2)
+        arr0 = core.array.array3d(0,0,0)
+        arr1 = core.array.array3d(1,1,1)
+        se2 = core.spatial_edge()
         se2.edge_points = [arr0, arr1];
-        [ed, added] = sgcore.graph.add_edge(0,1, se2, graph)
+        [ed, added] = core.graph.add_edge(0,1, se2, graph)
 
         v0 = graph.vertex(0)
         print(v0)
@@ -149,20 +149,25 @@ class TestGraph(unittest.TestCase):
 
     def test_get_all_points(self):
         print("test_get_all_points")
-        graph = sgcore.spatial_graph(2)
-        arr3 = sgcore.array.array3d(3,3,3)
+        graph = core.spatial_graph(2)
+        arr0 = core.array.array3d(0,0,0)
+        v0 = graph.vertex(0)
+        v0.pos = arr0
+        graph.set_vertex(0, v0)
+        arr3 = core.array.array3d(3,3,3)
         v1 = graph.vertex(1)
         v1.pos = arr3
         graph.set_vertex(1, v1)
-        arr1 = sgcore.array.array3d(1,1,1)
-        arr2 = sgcore.array.array3d(2,2,2)
-        se2 = sgcore.spatial_edge()
+        arr1 = core.array.array3d(1,1,1)
+        arr2 = core.array.array3d(2,2,2)
+        se2 = core.spatial_edge()
         se2.edge_points = [arr1, arr2];
-        [ed, added] = sgcore.graph.add_edge(0,1, se2, graph)
-        [points, descriptors] = sgcore.graph.get_all_points(graph)
+        [ed, added] = core.graph.add_edge(0,1, se2, graph)
+        [points, descriptors] = core.graph.get_all_points(graph)
         num_points = 4
+        print("print points:\n", points)
         self.assertEqual(len(points), num_points)
-        self.assertAlmostEqual(points[0][0], 0.)
+        self.assertAlmostEqual(points[0][0], 0)
         self.assertAlmostEqual(points[1][0], 3.)
         self.assertAlmostEqual(points[2][0], 1.)
         self.assertAlmostEqual(points[3][0], 2.)
