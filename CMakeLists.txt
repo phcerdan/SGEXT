@@ -26,6 +26,7 @@ option(SG_MODULE_COMPARE "Logic to compare and merge low and high information gr
 option(SG_MODULE_LOCATE "Use VTK KDtree for graph point location." ON)
 option(SG_MODULE_VISUALIZE "Functions to visualize spatial graphs and histograms." ON)
 option(SG_MODULE_GENERATE "Generate a graph with desired statistical parameters using simulated annealing." ON)
+option(SG_MODULE_DYNAMICS "Perform coarse grained dynamics simulation in the network." ON)
 CMAKE_DEPENDENT_OPTION(SG_MODULE_VISUALIZE_ENABLE_QT "Use QT for some visualizations" ON
   "SG_MODULE_VISUALIZE" ON)
 option(VISUALIZE "Enable visualization with VTK." OFF)
@@ -218,6 +219,9 @@ if(SG_MODULE_VISUALIZE)
 endif()
 if(SG_MODULE_GENERATE)
   add_subdirectory(modules/generate)
+endif()
+if(SG_MODULE_DYNAMICS)
+  add_subdirectory(modules/dynamics)
 endif()
 
 if(SG_BUILD_SCRIPTS)
