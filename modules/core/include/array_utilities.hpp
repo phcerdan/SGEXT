@@ -72,6 +72,47 @@ inline Array3D::value_type angle(const Array3D &a, const Array3D &b) {
 }
 
 /**
+ * Projection of array "a" into array "into"
+ *
+ * @param a
+ * @param into
+ *
+ * @return projection
+ */
+inline Array3D projection(const Array3D &a, const Array3D &into) {
+    const auto into_squared = dot_product(into, into);
+    if( into_squared > std::numeric_limits<double>::epsilon() ) {
+        const auto term = dot_product( into, a ) / into_squared;
+        return Array3D{ into[0] * term,
+                        into[1] * term,
+                        into[2] * term };
+    } else {
+        return Array3D{0,0,0};
+   }
+}
+
+/**
+ * Orthogonal_component of array "a" into array "into"
+ * The orthogonal component is the array: a - projection(a,into)
+ *
+ * @param a
+ * @param into
+ *
+ * @return orthogonal_component
+ */
+inline Array3D orthogonal_component(const Array3D &a, const Array3D &into) {
+    const auto into_squared = dot_product(into, into);
+    if( into_squared > std::numeric_limits<double>::epsilon() ) {
+        const auto term = dot_product( into, a ) / into_squared;
+        return Array3D { a[0] - into[0] * term,
+                         a[1] - into[1] * term,
+                         a[2] - into[2] * term };
+    } else {
+        return Array3D{0,0,0};
+   }
+}
+
+/**
  * Sum of arrays (each dimension)
  *
  * @param lhs left
