@@ -18,12 +18,7 @@
  *
  * *******************************************************************/
 
-#ifndef SG_DYNAMICS_HPP
-#define SG_DYNAMICS_HPP
+#ifndef SG_UNBONDED_FORCES_HPP
+#define SG_UNBONDED_FORCES_HPP
 
-#include "bonded_forces.hpp" // connected/bonded forces (connected by chains)
-#include "unbonded_forces.hpp" // excluded volume (collisions), hydrodynamics
-namespace SG {
-    void hola();
-} // end namespace
 #endif
