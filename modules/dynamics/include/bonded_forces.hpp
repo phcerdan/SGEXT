@@ -25,6 +25,72 @@
 
 namespace SG {
 
+/**
+ * Articles of interest:
+ * Single Polymer Dynamics For Molecular Rheology
+ * (2017). C.M Schroeder
+ * http://arxiv.org/abs/1712.03555
+ */
+
+
+/**
+ * From reference:
+ *
+ * Modeling the stretching of wormlike chains in the presence of excluded volume
+ * (2015). C.M Schroeder and K.D Dorfman
+ * http://xlink.rsc.org/?DOI=C5SM01333J
+ *
+ * @param relative_extension
+ * @param monomer_anisotropy_inverse backbone_width / l_persistence
+ * @param fit_constant 0.21 in article
+ *
+ * @return  normalized force = f * l_persistence / kT
+ */
+inline double force_extension_ev_wlc_low_force_normalized(const double & relative_extension,
+        const double &monomer_anisotropy_inverse, //backbone_width / l_persistence
+        const double &fit_constant = 0.21) {
+    const auto & x = relative_extension;
+    const auto xsqrt = sqrt(x); // x^{1/2}
+    return x*xsqrt / (fit_constant * sqrt(monomer_anisotropy_inverse) + xsqrt*(2/3.));
+
+}
+inline double force_extension_ev_wlc_high_force_normalized(const double & relative_extension) {
+    return 0.25 / (1-relative_extension)*(1-relative_extension) - (0.25 + 0.5*relative_extension);
+}
+inline double force_extension_ev_wlc_normalized(const double & relative_extension,
+        const double &monomer_anisotropy_inverse, //backbone_width / l_persistence
+        const double &fit_constant = 0.21) {
+    return force_extension_ev_wlc_low_force_normalized(
+            relative_extension, monomer_anisotropy_inverse, fit_constant) +
+        force_extension_ev_wlc_high_force_normalized(relative_extension);
+}
+
+/**
+ * An ideal chain described by random-walk statistics or theta-solvent conditions
+ * yields a low-force linear elasticity.
+ *
+ * @param relative_extension x/L_contour
+ *
+ * @return normalized force = f * L_persistence / kT
+ */
+inline double force_extension_low_regime_ideal_chain_normalized(
+        const double & relative_extension) {
+    return relative_extension;
+}
+/**
+ * Pincus, effect of excluded volume interactions at low force.
+ * Assumes excluded volume exponent of v = 3/5 (good solvents).
+ * Applied force generates a tensile screening length, known as tensile blob
+ * or a Pincus blob \f[ \xi_P = \frac{k_{B}T}{f} \f]
+ *
+ * @param relative_extension x/L_contour
+ *
+ * @return normalized force = f * L_persistence / kT
+ */
+inline double force_extension_low_regime_excluded_volume_pincus_normalized(
+        const double & relative_extension) {
+    return std::pow(relative_extension, 1.5);
+}
 /** TODO(phcerdan)
  * In the case of infinite forces in the unextensible WLC.
  * What does an infinite force mean? It means that it's impossible to extend
