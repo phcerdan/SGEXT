@@ -7,6 +7,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_DEPENDS
   )
 set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
     dynamics.cpp
+    dynamics_graph_glue.cpp
     )
 list(TRANSFORM SG_MODULE_${SG_MODULE_NAME}_SOURCES PREPEND "src/")
 add_library(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} ${SG_MODULE_${SG_MODULE_NAME}_SOURCES})
