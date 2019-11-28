@@ -32,7 +32,6 @@ namespace SG {
  * http://arxiv.org/abs/1712.03555
  */
 
-
 /**
  * From reference:
  *
@@ -46,35 +45,42 @@ namespace SG {
  *
  * @return  normalized force = f * l_persistence / kT
  */
-inline double force_extension_ev_wlc_low_force_normalized(const double & relative_extension,
-        const double &monomer_anisotropy_inverse, //backbone_width / l_persistence
+inline double force_extension_ev_wlc_low_force_normalized(
+        const double &relative_extension,
+        const double
+                &monomer_anisotropy_inverse, // backbone_width / l_persistence
         const double &fit_constant = 0.21) {
-    const auto & x = relative_extension;
+    const auto &x = relative_extension;
     const auto xsqrt = sqrt(x); // x^{1/2}
-    return x*xsqrt / (fit_constant * sqrt(monomer_anisotropy_inverse) + xsqrt*(2/3.));
-
+    return x * xsqrt /
+           (fit_constant * sqrt(monomer_anisotropy_inverse) + xsqrt * (2 / 3.));
 }
-inline double force_extension_ev_wlc_high_force_normalized(const double & relative_extension) {
-    return 0.25 / (1-relative_extension)*(1-relative_extension) - (0.25 + 0.5*relative_extension);
+inline double
+force_extension_ev_wlc_high_force_normalized(const double &relative_extension) {
+    return 0.25 / (1 - relative_extension) * (1 - relative_extension) -
+           (0.25 + 0.5 * relative_extension);
 }
-inline double force_extension_ev_wlc_normalized(const double & relative_extension,
-        const double &monomer_anisotropy_inverse, //backbone_width / l_persistence
+inline double force_extension_ev_wlc_normalized(
+        const double &relative_extension,
+        const double
+                &monomer_anisotropy_inverse, // backbone_width / l_persistence
         const double &fit_constant = 0.21) {
     return force_extension_ev_wlc_low_force_normalized(
-            relative_extension, monomer_anisotropy_inverse, fit_constant) +
-        force_extension_ev_wlc_high_force_normalized(relative_extension);
+                   relative_extension, monomer_anisotropy_inverse,
+                   fit_constant) +
+           force_extension_ev_wlc_high_force_normalized(relative_extension);
 }
 
 /**
- * An ideal chain described by random-walk statistics or theta-solvent conditions
- * yields a low-force linear elasticity.
+ * An ideal chain described by random-walk statistics or theta-solvent
+ * conditions yields a low-force linear elasticity.
  *
  * @param relative_extension x/L_contour
  *
  * @return normalized force = f * L_persistence / kT
  */
 inline double force_extension_low_regime_ideal_chain_normalized(
-        const double & relative_extension) {
+        const double &relative_extension) {
     return relative_extension;
 }
 /**
@@ -88,7 +94,7 @@ inline double force_extension_low_regime_ideal_chain_normalized(
  * @return normalized force = f * L_persistence / kT
  */
 inline double force_extension_low_regime_excluded_volume_pincus_normalized(
-        const double & relative_extension) {
+        const double &relative_extension) {
     return std::pow(relative_extension, 1.5);
 }
 /** TODO(phcerdan)
@@ -125,12 +131,12 @@ inline double force_extension_low_regime_excluded_volume_pincus_normalized(
  *
  * @return normalized force
  */
-inline double force_extension_fjc_petrosyan_normalized(
-        const double &relative_extension) {
+inline double
+force_extension_fjc_petrosyan_normalized(const double &relative_extension) {
     const auto &x = relative_extension;
-    const auto x2 = x*x;
-    const auto x3 = x2*x;
-    return 3*x + x2 * std::sin(7*x/2) + x3/(1 - x);
+    const auto x2 = x * x;
+    const auto x3 = x2 * x;
+    return 3 * x + x2 * std::sin(7 * x / 2) + x3 / (1 - x);
 }
 
 /**
@@ -149,40 +155,39 @@ inline double force_extension_fjc_petrosyan_normalized(
  *
  * @return force
  */
-inline double force_extension_wlc_petrosyan_normalized(
-        const double &relative_extension) {
-        // TODO if relative_extension is ~1, the force diverges
-        const auto one_minus_relative_extension = 1 - relative_extension;
-        return relative_extension - 0.8 * std::pow(relative_extension, 2.15) +
-            0.25 / (one_minus_relative_extension * one_minus_relative_extension) -
-            0.25;
+inline double
+force_extension_wlc_petrosyan_normalized(const double &relative_extension) {
+    // TODO if relative_extension is ~1, the force diverges
+    const auto one_minus_relative_extension = 1 - relative_extension;
+    return relative_extension - 0.8 * std::pow(relative_extension, 2.15) +
+           0.25 / (one_minus_relative_extension *
+                   one_minus_relative_extension) -
+           0.25;
 }
-inline double force_extension_wlc_petrosyan(
-        const double &z_extension,
-        const double &l_contour,
-        const double &l_persistence,
-        const double &kT) {
-    const double relative_extension = z_extension/l_contour;
-    return kT/l_persistence * force_extension_wlc_petrosyan_normalized(relative_extension);
+inline double force_extension_wlc_petrosyan(const double &z_extension,
+                                            const double &l_contour,
+                                            const double &l_persistence,
+                                            const double &kT) {
+    const double relative_extension = z_extension / l_contour;
+    return kT / l_persistence *
+           force_extension_wlc_petrosyan_normalized(relative_extension);
 };
 
 /**
- * Instead of the force given the extension, the inverse, it returns the extension
- * given the force.
+ * Instead of the force given the extension, the inverse, it returns the
+ * extension given the force.
  *
  * @param normalized_force
  *
  * @return the relative_extension
  */
 inline double extension_force_wlc_petrosyan(const double &normalized_force) {
-    const double & f = normalized_force;
-    const double four_thirds = 4.0/3.0;
-    const double exp_f = exp(std::pow(900/f, 0.25));
-    return four_thirds
-        - four_thirds / sqrt(f + 1)
-        - 10*exp_f / (sqrt(f)*(exp_f - 1)*(exp_f - 1))
-        + std::pow(f, 1.62)/ (3.55 + 3.8*std::pow(f, 2.2));
-
+    const double &f = normalized_force;
+    const double four_thirds = 4.0 / 3.0;
+    const double exp_f = exp(std::pow(900 / f, 0.25));
+    return four_thirds - four_thirds / sqrt(f + 1) -
+           10 * exp_f / (sqrt(f) * (exp_f - 1) * (exp_f - 1)) +
+           std::pow(f, 1.62) / (3.55 + 3.8 * std::pow(f, 2.2));
 };
 
 /**
@@ -200,18 +205,18 @@ inline double extension_force_wlc_petrosyan(const double &normalized_force) {
  *
  * @return force
  */
-inline double force_extension_wlc_marko_siggia_normalized(
-        const double &relative_extension) {
-        // TODO if relative_extension is ~1, the force diverges
-        return relative_extension - 0.25 + 0.25/(1.0 - relative_extension);
+inline double
+force_extension_wlc_marko_siggia_normalized(const double &relative_extension) {
+    // TODO if relative_extension is ~1, the force diverges
+    return relative_extension - 0.25 + 0.25 / (1.0 - relative_extension);
 }
-inline double force_extension_wlc_marko_siggia(
-        const double &z_extension,
-        const double &l_contour,
-        const double &l_persistence,
-        const double &kT) {
-    const double relative_extension = z_extension/l_contour;
-    return kT/l_persistence * force_extension_wlc_marko_siggia_normalized(relative_extension);
+inline double force_extension_wlc_marko_siggia(const double &z_extension,
+                                               const double &l_contour,
+                                               const double &l_persistence,
+                                               const double &kT) {
+    const double relative_extension = z_extension / l_contour;
+    return kT / l_persistence *
+           force_extension_wlc_marko_siggia_normalized(relative_extension);
 };
-}; // end namespace
+}; // namespace SG
 #endif

@@ -18,14 +18,11 @@
  *
  * *******************************************************************/
 
-
 #include "dynamics_common_fixtures.hpp"
 
 namespace SG {
 struct IntegratorPairBondForce_Fixture : public ::testing::Test {
     System sys;
-    void SetUp() override {
-        sys = System4Fixture();
-    }
+    void SetUp() override { sys = System4Fixture(); }
 };
-}
+} // namespace SG

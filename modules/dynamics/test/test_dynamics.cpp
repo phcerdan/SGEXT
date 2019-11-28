@@ -19,12 +19,10 @@
  * *******************************************************************/
 
 #include "dynamics.hpp"
-#include "gmock/gmock.h"
 #include "dynamics_common_data.hpp"
+#include "gmock/gmock.h"
 
-TEST(Dynamics, works) {
-    SG::hola();
-}
+TEST(Dynamics, works) { SG::hola(); }
 struct ParticleCollection_Fixture : public ::testing::Test {
     SG::ParticleCollection collection;
     SG::Particle a;
@@ -32,12 +30,12 @@ struct ParticleCollection_Fixture : public ::testing::Test {
     SG::Particle c;
     void SetUp() override {
         a.id = 5;
-        a.pos = {{1,1,1}};
+        a.pos = {{1, 1, 1}};
         b.id = 6;
-        b.pos = {{2,2,2}};
+        b.pos = {{2, 2, 2}};
         // c id is the smallest so far, even though the position is greater
         c.id = 2;
-        c.pos = {{100,100,100}};
+        c.pos = {{100, 100, 100}};
         collection.particles.emplace_back(b);
         collection.particles.emplace_back(a);
         collection.particles.emplace_back(c);
@@ -60,7 +58,8 @@ TEST_F(ParticleCollection_Fixture, ParticleCollection) {
     EXPECT_EQ((*it).id, b.id);
     index = std::distance(std::begin(collection.particles), it);
     EXPECT_EQ(index, 2);
-    std::cout << "binary_find(" << b.id << ") result: " << (*it).id << std::endl;
+    std::cout << "binary_find(" << b.id << ") result: " << (*it).id
+              << std::endl;
     std::cout << "Found at index: " << index << std::endl;
 
     it = collection.binary_find(c.id);
@@ -68,4 +67,3 @@ TEST_F(ParticleCollection_Fixture, ParticleCollection) {
     index = std::distance(std::begin(collection.particles), it);
     EXPECT_EQ(index, 0);
 }
-
