@@ -15,10 +15,9 @@ struct ParticleGraphGlueData {
     using graph_vertex_id_t = GraphType::vertex_descriptor;
     using particle_graph_map_t =
             std::unordered_map<particle_id_t, graph_vertex_id_t>;
-    using connected_list_t = std::vector<ConnectedParticles>;
     ParticleCollection particle_collection;
     particle_graph_map_t particle_graph_map;
-    connected_list_t connected_list;
+    ParticleNeighborsCollection connected_list;
 };
 
 ParticleGraphGlueData particles_from_graph(const GraphType &graph);
