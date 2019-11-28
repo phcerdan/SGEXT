@@ -51,6 +51,17 @@ inline bool operator<(const Particle &lhs, const Particle &rhs) {
 struct ParticleNeighbors {
     size_t particle_id;            ///< id of the particle
     std::vector<size_t> neighbors; /// ids of the neighbors of the particle
+
+    ParticleNeighbors() = default;
+    ParticleNeighbors(const size_t &id) : particle_id(id){};
+    ParticleNeighbors(const size_t &id,
+                      const std::vector<size_t> &input_neighbors)
+            : particle_id(id), neighbors(input_neighbors){};
+    ParticleNeighbors(const ParticleNeighbors &) = default;
+    ParticleNeighbors(ParticleNeighbors &&) = default;
+    ParticleNeighbors &operator=(const ParticleNeighbors &) = default;
+    ParticleNeighbors &operator=(ParticleNeighbors &&) = default;
+    ~ParticleNeighbors() = default;
 };
 
 struct ParticleNeighborsCollection {
