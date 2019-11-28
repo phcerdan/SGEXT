@@ -74,10 +74,27 @@ class Integrator {
   public:
     Integrator(System &sys) : m_sys(sys) {};
     void update(unsigned int time_step);
+
+    /**
+     * 
+     *
+     * @tparam TForceCompute
+     * @param new_force
+     *
+     * @return 
+     */
+    template <typename TForceCompute>
+    ForceCompute& add_force(const TForceCompute & new_force) {
+      force_types.emplace_back(std::make_unique(new_force));
+      return *force_types.back();
+    }
     /** Multiple forces can act over a particle.
      * Each ForceCompute has a force per particle.
+     * Pointers to avoid slicing of Derived classes
+     * shared_ptr because it's easier for usability than unique_ptr,
+     * allowing to create an instance of ForceCompute
      */
-    std::vector<std::shared_ptr<ForceCompute>> force_types;
+    std::vector<std::unique_ptr<ForceCompute>> force_types;
   protected:
     System &m_sys;
 };
