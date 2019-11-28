@@ -72,21 +72,21 @@ struct PairBondForce : public ForceCompute {
 //
 class Integrator {
   public:
-    Integrator(System &sys) : m_sys(sys) {};
+    Integrator(System &sys) : m_sys(sys){};
     void update(unsigned int time_step);
 
     /**
-     * 
+     *
      *
      * @tparam TForceCompute
      * @param new_force
      *
-     * @return 
+     * @return
      */
     template <typename TForceCompute>
-    ForceCompute& add_force(const TForceCompute & new_force) {
-      force_types.emplace_back(std::make_unique(new_force));
-      return *force_types.back();
+    ForceCompute &add_force(const TForceCompute &new_force) {
+        force_types.emplace_back(std::make_unique(new_force));
+        return *force_types.back();
     }
     /** Multiple forces can act over a particle.
      * Each ForceCompute has a force per particle.
@@ -95,6 +95,7 @@ class Integrator {
      * allowing to create an instance of ForceCompute
      */
     std::vector<std::unique_ptr<ForceCompute>> force_types;
+
   protected:
     System &m_sys;
 };

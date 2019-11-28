@@ -66,6 +66,4 @@ TEST_F(ParticleGraphGlueData_Fixture, works) {
     // Check map works
     auto &pgmap = particle_graph_data.particle_graph_map;
     EXPECT_EQ(pgmap[1], 1);
-
 }
-

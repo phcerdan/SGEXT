@@ -23,12 +23,13 @@ struct ParticleConsecutiveId : public Particle {
 };
 
 /**
- * Define a system with 4 particles, populating positions and bonds between them.
- * By index:
+ * Define a system with 4 particles, populating positions and bonds between
+ * them. By index:
  *   3
  *   |
  * 0-1-2
- * The id of the particles might be different than the indices for testing purposes.
+ * The id of the particles might be different than the indices for testing
+ * purposes.
  */
 struct System4Fixture : public System {
     constexpr static size_t nparticles = 4;

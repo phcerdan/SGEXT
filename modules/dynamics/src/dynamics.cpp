@@ -2,7 +2,5 @@
 #include <iostream>
 
 namespace SG {
-    void hola() {
-        std::cout << "HOLA!" << std::endl;
-    }
-}
+void hola() { std::cout << "HOLA!" << std::endl; }
+} // namespace SG
