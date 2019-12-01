@@ -8,15 +8,9 @@
 
 /*
  * graph0:
- *     o
- *     |
- *     .
- *     |
- *     o
- *     |
- *     .
- *     |
- *     o
+ *       o
+ *       |
+ *     o-o-o
  *
  */
 struct ParticleGraphGlueData_Fixture : public ::testing::Test {
