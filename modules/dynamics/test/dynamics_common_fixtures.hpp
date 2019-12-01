@@ -29,8 +29,8 @@ namespace SG {
  * when a regular Particle is needed.
  */
 struct ParticleConsecutiveId : public Particle {
-    // for testing purposes start the id_counter on 10.
-    static size_t id_counter = 10;
+    // note: inline non-const static requires c++17
+    inline static size_t id_counter = 0;
     ParticleConsecutiveId() : Particle() {
         id = id_counter;
         id_counter++;
@@ -49,6 +49,8 @@ struct ParticleConsecutiveId : public Particle {
 struct System4Fixture : public System {
     constexpr static size_t nparticles = 4;
     System4Fixture() : System() {
+        // for testing purposes start the id_counter on 10.
+        ParticleConsecutiveId::id_counter = 10;
         for (size_t i = 0; i < nparticles; i++) {
             all.particles.emplace_back(ParticleConsecutiveId());
         }

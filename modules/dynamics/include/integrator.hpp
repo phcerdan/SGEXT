@@ -25,61 +25,44 @@
 #include <vector>
 
 #include "dynamics_common_data.hpp"
+#include "force_compute.hpp"
 namespace SG {
 
-/**
- * Force per particle
- */
-struct ForceCompute {
-    ForceCompute(const System &sys) : m_sys(sys) {
-        forces.resize(sys.all.particles.size());
-    };
-    virtual ~ForceCompute();
-    // Compute and populate force;
-    virtual void compute() = 0;
-    std::vector<ArrayUtilities::Array3D> forces;
+// TODO Add a particle_selector (with lambda), here or on Integrator.
+// Integrator has IntegratorMethods
+struct IntegratorMethod {
+    explicit IntegratorMethod(System &sys, double deltaT_input)
+            : m_sys(sys), deltaT(deltaT_input){};
+    double deltaT;
+    virtual void integrate(const decltype(ForceCompute::forces) &forces) = 0;
 
   protected:
-    const System &m_sys;
+    System &m_sys;
 };
 
-/**
- */
-struct PairBondForce : public ForceCompute {
-    using ForceCompute::ForceCompute;
-    using force_function_t = std::function<ArrayUtilities::Array3D(
-            const Particle &, const Particle &)>;
-    force_function_t force_function;
-    void compute() override {
-        if (!force_function) {
-            throw std::runtime_error(
-                    "force_function is not set in PairBondForce");
-        }
-        for (auto &p : bonds.collection) {
-            // Find the particle index
-            const auto [particle_it, particle_index] =
-                    m_sys.all.find_particle_and_index(p.particle_id);
-            if (particle_index == std::numeric_limits<size_t>::max()) {
-                throw std::runtime_error("The particle in bonds does not exist "
-                                         "in all particles");
-            }
-            const auto &current_particle = *particle_it;
-            // Apply force_function between current particle and its neighbors
-            for (auto &neighbor_id : p.neighbors) {
-                const auto [neighbor_particle_it, neighbor_particle_index] =
-                        m_sys.all.find_particle_and_index(neighbor_id);
-                const auto &current_neighbor = *neighbor_particle_it;
-                auto &current_particle_force = forces[particle_index];
-                current_particle_force = ArrayUtilities::plus(
-                        current_particle_force,
-                        force_function(current_particle, current_neighbor));
-            }
-        }
-    };
+struct VerletVelocitiesMethod : public IntegratorMethod {
+    using IntegratorMethod::IntegratorMethod;
 
-  protected:
-    const ParticleNeighborsCollection &bonds = m_sys.bonds;
+    /**
+     * @param forces Corresponding to the final forces on each particle
+     * (sum of many forces).
+     * The method is decoupled with the type of force.
+     * TODO: right now it assumes all particles of the system
+     */
+    void integrate(const decltype(ForceCompute::forces) &forces) override;
+
+protected:
+    /**
+     * Positions are moved to timestep+1 and velocities to timestep+1/2
+     */
+    void integrateStepOne();
+    /**
+     * Velocities are finally computed to timestep + 1
+     *
+     */
+    void integrateStepTwo(const decltype(ForceCompute::forces) &forces);
 };
+
 // TODO: An integrator should:
 // 1. Collect, and sum all the forces affecting every particle.
 // 2. Integrate equation to get new positions from current state of the system
@@ -87,11 +70,16 @@ struct PairBondForce : public ForceCompute {
 //
 class Integrator {
   public:
-    Integrator(System &sys) : m_sys(sys){};
-    void update(unsigned int time_step);
+    explicit Integrator(System &sys) : m_sys(sys){};
+    /**
+     * TODO: Integrator should be an interface, update should be pure virtual
+     */
+    virtual void update(unsigned int time_step);
 
     /**
+     * add force to the integrator
      *
+     * returns a raw pointer
      *
      * @tparam TForceCompute
      * @param new_force
@@ -99,9 +87,9 @@ class Integrator {
      * @return
      */
     template <typename TForceCompute>
-    ForceCompute &add_force(const TForceCompute &new_force) {
-        force_types.emplace_back(std::make_unique(new_force));
-        return *force_types.back();
+    TForceCompute *add_force(std::shared_ptr<TForceCompute> new_force) {
+        force_types.push_back(std::move(new_force));
+        return dynamic_cast<TForceCompute *>(force_types.back().get());
     }
     /** Multiple forces can act over a particle.
      * Each ForceCompute has a force per particle.
@@ -109,10 +97,15 @@ class Integrator {
      * shared_ptr because it's easier for usability than unique_ptr,
      * allowing to create an instance of ForceCompute
      */
-    std::vector<std::unique_ptr<ForceCompute>> force_types;
+    std::vector<std::shared_ptr<ForceCompute>> force_types;
+    // TODO only one method? Add more methods when/if added particle selector
+    std::shared_ptr<IntegratorMethod> integrator_method;
 
   protected:
     System &m_sys;
+    /// Compute the sum of forces for each particle
+    decltype(ForceCompute::forces) sum_all_forces() const;
 };
+
 } // namespace SG
 #endif

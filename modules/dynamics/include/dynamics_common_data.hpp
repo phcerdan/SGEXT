@@ -53,7 +53,7 @@ struct ParticleNeighbors {
     std::vector<size_t> neighbors; /// ids of the neighbors of the particle
 
     ParticleNeighbors() = default;
-    ParticleNeighbors(const size_t &id) : particle_id(id){};
+    explicit ParticleNeighbors(const size_t &id) : particle_id(id){};
     ParticleNeighbors(const size_t &id,
                       const std::vector<size_t> &input_neighbors)
             : particle_id(id), neighbors(input_neighbors){};
@@ -173,7 +173,7 @@ struct ParticleCollection {
     }
     friend void print(const ParticleCollection &collection);
 };
-void print(const ParticleCollection &collection) {
+inline void print(const ParticleCollection &collection) {
     for (const auto &p : collection.particles) {
         std::cout << p.id << ": " << ArrayUtilities::to_string(p.pos)
                   << std::endl;
@@ -189,6 +189,52 @@ struct System {
     ParticleNeighborsCollection bonds; ///< fixed bonds between particles
     /** Dynamic neighbors per particle based on positions. */
     ParticleNeighborsCollection collision_neighbor_list;
+    // Helpers to get references of data.
+    inline ArrayUtilities::Array3D & get_position(size_t index) {
+        return all.particles[index].pos;
+    }
+    inline const ArrayUtilities::Array3D & get_position(size_t index) const {
+        return all.particles[index].pos;
+    }
+    inline ArrayUtilities::Array3D & get_velocity(size_t index) {
+        return all.particles[index].dynamics.vel;
+    }
+    inline const ArrayUtilities::Array3D & get_velocity(size_t index) const {
+        return all.particles[index].dynamics.vel;
+    }
+    inline ArrayUtilities::Array3D & get_acceleration(size_t index) {
+        return all.particles[index].dynamics.acc;
+    }
+    inline const ArrayUtilities::Array3D & get_acceleration(size_t index) const {
+        return all.particles[index].dynamics.acc;
+    }
+    // Return copy of positions
+    inline auto all_positions_copy() {
+        const auto nparts = all.particles.size();
+        std::vector<ArrayUtilities::Array3D> positions(nparts);
+        for (unsigned int i = 0; i < nparts; ++i) {
+            positions[i] = all.particles[i].pos;
+        }
+        return positions;
+    }
+    // Return copy of velocities
+    inline auto all_velocities_copy() {
+        const auto nparts = all.particles.size();
+        std::vector<ArrayUtilities::Array3D> velocities(nparts);
+        for (unsigned int i = 0; i < nparts; ++i) {
+            velocities[i] = all.particles[i].dynamics.vel;
+        }
+        return velocities;
+    }
+    // Return copy of accelerations
+    inline auto all_accelerations_copy() {
+        const auto nparts = all.particles.size();
+        std::vector<ArrayUtilities::Array3D> accelerations(nparts);
+        for (unsigned int i = 0; i < nparts; ++i) {
+            accelerations[i] = all.particles[i].dynamics.acc;
+        }
+        return accelerations;
+    }
 };
 
 } // namespace SG
