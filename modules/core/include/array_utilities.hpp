@@ -163,6 +163,11 @@ inline Array3D minus_scalar(const Array3D &lhs,
     return plus_scalar(lhs, -scalar);
 }
 
+inline Array3D product_scalar(const Array3D &lhs,
+                              const Array3D::value_type &scalar) {
+    return {{lhs[0] * scalar, lhs[1] * scalar, lhs[2] * scalar}};
+}
+
 /**
  * Distance between two arrays.
  * @param lhs
