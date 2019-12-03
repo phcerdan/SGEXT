@@ -29,10 +29,10 @@ struct ParticleCollection_Fixture : public ::testing::Test {
 
 TEST_F(ParticleCollection_Fixture, ParticleCollection) {
     std::cout << "--COLLECTION--" << std::endl;
-    SG::print(collection);
+    SG::print_id_pos(collection, std::cout);
     collection.sort();
     std::cout << "--COLLECTION AFTER SORT--" << std::endl;
-    SG::print(collection);
+    SG::print_id_pos(collection, std::cout);
 
     auto it = collection.binary_find(a.id);
     EXPECT_EQ((*it).id, a.id);
