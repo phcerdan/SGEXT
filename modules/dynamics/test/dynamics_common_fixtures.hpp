@@ -69,6 +69,7 @@ struct System4Fixture : public System {
                 ParticleNeighbors(all.particles[2].id, {all.particles[1].id}));
         bonds.collection.emplace_back(
                 ParticleNeighbors(all.particles[3].id, {all.particles[1].id}));
+        all.sort();
     }
 };
 

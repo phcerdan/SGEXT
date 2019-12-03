@@ -36,7 +36,7 @@ ParticleGraphGlueData particles_from_graph(const GraphType &graph) {
          ++ui, ++particle_id) {
         const Particle particle = {particle_id, graph[*ui].pos};
         particles.emplace_back(particle);
-        particle_graph_map[particle_id] = *ui;
+        particle_graph_map->operator[](particle_id) = *ui;
         const auto degree = boost::out_degree(*ui, graph);
         ParticleNeighbors connected_particles;
         connected_particles.particle_id = particle_id;

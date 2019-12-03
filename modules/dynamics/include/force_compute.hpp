@@ -45,9 +45,12 @@ struct ForceCompute {
  * Requires a 
  */
 struct PairBondForce : public ForceCompute {
-    using ForceCompute::ForceCompute;
     using force_function_t = std::function<ArrayUtilities::Array3D(
             const Particle &, const Particle &)>;
+    using ForceCompute::ForceCompute;
+    PairBondForce(const System & sys, force_function_t force_function):
+      ForceCompute(sys), force_function(force_function)
+    { }
     force_function_t force_function;
     void compute() override;
 

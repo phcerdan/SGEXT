@@ -31,13 +31,24 @@
 
 namespace SG {
 struct ParticleMaterial {
-    double radius;
-    double volume;
-    double mass;
+    double radius = 1.0;
+    double volume = 1.0;
+    double mass = 1.0;
+};
+inline void print(const ParticleMaterial & p, std::ostream & os) {
+    os << "radius = " << p.radius << std::endl;
+    os << "volume = " << p.volume << std::endl;
+    os << "mass = " << p.mass << std::endl;
 };
 struct ParticleDynamicProperties {
     ArrayUtilities::Array3D vel;
     ArrayUtilities::Array3D acc;
+    ArrayUtilities::Array3D net_force;
+};
+inline void print(const ParticleDynamicProperties & p, std::ostream & os) {
+    os << "vel = " << ArrayUtilities::to_string(p.vel) << std::endl;
+    os << "acc = " << ArrayUtilities::to_string(p.acc) << std::endl;
+    os << "net_force = " << ArrayUtilities::to_string(p.net_force) << std::endl;
 };
 struct Particle {
     size_t id;
@@ -48,6 +59,21 @@ struct Particle {
 inline bool operator<(const Particle &lhs, const Particle &rhs) {
     return lhs.id < rhs.id;
 }
+
+inline void print_id_pos(const Particle & p, std::ostream & os) {
+    os << "id = " << p.id << std::endl;
+    os << "pos = " << ArrayUtilities::to_string(p.pos) << std::endl;
+}
+inline void print(const Particle & p, std::ostream & os) {
+    print_id_pos(p, os);
+    print(p.dynamics, os);
+    print(p.material, os);
+};
+inline void print_trajectory(const Particle & p, std::ostream & os) {
+    print_id_pos(p, os);
+    print(p.dynamics, os);
+};
+
 struct ParticleNeighbors {
     size_t particle_id;            ///< id of the particle
     std::vector<size_t> neighbors; /// ids of the neighbors of the particle
@@ -63,10 +89,26 @@ struct ParticleNeighbors {
     ParticleNeighbors &operator=(ParticleNeighbors &&) = default;
     ~ParticleNeighbors() = default;
 };
+inline void print(const ParticleNeighbors & particle_neighbors, std::ostream & os) {
+    os << "neighbors of particle: " << particle_neighbors.particle_id << std::endl;
+    os << "neighbors: { ";
+    for(const auto & neigh : particle_neighbors.neighbors) {
+        os << neigh << ", ";
+    }
+    os << " }" << std::endl;
+
+};
 
 struct ParticleNeighborsCollection {
     std::vector<ParticleNeighbors> collection;
 };
+inline void print(const ParticleNeighborsCollection & all_neighbors, std::ostream & os) {
+    for(const auto & p : all_neighbors.collection) {
+        print(p, os);
+        os << "--" << std::endl;
+    }
+
+}
 
 /**
 struct BondedPair {
@@ -173,11 +215,22 @@ struct ParticleCollection {
     }
     friend void print(const ParticleCollection &collection);
 };
-inline void print(const ParticleCollection &collection) {
+inline void print_end_collection(const ParticleCollection &collection, std::ostream &os) {
+    os << "All " << collection.particles.size() << " particles printed" << std::endl;
+}
+inline void print_id_pos(const ParticleCollection &collection, std::ostream &os) {
     for (const auto &p : collection.particles) {
-        std::cout << p.id << ": " << ArrayUtilities::to_string(p.pos)
-                  << std::endl;
+        print_id_pos(p, os);
+        os << "-------------------------------" << std::endl;
     }
+    print_end_collection(collection, os);
+}
+inline void print(const ParticleCollection &collection, std::ostream &os) {
+    for (const auto &p : collection.particles) {
+        print(p, os);
+        os << "-------------------------------" << std::endl;
+    }
+    print_end_collection(collection, os);
 }
 
 /**

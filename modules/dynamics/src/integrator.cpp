@@ -21,28 +21,41 @@
 #include "integrator.hpp"
 
 namespace SG {
-decltype(ForceCompute::forces) Integrator::sum_all_forces() const {
-    const auto nparts = m_sys.all.particles.size();
-    decltype(ForceCompute::forces) force_sum(nparts);
+
+void Integrator::compute_net_forces(System & sys) const {
+    const auto nparts = sys.all.particles.size();
     for (size_t part_index = 0; part_index < nparts; ++part_index) {
+        auto & net_force = sys.all.particles[part_index].dynamics.net_force;
+        net_force = ArrayUtilities::Array3D(); // zero
         for (auto &force_type : force_types) {
-            force_sum[part_index] = ArrayUtilities::plus(
-                    force_sum[part_index], force_type->forces[part_index]);
+            net_force = ArrayUtilities::plus(
+                    net_force, force_type->forces[part_index]);
         };
     }
-    return force_sum;
-};
+}
 
-void Integrator::update(unsigned int time_step) {
+void IntegratorTwoStep::update(unsigned int time_step) {
     // sum all forces affecting every particles and
     // perform integration to get positions from forces.
     if(!integrator_method) {
         throw std::runtime_error("Provide an integrator method to Integrator");
     }
-    this->integrator_method->integrate(sum_all_forces());
+    this->integrator_method->integrateStepOne();
+    // compute all types of forces
+    for(auto & f : this->force_types) {
+        f->compute();
+        std::cout << ArrayUtilities::to_string(f->forces[2]) << std::endl;
+    }
+    // sum net forces
+    this->compute_net_forces(m_sys);
+    this->integrator_method->integrateStepTwo();
+
 };
 
-void VerletVelocitiesMethod::integrateStepOne() {
+void VerletVelocitiesIntegratorMethod::integrate() {
+    std::cout << "Do Nothing, update() in Integrator has to compute net_forces" << std::endl;
+}
+void VerletVelocitiesIntegratorMethod::integrateStepOne() {
     // perform the first half step of velocity verlet
     // r(t+deltaT) = r(t) + v(t)*deltaT + (1/2)a(t)*deltaT^2
     // v(t+deltaT/2) = v(t) + (1/2)a*deltaT
@@ -63,7 +76,7 @@ void VerletVelocitiesMethod::integrateStepOne() {
     }
 }
 
-void VerletVelocitiesMethod::integrateStepTwo(const decltype(ForceCompute::forces) &forces) {
+void VerletVelocitiesIntegratorMethod::integrateStepTwo() {
     // first update acceleration from current forces
     // a(t+deltaT) = force/mass
     // v(t+deltaT) = v(t+deltaT/2) + 1/2 * a(t+deltaT)*deltaT
@@ -72,17 +85,12 @@ void VerletVelocitiesMethod::integrateStepTwo(const decltype(ForceCompute::force
         // auto & position = m_sys.all.particles[index].pos;
         auto &velocity = m_sys.all.particles[index].dynamics.vel;
         auto &acceleration = m_sys.all.particles[index].dynamics.acc;
-        auto &force = forces[index];
+        auto &force = m_sys.all.particles[index].dynamics.net_force;
         const auto &mass = m_sys.all.particles[index].material.mass;
         acceleration = ArrayUtilities::product_scalar(force, 1.0 / mass);
         velocity = ArrayUtilities::plus(
                 velocity,
                 ArrayUtilities::product_scalar(acceleration, deltaT * 0.5));
     }
-}
-
-void VerletVelocitiesMethod::integrate(const decltype(ForceCompute::forces) &forces) {
-    integrateStepOne();
-    integrateStepTwo(forces);
 }
 }; // namespace SG

@@ -61,7 +61,7 @@ TEST_F(ParticleGraphGlueData_Fixture, works) {
     auto particle_graph_data = SG::particles_from_graph(graph0);
 
     EXPECT_EQ(std::size(particle_graph_data.particle_collection.particles), 4);
-    EXPECT_EQ(std::size(particle_graph_data.particle_graph_map), 4);
+    EXPECT_EQ(std::size(*(particle_graph_data.particle_graph_map)), 4);
     EXPECT_EQ(std::size(particle_graph_data.connected_list.collection[0].neighbors), 1);
     EXPECT_EQ(std::size(particle_graph_data.connected_list.collection[1].neighbors), 3);
     EXPECT_EQ(std::size(particle_graph_data.connected_list.collection[2].neighbors), 1);
@@ -73,6 +73,6 @@ TEST_F(ParticleGraphGlueData_Fixture, works) {
     EXPECT_EQ(neighbors.at(2), 3);
 
     // Check map works
-    auto &pgmap = particle_graph_data.particle_graph_map;
+    auto &pgmap = *(particle_graph_data.particle_graph_map);
     EXPECT_EQ(pgmap[1], 1);
 }

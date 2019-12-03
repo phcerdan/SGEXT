@@ -33,15 +33,30 @@ namespace SG {
 struct IntegratorMethod {
     explicit IntegratorMethod(System &sys, double deltaT_input)
             : m_sys(sys), deltaT(deltaT_input){};
+    virtual ~IntegratorMethod(){};
     double deltaT;
-    virtual void integrate(const decltype(ForceCompute::forces) &forces) = 0;
+    virtual void integrate() = 0;
 
   protected:
     System &m_sys;
 };
 
-struct VerletVelocitiesMethod : public IntegratorMethod {
+struct TwoStepIntegratorMethod : public IntegratorMethod {
     using IntegratorMethod::IntegratorMethod;
+    // virtual void integrate() = 0;
+    /**
+     * Positions are moved to timestep+1 and velocities to timestep+1/2
+     */
+    virtual void integrateStepOne() = 0;
+    /**
+     * Velocities are finally computed to timestep + 1
+     *
+     */
+    virtual void integrateStepTwo() = 0;
+};
+
+struct VerletVelocitiesIntegratorMethod : public TwoStepIntegratorMethod {
+    using TwoStepIntegratorMethod::TwoStepIntegratorMethod;
 
     /**
      * @param forces Corresponding to the final forces on each particle
@@ -49,18 +64,17 @@ struct VerletVelocitiesMethod : public IntegratorMethod {
      * The method is decoupled with the type of force.
      * TODO: right now it assumes all particles of the system
      */
-    void integrate(const decltype(ForceCompute::forces) &forces) override;
+    void integrate() override;
 
-protected:
     /**
      * Positions are moved to timestep+1 and velocities to timestep+1/2
      */
-    void integrateStepOne();
+    void integrateStepOne() override;
     /**
      * Velocities are finally computed to timestep + 1
      *
      */
-    void integrateStepTwo(const decltype(ForceCompute::forces) &forces);
+    void integrateStepTwo() override;
 };
 
 // TODO: An integrator should:
@@ -71,10 +85,13 @@ protected:
 class Integrator {
   public:
     explicit Integrator(System &sys) : m_sys(sys){};
+    virtual ~Integrator(){};
     /**
      * TODO: Integrator should be an interface, update should be pure virtual
      */
-    virtual void update(unsigned int time_step);
+    virtual void update(unsigned int time_step) = 0;
+    /// Compute the sum of forces for each particle and store it in Particle
+    virtual void compute_net_forces(System &sys) const;
 
     /**
      * add force to the integrator
@@ -98,13 +115,16 @@ class Integrator {
      * allowing to create an instance of ForceCompute
      */
     std::vector<std::shared_ptr<ForceCompute>> force_types;
-    // TODO only one method? Add more methods when/if added particle selector
-    std::shared_ptr<IntegratorMethod> integrator_method;
 
   protected:
     System &m_sys;
-    /// Compute the sum of forces for each particle
-    decltype(ForceCompute::forces) sum_all_forces() const;
+};
+
+struct IntegratorTwoStep : public Integrator {
+    using Integrator::Integrator;
+    // TODO only one method? Add more methods when/if added particle selector
+    std::shared_ptr<TwoStepIntegratorMethod> integrator_method;
+    void update(unsigned int time_step) override;
 };
 
 } // namespace SG
