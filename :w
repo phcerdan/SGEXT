@@ -1,0 +1,63 @@
+/* Copyright (C) 2019 Pablo Hernandez-Cerdan
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+#include "write_vtk_file.hpp"
+
+#include <vtkSmartPointer.h>
+#include <vtkCellArray.h>
+#include <vtkXMLUnstructuredGridReader.h>
+#include <vtkDataSetMapper.h>
+#include <vtkXMLUnstructuredGridWriter.h>
+#include <vtkUnstructuredGrid.h>
+#include <vtkPointData.h>
+#include <vtkVertexGlyphFilter.h>
+#include <vtkCellData.h>
+#include <vtkLine.h>
+#include <vtkDoubleArray.h>
+
+namespace SG {
+void write_vtk_file(const System & sys, const std::string & file_name) {
+  auto ugrid = vtkUnstructuredGrid::New();
+  // Allocate Number of cells, i.e number of bonds in the system;
+  // TODO: Compute exactly, instead of 3* approximation.
+  ugrid->Allocate(sys.bonds.collection.size() * 3);
+  // Set geometry with position of points
+  auto vtk_points = vtkSmartPointer<vtkPoints>::New();
+  using particle_id_t = size_t;
+  std::unordered_map<particle_id_t, vtkIdType> particle_id_to_vtk_id_map;
+  for( const auto & particle : sys.all.particles) {
+      const auto & pos = particle.pos;
+      particle_id_to_vtk_id_map[particle.id] =
+          vtk_points->InsertNextPoint(pos[0], pos[1], pos[2]);
+  }
+  ugrid->SetPoints(vtk_points);
+  // Set topology using bonds
+  auto unique_bonds = SG::unique_bonds(sys);
+  for(const auto & bond : unique_bonds) {
+      auto vtk_id_list = vtkIdList::New();
+      vtk_id_list->InsertNextId(particle_id_to_vtk_id_map[source_particle_id]);
+      vtk_id_list->InsertNextId(particle_id_to_vtk_id_map[neigh]);
+      auto line = vtkLine::New();
+      ugrid->InsertNextCell(line->GetCellType(), vtk_id_list);
+  }
+  // TODO: Insert extra PointData: acc, vel, etc
+  // auto point_data = ugrid->GetPointData();
+  // auto acc = vtkDoubleArray::New();
+  // acc->SetName("Acceleration");
+  // acc->SetNumberOfValues(3);
+  // for( const auto & particle : sys.all.particles) {
+  //     acc->SetValue(0, particle.dynamics.acc[0]);
+  //     acc->SetValue(1, particle.dynamics.acc[1]);
+  //     acc->SetValue(2, particle.dynamics.acc[2]);
+  // }
+  // point_data->AddArray(acc);
+  // point_data->Update();
+
+  auto ugrid_writer = vtkXMLUnstructuredGridWriter::New();
+  ugrid_writer->SetFileName(file_name.c_str());
+  ugrid_writer->SetInputData(ugrid);
+  ugrid_writer->Update();
+}
+} // end namespace

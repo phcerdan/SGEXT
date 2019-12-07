@@ -31,7 +31,7 @@ struct ForceCompute {
  */
 struct PairBondForce : public ForceCompute {
     using force_function_t = std::function<ArrayUtilities::Array3D(
-            const Particle &, const Particle &)>;
+            const Particle &, const Particle &, const Chain &)>;
     using ForceCompute::ForceCompute;
     PairBondForce(const System & sys, force_function_t force_function):
       ForceCompute(sys), force_function(force_function)
@@ -40,7 +40,7 @@ struct PairBondForce : public ForceCompute {
     void compute() override;
 
   protected:
-    const ParticleNeighborsCollection &bonds = m_sys.bonds;
+    const ParticleNeighborsCollection &conexions = m_sys.conexions;
 };
 
 } // namespace SG

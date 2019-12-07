@@ -25,6 +25,20 @@ inline void print(const ParticleMaterial & p, std::ostream & os) {
     os << "volume = " << p.volume << std::endl;
     os << "mass = " << p.mass << std::endl;
 };
+inline void dump_csv_header(const ParticleMaterial & p, std::ostream & os, bool add_end_of_line = true) {
+    os << "radius, volume, mass";
+    if(add_end_of_line) os << std::endl;
+}
+inline void dump_csv_data(const ParticleMaterial & p, std::ostream & os, bool add_end_of_line = true) {
+    os << p.radius << ", ";
+    os << p.volume << ", ";
+    os << p.mass;
+    if(add_end_of_line) os << std::endl;
+};
+inline void dump_csv(const ParticleMaterial & p, std::ostream & os) {
+    dump_csv_header(p, os);
+    dump_csv_data(p, os);
+};
 struct ParticleDynamicProperties {
     ArrayUtilities::Array3D vel;
     ArrayUtilities::Array3D acc;
@@ -34,6 +48,23 @@ inline void print(const ParticleDynamicProperties & p, std::ostream & os) {
     os << "vel = " << ArrayUtilities::to_string(p.vel) << std::endl;
     os << "acc = " << ArrayUtilities::to_string(p.acc) << std::endl;
     os << "net_force = " << ArrayUtilities::to_string(p.net_force) << std::endl;
+};
+inline void dump_csv_header(const ParticleDynamicProperties & p, std::ostream & os, bool add_end_of_line = true) {
+    os << "vel.x, vel.y, vel.z, acc.x, acc.y, acc.z, net_force.x, net_force.y, net_force.z";
+    if(add_end_of_line) os << std::endl;
+}
+inline void dump_csv_data(const ParticleDynamicProperties & p, std::ostream & os, bool add_end_of_line = true) {
+    const bool comma_separated = true;
+    os << ArrayUtilities::to_string(p.vel, comma_separated);
+    os << ", ";
+    os << ArrayUtilities::to_string(p.acc, comma_separated);
+    os << ", ";
+    os << ArrayUtilities::to_string(p.net_force, comma_separated);
+    if(add_end_of_line) os << std::endl;
+};
+inline void dump_csv(const ParticleDynamicProperties & p, std::ostream & os) {
+    dump_csv_header(p, os);
+    dump_csv_data(p, os);
 };
 struct Particle {
     size_t id;
@@ -58,6 +89,32 @@ inline void print_trajectory(const Particle & p, std::ostream & os) {
     print_id_pos(p, os);
     print(p.dynamics, os);
 };
+
+inline void dump_csv_header(const Particle & p, std::ostream &os, bool add_end_of_line = true) {
+    const bool internal_do_not_add_end_of_line = false;
+    os << "id, pos.x, pos.y, pos.z";
+    os << ", ";
+    dump_csv_header(p.dynamics, os, internal_do_not_add_end_of_line);
+    os << ", ";
+    dump_csv_header(p.material, os, internal_do_not_add_end_of_line);
+    if(add_end_of_line) os << std::endl;
+}
+inline void dump_csv_data(const Particle & p, std::ostream &os, bool add_end_of_line = true) {
+    const bool comma_separated = true;
+    const bool internal_do_not_add_end_of_line = false;
+    os << p.id;
+    os << ", ";
+    os << ArrayUtilities::to_string(p.pos, comma_separated);
+    os << ", ";
+    dump_csv_data(p.dynamics, os, internal_do_not_add_end_of_line);
+    os << ", ";
+    dump_csv_data(p.material, os, internal_do_not_add_end_of_line);
+    if(add_end_of_line) os << std::endl;
+}
+inline void dump_csv(const Particle & p, std::ostream &os) {
+    dump_csv_header(p, os);
+    dump_csv_data(p, os);
+}
 
 struct ParticleNeighbors {
     size_t particle_id;            ///< id of the particle
@@ -84,24 +141,55 @@ inline void print(const ParticleNeighbors & particle_neighbors, std::ostream & o
 
 };
 
-struct ParticleNeighborsCollection {
-    std::vector<ParticleNeighbors> collection;
-};
-inline void print(const ParticleNeighborsCollection & all_neighbors, std::ostream & os) {
-    for(const auto & p : all_neighbors.collection) {
-        print(p, os);
-        os << "--" << std::endl;
+inline void dump_csv_header(const ParticleNeighbors & particle_neighbors, std::ostream & os, bool add_end_of_line = true, bool with_particle_id = true) {
+    if(with_particle_id) os << "id, ";
+    os << "neighbors";
+    if(add_end_of_line) os << std::endl;
+}
+inline void dump_csv_data(const ParticleNeighbors & particle_neighbors, std::ostream & os, bool add_end_of_line = true, bool with_particle_id = true) {
+    if(with_particle_id) {
+        os << particle_neighbors.particle_id;
+        os << ",";
     }
+    os << "\"[";
+    for(const auto & neigh : particle_neighbors.neighbors) {
+        os << neigh << ", ";
+    }
+    os << "]\"";
+    if(add_end_of_line) os << std::endl;
 
 }
+inline void dump_csv(const ParticleNeighbors & particle_neighbors, std::ostream & os) {
+    dump_csv_header(particle_neighbors, os);
+    dump_csv_data(particle_neighbors, os);
+}
 
-/**
-struct BondedPair {
+struct Bond {
     // id of bonded particles
     size_t id_a;
     size_t id_b;
+    Bond() = default;
+    Bond(const size_t &a, const size_t &b): id_a(a), id_b(b) {};
+    Bond(const Bond&) = default;
+    Bond(Bond&&) = default;
+    Bond& operator=(const Bond&) = default;
+    Bond& operator=(Bond&&) = default;
+    virtual ~Bond() = default;
 };
-inline bool operator<(const BondedPair& lhs, const BondedPair& rhs)
+
+struct Chain :  public Bond {
+    double length_contour;
+    Chain(const size_t &a, const size_t & b, const double & input_contour_lenght) : Bond(a,b), length_contour(input_contour_lenght){};
+    using Bond::Bond;
+};
+
+inline bool operator==(const Bond& lhs, const Bond& rhs) {
+    return (lhs.id_a == rhs.id_a) && (lhs.id_b == rhs.id_b);
+}
+inline bool operator!=(const Bond& lhs, const Bond& rhs) {
+    return !(lhs==rhs);
+}
+inline bool operator<(const Bond& lhs, const Bond& rhs)
 {
     if(lhs.id_a < rhs.id_a){
         return true;
@@ -116,17 +204,51 @@ inline bool operator<(const BondedPair& lhs, const BondedPair& rhs)
     }
     return false;
 }
+inline void print(const Bond & bonded_pair, std::ostream &os, bool add_end_of_line = true) {
+    os << "id_a: " << bonded_pair.id_a;
+    os << ", ";
+    os << "id_b: " << bonded_pair.id_b;
+    if(add_end_of_line) os << std::endl;
+}
 // *
 // * Ensures id_a to be smaller than id_b in a bonded_pair.
 // *
 // * @param bonded_pair
 //
-void sort(BondedPair & bonded_pair) {
+inline void sort(Bond & bonded_pair) {
     if(bonded_pair.id_a > bonded_pair.id_b) {
         std::swap(bonded_pair.id_a, bonded_pair.id_b);
     }
 };
-*/
+
+
+struct ParticleNeighborsCollection {
+    std::vector<ParticleNeighbors> collection;
+    std::vector<std::shared_ptr<Bond>> bonds;
+};
+
+inline void print(const ParticleNeighborsCollection & all_neighbors, std::ostream & os) {
+    for(const auto & p : all_neighbors.collection) {
+        print(p, os);
+        os << "--" << std::endl;
+    }
+}
+inline void dump_csv_header(const ParticleNeighborsCollection & all_particle_neighbors, std::ostream & os, bool add_end_of_line = true, bool with_particle_id = true) {
+    const bool internal_add_end_of_line = true;
+    dump_csv_header(all_particle_neighbors.collection[0], os, with_particle_id, internal_add_end_of_line);
+    if(add_end_of_line) os << std::endl;
+}
+inline void dump_csv_data(const ParticleNeighborsCollection & all_particle_neighbors, std::ostream & os, bool add_end_of_line = true, bool with_particle_id = true) {
+    const bool internal_add_end_of_line = true;
+    for(const auto & particle_neighbors : all_particle_neighbors.collection) {
+        dump_csv_data(particle_neighbors, os, internal_add_end_of_line, with_particle_id);
+    }
+    if(add_end_of_line) os << std::endl;
+}
+inline void dump_csv(const ParticleNeighborsCollection & all_particle_neighbors, std::ostream & os) {
+    dump_csv_header(all_particle_neighbors, os);
+    dump_csv_data(all_particle_neighbors, os);
+}
 
 /**
  * Simplest ParticleCollection.
@@ -218,13 +340,30 @@ inline void print(const ParticleCollection &collection, std::ostream &os) {
     print_end_collection(collection, os);
 }
 
+inline void dump_csv_header(const ParticleCollection & all_particles, std::ostream & os, bool add_end_of_line = true, bool with_particle_id = true) {
+    const bool internal_do_not_add_end_of_line = false;
+    dump_csv_header(all_particles.particles[0], os, internal_do_not_add_end_of_line);
+    if(add_end_of_line) os << std::endl;
+}
+inline void dump_csv_data(const ParticleCollection & all_particles, std::ostream & os, bool add_end_of_line = true, bool with_particle_id = true) {
+    const bool internal_add_end_of_line = true;
+    for(const auto & particle_neighbors : all_particles.particles) {
+        dump_csv_data(particle_neighbors, os, internal_add_end_of_line);
+    }
+    if(add_end_of_line) os << std::endl;
+}
+inline void dump_csv(const ParticleCollection & all_particles, std::ostream & os) {
+    dump_csv_header(all_particles, os);
+    dump_csv_data(all_particles, os);
+}
+
 /**
  * System is a catch all structure to perform simulations,
  * Classes might need a reference to it in the constructor.
  */
 struct System {
     ParticleCollection all;            ///< all particles
-    ParticleNeighborsCollection bonds; ///< fixed bonds between particles
+    ParticleNeighborsCollection conexions; ///< fixed bonds between particles
     /** Dynamic neighbors per particle based on positions. */
     ParticleNeighborsCollection collision_neighbor_list;
     // Helpers to get references of data.
@@ -275,5 +414,22 @@ struct System {
     }
 };
 
+inline std::vector<Bond> unique_bonds(const System &sys) {
+    std::vector<Bond> bonds;
+    for (const auto & particle_neighbor : sys.conexions.collection) {
+        const auto source_particle_id = particle_neighbor.particle_id;
+        for (const auto & neigh: particle_neighbor.neighbors) {
+            Bond bond = {source_particle_id, neigh};
+            sort(bond);
+            auto found = std::find(std::begin(bonds), std::end(bonds), bond);
+            if(found == std::end(bonds)) {
+                bonds.push_back(bond);
+            }
+        }
+    }
+    return bonds;
+}
+
 } // namespace SG
+
 #endif
