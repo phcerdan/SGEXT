@@ -18,54 +18,141 @@
  *
  * *******************************************************************/
 
+#include "bonded_forces.hpp"
 #include "dynamics_common_fixtures.hpp"
 #include "integrator.hpp"
-#include "bonded_forces.hpp"
+#include <fstream>
+#include "write_vtu_file.hpp"
 
 struct IntegratorPairBondForce_Fixture : public ::testing::Test {
     SG::System sys = SG::System4Fixture();
     SG::IntegratorTwoStep integrator = SG::IntegratorTwoStep(sys);
+    std::shared_ptr<SG::PairBondForce> pair_force;
+    double deltaT = 0.4;
     void SetUp() override {
-        print(sys.bonds, std::cout);
+        integrator.integrator_method =
+                std::make_shared<SG::VerletVelocitiesIntegratorMethod>(sys,
+                                                                       deltaT);
+        // create pair_force
+        pair_force = integrator.add_force(
+                std::make_shared<SG::PairBondForce>(SG::PairBondForce(sys)));
+        pair_force->force_function = [](const SG::Particle &a,
+                                        const SG::Particle &b,
+                                        const SG::Chain & chain) {
+            const auto d_ete = ArrayUtilities::minus(b.pos, a.pos); // F_{a, b}
+            const auto d_ete_modulo = ArrayUtilities::norm(d_ete);
+            // TODO, add parameter for bond:
+            // const double l_contour_length = 100;
+            const auto & l_contour_length = chain.length_contour;
+            const double l_persistence = 1000;
+            const double relative_extension = d_ete_modulo / l_contour_length;
+            const double monomer_anisotropy_inverse = 1 / l_persistence;
+            const auto force = SG::force_extension_ev_wlc_normalized(
+                    relative_extension, monomer_anisotropy_inverse);
+            return ArrayUtilities::product_scalar(d_ete, force / d_ete_modulo);
+        };
     }
 };
 
 TEST_F(IntegratorPairBondForce_Fixture, IntegratorWorks) {
+    // Check System for sanity
+    EXPECT_EQ(sys.all.particles.size(), 4);
+    EXPECT_EQ(sys.conexions.collection.size(), 4);
     std::cout << "IntegratorPairBondForce_Fixture: IntegratorWorks"
               << std::endl;
-    // Check System for sanity
-    // EXPECT_EQ(sys.all.particles.size(), 4);
-    // EXPECT_EQ(sys.bonds.collection.size(), 4);
-    auto pair_force = integrator.add_force(
-            std::make_shared<SG::PairBondForce>(SG::PairBondForce(sys)));
-    pair_force->force_function = [](const SG::Particle &a,
-                                    const SG::Particle &b) {
-        const auto d_ete = ArrayUtilities::minus(b.pos, a.pos); //F_{a, b}
-        const auto d_ete_modulo = ArrayUtilities::norm(d_ete);
-        // TODO, add parameter for bond:
-        const double l_contour_length = 100;
-        const double l_persistence = 1000;
-        const double relative_extension = d_ete_modulo / l_contour_length;
-        const double monomer_anisotropy_inverse = 1 / l_persistence;
-        const auto force = SG::force_extension_ev_wlc_normalized(relative_extension, monomer_anisotropy_inverse);
-        return ArrayUtilities::product_scalar(d_ete, force/d_ete_modulo );
-    };
+}
 
-    const double deltaT = 0.4;
-    integrator.integrator_method =
-            std::make_shared<SG::VerletVelocitiesIntegratorMethod>(sys, deltaT);
-    // set forces
-
+TEST_F(IntegratorPairBondForce_Fixture, DumpOneParticleTrajectory) {
+    std::cout << "IntegratorPairBondForce_Fixture: DumpOneParticleTrajectory"
+              << std::endl;
     std::cout << "-------- STARTING SYSTEM --------" << std::endl;
-    SG::print(sys.all, std::cout);
-    integrator.update(1);
-    std::cout << "-------- AFTER UPDATE (0) --------" << std::endl;
-    SG::print(sys.all, std::cout);
-    const size_t nupdates = 10;
+    const size_t time_steps = 10;
     const size_t particle_index = 2;
-    for(size_t n = 1; n < nupdates; ++n){
-        std::cout << "-------- Particle[" << particle_index << "]: AFTER UPDATE (" << n << ") --------" << std::endl;
-        integrator.update(n);
-        SG::print_trajectory(sys.all.particles[particle_index], std::cout);
+    const std::string base_file =
+        "./trajectory_n" + std::to_string(particle_index) + "_t";
+    SG::print(sys.all, std::cout);
+    { // time_step = 0
+        const size_t time_step  = 0;
+        const std::string final_file = base_file + std::to_string(time_step) + ".csv";
+        std::ofstream fout(final_file);
+        SG::dump_csv(sys.all, fout);
+    }
+    for (size_t time_step = 1; time_step < time_steps; ++time_step) {
+        const std::string final_file = base_file + std::to_string(time_step) + ".csv";
+        std::ofstream fout(final_file);
+        integrator.update(time_step);
+        SG::dump_csv(sys.all, fout);
+    }
+    std::cout << "-------- FINAL SYSTEM --------" << std::endl;
+    SG::print(sys.all, std::cout);
+}
+
+TEST_F(IntegratorPairBondForce_Fixture, DumpAllParticlesTrajectory) {
+    std::cout << "IntegratorPairBondForce_Fixture: DumpAllParticlesTrajectory"
+              << std::endl;
+    const size_t time_steps = 10;
+    const std::string base_file = "./all_trajectories_t";
+
+    // time_step = 0
+    {
+        const size_t time_step  = 0;
+        const std::string final_file = base_file + std::to_string(time_step) + ".csv";
+        std::ofstream fout(final_file);
+        SG::dump_csv(sys.all, fout);
+    }
+    for (size_t time_step = 1; time_step < time_steps; ++time_step) {
+        const std::string final_file = base_file + std::to_string(time_step) + ".csv";
+        std::ofstream fout(final_file);
+        integrator.update(time_step);
+        SG::dump_csv(sys.all, fout);
+    }
+}
+
+TEST_F(IntegratorPairBondForce_Fixture, DumpAllParticlesBonds) {
+    std::cout << "IntegratorPairBondForce_Fixture: DumpAllParticlesBonds"
+              << std::endl;
+    const size_t time_steps = 10;
+    const std::string base_file = "./all_bonds_t";
+
+    // time_step = 0
+    {
+        const size_t time_step  = 0;
+        const std::string final_file = base_file + std::to_string(time_step) + ".csv";
+        std::ofstream fout(final_file);
+        SG::dump_csv(sys.conexions, fout);
+    }
+    for (size_t time_step = 1; time_step < time_steps; ++time_step) {
+        const std::string final_file = base_file + std::to_string(time_step) + ".csv";
+        std::ofstream fout(final_file);
+        integrator.update(time_step);
+        SG::dump_csv(sys.conexions, fout);
+    }
+}
+
+TEST_F(IntegratorPairBondForce_Fixture, write_wtu_file) {
+    std::cout << "IntegratorPairBondForce_Fixture: write_wtu_file"
+              << std::endl;
+    const size_t time_steps = 10;
+    const std::string base_file = "./system";
+
+    // time_step = 0
+    {
+        const size_t time_step  = 0;
+        const std::string final_file = base_file + std::to_string(time_step) + ".vtu";
+        std::ofstream fout(final_file);
+        SG::write_vtu_file(sys, final_file);
+    }
+    for (size_t time_step = 1; time_step < time_steps; ++time_step) {
+        const std::string final_file = base_file + std::to_string(time_step) + ".vtu";
+        std::ofstream fout(final_file);
+        integrator.update(time_step);
+        SG::write_vtu_file(sys, final_file);
+    }
+}
+
+TEST_F(IntegratorPairBondForce_Fixture, test_unique_bonds) {
+    auto bonds = SG::unique_bonds(sys);
+    for(const auto & bond : bonds) {
+        print(bond, std::cout);
     }
 }

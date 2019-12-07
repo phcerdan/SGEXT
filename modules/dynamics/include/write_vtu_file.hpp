@@ -18,45 +18,12 @@
  *
  * *******************************************************************/
 
-#ifndef SG_FORCE_COMPUTE_HPP
-#define SG_FORCE_COMPUTE_HPP
+#ifndef SG_WRITE_VTU_FILE_HPP
+#define SG_WRITE_VTU_FILE_HPP
 
 #include "dynamics_common_data.hpp"
 
 namespace SG {
-/**
- * Force per particle
- */
-struct ForceCompute {
-    explicit ForceCompute(const System &sys) : m_sys(sys) {
-        forces.resize(sys.all.particles.size());
-    };
-    virtual ~ForceCompute(){};
-    // Compute and populate force;
-    virtual void compute() = 0;
-    std::vector<ArrayUtilities::Array3D> forces;
-
-  protected:
-    const System &m_sys;
-};
-
-/**
- * ForceCompute between a pair of Particles
- * Requires a 
- */
-struct PairBondForce : public ForceCompute {
-    using force_function_t = std::function<ArrayUtilities::Array3D(
-            const Particle &, const Particle &, const Chain &)>;
-    using ForceCompute::ForceCompute;
-    PairBondForce(const System & sys, force_function_t force_function):
-      ForceCompute(sys), force_function(force_function)
-    { }
-    force_function_t force_function;
-    void compute() override;
-
-  protected:
-    const ParticleNeighborsCollection &conexions = m_sys.conexions;
-};
-
+void write_vtu_file(const System & sys, const std::string &file_name);
 } // namespace SG
 #endif

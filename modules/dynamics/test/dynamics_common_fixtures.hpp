@@ -58,16 +58,16 @@ struct System4Fixture : public System {
         all.particles[1].pos = {1, 0, 0};
         all.particles[2].pos = {2, 0, 0};
         all.particles[3].pos = {1, 1, 0};
-        bonds.collection.emplace_back(ParticleNeighbors(
+        conexions.collection.emplace_back(ParticleNeighbors(
                 all.particles[0].id, {all.particles[1].id} // neighbor ids
                 ));
-        bonds.collection.emplace_back(ParticleNeighbors(
+        conexions.collection.emplace_back(ParticleNeighbors(
                 all.particles[1].id, {all.particles[0].id, all.particles[2].id,
                                       all.particles[3].id} // neighbor ids
                 ));
-        bonds.collection.emplace_back(
+        conexions.collection.emplace_back(
                 ParticleNeighbors(all.particles[2].id, {all.particles[1].id}));
-        bonds.collection.emplace_back(
+        conexions.collection.emplace_back(
                 ParticleNeighbors(all.particles[3].id, {all.particles[1].id}));
         all.sort();
     }
