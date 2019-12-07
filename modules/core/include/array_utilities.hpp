@@ -194,13 +194,15 @@ inline Array3D::value_type cos_director(const Array3D &lhs,
  *
  * @return string with array content, separated by space
  */
-inline std::string to_string(const Array3D &a) {
+inline std::string to_string(const Array3D &a, bool comma_separated = false) {
     std::ostringstream ss;
     auto a_size = a.size();
     for (size_t i = 0; i < a_size; ++i) {
         ss << a[i];
-        if (i != a_size - 1)
-            ss << " ";
+        if (i != a_size - 1) {
+           if(comma_separated) ss << ", ";
+           else ss << " ";
+        }
     }
     return ss.str();
 }

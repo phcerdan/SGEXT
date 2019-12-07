@@ -21,7 +21,7 @@ struct ParticleGraphGlueData {
     std::unique_ptr<System> sys;
     std::unique_ptr<particle_graph_map_t> particle_graph_map;
     ParticleCollection & particle_collection = sys->all;
-    ParticleNeighborsCollection & connected_list = sys->bonds;
+    ParticleNeighborsCollection & connected_list = sys->conexions;
 };
 
 ParticleGraphGlueData particles_from_graph(const GraphType &graph);

@@ -11,6 +11,17 @@ set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
     force_compute.cpp
     integrator.cpp
     )
+
+# Use VTK if available
+if(SG_REQUIRES_VTK)
+  list(APPEND SG_MODULE_${SG_MODULE_NAME}_DEPENDS
+    ${VTK_LIBRARIES}
+    )
+  list(APPEND SG_MODULE_${SG_MODULE_NAME}_SOURCES
+    write_vtu_file.cpp
+    )
+endif()
+
 list(TRANSFORM SG_MODULE_${SG_MODULE_NAME}_SOURCES PREPEND "src/")
 add_library(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} ${SG_MODULE_${SG_MODULE_NAME}_SOURCES})
 target_include_directories(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} PUBLIC
