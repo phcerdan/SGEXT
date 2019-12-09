@@ -6,7 +6,7 @@
 #ifndef SG_FORCE_COMPUTE_HPP
 #define SG_FORCE_COMPUTE_HPP
 
-#include "dynamics_common_data.hpp"
+#include "system.hpp"
 
 namespace SG {
 /**
@@ -27,11 +27,10 @@ struct ForceCompute {
 
 /**
  * ForceCompute between a pair of Particles
- * Requires a 
  */
 struct PairBondForce : public ForceCompute {
     using force_function_t = std::function<ArrayUtilities::Array3D(
-            const Particle &, const Particle &, const Chain &)>;
+            const Particle &, const Particle &, const Bond &)>;
     using ForceCompute::ForceCompute;
     PairBondForce(const System & sys, force_function_t force_function):
       ForceCompute(sys), force_function(force_function)
