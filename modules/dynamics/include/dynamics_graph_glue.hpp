@@ -21,7 +21,7 @@
 #ifndef SG_DYNAMICS_GRAPH_GLUE_HPP
 #define SG_DYNAMICS_GRAPH_GLUE_HPP
 
-#include "dynamics_common_data.hpp"
+#include "system.hpp"
 #include "spatial_graph.hpp"
 
 namespace SG {
