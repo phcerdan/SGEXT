@@ -9,7 +9,7 @@
 #include <memory>
 #include <vector>
 
-#include "dynamics_common_data.hpp"
+#include "system.hpp"
 #include "force_compute.hpp"
 namespace SG {
 

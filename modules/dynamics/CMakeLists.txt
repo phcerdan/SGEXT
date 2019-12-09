@@ -10,6 +10,11 @@ set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
     dynamics_graph_glue.cpp
     force_compute.cpp
     integrator.cpp
+    particle.cpp
+    bond.cpp
+    particle_neighbors.cpp
+    particle_collection.cpp
+    system.cpp
     )
 
 # Use VTK if available

@@ -6,7 +6,7 @@
 #ifndef SG_WRITE_VTU_FILE_HPP
 #define SG_WRITE_VTU_FILE_HPP
 
-#include "dynamics_common_data.hpp"
+#include "system.hpp"
 
 namespace SG {
 void write_vtu_file(const System & sys, const std::string &file_name);

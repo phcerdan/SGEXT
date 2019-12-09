@@ -6,8 +6,8 @@
 #include "bonded_forces.hpp"
 #include "dynamics_common_fixtures.hpp"
 #include "integrator.hpp"
-#include <fstream>
 #include "write_vtu_file.hpp"
+#include <fstream>
 
 struct IntegratorPairBondForce_Fixture : public ::testing::Test {
     SG::System sys = SG::System4Fixture();
@@ -23,12 +23,13 @@ struct IntegratorPairBondForce_Fixture : public ::testing::Test {
                 std::make_shared<SG::PairBondForce>(SG::PairBondForce(sys)));
         pair_force->force_function = [](const SG::Particle &a,
                                         const SG::Particle &b,
-                                        const SG::Chain & chain) {
+                                        const SG::Bond &chain) {
             const auto d_ete = ArrayUtilities::minus(b.pos, a.pos); // F_{a, b}
             const auto d_ete_modulo = ArrayUtilities::norm(d_ete);
             // TODO, add parameter for bond:
             // const double l_contour_length = 100;
-            const auto & l_contour_length = chain.length_contour;
+            const auto &l_contour_length =
+                    static_cast<const SG::BondChain &>(chain).length_contour;
             const double l_persistence = 1000;
             const double relative_extension = d_ete_modulo / l_contour_length;
             const double monomer_anisotropy_inverse = 1 / l_persistence;
@@ -54,16 +55,18 @@ TEST_F(IntegratorPairBondForce_Fixture, DumpOneParticleTrajectory) {
     const size_t time_steps = 10;
     const size_t particle_index = 2;
     const std::string base_file =
-        "./trajectory_n" + std::to_string(particle_index) + "_t";
+            "./trajectory_n" + std::to_string(particle_index) + "_t";
     SG::print(sys.all, std::cout);
     { // time_step = 0
-        const size_t time_step  = 0;
-        const std::string final_file = base_file + std::to_string(time_step) + ".csv";
+        const size_t time_step = 0;
+        const std::string final_file =
+                base_file + std::to_string(time_step) + ".csv";
         std::ofstream fout(final_file);
         SG::dump_csv(sys.all, fout);
     }
     for (size_t time_step = 1; time_step < time_steps; ++time_step) {
-        const std::string final_file = base_file + std::to_string(time_step) + ".csv";
+        const std::string final_file =
+                base_file + std::to_string(time_step) + ".csv";
         std::ofstream fout(final_file);
         integrator.update(time_step);
         SG::dump_csv(sys.all, fout);
@@ -80,13 +83,15 @@ TEST_F(IntegratorPairBondForce_Fixture, DumpAllParticlesTrajectory) {
 
     // time_step = 0
     {
-        const size_t time_step  = 0;
-        const std::string final_file = base_file + std::to_string(time_step) + ".csv";
+        const size_t time_step = 0;
+        const std::string final_file =
+                base_file + std::to_string(time_step) + ".csv";
         std::ofstream fout(final_file);
         SG::dump_csv(sys.all, fout);
     }
     for (size_t time_step = 1; time_step < time_steps; ++time_step) {
-        const std::string final_file = base_file + std::to_string(time_step) + ".csv";
+        const std::string final_file =
+                base_file + std::to_string(time_step) + ".csv";
         std::ofstream fout(final_file);
         integrator.update(time_step);
         SG::dump_csv(sys.all, fout);
@@ -101,13 +106,15 @@ TEST_F(IntegratorPairBondForce_Fixture, DumpAllParticlesBonds) {
 
     // time_step = 0
     {
-        const size_t time_step  = 0;
-        const std::string final_file = base_file + std::to_string(time_step) + ".csv";
+        const size_t time_step = 0;
+        const std::string final_file =
+                base_file + std::to_string(time_step) + ".csv";
         std::ofstream fout(final_file);
         SG::dump_csv(sys.conexions, fout);
     }
     for (size_t time_step = 1; time_step < time_steps; ++time_step) {
-        const std::string final_file = base_file + std::to_string(time_step) + ".csv";
+        const std::string final_file =
+                base_file + std::to_string(time_step) + ".csv";
         std::ofstream fout(final_file);
         integrator.update(time_step);
         SG::dump_csv(sys.conexions, fout);
@@ -115,20 +122,21 @@ TEST_F(IntegratorPairBondForce_Fixture, DumpAllParticlesBonds) {
 }
 
 TEST_F(IntegratorPairBondForce_Fixture, write_wtu_file) {
-    std::cout << "IntegratorPairBondForce_Fixture: write_wtu_file"
-              << std::endl;
+    std::cout << "IntegratorPairBondForce_Fixture: write_wtu_file" << std::endl;
     const size_t time_steps = 10;
     const std::string base_file = "./system";
 
     // time_step = 0
     {
-        const size_t time_step  = 0;
-        const std::string final_file = base_file + std::to_string(time_step) + ".vtu";
+        const size_t time_step = 0;
+        const std::string final_file =
+                base_file + std::to_string(time_step) + ".vtu";
         std::ofstream fout(final_file);
         SG::write_vtu_file(sys, final_file);
     }
     for (size_t time_step = 1; time_step < time_steps; ++time_step) {
-        const std::string final_file = base_file + std::to_string(time_step) + ".vtu";
+        const std::string final_file =
+                base_file + std::to_string(time_step) + ".vtu";
         std::ofstream fout(final_file);
         integrator.update(time_step);
         SG::write_vtu_file(sys, final_file);
@@ -137,7 +145,7 @@ TEST_F(IntegratorPairBondForce_Fixture, write_wtu_file) {
 
 TEST_F(IntegratorPairBondForce_Fixture, test_unique_bonds) {
     auto bonds = SG::unique_bonds(sys);
-    for(const auto & bond : bonds) {
+    for (const auto &bond : bonds) {
         print(bond, std::cout);
     }
 }
