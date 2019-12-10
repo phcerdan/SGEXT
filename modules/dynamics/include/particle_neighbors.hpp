@@ -41,10 +41,7 @@ void dump_csv(const ParticleNeighbors &particle_neighbors, std::ostream &os);
 
 struct ParticleNeighborsCollection {
     std::vector<ParticleNeighbors> collection;
-    std::vector<std::shared_ptr<Bond>> bonds;
 };
-
-void sort(std::vector<std::shared_ptr<Bond>> &bonds);
 
 void print(const ParticleNeighborsCollection &all_neighbors, std::ostream &os);
 void dump_csv_header(const ParticleNeighborsCollection &all_particle_neighbors,

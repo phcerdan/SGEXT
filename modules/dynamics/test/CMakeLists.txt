@@ -7,6 +7,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_TESTS
   test_dynamics.cpp
   test_particle_graph_glue.cpp
   test_integrator.cpp
+  test_bond_collection.cpp
   )
 
 SG_add_gtests()

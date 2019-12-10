@@ -6,6 +6,7 @@
 #ifndef SG_SYSTEM_HPP
 #define SG_SYSTEM_HPP
 
+#include "bond_collection.hpp"
 #include "particle_collection.hpp"
 #include "particle_neighbors.hpp"
 
@@ -16,6 +17,7 @@ namespace SG {
  */
 struct System {
     ParticleCollection all;                ///< all particles
+    BondCollection bonds;
     ParticleNeighborsCollection conexions; ///< fixed bonds between particles
     /** Dynamic neighbors per particle based on positions. */
     ParticleNeighborsCollection collision_neighbor_list;
