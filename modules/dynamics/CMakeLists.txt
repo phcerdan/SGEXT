@@ -15,6 +15,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
     particle_neighbors.cpp
     particle_collection.cpp
     system.cpp
+    bond_collection.cpp
     )
 
 # Use VTK if available
