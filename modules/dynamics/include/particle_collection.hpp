@@ -22,9 +22,9 @@
 #define SG_PARTICLE_COLLECTION_HPP
 
 #include "particle.hpp"
-#include <vector>
-#include <cassert>
 #include <algorithm>
+#include <cassert>
+#include <vector>
 
 namespace SG {
 /**
@@ -47,24 +47,27 @@ struct ParticleCollection {
     inline ForwardIt binary_find(const ForwardIt &first,
                                  const ForwardIt &last,
                                  const size_t &id_value) const {
-        assert(sorted &&
-               "Particles not sorted before binary_find. Call sort() first");
+        if (!sorted) {
+            throw std::runtime_error(
+                    "Particles not sorted in ParticleCollection before a find. "
+                    "Call sort() first.");
+        }
         constexpr auto comp = [](const Particle &p, const size_t &value) {
             return p.id < value;
         };
         return std::lower_bound(first, last, id_value, comp);
         // return (it != last && !comp(*it, id_value) ) ? it : last;
     }
-
     std::vector<Particle>::iterator binary_find(const size_t &id_value);
+
     std::vector<Particle>::const_iterator
     binary_find(const size_t &id_value) const;
 
     std::pair<std::vector<Particle>::const_iterator, size_t>
     find_particle_and_index(const size_t &id_value) const;
-
     std::pair<std::vector<Particle>::iterator, size_t>
     find_particle_and_index(const size_t &id_value);
+
     size_t find_index(const size_t &id_value) const;
     friend void print(const ParticleCollection &collection);
 };

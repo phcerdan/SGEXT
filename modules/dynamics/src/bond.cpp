@@ -42,9 +42,13 @@ bool operator<(const Bond &lhs, const Bond &rhs) {
 }
 
 void print(const Bond &bonded_pair, std::ostream &os, bool add_end_of_line) {
-    os << "id_a: " << bonded_pair.id_a;
+    // os << "id_a: " << bonded_pair.id_a;
+    // os << ", ";
+    // os << "id_b: " << bonded_pair.id_b;
+    os << "[" << bonded_pair.id_a;
     os << ", ";
-    os << "id_b: " << bonded_pair.id_b;
+    os << bonded_pair.id_b;
+    os << "]";
     if (add_end_of_line)
         os << std::endl;
 };

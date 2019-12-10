@@ -68,10 +68,6 @@ void dump_csv(const ParticleNeighbors &particle_neighbors, std::ostream &os) {
 /**** ParticleNeighborsCollection *****/
 /**************************************/
 
-void sort(std::vector<std::shared_ptr<Bond>> &bonds) {
-    std::sort(std::begin(bonds), std::end(bonds));
-};
-
 void print(const ParticleNeighborsCollection &all_neighbors, std::ostream &os) {
     for (const auto &p : all_neighbors.collection) {
         print(p, os);
