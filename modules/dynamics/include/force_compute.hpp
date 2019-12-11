@@ -9,17 +9,32 @@
 #include "system.hpp"
 
 namespace SG {
+struct ParticleForce {
+    size_t particle_id;
+    ArrayUtilities::Array3D force;
+    ParticleForce() = default;
+    ParticleForce(const size_t & input_particle_id, const ArrayUtilities::Array3D & input_force) :
+      particle_id(input_particle_id), force(input_force) {}
+    ParticleForce(const ParticleForce&) = default;
+    ParticleForce(ParticleForce&&) = default;
+    ParticleForce& operator=(const ParticleForce&) = default;
+    ParticleForce& operator=(ParticleForce&&) = default;
+    ~ParticleForce() = default;
+};
 /**
  * Force per particle
  */
 struct ForceCompute {
     explicit ForceCompute(const System &sys) : m_sys(sys) {
-        forces.resize(sys.all.particles.size());
+        particle_forces.reserve(sys.all.particles.size());
+        for (const auto &p : sys.all.particles) {
+            particle_forces.emplace_back(p.id, ArrayUtilities::Array3D());
+        }
     };
     virtual ~ForceCompute(){};
     // Compute and populate force;
     virtual void compute() = 0;
-    std::vector<ArrayUtilities::Array3D> forces;
+    std::vector<ParticleForce> particle_forces;
 
   protected:
     const System &m_sys;
@@ -32,9 +47,8 @@ struct PairBondForce : public ForceCompute {
     using force_function_t = std::function<ArrayUtilities::Array3D(
             const Particle &, const Particle &, const Bond &)>;
     using ForceCompute::ForceCompute;
-    PairBondForce(const System & sys, force_function_t force_function):
-      ForceCompute(sys), force_function(force_function)
-    { }
+    PairBondForce(const System &sys, force_function_t force_function)
+            : ForceCompute(sys), force_function(force_function) {}
     force_function_t force_function;
     void compute() override;
 
