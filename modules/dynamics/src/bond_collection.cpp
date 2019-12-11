@@ -38,7 +38,7 @@ void print(const BondCollection &collection,
            bool each_bond_in_new_line) {
     const bool internal_do_not_add_end_of_line = false;
     for (const auto &bond_ptr : collection.bonds) {
-        print(*bond_ptr, os, internal_do_not_add_end_of_line);
+        print(*std::static_pointer_cast<BondChain>(bond_ptr), os, internal_do_not_add_end_of_line);
         if (each_bond_in_new_line)
             os << std::endl;
         else

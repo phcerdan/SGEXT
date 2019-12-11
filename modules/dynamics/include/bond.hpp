@@ -45,6 +45,9 @@ struct BondChain : public Bond {
             : Bond(a, b), length_contour(input_contour_lenght){};
     using Bond::Bond;
 };
+void print(const BondChain &bonded_pair,
+           std::ostream &os,
+           bool add_end_of_line);
 
 } // namespace SG
 #endif
