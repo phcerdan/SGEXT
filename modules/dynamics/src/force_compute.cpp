@@ -28,20 +28,24 @@ void PairBondForce::compute() {
     }
 
     size_t current_particle_index = 0;
-    for(auto &particle : m_sys.all.particles) {
+    for (auto &particle : m_sys.all.particles) {
         auto bonds = m_sys.bonds.find_all_bonds_with_id(particle.id);
-        for (const auto & bond : bonds) {
-            // print(*bond, std::cout);
+        for (const auto &bond : bonds) {
             const auto connected_particle_id =
-                (particle.id == bond->id_a) ? bond->id_b : bond->id_a;
+                    (particle.id == bond->id_a) ? bond->id_b : bond->id_a;
             const auto [connected_particle_it, connected_particle_index] =
-                m_sys.all.find_particle_and_index(connected_particle_id);
+                    m_sys.all.find_particle_and_index(connected_particle_id);
 
-            auto &current_particle_force = forces[current_particle_index];
+            auto &current_particle_force =
+                    particle_forces[current_particle_index].force;
+            assert(particle.id == particle_forces[current_particle_index]
+                                          .particle_id &&
+                   "particle ids are not synchornized in "
+                   "PairBondeForce:compute(), they should be sorted as well as "
+                   "all the particles.");
             current_particle_force = ArrayUtilities::plus(
                     current_particle_force,
-                    force_function(particle, *connected_particle_it, *bond)
-                    );
+                    force_function(particle, *connected_particle_it, *bond));
         }
         current_particle_index++;
     }
@@ -50,7 +54,8 @@ void PairBondForce::compute() {
     //     const auto [particle_it, particle_index] =
     //             m_sys.all.find_particle_and_index(p.particle_id);
     //     if (particle_index == std::numeric_limits<size_t>::max()) {
-    //         throw std::runtime_error("The particle in bonds does not exist.");
+    //         throw std::runtime_error("The particle in bonds does not
+    //         exist.");
     //     }
     //     const auto &current_particle = *particle_it;
     //     // Apply force_function between current particle and its neighbors
@@ -65,7 +70,8 @@ void PairBondForce::compute() {
     //         BondChain chain = {1, 2, 2.0};
     //         current_particle_force = ArrayUtilities::plus(
     //                 current_particle_force,
-    //                 force_function(current_particle, current_neighbor, chain));
+    //                 force_function(current_particle, current_neighbor,
+    //                 chain));
     //     }
     // }
 }
