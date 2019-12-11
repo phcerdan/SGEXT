@@ -52,9 +52,6 @@ void IntegratorTwoStep::update(unsigned int time_step) {
 
 };
 
-void VerletVelocitiesIntegratorMethod::integrate() {
-    std::cout << "Do Nothing, update() in Integrator has to compute net_forces" << std::endl;
-}
 void VerletVelocitiesIntegratorMethod::integrateStepOne() {
     // perform the first half step of velocity verlet
     // r(t+deltaT) = r(t) + v(t)*deltaT + (1/2)a(t)*deltaT^2

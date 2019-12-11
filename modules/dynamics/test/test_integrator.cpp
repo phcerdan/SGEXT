@@ -41,10 +41,10 @@ struct IntegratorPairBondForce_Fixture : public ::testing::Test {
                                         const SG::Bond &chain) {
             const auto d_ete = ArrayUtilities::minus(b.pos, a.pos); // F_{a, b}
             const auto d_ete_modulo = ArrayUtilities::norm(d_ete);
-            // TODO, add parameter for bond:
-            // const double l_contour_length = 100;
             const auto &l_contour_length =
                     static_cast<const SG::BondChain &>(chain).length_contour;
+            std::cout << "[" << a.id << ", " << b.id
+                      << "] lengh_contour: " << l_contour_length << std::endl;
             const double l_persistence = 1000;
             const double relative_extension = d_ete_modulo / l_contour_length;
             const double monomer_anisotropy_inverse = 1 / l_persistence;
@@ -158,9 +158,53 @@ TEST_F(IntegratorPairBondForce_Fixture, write_wtu_file) {
     }
 }
 
+TEST_F(IntegratorPairBondForce_Fixture,
+       test_unique_bonds_from_system_conexions) {
+    auto bond_collection =
+            SG::make_unique_bonds_from_system_conexions<SG::Bond>(sys);
+    for (const auto &bond : bond_collection.bonds) {
+        print(*bond, std::cout);
+    }
+    EXPECT_EQ(*bond_collection.bonds[0], SG::Bond(10, 11));
+    EXPECT_EQ(*bond_collection.bonds[1], SG::Bond(11, 12));
+    EXPECT_EQ(*bond_collection.bonds[2], SG::Bond(11, 13));
+}
+
 TEST_F(IntegratorPairBondForce_Fixture, test_unique_bonds) {
     auto bonds = SG::unique_bonds(sys);
     for (const auto &bond : bonds) {
         print(bond, std::cout);
+    }
+    EXPECT_EQ(bonds[0], SG::Bond(10, 11));
+    EXPECT_EQ(bonds[1], SG::Bond(11, 12));
+    EXPECT_EQ(bonds[2], SG::Bond(11, 13));
+}
+
+TEST_F(IntegratorPairBondForce_Fixture, bonds_with_properties) {
+    std::cout << "IntegratorPairBondForce_Fixture: bonds_with_properties" << std::endl;
+    const size_t time_steps = 10;
+    const std::string base_file = "./system_with_props";
+
+    std::static_pointer_cast<SG::BondChain>(sys.bonds.bonds[0])
+            ->length_contour = 100;
+    std::static_pointer_cast<SG::BondChain>(sys.bonds.bonds[1])
+            ->length_contour = 2000;
+    std::static_pointer_cast<SG::BondChain>(sys.bonds.bonds[2])
+            ->length_contour = 30000;
+
+    // time_step = 0
+    {
+        const size_t time_step = 0;
+        const std::string final_file =
+                base_file + std::to_string(time_step) + ".vtu";
+        std::ofstream fout(final_file);
+        SG::write_vtu_file(sys, final_file);
+    }
+    for (size_t time_step = 1; time_step < time_steps; ++time_step) {
+        const std::string final_file =
+                base_file + std::to_string(time_step) + ".vtu";
+        std::ofstream fout(final_file);
+        integrator.update(time_step);
+        SG::write_vtu_file(sys, final_file);
     }
 }

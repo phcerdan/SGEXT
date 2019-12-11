@@ -79,7 +79,6 @@ std::vector<Bond> unique_bonds(const System &sys) {
     }
     return bonds;
 }
-
 } // namespace SG
 
 

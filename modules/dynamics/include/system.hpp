@@ -59,5 +59,25 @@ struct System {
  * @return vector with unique Bonds
  */
 std::vector<Bond> unique_bonds(const System &sys);
+
+template<typename TBond>
+BondCollection make_unique_bonds_from_system_conexions(const System &sys) {
+    BondCollection bond_collection;
+    bond_collection.sorted = true;
+    auto & bonds = bond_collection.bonds;
+    for (const auto &particle_neighbor : sys.conexions.collection) {
+        const auto source_particle_id = particle_neighbor.particle_id;
+        for (const auto &neigh : particle_neighbor.neighbors) {
+            auto bond_ptr = std::make_shared<TBond>(source_particle_id, neigh);
+            sort(*bond_ptr);
+            auto found = bond_collection.find_bond(*bond_ptr);
+            if (found == std::end(bonds)) {
+                bonds.push_back(bond_ptr);
+                bond_collection.sort();
+            }
+        }
+    }
+    return bond_collection;
+}
 } // namespace SG
 #endif

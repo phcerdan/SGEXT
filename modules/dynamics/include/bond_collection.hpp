@@ -127,6 +127,7 @@ struct BondCollection {
     bond_vector_t::const_iterator find_bond(size_t bond_id_a,
                                             size_t bond_id_b) const;
     bond_vector_t find_all_bonds_with_id(size_t bond_id_any);
+    bond_vector_t find_all_bonds_with_id(size_t bond_id_any) const;
 };
 
 void print(const BondCollection &collection,
