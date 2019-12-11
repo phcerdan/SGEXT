@@ -27,9 +27,9 @@ void IntegratorTwoStep::update(unsigned int time_step) {
     }
     this->integrator_method->integrateStepOne();
     // compute all types of forces
-    for (auto &f : this->force_types) {
-        f->compute();
-        for (auto &particle_force : f->particle_forces) {
+    for (auto &force_type : this->force_types) {
+        force_type->compute();
+        for (auto &particle_force : force_type->particle_forces) {
             std::cout << "Particle: " << particle_force.particle_id
                       << ", force: "
                       << ArrayUtilities::to_string(particle_force.force)
