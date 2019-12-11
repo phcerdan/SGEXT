@@ -55,6 +55,7 @@ struct System4Fixture : public System {
         conexions.collection.emplace_back(
                 ParticleNeighbors(all.particles[3].id, {all.particles[1].id}));
         all.sort();
+        this->bonds = SG::make_unique_bonds_from_system_conexions<SG::BondChain>(*this);
     }
 };
 

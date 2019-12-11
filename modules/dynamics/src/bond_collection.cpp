@@ -28,6 +28,10 @@ BondCollection::bond_vector_t
 BondCollection::find_all_bonds_with_id(size_t bond_id_any) {
     return find_all_bonds_with_id(std::begin(bonds), std::end(bonds), bond_id_any);
 };
+BondCollection::bond_vector_t
+BondCollection::find_all_bonds_with_id(size_t bond_id_any) const {
+    return find_all_bonds_with_id(std::begin(bonds), std::end(bonds), bond_id_any);
+};
 
 void print(const BondCollection &collection,
            std::ostream &os,
