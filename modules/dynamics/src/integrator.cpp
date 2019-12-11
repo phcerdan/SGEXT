@@ -7,14 +7,14 @@
 
 namespace SG {
 
-void Integrator::compute_net_forces(System & sys) const {
+void Integrator::compute_net_forces(System &sys) const {
     const auto nparts = sys.all.particles.size();
     for (size_t part_index = 0; part_index < nparts; ++part_index) {
-        auto & net_force = sys.all.particles[part_index].dynamics.net_force;
+        auto &net_force = sys.all.particles[part_index].dynamics.net_force;
         net_force = ArrayUtilities::Array3D(); // zero
         for (auto &force_type : force_types) {
             net_force = ArrayUtilities::plus(
-                    net_force, force_type->forces[part_index]);
+                    net_force, force_type->particle_forces[part_index].force);
         };
     }
 }
@@ -22,19 +22,23 @@ void Integrator::compute_net_forces(System & sys) const {
 void IntegratorTwoStep::update(unsigned int time_step) {
     // sum all forces affecting every particles and
     // perform integration to get positions from forces.
-    if(!integrator_method) {
+    if (!integrator_method) {
         throw std::runtime_error("Provide an integrator method to Integrator");
     }
     this->integrator_method->integrateStepOne();
     // compute all types of forces
-    for(auto & f : this->force_types) {
+    for (auto &f : this->force_types) {
         f->compute();
-        std::cout << ArrayUtilities::to_string(f->forces[2]) << std::endl;
+        for (auto &particle_force : f->particle_forces) {
+            std::cout << "Particle: " << particle_force.particle_id
+                      << ", force: "
+                      << ArrayUtilities::to_string(particle_force.force)
+                      << std::endl;
+        }
     }
     // sum net forces
     this->compute_net_forces(m_sys);
     this->integrator_method->integrateStepTwo();
-
 };
 
 void VerletVelocitiesIntegratorMethod::integrateStepOne() {
