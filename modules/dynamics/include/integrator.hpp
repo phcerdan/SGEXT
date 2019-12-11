@@ -44,12 +44,10 @@ struct VerletVelocitiesIntegratorMethod : public TwoStepIntegratorMethod {
     using TwoStepIntegratorMethod::TwoStepIntegratorMethod;
 
     /**
-     * @param forces Corresponding to the final forces on each particle
-     * (sum of many forces).
-     * The method is decoupled with the type of force.
-     * TODO: right now it assumes all particles of the system
+     * TODO: doing nothing, the work is done in the integrator,
+     * calling the integrateSteps in order
      */
-    void integrate() override;
+    void integrate() override {};
 
     /**
      * Positions are moved to timestep+1 and velocities to timestep+1/2
@@ -62,18 +60,13 @@ struct VerletVelocitiesIntegratorMethod : public TwoStepIntegratorMethod {
     void integrateStepTwo() override;
 };
 
-// TODO: An integrator should:
 // 1. Collect, and sum all the forces affecting every particle.
 // 2. Integrate equation to get new positions from current state of the system
 //    plus the forces.
-//
 class Integrator {
   public:
     explicit Integrator(System &sys) : m_sys(sys){};
     virtual ~Integrator(){};
-    /**
-     * TODO: Integrator should be an interface, update should be pure virtual
-     */
     virtual void update(unsigned int time_step) = 0;
     /// Compute the sum of forces for each particle and store it in Particle
     virtual void compute_net_forces(System &sys) const;
