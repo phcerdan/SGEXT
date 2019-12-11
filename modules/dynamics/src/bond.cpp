@@ -19,6 +19,7 @@
  * *******************************************************************/
 
 #include "bond.hpp"
+#include <memory>
 
 namespace SG {
 
@@ -42,9 +43,6 @@ bool operator<(const Bond &lhs, const Bond &rhs) {
 }
 
 void print(const Bond &bonded_pair, std::ostream &os, bool add_end_of_line) {
-    // os << "id_a: " << bonded_pair.id_a;
-    // os << ", ";
-    // os << "id_b: " << bonded_pair.id_b;
     os << "[" << bonded_pair.id_a;
     os << ", ";
     os << bonded_pair.id_b;
@@ -57,5 +55,14 @@ void sort(Bond &bonded_pair) {
     if (bonded_pair.id_a > bonded_pair.id_b) {
         std::swap(bonded_pair.id_a, bonded_pair.id_b);
     }
+};
+
+void print(const BondChain & bonded_pair,
+           std::ostream &os,
+           bool add_end_of_line) {
+    print(static_cast<const Bond&>(bonded_pair), os, false);
+    os << " Lc: " << bonded_pair.length_contour;
+    if (add_end_of_line)
+        os << std::endl;
 };
 } // namespace SG
