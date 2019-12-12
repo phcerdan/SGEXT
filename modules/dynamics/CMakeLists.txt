@@ -38,6 +38,10 @@ target_link_libraries(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY}
   ${SG_MODULE_${SG_MODULE_NAME}_DEPENDS}
   )
 
+if(SG_REQUIRES_VTK)
+  target_compile_definitions(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} PUBLIC SG_USING_VTK)
+endif()
+
 if(SG_BUILD_TESTING)
   add_subdirectory(test)
 endif()
