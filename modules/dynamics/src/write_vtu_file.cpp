@@ -4,6 +4,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "write_vtu_file.hpp"
+#include "bond.hpp"
 
 #include <vtkDoubleArray.h>
 #include <vtkIdTypeArray.h>
@@ -11,6 +12,9 @@
 #include <vtkPointData.h>
 #include <vtkUnstructuredGrid.h>
 #include <vtkXMLUnstructuredGridWriter.h>
+
+#include <vtkCellData.h>
+#include <vtkXMLUnstructuredGridReader.h>
 
 namespace SG {
 void write_vtu_file(const System &sys, const std::string &file_name) {
@@ -27,17 +31,20 @@ void write_vtu_file(const System &sys, const std::string &file_name) {
     ugrid->SetPoints(vtk_points);
 
     // Set topology using bonds
-    const auto & unique_bonds = sys.bonds.bonds;
+    const auto &unique_bonds = sys.bonds.bonds;
     // auto unique_bonds = SG::unique_bonds(sys);
-    if(unique_bonds.empty()) {
-        std::cerr << "WARNING: write_vtu_file, the system has no bonds." << std::endl;
+    if (unique_bonds.empty()) {
+        std::cerr << "WARNING: write_vtu_file, the system has no bonds."
+                  << std::endl;
     }
     // Allocate Number of cells, i.e number of bonds in the system;
     ugrid->Allocate(unique_bonds.size());
     std::vector<vtkIdType> cell_ids;
     for (const auto &bond : unique_bonds) {
-        // This adds cells (Bond adds vtkLines, but it can be overriden by derived classes)
-        cell_ids.emplace_back(bond->add_to_vtu(ugrid, particle_id_to_vtk_id_map));
+        // This adds cells (Bond adds vtkLines, but it can be overriden by
+        // derived classes)
+        cell_ids.emplace_back(
+                bond->add_to_vtu(ugrid, particle_id_to_vtk_id_map));
     }
     // second sweep to append data dynamically depending on the type of Bond,
     // (because vtk arrays needs to know the total number of cells beforehand)
@@ -108,4 +115,97 @@ void write_vtu_file(const System &sys, const std::string &file_name) {
     ugrid_writer->SetInputData(ugrid);
     ugrid_writer->Update();
 }
+
+std::unique_ptr<System> read_vtu_file(const std::string &file_name) {
+    auto sys = std::make_unique<System>();
+
+    auto reader = vtkSmartPointer<vtkXMLUnstructuredGridReader>::New();
+    reader->SetFileName(file_name.c_str());
+    reader->Update();
+    const auto ugrid = reader->GetOutput();
+    const auto npoints = ugrid->GetNumberOfPoints(); // particles
+    const auto ncells = ugrid->GetNumberOfCells();   // bonds
+
+    auto &particles = sys->all.particles;
+    auto &bonds = sys->bonds.bonds;
+    auto &conexions_collection = sys->conexions.collection;
+    particles.resize(npoints);
+    bonds.resize(ncells);
+    conexions_collection.resize(npoints);
+
+    read_vtu_point_data(ugrid, sys.get());
+    read_vtu_bond_ids(ugrid, sys.get());
+    read_vtu_bond_contour_length(ugrid, sys.get());
+
+    return sys;
+}
+void read_vtu_point_data(vtkUnstructuredGrid *ugrid, System *sys) {
+    const auto npoints = ugrid->GetNumberOfPoints(); // particles
+    auto &particles = sys->all.particles;
+    if (particles.size() != npoints) {
+        particles.resize(npoints);
+    }
+    // Get arrays of points
+    const auto point_data = ugrid->GetPointData();
+
+    const auto acc_array = point_data->GetArray("acceleration");
+    const auto vel_array = point_data->GetArray("velocity");
+    const auto mass_array = point_data->GetArray("mass");
+    const auto volume_array = point_data->GetArray("volume");
+    const auto radius_array = point_data->GetArray("radius");
+    const auto particle_id_array = point_data->GetArray("particle_id");
+
+    for (size_t i = 0; i < npoints; i++) {
+        particles[i].id = particle_id_array->GetTuple1(i);
+        memcpy(particles[i].pos.data(), ugrid->GetPoint(i), sizeof(double) * 3);
+        memcpy(particles[i].dynamics.acc.data(), acc_array->GetTuple3(i),
+               sizeof(double) * 3);
+        memcpy(particles[i].dynamics.vel.data(), vel_array->GetTuple3(i),
+               sizeof(double) * 3);
+        particles[i].material.mass = mass_array->GetTuple1(i);
+        particles[i].material.volume = volume_array->GetTuple1(i);
+        particles[i].material.radius = radius_array->GetTuple1(i);
+    }
+}
+
+void read_vtu_bond_ids(vtkUnstructuredGrid *ugrid, System *sys) {
+    const auto ncells = ugrid->GetNumberOfCells();   // bonds
+    auto &particles = sys->all.particles;
+    auto &bonds = sys->bonds.bonds;
+    // Populate bonds ids from Cell points
+    auto line_cell = vtkSmartPointer<vtkLine>::New();
+    for (size_t i = 0; i < ncells; ++i) {
+        // Get the cell (a vtkLine)
+        auto cell = ugrid->GetCell(i);
+        if (cell->GetCellType() != line_cell->GetCellType()) {
+            throw std::runtime_error(
+                    "The only allowed cells to read are vtkLine, but found a "
+                    "different one. Use another reader for this cell type and "
+                    "data.");
+        }
+        auto cell_point_ids = cell->GetPointIds();
+        auto line_id_a = cell_point_ids->GetId(0);
+        auto line_id_b = cell_point_ids->GetId(1);
+        // Create bond (Base class) with this info
+        bonds[i] = std::make_shared<Bond>(particles[line_id_a].id,
+                                          particles[line_id_b].id);
+    }
+}
+
+void read_vtu_bond_contour_length(vtkUnstructuredGrid *ugrid, System *sys) {
+    const auto ncells = ugrid->GetNumberOfCells();   // bonds
+    auto &bonds = sys->bonds.bonds;
+    // Get cell data
+    auto cell_data = ugrid->GetCellData();
+    const std::string array_name = "contour_length";
+    auto contour_length_array = cell_data->GetArray(array_name.c_str());
+    if (contour_length_array) {
+        for (size_t i = 0; i < ncells; ++i) {
+            bonds[i] = std::make_shared<BondChain>(
+                    bonds[i]->id_a, bonds[i]->id_b,
+                    contour_length_array->GetTuple1(i));
+        }
+    }
+}
+
 } // namespace SG

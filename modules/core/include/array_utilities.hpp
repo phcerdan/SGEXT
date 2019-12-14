@@ -138,6 +138,17 @@ inline Array3D plus_scalar(const Array3D &lhs,
 }
 
 /**
+ * negation of array: -lhs
+ *
+ * @param lhs input array
+ *
+ * @return negation of array
+ */
+inline Array3D negate(const Array3D &lhs) {
+    return {{-lhs[0], -lhs[1], -lhs[2]}};
+}
+
+/**
  * Difference between arrays: lhs - rhs
  * minus(a,b) = a - b;
  *
