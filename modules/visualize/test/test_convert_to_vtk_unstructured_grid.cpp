@@ -19,6 +19,16 @@
  * *******************************************************************/
 
 #include "test_fixtures.hpp"
+#include "convert_to_vtk_unstructured_grid.hpp"
 
-TEST_F(sg_3D, visualize) { SG::visualize_spatial_graph(g); }
+TEST_F(sg_3D, convert_to_vtk_unstructured_grid) {
+    auto ugrid = SG::convert_to_vtk_unstructured_grid(g);
+    const std::string file_name = "./converted_graph_to_vtk_unstructured_grid.vtu";
+    SG::write_vtk_unstructured_grid(ugrid, file_name);
+}
 
+TEST_F(sg_3D, convert_to_vtk_unstructured_grid_with_edge_points) {
+    const std::string file_name = "./converted_graph_to_vtk_unstructured_grid_with_edge_points.vtu";
+    auto ugrid = SG::convert_to_vtk_unstructured_grid_with_edge_points(g);
+    SG::write_vtk_unstructured_grid(ugrid, file_name);
+}

@@ -29,6 +29,7 @@ endif()
 set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
     ${qt_sources}
     convert_to_vtk_graph.cpp
+    convert_to_vtk_unstructured_grid.cpp
     visualize_common.cpp
     visualize_object.cpp
     visualize_spatial_graph.cpp
