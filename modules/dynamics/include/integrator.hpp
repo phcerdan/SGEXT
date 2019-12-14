@@ -9,8 +9,8 @@
 #include <memory>
 #include <vector>
 
-#include "system.hpp"
 #include "force_compute.hpp"
+#include "system.hpp"
 namespace SG {
 
 // TODO Add a particle_selector (with lambda), here or on Integrator.
@@ -47,7 +47,7 @@ struct VerletVelocitiesIntegratorMethod : public TwoStepIntegratorMethod {
      * TODO: doing nothing, the work is done in the integrator,
      * calling the integrateSteps in order
      */
-    void integrate() override {};
+    void integrate() override{};
 
     /**
      * Positions are moved to timestep+1 and velocities to timestep+1/2
@@ -82,7 +82,8 @@ class Integrator {
      * @return
      */
     template <typename TForceCompute>
-    auto add_force(std::shared_ptr<TForceCompute> new_force) {
+    std::shared_ptr<TForceCompute>
+    add_force(std::shared_ptr<TForceCompute> new_force) {
         force_types.push_back(std::move(new_force));
         return std::dynamic_pointer_cast<TForceCompute>(force_types.back());
     }
