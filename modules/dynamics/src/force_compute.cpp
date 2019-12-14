@@ -75,4 +75,22 @@ void PairBondForce::compute() {
     //     }
     // }
 }
+
+void PairBondForceWithBond::compute() {
+    if (!force_function) {
+        throw std::runtime_error("force_function is not set in PairBondForceWithBond");
+    }
+
+    // Compute and store forces per bond
+    for (auto &bond_force : bond_forces) {
+        const auto [p_a, p_a_index ] =
+            m_sys.all.find_particle_and_index(bond_force.bond->id_a);
+        const auto [p_b, p_b_index ] =
+            m_sys.all.find_particle_and_index(bond_force.bond->id_b);
+        bond_force.force = force_function(*p_a, *p_b, *bond_force.bond);
+        // Assign to the per particle forces
+        particle_forces[p_a_index].force = bond_force.force;
+        particle_forces[p_b_index].force = ArrayUtilities::negate(bond_force.force);
+    }
+};
 }; // namespace SG

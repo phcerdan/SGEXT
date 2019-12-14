@@ -71,5 +71,41 @@ struct PairBondForce : public ForceCompute {
     const ParticleNeighborsCollection &conexions = m_sys.conexions;
 };
 
+// TODO Add BondForce and BondForceCompute given force per bond
+// This should compute the force F_ab only once (per bond) and assign the force
+// to the particles i.e F_ab = - F_ba
+//
+struct BondForce {
+    Bond* bond; // not owning
+    ArrayUtilities::Array3D force;
+    BondForce() = default;
+    BondForce(Bond * input_bond, const ArrayUtilities::Array3D & input_force) :
+      bond(input_bond), force(input_force) {}
+    BondForce(const BondForce&) = default;
+    BondForce(BondForce&&) = default;
+    BondForce& operator=(const BondForce&) = default;
+    BondForce& operator=(BondForce&&) = default;
+    ~BondForce() = default;
+};
+
+struct PairBondForceWithBond : public ForceCompute {
+    using force_function_t = std::function<ArrayUtilities::Array3D(
+            const Particle &, const Particle &, const Bond &)>;
+    using ForceCompute::ForceCompute;
+    PairBondForceWithBond(const System &sys, force_function_t force_function)
+            : ForceCompute(sys), force_function(force_function) {
+              bond_forces.reserve(sys.bonds.bonds.size());
+              for (const auto &bond : sys.bonds.bonds) {
+                bond_forces.emplace_back(bond.get(), ArrayUtilities::Array3D());
+              }
+            }
+    force_function_t force_function;
+    void compute() override;
+    std::vector<BondForce> bond_forces;
+
+  protected:
+    const ParticleNeighborsCollection &conexions = m_sys.conexions;
+};
+
 } // namespace SG
 #endif
