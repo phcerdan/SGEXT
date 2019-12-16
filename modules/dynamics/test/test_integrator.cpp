@@ -18,25 +18,25 @@ struct IntegratorPairBondForce_Fixture : public ::testing::Test {
         integrator.integrator_method =
                 std::make_shared<SG::VerletVelocitiesIntegratorMethod>(sys,
                                                                        deltaT);
-        // create pair_force
-        pair_force = integrator.add_force(
-                std::make_shared<SG::PairBondForce>(SG::PairBondForce(sys)));
-        pair_force->force_function = [](const SG::Particle &a,
-                                        const SG::Particle &b,
-                                        const SG::Bond &chain) {
-            const auto d_ete = ArrayUtilities::minus(b.pos, a.pos); // F_{a, b}
-            const auto d_ete_modulo = ArrayUtilities::norm(d_ete);
-            const auto &l_contour_length =
-                    static_cast<const SG::BondChain &>(chain).length_contour;
-            std::cout << "[" << a.id << ", " << b.id
-                      << "] lengh_contour: " << l_contour_length << std::endl;
-            const double l_persistence = 1000;
-            const double relative_extension = d_ete_modulo / l_contour_length;
-            const double monomer_anisotropy_inverse = 1 / l_persistence;
-            const auto force = SG::force_extension_ev_wlc_normalized(
-                    relative_extension, monomer_anisotropy_inverse);
-            return ArrayUtilities::product_scalar(d_ete, force / d_ete_modulo);
-        };
+        // // create pair_force
+        // pair_force = integrator.add_force(
+        //         std::make_shared<SG::PairBondForce>(sys));
+        // pair_force->force_function = [](const SG::Particle &a,
+        //                                 const SG::Particle &b,
+        //                                 const SG::Bond &chain) {
+        //     const auto d_ete = ArrayUtilities::minus(b.pos, a.pos); // F_{a, b}
+        //     const auto d_ete_modulo = ArrayUtilities::norm(d_ete);
+        //     const auto &l_contour_length =
+        //             static_cast<const SG::BondChain &>(chain).length_contour;
+        //     std::cout << "[" << a.id << ", " << b.id
+        //               << "] lengh_contour: " << l_contour_length << std::endl;
+        //     const double l_persistence = 1000;
+        //     const double relative_extension = d_ete_modulo / l_contour_length;
+        //     const double monomer_anisotropy_inverse = 1 / l_persistence;
+        //     const auto force = SG::force_extension_ev_wlc_normalized(
+        //             relative_extension, monomer_anisotropy_inverse);
+        //     return ArrayUtilities::product_scalar(d_ete, force / d_ete_modulo);
+        // };
     }
 };
 
@@ -166,7 +166,8 @@ TEST_F(IntegratorPairBondForce_Fixture, test_unique_bonds) {
 }
 
 TEST_F(IntegratorPairBondForce_Fixture, bonds_with_properties) {
-    std::cout << "IntegratorPairBondForce_Fixture: bonds_with_properties" << std::endl;
+    std::cout << "IntegratorPairBondForce_Fixture: bonds_with_properties"
+              << std::endl;
     const size_t time_steps = 10;
     const std::string base_file = "./system_with_props";
 
@@ -204,21 +205,76 @@ TEST_F(IntegratorPairBondForce_Fixture, read_vtu_file) {
 
 // TODO Incomplete, develop and make it into a function
 TEST_F(IntegratorPairBondForce_Fixture, compute_pre_stress) {
-    auto force_compute = std::make_shared<SG::PairBondForce>(sys);
-    force_compute->force_function = [](const SG::Particle &a,
-                                        const SG::Particle &b,
-                                        const SG::Bond &chain) {
-            const auto d_ete = ArrayUtilities::minus(b.pos, a.pos); // F_{a, b}
-            const auto d_ete_modulo = ArrayUtilities::norm(d_ete);
-            const auto &l_contour_length =
-                    static_cast<const SG::BondChain &>(chain).length_contour;
-            std::cout << "[" << a.id << ", " << b.id
-                      << "] lengh_contour: " << l_contour_length << std::endl;
-            const double l_persistence = 1000;
-            const double relative_extension = d_ete_modulo / l_contour_length;
-            const double monomer_anisotropy_inverse = 1 / l_persistence;
-            const auto force = SG::force_extension_ev_wlc_normalized(
-                    relative_extension, monomer_anisotropy_inverse);
-            return ArrayUtilities::product_scalar(d_ete, force / d_ete_modulo);
+    auto force_function = [](const SG::Particle &a,
+                                       const SG::Particle &b,
+                                       const SG::Bond &chain) {
+        const auto d_ete = ArrayUtilities::minus(b.pos, a.pos); // F_{a, b}
+        const auto d_ete_modulo = ArrayUtilities::norm(d_ete);
+        const auto &l_contour_length =
+                static_cast<const SG::BondChain &>(chain).length_contour;
+        std::cout << "wlc_petrosyan_normalized force. ";
+        std::cout << "[" << a.id << ", " << b.id
+                  << "] lengh_contour: " << l_contour_length << std::endl;
+        const double relative_extension = d_ete_modulo / l_contour_length;
+        // const double l_persistence = 1000;
+        // const double monomer_anisotropy_inverse = 1 / l_persistence;
+        // const auto force = SG::force_extension_ev_wlc_normalized(
+        //         relative_extension, monomer_anisotropy_inverse);
+        const auto force = SG::force_extension_wlc_petrosyan_normalized(
+                relative_extension);
+        // d_ete/d_ete_modulo is the unitary vector, in the direction F_{a,b}
+        return ArrayUtilities::product_scalar(d_ete, force / d_ete_modulo);
+
+            // const auto d_ete = ArrayUtilities::minus(b.pos, a.pos); // F_{a, b}
+            // const auto d_ete_modulo = ArrayUtilities::norm(d_ete);
+            // const auto &l_contour_length =
+            //         static_cast<const SG::BondChain &>(chain).length_contour;
+            // std::cout << "[" << a.id << ", " << b.id
+            //           << "] lengh_contour: " << l_contour_length << std::endl;
+            // const double l_persistence = 1000;
+            // const double relative_extension = d_ete_modulo / l_contour_length;
+            // const double monomer_anisotropy_inverse = 1 / l_persistence;
+            // const auto force = SG::force_extension_ev_wlc_normalized(
+            //         relative_extension, monomer_anisotropy_inverse);
+            // return ArrayUtilities::product_scalar(d_ete, force / d_ete_modulo);
     };
+    std::static_pointer_cast<SG::BondChain>(sys.bonds.bonds[0])
+            ->length_contour = 100;
+    std::static_pointer_cast<SG::BondChain>(sys.bonds.bonds[1])
+            ->length_contour = 100;
+    std::static_pointer_cast<SG::BondChain>(sys.bonds.bonds[2])
+            ->length_contour = 100;
+
+    // // Regular (variable/dynamic) force
+    auto force_compute = std::make_shared<SG::PairBondForceWithBond>(sys);
+    force_compute->force_function = force_function;
+    integrator.add_force(force_compute);
+
+    // Use FixedPairBondForceWithBond to set this force
+    // Save this pre-stress forces in the integrator
+    auto fixed_force_compute = std::make_shared<SG::FixedPairBondForceWithBond>(sys);
+    fixed_force_compute->force_function = force_function;
+    fixed_force_compute->compute_once();
+    fixed_force_compute->negate_forces();
+    integrator.add_force(fixed_force_compute);
+
+    const size_t time_steps = 10;
+    const std::string base_file = "./with_pre_stress";
+
+
+    // time_step = 0
+    {
+        const size_t time_step = 0;
+        const std::string final_file =
+                base_file + std::to_string(time_step) + ".vtu";
+        std::ofstream fout(final_file);
+        SG::write_vtu_file(sys, final_file);
+    }
+    for (size_t time_step = 1; time_step < time_steps; ++time_step) {
+        const std::string final_file =
+                base_file + std::to_string(time_step) + ".vtu";
+        std::ofstream fout(final_file);
+        integrator.update(time_step);
+        SG::write_vtu_file(sys, final_file);
+    }
 }
