@@ -50,6 +50,12 @@ struct ForceCompute {
     // Compute and populate force;
     virtual void compute() = 0;
     std::vector<ParticleForce> particle_forces;
+    inline void reset_forces_to_zero() {
+      for(auto & pf : particle_forces) {
+        std::fill(pf.force.begin(), pf.force.end(), 0);
+      }
+    }
+    inline virtual std::string get_type() {return  "ForceCompute";};
 
   protected:
     const System &m_sys;
@@ -59,6 +65,7 @@ struct ForceCompute {
  * ForceCompute between a pair of Particles
  */
 struct PairBondForce : public ForceCompute {
+    inline virtual std::string get_type() override {return  "PairBondForce";};
     using force_function_t = std::function<ArrayUtilities::Array3D(
             const Particle &, const Particle &, const Bond &)>;
     using ForceCompute::ForceCompute;
@@ -89,22 +96,40 @@ struct BondForce {
 };
 
 struct PairBondForceWithBond : public ForceCompute {
+    inline virtual std::string get_type() override {return  "PairBondForceWithBond";};
     using force_function_t = std::function<ArrayUtilities::Array3D(
             const Particle &, const Particle &, const Bond &)>;
     using ForceCompute::ForceCompute;
-    PairBondForceWithBond(const System &sys, force_function_t force_function)
-            : ForceCompute(sys), force_function(force_function) {
+    PairBondForceWithBond(const System &sys): ForceCompute(sys) {
               bond_forces.reserve(sys.bonds.bonds.size());
               for (const auto &bond : sys.bonds.bonds) {
                 bond_forces.emplace_back(bond.get(), ArrayUtilities::Array3D());
               }
+    }
+    PairBondForceWithBond(const System &sys, force_function_t force_function)
+            : PairBondForceWithBond(sys) {
+              force_function = force_function;
             }
     force_function_t force_function;
     void compute() override;
     std::vector<BondForce> bond_forces;
+    inline void reset_bond_forces_to_zero() {
+      for(auto & bf : bond_forces) {
+        std::fill(bf.force.begin(), bf.force.end(), 0);
+      }
+    };
 
   protected:
     const ParticleNeighborsCollection &conexions = m_sys.conexions;
+};
+
+struct FixedPairBondForceWithBond: public PairBondForceWithBond {
+  inline virtual std::string get_type() override {return  "FixedPairBondForceWithBond";};
+  using PairBondForceWithBond::PairBondForceWithBond;
+  void compute() override;
+  void compute_once();
+  void negate_forces();
+  bool forces_are_populated = false;
 };
 
 } // namespace SG

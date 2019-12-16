@@ -26,7 +26,7 @@ void Integrator::compute_net_forces(System &sys) const {
     const auto nparts = sys.all.particles.size();
     for (size_t part_index = 0; part_index < nparts; ++part_index) {
         auto &net_force = sys.all.particles[part_index].dynamics.net_force;
-        net_force = ArrayUtilities::Array3D(); // zero
+        std::fill(net_force.begin(), net_force.end(), 0.0);
         for (auto &force_type : force_types) {
             net_force = ArrayUtilities::plus(
                     net_force, force_type->particle_forces[part_index].force);
@@ -44,6 +44,7 @@ void IntegratorTwoStep::update(unsigned int time_step) {
     // compute all types of forces
     for (auto &force_type : this->force_types) {
         force_type->compute();
+        std::cout << "force_type: " << force_type->get_type() << std::endl;
         for (auto &particle_force : force_type->particle_forces) {
             std::cout << "Particle: " << particle_force.particle_id
                       << ", force: "
@@ -54,6 +55,11 @@ void IntegratorTwoStep::update(unsigned int time_step) {
     // sum net forces
     this->compute_net_forces(m_sys);
     this->integrator_method->integrateStepTwo();
+    for (auto &particle : m_sys.all.particles) {
+        std::cout << "id: " << particle.id
+                  << "; net_force: " << ArrayUtilities::to_string(particle.dynamics.net_force)
+                  << std::endl;
+    }
 };
 
 void VerletVelocitiesIntegratorMethod::integrateStepOne() {

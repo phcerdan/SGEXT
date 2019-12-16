@@ -99,7 +99,7 @@ class Integrator {
     template <typename TForceCompute>
     std::shared_ptr<TForceCompute>
     add_force(std::shared_ptr<TForceCompute> new_force) {
-        force_types.push_back(std::move(new_force));
+        force_types.push_back(new_force);
         return std::dynamic_pointer_cast<TForceCompute>(force_types.back());
     }
     /** Multiple forces can act over a particle.

@@ -27,6 +27,8 @@ void PairBondForce::compute() {
         throw std::runtime_error("force_function is not set in PairBondForce");
     }
 
+    reset_forces_to_zero();
+
     size_t current_particle_index = 0;
     for (auto &particle : m_sys.all.particles) {
         auto bonds = m_sys.bonds.find_all_bonds_with_id(particle.id);
@@ -40,7 +42,7 @@ void PairBondForce::compute() {
                     particle_forces[current_particle_index].force;
             assert(particle.id == particle_forces[current_particle_index]
                                           .particle_id &&
-                   "particle ids are not synchornized in "
+                   "particle ids are not synchronized in "
                    "PairBondeForce:compute(), they should be sorted as well as "
                    "all the particles.");
             current_particle_force = ArrayUtilities::plus(
@@ -78,19 +80,54 @@ void PairBondForce::compute() {
 
 void PairBondForceWithBond::compute() {
     if (!force_function) {
-        throw std::runtime_error("force_function is not set in PairBondForceWithBond");
+        throw std::runtime_error(
+                "force_function is not set in PairBondForceWithBond");
     }
+
+    reset_forces_to_zero();
+    reset_bond_forces_to_zero();
 
     // Compute and store forces per bond
     for (auto &bond_force : bond_forces) {
-        const auto [p_a, p_a_index ] =
-            m_sys.all.find_particle_and_index(bond_force.bond->id_a);
-        const auto [p_b, p_b_index ] =
-            m_sys.all.find_particle_and_index(bond_force.bond->id_b);
+        const auto [p_a, p_a_index] =
+                m_sys.all.find_particle_and_index(bond_force.bond->id_a);
+        const auto [p_b, p_b_index] =
+                m_sys.all.find_particle_and_index(bond_force.bond->id_b);
+        // Assign to bond_force
         bond_force.force = force_function(*p_a, *p_b, *bond_force.bond);
         // Assign to the per particle forces
-        particle_forces[p_a_index].force = bond_force.force;
-        particle_forces[p_b_index].force = ArrayUtilities::negate(bond_force.force);
+        auto &force_on_a =
+            particle_forces[p_a_index].force;
+        auto &force_on_b =
+            particle_forces[p_b_index].force;
+        // Bond force is equal to F_{a,b}
+        force_on_a =
+            ArrayUtilities::plus(force_on_a, bond_force.force);
+        // change sign of bond_force for the F_{b,a}
+        force_on_b =
+            ArrayUtilities::minus(force_on_b, bond_force.force);
     }
 };
+
+void FixedPairBondForceWithBond::compute() {
+    // do nothing, the forces are fixed and set in compute_once()
+    if (!forces_are_populated) {
+        throw std::runtime_error(
+                "FixedPairBondForceWithBond forces need to be populated before "
+                "calling compute(). Use compute_once(), or manually set "
+                "forces_are_populated to true.");
+    }
+}
+void FixedPairBondForceWithBond::compute_once() {
+    PairBondForceWithBond::compute();
+    this->forces_are_populated = true;
+}
+void FixedPairBondForceWithBond::negate_forces() {
+      for(auto & pf : particle_forces) {
+        pf.force = ArrayUtilities::negate(pf.force);
+      }
+      for(auto & bf : bond_forces) {
+        bf.force = ArrayUtilities::negate(bf.force);
+      }
+}
 }; // namespace SG
