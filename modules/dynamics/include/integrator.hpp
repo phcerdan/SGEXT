@@ -16,7 +16,9 @@ namespace SG {
 // TODO Add a particle_selector (with lambda), here or on Integrator.
 // Integrator has IntegratorMethods
 struct IntegratorMethod {
-    explicit IntegratorMethod(System &sys, double deltaT_input)
+    explicit IntegratorMethod(System &sys)
+            : m_sys(sys) {}
+    IntegratorMethod(System &sys, double deltaT_input)
             : m_sys(sys), deltaT(deltaT_input){};
     virtual ~IntegratorMethod(){};
     double deltaT;
@@ -86,6 +88,9 @@ class Integrator {
     add_force(std::shared_ptr<TForceCompute> new_force) {
         force_types.push_back(new_force);
         return std::dynamic_pointer_cast<TForceCompute>(force_types.back());
+    }
+    void add_force(std::shared_ptr<ForceCompute> new_force) {
+        force_types.push_back(new_force);
     }
     /** Multiple forces can act over a particle.
      * Each ForceCompute has a force per particle.
