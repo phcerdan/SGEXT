@@ -61,6 +61,17 @@ struct ForceCompute {
     const System &m_sys;
 };
 
+struct ParticleForceCompute : public ForceCompute {
+    inline virtual std::string get_type() override {return  "ParticleForceCompute";};
+    using force_function_t = std::function<ArrayUtilities::Array3D(
+            const Particle &)>;
+    force_function_t force_function;
+    using ForceCompute::ForceCompute;
+    ParticleForceCompute(const System &sys, force_function_t force_function)
+            : ForceCompute(sys), force_function(force_function) {}
+    void compute() override;
+};
+
 /**
  * ForceCompute between a pair of Particles
  */

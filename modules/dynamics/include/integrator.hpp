@@ -80,7 +80,7 @@ struct VerletVelocitiesIntegratorMethod : public TwoStepIntegratorMethod {
 //    plus the forces.
 class Integrator {
   public:
-    explicit Integrator(System &sys) : m_sys(sys){};
+    explicit Integrator(System &sys) : m_sys(sys), all_old_state(sys.all){};
     virtual ~Integrator(){};
     virtual void update(unsigned int time_step) = 0;
     /// Compute the sum of forces for each particle and store it in Particle
@@ -112,6 +112,7 @@ class Integrator {
 
   protected:
     System &m_sys;
+    ParticleCollection all_old_state;
 };
 
 struct IntegratorTwoStep : public Integrator {
