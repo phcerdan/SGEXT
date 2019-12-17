@@ -29,21 +29,25 @@ void IntegratorTwoStep::update(unsigned int time_step) {
     // compute all types of forces
     for (auto &force_type : this->force_types) {
         force_type->compute();
-        std::cout << "force_type: " << force_type->get_type() << std::endl;
-        for (auto &particle_force : force_type->particle_forces) {
-            std::cout << "Particle: " << particle_force.particle_id
-                      << ", force: "
-                      << ArrayUtilities::to_string(particle_force.force)
-                      << std::endl;
+        { // TODO remove debug
+            std::cout << "force_type: " << force_type->get_type() << std::endl;
+            for (auto &particle_force : force_type->particle_forces) {
+                std::cout << "Particle: " << particle_force.particle_id
+                    << ", force: "
+                    << ArrayUtilities::to_string(particle_force.force)
+                    << std::endl;
+            }
         }
     }
     // sum net forces
     this->compute_net_forces(m_sys);
     this->integrator_method->integrateStepTwo();
-    for (auto &particle : m_sys.all.particles) {
-        std::cout << "id: " << particle.id
-                  << "; net_force: " << ArrayUtilities::to_string(particle.dynamics.net_force)
-                  << std::endl;
+    { // TODO remove debug
+        for (auto &particle : m_sys.all.particles) {
+            std::cout << "id: " << particle.id
+                << "; net_force: " << ArrayUtilities::to_string(particle.dynamics.net_force)
+                << std::endl;
+        }
     }
 };
 

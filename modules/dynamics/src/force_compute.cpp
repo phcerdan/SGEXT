@@ -115,4 +115,27 @@ void FixedPairBondForceWithBond::negate_forces() {
         bf.force = ArrayUtilities::negate(bf.force);
       }
 }
+
+void ParticleForceCompute::compute() {
+    if (!force_function) {
+        throw std::runtime_error("force_function is not set in PairBondForce");
+    }
+    reset_forces_to_zero();
+
+    size_t current_particle_index = 0;
+    for (auto &particle : m_sys.all.particles) {
+        auto &current_particle_force =
+            particle_forces[current_particle_index].force;
+        assert(particle.id == particle_forces[current_particle_index]
+                .particle_id &&
+                "particle ids are not synchronized in "
+                "PairBondeForce:compute(), they should be sorted as well as "
+                "all the particles.");
+        current_particle_force = ArrayUtilities::plus(
+                current_particle_force,
+                force_function(particle));
+        current_particle_index++;
+    }
+}
+
 }; // namespace SG
