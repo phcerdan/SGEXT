@@ -79,6 +79,12 @@ class TestArray3D(unittest.TestCase):
         array.plus_scalar(a1, 1.0)
         array.minus(a1,ax)
         array.minus_scalar(a1, 1.0)
+        a1_negated = array.negate(a1)
+        self.assertEqual(a1_negated[0], -a1[0]);
+        self.assertEqual(a1_negated[1], -a1[1]);
+        self.assertEqual(a1_negated[2], -a1[2]);
+        array.negate_in_place(ax)
+        self.assertEqual(ax[0], -1);
 
 if __name__ == '__main__':
     unittest.main()
