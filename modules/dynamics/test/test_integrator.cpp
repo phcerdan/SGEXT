@@ -6,6 +6,7 @@
 #include "bonded_forces.hpp"
 #include "dynamics_common_fixtures.hpp"
 #include "integrator.hpp"
+#include "unbonded_forces.hpp"
 #include "write_vtu_file.hpp"
 #include <fstream>
 
@@ -225,18 +226,6 @@ TEST_F(IntegratorPairBondForce_Fixture, compute_pre_stress) {
         // d_ete/d_ete_modulo is the unitary vector, in the direction F_{a,b}
         return ArrayUtilities::product_scalar(d_ete, force / d_ete_modulo);
 
-            // const auto d_ete = ArrayUtilities::minus(b.pos, a.pos); // F_{a, b}
-            // const auto d_ete_modulo = ArrayUtilities::norm(d_ete);
-            // const auto &l_contour_length =
-            //         static_cast<const SG::BondChain &>(chain).length_contour;
-            // std::cout << "[" << a.id << ", " << b.id
-            //           << "] lengh_contour: " << l_contour_length << std::endl;
-            // const double l_persistence = 1000;
-            // const double relative_extension = d_ete_modulo / l_contour_length;
-            // const double monomer_anisotropy_inverse = 1 / l_persistence;
-            // const auto force = SG::force_extension_ev_wlc_normalized(
-            //         relative_extension, monomer_anisotropy_inverse);
-            // return ArrayUtilities::product_scalar(d_ete, force / d_ete_modulo);
     };
     std::static_pointer_cast<SG::BondChain>(sys.bonds.bonds[0])
             ->length_contour = 100;
@@ -246,21 +235,29 @@ TEST_F(IntegratorPairBondForce_Fixture, compute_pre_stress) {
             ->length_contour = 100;
 
     // // Regular (variable/dynamic) force
-    auto force_compute = std::make_shared<SG::PairBondForceWithBond>(sys);
-    force_compute->force_function = force_function;
-    integrator.add_force(force_compute);
+    auto force_compute_pair_bond = std::make_shared<SG::PairBondForceWithBond>(sys);
+    force_compute_pair_bond->force_function = force_function;
+    integrator.add_force(force_compute_pair_bond);
 
     // Use FixedPairBondForceWithBond to set this force
     // Save this pre-stress forces in the integrator
-    auto fixed_force_compute = std::make_shared<SG::FixedPairBondForceWithBond>(sys);
-    fixed_force_compute->force_function = force_function;
-    fixed_force_compute->compute_once();
-    fixed_force_compute->negate_forces();
-    integrator.add_force(fixed_force_compute);
+    auto fixed_force_compute_pair_bond = std::make_shared<SG::FixedPairBondForceWithBond>(sys);
+    fixed_force_compute_pair_bond->force_function = force_function;
+    fixed_force_compute_pair_bond->compute_once();
+    fixed_force_compute_pair_bond->negate_forces();
+    integrator.add_force(fixed_force_compute_pair_bond);
+
+    auto force_function_drag = [](const SG::Particle &a) {
+        const double sphere_radius = 1.0;
+        const double fluid_viscosity = 1.0;
+        return SG::force_linear_drag(sphere_radius, fluid_viscosity, a.dynamics.vel);
+    };
+    auto force_compute_drag = std::make_shared<SG::ParticleForceCompute>(sys);
+    force_compute_drag->force_function = force_function_drag;
+    integrator.add_force(force_compute_drag);
 
     const size_t time_steps = 10;
     const std::string base_file = "./with_pre_stress";
-
 
     // time_step = 0
     {

@@ -9,6 +9,8 @@
 #include "array_utilities.hpp"
 #include <math.h>
 
+namespace SG {
+
 /**
  * Simple linear viscous force, proportional to velocity.
  * \f[ \vec{F} = - \mu \cdot \vec{v} \f]
@@ -47,4 +49,5 @@ force_linear_drag(double sphere_radius,
 // to the direction of shear, relative to displacement in the perpendicular
 // direction. https://en.wikipedia.org/wiki/Newtonian_fluid
 
+} // end namespace SG
 #endif
