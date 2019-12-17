@@ -8,9 +8,11 @@ namespace py = pybind11;
 
 void init_sgcore(py::module &);
 void init_sggenerate(py::module &);
+void init_sgdynamics(py::module &);
 
 PYBIND11_MODULE(_sgext, m) {
     m.doc() = "SGEXT, Spatial Graph Extraction, Analysis and Generation";
     init_sgcore(m);
     init_sggenerate(m);
+    init_sgdynamics(m);
 }
