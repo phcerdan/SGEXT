@@ -55,8 +55,13 @@ struct ParticleCollection {
         constexpr auto comp = [](const Particle &p, const size_t &value) {
             return p.id < value;
         };
-        return std::lower_bound(first, last, id_value, comp);
-        // return (it != last && !comp(*it, id_value) ) ? it : last;
+        const auto lower_bound_search_it = std::lower_bound(first, last, id_value, comp);
+
+        if (lower_bound_search_it == last ||
+            id_value < (*lower_bound_search_it).id) {
+            return last;
+        }
+        return lower_bound_search_it;
     }
     std::vector<Particle>::iterator binary_find(const size_t &id_value);
 

@@ -18,16 +18,15 @@
  *
  * *******************************************************************/
 
+#include "write_vtu_file.hpp"
+#include "sgdynamics_common_py.hpp"
+
 #include <pybind11/pybind11.h>
+
 namespace py = pybind11;
+using namespace SG;
 
-void init_sgcore(py::module &);
-void init_sggenerate(py::module &);
-void init_sgdynamics(py::module &);
-
-PYBIND11_MODULE(_sgext, m) {
-    m.doc() = "SGEXT, Spatial Graph Extraction, Analysis and Generation";
-    init_sgcore(m);
-    init_sggenerate(m);
-    init_sgdynamics(m);
+void init_vtu_file_io(py::module &m) {
+    m.def("write_vtu_file", &SG::write_vtu_file);
+    m.def("read_vtu_file", &SG::read_vtu_file);
 }

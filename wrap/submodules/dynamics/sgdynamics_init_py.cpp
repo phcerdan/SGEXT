@@ -19,15 +19,30 @@
  * *******************************************************************/
 
 #include <pybind11/pybind11.h>
+#include "sgdynamics_common_py.hpp"
+
 namespace py = pybind11;
+void init_particle(py::module &);
+void init_bond(py::module &);
+void init_particle_collection(py::module &);
+void init_bond_collection(py::module &);
+void init_system(py::module &);
+void init_vtu_file_io(py::module &);
+void init_integrator_methods(py::module &);
+void init_forces(py::module &);
+void init_force_compute(py::module &);
+void init_integrator(py::module &);
 
-void init_sgcore(py::module &);
-void init_sggenerate(py::module &);
-void init_sgdynamics(py::module &);
-
-PYBIND11_MODULE(_sgext, m) {
-    m.doc() = "SGEXT, Spatial Graph Extraction, Analysis and Generation";
-    init_sgcore(m);
-    init_sggenerate(m);
-    init_sgdynamics(m);
+void init_sgdynamics(py::module & mparent) {
+    auto m = mparent.def_submodule("dynamics");
+    m.doc() = "Dynamics submodule"; // optional module docstring
+    init_particle(m);
+    init_bond(m);
+    init_particle_collection(m);
+    init_bond_collection(m);
+    init_system(m);
+    init_integrator_methods(m);
+    init_forces(m);
+    init_force_compute(m);
+    init_integrator(m);
 }

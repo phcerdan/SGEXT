@@ -18,16 +18,25 @@
  *
  * *******************************************************************/
 
+#include "system.hpp"
+#include "sgdynamics_common_py.hpp"
+
 #include <pybind11/pybind11.h>
+
 namespace py = pybind11;
+using namespace SG;
 
-void init_sgcore(py::module &);
-void init_sggenerate(py::module &);
-void init_sgdynamics(py::module &);
-
-PYBIND11_MODULE(_sgext, m) {
-    m.doc() = "SGEXT, Spatial Graph Extraction, Analysis and Generation";
-    init_sgcore(m);
-    init_sggenerate(m);
-    init_sgdynamics(m);
+void init_system(py::module &m) {
+    py::class_<System>(m, "system")
+        .def(py::init())
+        .def_readwrite("all", &System::all)
+        .def_readwrite("bonds", &System::bonds)
+        .def("__str__", [](const System &sys) {
+                std::stringstream os;
+                os << "particles: " << std::endl;
+                print(sys.all, os);
+                os << "bonds: " << std::endl;
+                print(sys.bonds, os);
+                return os.str();
+        });
 }

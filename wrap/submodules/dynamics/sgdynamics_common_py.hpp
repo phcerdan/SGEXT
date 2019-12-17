@@ -18,16 +18,15 @@
  *
  * *******************************************************************/
 
-#include <pybind11/pybind11.h>
-namespace py = pybind11;
+#ifndef SGDYNAMICS_COMMON_PYBIND_HPP
+#define SGDYNAMICS_COMMON_PYBIND_HPP
 
-void init_sgcore(py::module &);
-void init_sggenerate(py::module &);
-void init_sgdynamics(py::module &);
+#include "particle.hpp"
+#include <pybind11/stl_bind.h>
+// #include "bond.hpp"
+// #include <memory>
 
-PYBIND11_MODULE(_sgext, m) {
-    m.doc() = "SGEXT, Spatial Graph Extraction, Analysis and Generation";
-    init_sgcore(m);
-    init_sggenerate(m);
-    init_sgdynamics(m);
-}
+PYBIND11_MAKE_OPAQUE(std::vector<SG::Particle>);
+// PYBIND11_MAKE_OPAQUE(std::vector<std::shared_ptr<SG::Bond>>);
+
+#endif
