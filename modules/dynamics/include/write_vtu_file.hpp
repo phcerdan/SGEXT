@@ -34,7 +34,7 @@ std::unique_ptr<System> read_vtu_file(const std::string &file_name);
  *
  * @param ugrid
  * @param sys
- * 
+ *
  * @sa read_vtu_file
  */
 void read_vtu_point_data(vtkUnstructuredGrid *ugrid, System *sys);
