@@ -148,28 +148,45 @@ void read_vtu_point_data(vtkUnstructuredGrid *ugrid, System *sys) {
     // Get arrays of points
     const auto point_data = ugrid->GetPointData();
 
+    const auto particle_id_array = point_data->GetArray("particle_id");
     const auto acc_array = point_data->GetArray("acceleration");
     const auto vel_array = point_data->GetArray("velocity");
     const auto mass_array = point_data->GetArray("mass");
     const auto volume_array = point_data->GetArray("volume");
     const auto radius_array = point_data->GetArray("radius");
-    const auto particle_id_array = point_data->GetArray("particle_id");
 
     for (size_t i = 0; i < npoints; i++) {
-        particles[i].id = particle_id_array->GetTuple1(i);
+        // pos (always there)
         memcpy(particles[i].pos.data(), ugrid->GetPoint(i), sizeof(double) * 3);
-        memcpy(particles[i].dynamics.acc.data(), acc_array->GetTuple3(i),
-               sizeof(double) * 3);
-        memcpy(particles[i].dynamics.vel.data(), vel_array->GetTuple3(i),
-               sizeof(double) * 3);
-        particles[i].material.mass = mass_array->GetTuple1(i);
-        particles[i].material.volume = volume_array->GetTuple1(i);
-        particles[i].material.radius = radius_array->GetTuple1(i);
+
+        // particle_id
+        if (particle_id_array) {
+            particles[i].id = particle_id_array->GetTuple1(i);
+        } else {
+            particles[i].id = i;
+        }
+        if (acc_array) {
+            memcpy(particles[i].dynamics.acc.data(), acc_array->GetTuple3(i),
+                   sizeof(double) * 3);
+        }
+        if (vel_array) {
+            memcpy(particles[i].dynamics.vel.data(), vel_array->GetTuple3(i),
+                   sizeof(double) * 3);
+        }
+        if (mass_array) {
+            particles[i].material.mass = mass_array->GetTuple1(i);
+        }
+        if (volume_array) {
+            particles[i].material.volume = volume_array->GetTuple1(i);
+        }
+        if (radius_array) {
+            particles[i].material.radius = radius_array->GetTuple1(i);
+        }
     }
 }
 
 void read_vtu_bond_ids(vtkUnstructuredGrid *ugrid, System *sys) {
-    const auto ncells = ugrid->GetNumberOfCells();   // bonds
+    const auto ncells = ugrid->GetNumberOfCells(); // bonds
     auto &particles = sys->all.particles;
     auto &bonds = sys->bonds.bonds;
     // Populate bonds ids from Cell points
@@ -193,7 +210,7 @@ void read_vtu_bond_ids(vtkUnstructuredGrid *ugrid, System *sys) {
 }
 
 void read_vtu_bond_contour_length(vtkUnstructuredGrid *ugrid, System *sys) {
-    const auto ncells = ugrid->GetNumberOfCells();   // bonds
+    const auto ncells = ugrid->GetNumberOfCells(); // bonds
     auto &bonds = sys->bonds.bonds;
     // Get cell data
     auto cell_data = ugrid->GetCellData();
