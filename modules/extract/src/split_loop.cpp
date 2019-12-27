@@ -38,6 +38,7 @@ void split_loop(GraphType::vertex_descriptor loop_vertex_id,
     // input_sg)
     // << std::endl; std::cout << "Degree created: " <<
     // boost::degree(created_vertex_id, input_sg) << std::endl;
+    boost::remove_edge(loop_vertex_id, loop_vertex_id, input_sg);
 }
 
 } // namespace SG
