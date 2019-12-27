@@ -22,6 +22,7 @@ TEST(split_loop, split_loop) {
     SpatialEdge sg_edge;
     sg_edge.edge_points.insert(std::end(sg_edge.edge_points),
                                {n1, n2, e1n2, e2n2, e2n1, e2, e1});
+    boost::add_edge(vertex_id, vertex_id, sg_edge, sg);
     SG::split_loop(vertex_id, sg_edge, sg);
     EXPECT_EQ(num_vertices(sg), 2);
     EXPECT_EQ(num_edges(sg), 2);
