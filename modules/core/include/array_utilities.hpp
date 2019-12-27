@@ -72,6 +72,47 @@ inline Array3D::value_type angle(const Array3D &a, const Array3D &b) {
 }
 
 /**
+ * Projection of array "a" into array "into"
+ *
+ * @param a
+ * @param into
+ *
+ * @return projection
+ */
+inline Array3D projection(const Array3D &a, const Array3D &into) {
+    const auto into_squared = dot_product(into, into);
+    if( into_squared > std::numeric_limits<double>::epsilon() ) {
+        const auto term = dot_product( into, a ) / into_squared;
+        return Array3D{ into[0] * term,
+                        into[1] * term,
+                        into[2] * term };
+    } else {
+        return Array3D{0,0,0};
+   }
+}
+
+/**
+ * Orthogonal_component of array "a" into array "into"
+ * The orthogonal component is the array: a - projection(a,into)
+ *
+ * @param a
+ * @param into
+ *
+ * @return orthogonal_component
+ */
+inline Array3D orthogonal_component(const Array3D &a, const Array3D &into) {
+    const auto into_squared = dot_product(into, into);
+    if( into_squared > std::numeric_limits<double>::epsilon() ) {
+        const auto term = dot_product( into, a ) / into_squared;
+        return Array3D { a[0] - into[0] * term,
+                         a[1] - into[1] * term,
+                         a[2] - into[2] * term };
+    } else {
+        return Array3D{0,0,0};
+   }
+}
+
+/**
  * Sum of arrays (each dimension)
  *
  * @param lhs left
@@ -94,6 +135,20 @@ inline Array3D plus(const Array3D &lhs, const Array3D &rhs) {
 inline Array3D plus_scalar(const Array3D &lhs,
                            const Array3D::value_type &scalar) {
     return plus(lhs, Array3D{{scalar, scalar, scalar}});
+}
+
+/**
+ * negation of array: -lhs
+ *
+ * @param lhs input array
+ *
+ * @return negation of array
+ */
+inline Array3D negate(const Array3D &lhs) {
+    return {{-lhs[0], -lhs[1], -lhs[2]}};
+}
+inline void negate_in_place(Array3D &lhs) {
+   lhs[0] = -lhs[0]; lhs[1] = -lhs[1]; lhs[2] = -lhs[2];
 }
 
 /**
@@ -122,6 +177,11 @@ inline Array3D minus_scalar(const Array3D &lhs,
     return plus_scalar(lhs, -scalar);
 }
 
+inline Array3D product_scalar(const Array3D &lhs,
+                              const Array3D::value_type &scalar) {
+    return {{lhs[0] * scalar, lhs[1] * scalar, lhs[2] * scalar}};
+}
+
 /**
  * Distance between two arrays.
  * @param lhs
@@ -148,13 +208,15 @@ inline Array3D::value_type cos_director(const Array3D &lhs,
  *
  * @return string with array content, separated by space
  */
-inline std::string to_string(const Array3D &a) {
+inline std::string to_string(const Array3D &a, bool comma_separated = false) {
     std::ostringstream ss;
     auto a_size = a.size();
     for (size_t i = 0; i < a_size; ++i) {
         ss << a[i];
-        if (i != a_size - 1)
-            ss << " ";
+        if (i != a_size - 1) {
+           if(comma_separated) ss << ", ";
+           else ss << " ";
+        }
     }
     return ss.str();
 }

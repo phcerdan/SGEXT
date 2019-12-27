@@ -6,6 +6,10 @@ if(SG_MODULE_GENERATE)
   add_subdirectory(submodules/generate)
   list(APPEND enabled_libs_ SGGenerate)
 endif()
+if(SG_MODULE_DYNAMICS)
+  add_subdirectory(submodules/dynamics)
+  list(APPEND enabled_libs_ SGDynamics)
+endif()
 
 # Add the pybind module
 pybind11_add_module(_sgext
@@ -13,6 +17,9 @@ pybind11_add_module(_sgext
   ${all_modules_python_sources} # all the collected sources in submodules
   )
 target_link_libraries(_sgext PRIVATE ${enabled_libs_})
+if(SG_REQUIRES_VTK)
+  target_compile_definitions(_sgext PRIVATE SG_USING_VTK)
+endif()
 
 install(TARGETS _sgext
   DESTINATION ${CMAKE_INSTALL_PYTHONLIBDIR})

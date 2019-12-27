@@ -8,6 +8,7 @@ if(SG_MODULE_VISUALIZE_ENABLE_QT)
 endif()
 set(SG_MODULE_${SG_MODULE_NAME}_TESTS
   test_visualize_spatial_graph.cpp
+  test_convert_to_vtk_unstructured_grid.cpp
   ${qt_tests}
   )
 

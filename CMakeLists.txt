@@ -5,7 +5,7 @@ if(POLICY CMP0048)
 endif()
 
 project(SGEXT
-  VERSION 0.8.0
+  VERSION 0.9.0
   LANGUAGES CXX)
 message(STATUS "SGEXT version: ${SGEXT_VERSION}")
 
@@ -26,20 +26,23 @@ option(SG_MODULE_COMPARE "Logic to compare and merge low and high information gr
 option(SG_MODULE_LOCATE "Use VTK KDtree for graph point location." ON)
 option(SG_MODULE_VISUALIZE "Functions to visualize spatial graphs and histograms." ON)
 option(SG_MODULE_GENERATE "Generate a graph with desired statistical parameters using simulated annealing." ON)
+option(SG_MODULE_DYNAMICS "Perform coarse grained dynamics simulation in the network." ON)
+option(SG_MODULE_DYNAMICS_USING_VTK "Force enabling VTK in the dynamics module." OFF)
+mark_as_advanced(SG_MODULE_DYNAMICS_USING_VTK)
 CMAKE_DEPENDENT_OPTION(SG_MODULE_VISUALIZE_ENABLE_QT "Use QT for some visualizations" ON
   "SG_MODULE_VISUALIZE" ON)
 option(VISUALIZE "Enable visualization with VTK." OFF)
 option(SG_WRAP_PYTHON "Use pybind11 to create bindings to python." OFF)
 
 
-if(VISUALIZE OR SG_MODULE_VISUALIZE OR SG_MODULE_LOCATE OR SG_MODULE_COMPARE)
+if(VISUALIZE OR SG_MODULE_VISUALIZE OR SG_MODULE_LOCATE OR SG_MODULE_COMPARE OR SG_MODULE_DYNAMICS_USING_VTK)
   set(SG_REQUIRES_VTK TRUE)
 endif()
 
 if(NOT CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 14)
-    if(SG_MODULE_GENERATE)
-      set(CMAKE_CXX_STANDARD 17) # Used in generate module at least
+    if(SG_MODULE_GENERATE OR SG_MODULE_DYNAMICS)
+      set(CMAKE_CXX_STANDARD 17)
     endif()
 endif()
 
@@ -218,6 +221,9 @@ if(SG_MODULE_VISUALIZE)
 endif()
 if(SG_MODULE_GENERATE)
   add_subdirectory(modules/generate)
+endif()
+if(SG_MODULE_DYNAMICS)
+  add_subdirectory(modules/dynamics)
 endif()
 
 if(SG_BUILD_SCRIPTS)
