@@ -10,6 +10,7 @@ void init_sgcore(py::module &);
 void init_sggenerate(py::module &);
 void init_sgdynamics(py::module &);
 void init_sgextract(py::module &);
+void init_sganalyze(py::module &);
 
 PYBIND11_MODULE(_sgext, m) {
     m.doc() = "SGEXT, Spatial Graph Extraction, Analysis and Generation";
@@ -17,4 +18,5 @@ PYBIND11_MODULE(_sgext, m) {
     init_sggenerate(m);
     init_sgdynamics(m);
     init_sgextract(m);
+    init_sganalyze(m);
 }
