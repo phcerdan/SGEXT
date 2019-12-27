@@ -1,4 +1,5 @@
 add_subdirectory(core)
+add_subdirectory(extract)
 if(SG_MODULE_GENERATE)
   add_subdirectory(generate)
 endif()
