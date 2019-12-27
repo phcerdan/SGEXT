@@ -18,18 +18,13 @@
  *
  * *******************************************************************/
 
+// #include "sgextract_common_py.hpp"
+#include "split_loop.hpp"
 #include <pybind11/pybind11.h>
+
 namespace py = pybind11;
+using namespace SG;
 
-void init_sgcore(py::module &);
-void init_sggenerate(py::module &);
-void init_sgdynamics(py::module &);
-void init_sgextract(py::module &);
-
-PYBIND11_MODULE(_sgext, m) {
-    m.doc() = "SGEXT, Spatial Graph Extraction, Analysis and Generation";
-    init_sgcore(m);
-    init_sggenerate(m);
-    init_sgdynamics(m);
-    init_sgextract(m);
+void init_split_loop(py::module &m) {
+    m.def("split_loop", &split_loop);
 }

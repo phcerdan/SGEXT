@@ -19,17 +19,18 @@
  * *******************************************************************/
 
 #include <pybind11/pybind11.h>
+
 namespace py = pybind11;
+void init_split_loop(py::module &);
+void init_merge_nodes(py::module &);
+void init_remove_extra_edges(py::module &);
+void init_reduce_spatial_graph(py::module &);
 
-void init_sgcore(py::module &);
-void init_sggenerate(py::module &);
-void init_sgdynamics(py::module &);
-void init_sgextract(py::module &);
-
-PYBIND11_MODULE(_sgext, m) {
-    m.doc() = "SGEXT, Spatial Graph Extraction, Analysis and Generation";
-    init_sgcore(m);
-    init_sggenerate(m);
-    init_sgdynamics(m);
-    init_sgextract(m);
+void init_sgextract(py::module & mparent) {
+    auto m = mparent.def_submodule("extract");
+    m.doc() = "Extract submodule "; // optional module docstring
+    init_split_loop(m);
+    init_merge_nodes(m);
+    init_remove_extra_edges(m);
+    init_reduce_spatial_graph(m);
 }
