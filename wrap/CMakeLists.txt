@@ -1,7 +1,10 @@
 # Python wrapping will be one single module with submodules
 set(enabled_libs_ SGCore)
 add_subdirectory(submodules/core)
-# add_subdirectory(submodules/extract) # not implemented yet
+# MODULE_EXTRACT
+add_subdirectory(submodules/extract)
+list(APPEND enabled_libs_ SGExtract)
+
 if(SG_MODULE_GENERATE)
   add_subdirectory(submodules/generate)
   list(APPEND enabled_libs_ SGGenerate)
