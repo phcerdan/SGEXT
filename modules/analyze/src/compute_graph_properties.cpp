@@ -126,9 +126,12 @@ std::vector<double> compute_angles(const SG::GraphType &sg,
 }
 
 std::vector<double> compute_cosines(const std::vector<double> &angles) {
+    std::cout << "ANGLES SIZE: " << angles.size() << std::endl;
+    std::cout << "is empty? : " << angles.empty() << std::endl;
     std::vector<double> cosines(angles.size());
+    std::cout << "cosines is empty? : " << cosines.empty() << std::endl;
     // cosines.resize(angles.size())
-    std::transform(angles.begin(), angles.end(), cosines.begin(),
+    std::transform(angles.cbegin(), angles.cend(), cosines.begin(),
                    [](const double &a) { return std::cos(a); });
     return cosines;
 }

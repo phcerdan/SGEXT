@@ -18,9 +18,13 @@
  *
  * *******************************************************************/
 
-#ifndef SGCORE_COMMON_PYBIND_HPP
-#define SGCORE_COMMON_PYBIND_HPP
+#include <pybind11/pybind11.h>
 
-#include <pybind11/stl_bind.h>
-PYBIND11_MAKE_OPAQUE(std::array<double, 3>);
-#endif
+namespace py = pybind11;
+void init_compute_graph_properties(py::module &);
+
+void init_sganalyze(py::module & mparent) {
+    auto m = mparent.def_submodule("analyze");
+    m.doc() = "Analyze submodule "; // optional module docstring
+    init_compute_graph_properties(m);
+}

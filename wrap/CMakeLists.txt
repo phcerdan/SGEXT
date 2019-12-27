@@ -4,7 +4,10 @@ add_subdirectory(submodules/core)
 # MODULE_EXTRACT
 add_subdirectory(submodules/extract)
 list(APPEND enabled_libs_ SGExtract)
-
+if(SG_MODULE_ANALYZE)
+  add_subdirectory(submodules/analyze)
+  list(APPEND enabled_libs_ SGAnalyze)
+endif()
 if(SG_MODULE_GENERATE)
   add_subdirectory(submodules/generate)
   list(APPEND enabled_libs_ SGGenerate)

@@ -18,20 +18,31 @@
  *
  * *******************************************************************/
 
+
+#include "compute_graph_properties.hpp"
+#include <pybind11/stl.h>
 #include <pybind11/pybind11.h>
+
 namespace py = pybind11;
+using namespace SG;
 
-void init_sgcore(py::module &);
-void init_sggenerate(py::module &);
-void init_sgdynamics(py::module &);
-void init_sgextract(py::module &);
-void init_sganalyze(py::module &);
-
-PYBIND11_MODULE(_sgext, m) {
-    m.doc() = "SGEXT, Spatial Graph Extraction, Analysis and Generation";
-    init_sgcore(m);
-    init_sggenerate(m);
-    init_sgdynamics(m);
-    init_sgextract(m);
-    init_sganalyze(m);
+void init_compute_graph_properties(py::module &m) {
+    m.def("compute_cosines", &compute_cosines);
+    m.def("compute_degrees", &compute_degrees);
+    m.def("compute_ete_distances", &compute_ete_distances,
+            py::arg("graph"),
+            py::arg("min_edge_points") = 0,
+            py::arg("ignore_end_nodes") = false
+            );
+    m.def("compute_contour_lengths", &compute_contour_lengths,
+            py::arg("graph"),
+            py::arg("min_edge_points") = 0,
+            py::arg("ignore_end_nodes") = false
+            );
+    m.def("compute_angles", &compute_angles,
+            py::arg("graph"),
+            py::arg("min_edge_points") = 0,
+            py::arg("ignore_parallel_edges") = false,
+            py::arg("ignore_end_nodes") = false
+            );
 }

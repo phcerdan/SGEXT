@@ -20,7 +20,7 @@ import _sgext.core as core
 import _sgext.extract as extract
 import unittest
 
-class WithEdgesRemovedGraphFixture:
+class ThreeConnectedNodesGraphFixture:
     def __init__(self):
         self.graph = core.spatial_graph(6)
         # Set vertex positions
@@ -70,7 +70,7 @@ class TestSplitLoop(unittest.TestCase):
 
 class TestMergeNodes(unittest.TestCase):
     def setUp(self):
-        fixture = WithEdgesRemovedGraphFixture()
+        fixture = ThreeConnectedNodesGraphFixture()
         self.graph = fixture.graph
         self.assertEqual(self.graph.num_vertices(), 6)
         self.assertEqual(self.graph.num_edges(), 6)
@@ -84,7 +84,7 @@ class TestMergeNodes(unittest.TestCase):
 
 class TestRemoveExtraEdges(unittest.TestCase):
     def setUp(self):
-        fixture = WithEdgesRemovedGraphFixture()
+        fixture = ThreeConnectedNodesGraphFixture()
         self.graph = fixture.graph
     def test_remove_extra_edges_do_nothing(self):
         any_node_removed = extract.remove_extra_edges(self.graph)
@@ -92,7 +92,7 @@ class TestRemoveExtraEdges(unittest.TestCase):
 
 class TestReduceSpatialGraph(unittest.TestCase):
     def setUp(self):
-        fixture = WithEdgesRemovedGraphFixture()
+        fixture = ThreeConnectedNodesGraphFixture()
         self.graph = fixture.graph
     def test_reduce_spatial_graph_to_same_graph(self):
         verbose = False
