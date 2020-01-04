@@ -199,6 +199,7 @@ void export_graph_interface(GraphType & reduced_g,
         std::string output_full_string,
         bool exportSerialized,
         bool exportVtu,
+        bool exportVtuWithEdgePoints,
         bool exportGraphviz,
         const bool verbose
         ) {
@@ -235,20 +236,31 @@ void export_graph_interface(GraphType & reduced_g,
                 << output_full_path.string() << std::endl;
         }
     }
+#ifdef SG_MODULE_VISUALIZE_ENABLED
     // export vtu file
     if(exportVtu) {
-#ifdef SG_MODULE_VISUALIZE_ENABLED
         fs::path output_full_path =
             output_folder_path / fs::path(output_full_string + ".vtu");
         auto ugrid =
-            SG::convert_to_vtk_unstructured_grid_with_edge_points(reduced_g);
+            SG::convert_to_vtk_unstructured_grid(reduced_g);
         SG::write_vtk_unstructured_grid(ugrid, output_full_path.string());
         if (verbose) {
             std::cout << "Output reduced graph (vtu) to: "
                 << output_full_path.string() << std::endl;
         }
-#endif
     }
+    if(exportVtuWithEdgePoints) {
+        fs::path output_full_path =
+            output_folder_path / fs::path(output_full_string + "WithEdgePoints.vtu");
+        auto ugrid =
+            SG::convert_to_vtk_unstructured_grid_with_edge_points(reduced_g);
+        SG::write_vtk_unstructured_grid(ugrid, output_full_path.string());
+        if (verbose) {
+            std::cout << "Output reduced graph (vtu with edge points) to: "
+                << output_full_path.string() << std::endl;
+        }
+    }
+#endif
 
     if(!exportGraphviz && !exportSerialized && !exportVtu) {
         if (verbose) {
@@ -410,6 +422,7 @@ GraphType analyze_graph_function(
         const std::string & exportReducedGraph_foldername,
         bool exportSerialized,
         bool exportVtu,
+        bool exportVtuWithEdgePoints,
         bool exportGraphviz,
         const std::string &exportData_foldername,
         bool ignoreAngleBetweenParallelEdges,
@@ -499,6 +512,7 @@ GraphType analyze_graph_function(
                 output_full_string,
                 exportSerialized,
                 exportVtu,
+                exportVtuWithEdgePoints,
                 exportGraphviz,
                 verbose);
     }
