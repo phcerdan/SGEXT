@@ -39,7 +39,7 @@
 // Reduce graph via dfs:
 #include "spatial_graph.hpp"
 #include "spatial_graph_utilities.hpp"
-#include "serialize_spatial_graph.hpp"
+#include "spatial_graph_io.hpp"
 
 #include "visualize_spatial_graph.hpp"
 #include "visualize_spatial_graph_with_image.hpp"
@@ -101,14 +101,14 @@ int main(int argc, char* const argv[]) {
   if(!useSerialized) {  // read graphviz
     boost::dynamic_properties dp0;
     {
-      dp0.property("node_id", boost::get(&SG::SpatialNode::label, sg));
+      dp0.property("node_id", boost::get(&SG::SpatialNode::id, sg));
       dp0.property("spatial_node", boost::get(boost::vertex_bundle, sg));
       dp0.property("spatial_edge", boost::get(boost::edge_bundle, sg));
       std::ifstream ifileLow(filenameGraph);
       boost::read_graphviz(ifileLow, sg, dp0, "node_id");
     }
   } else {
-    sg = SG::read_serialized_graph(filenameGraph);
+    sg = SG::read_serialized_sg(filenameGraph);
   }
 
   auto repeated_points_sg = SG::check_unique_points_in_graph(sg);

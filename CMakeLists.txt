@@ -29,7 +29,7 @@ option(SG_MODULE_GENERATE "Generate a graph with desired statistical parameters 
 option(SG_MODULE_DYNAMICS "Perform coarse grained dynamics simulation in the network." ON)
 option(SG_MODULE_DYNAMICS_USING_VTK "Force enabling VTK in the dynamics module." OFF)
 mark_as_advanced(SG_MODULE_DYNAMICS_USING_VTK)
-CMAKE_DEPENDENT_OPTION(SG_MODULE_VISUALIZE_ENABLE_QT "Use QT for some visualizations" ON
+CMAKE_DEPENDENT_OPTION(SG_MODULE_VISUALIZE_WITH_QT "Use QT for some visualizations" ON
   "SG_MODULE_VISUALIZE" ON)
 option(VISUALIZE "Enable visualization with VTK." OFF)
 option(SG_WRAP_PYTHON "Use pybind11 to create bindings to python." OFF)
@@ -91,7 +91,7 @@ find_package(ITK REQUIRED COMPONENTS
 message(STATUS "ITK version: ${ITK_VERSION}")
 include(${ITK_USE_FILE})
 set(vtk_qt_components)
-if(SG_MODULE_VISUALIZE_ENABLE_QT)
+if(SG_MODULE_VISUALIZE_WITH_QT)
   find_package(Qt5 REQUIRED
     Widgets
     Xml
