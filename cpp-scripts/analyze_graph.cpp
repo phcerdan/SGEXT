@@ -35,7 +35,8 @@ int main(int argc, char *const argv[]) {
     opt_desc.add_options()("input,i", po::value<std::string>()->required(),
                            "Input thin image.");
     opt_desc.add_options()(
-            "reduceGraph,r", po::bool_switch()->default_value(false),
+            "reduceGraph,r", po::bool_switch()->default_value(true),
+            "Deprecated (always true, no effect). "
             "Reduce obj graph into a new SpatialGraph, converting "
             "chain nodes (degree=2) into edge_points.");
     opt_desc.add_options()(
@@ -95,6 +96,10 @@ int main(int argc, char *const argv[]) {
             "Write unstructured grid file representing the reduced graph "
             "(readable by Paraview). Requires exportReducedGraph_foldername.");
     opt_desc.add_options()(
+            "exportVtuWithEdgePoints", po::bool_switch()->default_value(false),
+            "Write unstructured grid file representing the reduced graph "
+            "(readable by Paraview). Requires exportReducedGraph_foldername.");
+    opt_desc.add_options()(
             "exportGraphviz", po::bool_switch()->default_value(false),
             "Write graphviz representing the reduced graph. (readable by graph "
             "libraries). Requires exportReducedGraph_foldername.");
@@ -125,7 +130,6 @@ int main(int argc, char *const argv[]) {
     if (verbose)
         std::cout << "Filename: " << filename << std::endl;
     bool output_filename_simple = vm["output_filename_simple"].as<bool>();
-    bool reduceGraph = vm["reduceGraph"].as<bool>();
     bool avoid_transformToPhysicalPoints =
             vm["avoid_transformToPhysicalPoints"].as<bool>();
     std::string spacing = vm["spacing"].as<std::string>();
@@ -153,6 +157,7 @@ int main(int argc, char *const argv[]) {
     }
     bool exportSerialized = vm["exportSerialized"].as<bool>();
     bool exportVtu = vm["exportVtu"].as<bool>();
+    bool exportVtuWithEdgePoints = vm["exportVtuWithEdgePoints"].as<bool>();
     bool exportGraphviz = vm["exportGraphviz"].as<bool>();
 
 #ifdef SG_MODULE_VISUALIZE_ENABLED
@@ -174,6 +179,7 @@ int main(int argc, char *const argv[]) {
         exportReducedGraph_foldername,
         exportSerialized,
         exportVtu,
+        exportVtuWithEdgePoints,
         exportGraphviz,
         exportData_foldername,
         ignoreAngleBetweenParallelEdges,
