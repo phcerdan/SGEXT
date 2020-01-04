@@ -35,7 +35,7 @@
 #include "spatial_graph_from_object.hpp"
 #include "spatial_graph_utilities.hpp"
 
-#ifdef VISUALIZE_USING_QT
+#ifdef SG_MODULE_VISUALIZE_ENABLED
 // Viewer
 #include <DGtal/io/Color.h>
 #include <DGtal/io/DrawWithDisplay3DModifier.h>
@@ -45,8 +45,6 @@
 #include "visualize_spatial_graph.hpp"
 #include "visualize_spatial_graph_with_image.hpp"
 // #include "itkViewImage.h"
-#endif
-#ifdef SG_MODULE_VISUALIZE_ENABLED
 #include "convert_to_vtk_unstructured_grid.hpp"
 #endif
 
@@ -91,22 +89,22 @@ GraphType spatial_graph_from_file(
     Object obj(topo, image_set);
 
 
-#ifdef VISUALIZE_USING_QT
+#ifdef SG_MODULE_VISUALIZE_ENABLED_WITH_QT
     if (visualize) {
         int argc(1);
         char **argv(nullptr);
         QApplication app(argc, argv);
-        Viewer3D<> viewer(ks);
+        DGtal::Viewer3D<> viewer(ks);
         viewer.show();
 
-        viewer.setFillColor(Color(255, 255, 255, 255));
+        viewer.setFillColor(DGtal::Color(255, 255, 255, 255));
         viewer << image_set;
 
         // All kspace voxels
-        // viewer.setFillColor(Color(40, 200, 55, 10));
+        // viewer.setFillColor(DGtal::Color(40, 200, 55, 10));
         // viewer << all_set;
 
-        viewer << Viewer3D<>::updateDisplay;
+        viewer << DGtal::Viewer3D<>::updateDisplay;
 
         app.exec();
     }
