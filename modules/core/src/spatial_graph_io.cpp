@@ -54,11 +54,11 @@ GraphType read_graphviz_sg(const std::string &input_file) {
 }
 
 // Serialize
-void write_serialized_sg(std::ostream &os, GraphType &graph) {
+void write_serialized_sg(std::ostream &os, const GraphType &graph) {
     boost::archive::text_oarchive arch(os);
     arch << graph;
 }
-void write_serialized_sg(const std::string &output_file, GraphType &graph) {
+void write_serialized_sg(const std::string &output_file, const GraphType &graph) {
     std::ofstream os(output_file);
     return write_serialized_sg(os, graph);
 }
