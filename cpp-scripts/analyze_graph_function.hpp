@@ -117,6 +117,7 @@ void export_graph_interface(GraphType & reduced_g,
         std::string output_full_string,
         bool exportSerialized = true,
         bool exportVtu = false,
+        bool exportVtuWithEdgePoints = false,
         bool exportGraphviz = false,
         const bool verbose = false
         );
@@ -147,6 +148,7 @@ GraphType analyze_graph_function(
         const std::string & exportReducedGraph_foldername = "",
         bool exportSerialized = true,
         bool exportVtu = false,
+        bool exportVtuWithEdgePoints = false,
         bool exportGraphviz = false,
         const std::string &exportData_foldername = "",
         bool ignoreAngleBetweenParallelEdges = false,
