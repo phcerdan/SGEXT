@@ -13,12 +13,9 @@
 namespace SG {
 
 struct SpatialNode {
-    /** Please note that node_id "label" is meaningless, but required for
-     * the graphviz reader.
-     * @sa read_graphviz
-     * I haven't found a way, ie with:
-     * static_property_map, ref_property_map or dummy_property_map, to ignore
-     * it. Don't expect that the node_id in the .dot files are the same ids than
+    /** id of the node, used in some situations, i.e read_graphviz
+     * * @sa read_graphviz
+     * Don't expect that the node_id in the .dot files are the same ids than
      * in the graph after read. */
     size_t id;
     /// Use Array to store the position.

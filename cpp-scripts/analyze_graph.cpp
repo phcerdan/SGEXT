@@ -83,10 +83,10 @@ int main(int argc, char *const argv[]) {
             "exportGraphviz", po::bool_switch()->default_value(false),
             "Write graphviz representing the reduced graph. (readable by graph "
             "libraries). Requires exportReducedGraph_foldername.");
-#ifdef VISUALIZE_USING_QT
+#ifdef SG_MODULE_VISUALIZE_ENABLED
     opt_desc.add_options()("visualize,t",
                            po::bool_switch()->default_value(false),
-                           "Visualize object with DGtal. Requires VISUALIZE_USING_QT "
+                           "Visualize object with DGtal. Requires SG_MODULE_VISUALIZE"
                            "option enabled at build.");
 #endif
     opt_desc.add_options()("verbose,v", po::bool_switch()->default_value(false),
@@ -140,7 +140,7 @@ int main(int argc, char *const argv[]) {
     bool exportVtu = vm["exportVtu"].as<bool>();
     bool exportGraphviz = vm["exportGraphviz"].as<bool>();
 
-#ifdef VISUALIZE_USING_QT
+#ifdef SG_MODULE_VISUALIZE_ENABLED
     bool visualize = vm["visualize"].as<bool>();
 # else
     bool visualize = false;
