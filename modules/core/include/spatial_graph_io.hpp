@@ -37,8 +37,8 @@ void read_graphviz_sg(const std::string &input_file, GraphType &graph);
 GraphType read_graphviz_sg(const std::string &input_file);
 
 // Serialize
-void write_serialized_sg(std::ostream &os, GraphType &graph);
-void write_serialized_sg(const std::string &output_file, GraphType &graph);
+void write_serialized_sg(std::ostream &os, const GraphType &graph);
+void write_serialized_sg(const std::string &output_file, const GraphType &graph);
 void read_serialized_sg(std::istream &is, GraphType &graph);
 void read_serialized_sg(const std::string &input_file, GraphType &graph);
 GraphType read_serialized_sg(const std::string &input_file);
