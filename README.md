@@ -1,4 +1,4 @@
-# SGEXT-scripts
+# SGEXT
 
 **S**patial**G**raph **Ext**ractor.
 
@@ -17,13 +17,13 @@ Using histo.hpp from: https://github.com/phcerdan/histo-header
 SHA: 556ada3ff79c0180a0cbec36ff29a30da5acb367
 
 ## Docker
-First build the container with all the dependencies, [Dockerfile-base](https://github.com/phcerdan/SGEXT-scripts/blob/master/Dockerfile-base).
+First build the container with all the dependencies, [Dockerfile-base](https://github.com/phcerdan/SGEXT/blob/master/Dockerfile-base).
 
 ```bash
 docker build -f Dockerfile-base -t sgext/base .
 ```
 
-Then use the [Dockerfile](https://github.com/phcerdan/SGEXT-scripts/blob/master/Dockerfile) that copies your local source folder with this repository into the container.
+Then use the [Dockerfile](https://github.com/phcerdan/SGEXT/blob/master/Dockerfile) that copies your local source folder with this repository into the container.
 
 ```bash
 docker build -f Dockerfile -t sgext/scripts .
@@ -53,7 +53,7 @@ cmake -DBUILD_TYPE:STRING=Release -DBUILD_EXAMPLES:BOOL=OFF -DBUILD_TESTING:BOOL
 ```
 
 I do have scripts doing the thinning (and post-processing graph analysis) here:
-https://github.com/phcerdan/SGEXT-scripts
+https://github.com/phcerdan/SGEXT
 
 They add a boost dependency.
 
@@ -62,8 +62,8 @@ And build the scripts
 
 ```
 cd your_favourite_folder
-mkdir SGEXT-scripts; cd SGEXT-scripts
-git clone https://github.com/phcerdan/SGEXT-scripts src
+mkdir SGEXT; cd SGEXT
+git clone https://github.com/phcerdan/SGEXT src
 mkdir build; cd build
 cmake -DBUILD_TYPE:STRING=Release -DDGtal_DIR:PATH=/path/DGtal/build -DITK_DIR:PATH=your_path_to_build_dir_ITK ../src
 # if Boost is not the system path, also -DBoost_DIR:PATH=...
