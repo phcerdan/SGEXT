@@ -19,39 +19,12 @@
  * *******************************************************************/
 
 #include <pybind11/pybind11.h>
+
 namespace py = pybind11;
+void init_analyze_graph(py::module &);
 
-void init_sgcore(py::module &);
-#ifdef SG_MODULE_GENERATE_ENABLED
-void init_sggenerate(py::module &);
-#endif
-#ifdef SG_MODULE_DYNAMICS_ENABLED
-void init_sgdynamics(py::module &);
-#endif
-void init_sgextract(py::module &);
-#ifdef SG_MODULE_ANALYZE_ENABLED
-void init_sganalyze(py::module &);
-#endif
-#ifdef SG_MODULE_SCRIPTS_ENABLED
-void init_sgscripts(py::module &);
-#endif
-
-PYBIND11_MODULE(_sgext, m) {
-    m.doc() = "SGEXT, Spatial Graph Extraction, Analysis and Generation";
-    init_sgcore(m);
-#ifdef SG_MODULE_GENERATE_ENABLED
-    init_sggenerate(m);
-#endif
-#ifdef SG_MODULE_DYNAMICS_ENABLED
-    init_sgdynamics(m);
-#endif
-
-    init_sgextract(m);
-
-#ifdef SG_MODULE_ANALYZE_ENABLED
-    init_sganalyze(m);
-#endif
-#ifdef SG_MODULE_SCRIPTS_ENABLED
-    init_sgscripts(m);
-#endif
+void init_sgscripts(py::module & mparent) {
+    auto m = mparent.def_submodule("scripts");
+    m.doc() = "Scripts submodule "; // optional module docstring
+    init_analyze_graph(m);
 }
