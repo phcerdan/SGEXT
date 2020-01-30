@@ -80,6 +80,12 @@ int main(int argc, char* const argv[]) {
   opt_desc.add_options()(
       "select,c", po::value<string>()->required(),
       "select method for skeletonization. Valid: dmax, random, first");
+  opt_desc.add_options()(
+      "requested_number_of_splits,k", po::value<size_t>()->default_value(1),
+      "requested number of splits in the original image to process in parallel");
+  opt_desc.add_options()(
+      "saveMemory", po::value<bool>()->default_value(true),
+      "save memory deletes internal subcomplexes used in performing the thinning");
   opt_desc.add_options()("foreground,f",
                          po::value<string>()->default_value("white"),
                          "foreground color in binary image. [black|white]");
@@ -152,6 +158,12 @@ int main(int argc, char* const argv[]) {
         select_string == "first")))
     throw po::validation_error(po::validation_error::invalid_option_value,
                                "select");
+  const size_t requested_number_of_splits =
+    vm["requested_number_of_splits"].as<size_t>();
+  if(requested_number_of_splits == 0)
+    throw po::validation_error(po::validation_error::invalid_option_value,
+                               "requested_number_of_splits should be at least 1");
+  const bool saveMemory = vm["saveMemory"].as<bool>();
 
 #ifdef VISUALIZE
   bool visualize = vm["visualize"].as<bool>();
@@ -203,8 +215,10 @@ int main(int argc, char* const argv[]) {
   const fs::path input_stem = fs::path(filename).stem();
   std::string output_file_string = input_stem.string() + "_SKEL";
   if(!output_filename_simple) {
-    output_file_string += "_" + select_string + "_" + sk_string + "_p" +
-                          std::to_string(persistence);
+    output_file_string += "_" + select_string +
+      "_" + sk_string +
+      "_p" + std::to_string(persistence)
+      + "_k" + std::to_string(requested_number_of_splits);
   }
   const fs::path output_file_path = fs::path(output_file_string);
 
@@ -242,15 +256,16 @@ int main(int argc, char* const argv[]) {
   using DigitalSet =  // DGtal::Z3i::DigitalSet;
       DGtal::DigitalSetByAssociativeContainer<
           Domain, std::unordered_set<typename Domain::Point> >;
-  using ComplexMap = std::unordered_map<KSpace::Cell, DGtal::CubicalCellData>;
+  using ComplexMap = std::unordered_map<KSpace::Cell, DGtal::CubicalCellDataWithBirthDate>;
   using Complex = DGtal::VoxelComplex<KSpace, ComplexMap>;
 
   auto& sk = sk_string;
   KSpace ks;
-  // Domain of kspace must be padded.
-  KSpace::Point d1(KSpace::Point::diagonal(1));
-  ks.init(image.domain().lowerBound() - d1, image.domain().upperBound() + d1,
-          true);
+  // Domain of kspace must be padded. TODO: Not since DGtal 1.1 with SplitFunctions
+  // KSpace::Point d1(KSpace::Point::diagonal(1));
+  // ks.init(image.domain().lowerBound() - d1, image.domain().upperBound() + d1,
+  //         true);
+  ks.init(image.domain().lowerBound(), image.domain().upperBound(), true);
   DigitalTopology::ForegroundAdjacency adjF;
   DigitalTopology::BackgroundAdjacency adjB;
   DigitalTopology topo(adjF, adjB, DGtal::DigitalTopologyProperties::JORDAN_DT);
@@ -342,12 +357,44 @@ int main(int argc, char* const argv[]) {
   } else
     throw std::runtime_error("Invalid skel string");
 
-  Complex vc_new(ks);
-  if(persistence == 0)
-    vc_new = asymetricThinningScheme<Complex>(vc, Select, Skel, verbose);
-  else
-    vc_new = persistenceAsymetricThinningScheme<Complex>(vc, Select, Skel,
-                                                         persistence, verbose);
+  // Use parallel thinning introduced in DGtal 1.1.beta
+  // https://github.com/DGtal-team/DGtal/pull/1448
+  // Get max value of distance map in the image (needed for parallel thinning)
+  DistanceMapPixelType maxv = 0.0;
+  for(auto it = distanceMapImage.constRange().begin(),
+      itend = distanceMapImage.constRange().end();
+      it != itend ; ++it)
+    if ((*it) > maxv)
+      maxv = (*it);
+  const size_t wide_of_block_sub_complex = std::ceil(maxv);
+  const size_t number_of_threads = 0; // 0 is equivalent to max threads
+  const bool closeVoxels = true;
+  if(verbose) {
+    std::cout << "saveMemory: " << saveMemory << std::endl;
+    std::cout << "requested_number_of_splits: " << requested_number_of_splits << std::endl;
+    std::cout << "Max DistanceMap value: " << maxv << std::endl;
+    std::cout << "wide_of_block_sub_complex: " << wide_of_block_sub_complex << std::endl;
+    std::cout << "number_of_threads: " << (number_of_threads? std::to_string(number_of_threads) : "all") << std::endl;
+  }
+  auto thinning = thinningSchemeWithSplits<Complex>(
+      vc, Select, Skel,
+      requested_number_of_splits,
+      wide_of_block_sub_complex,
+      persistence,
+      number_of_threads,
+      closeVoxels,
+      saveMemory,
+      verbose);
+  if(verbose) {
+    std::cout << "actual splits: " << thinning.splitted_complexes.number_of_splits << std::endl;
+  }
+  auto & vc_new = thinning.merged_complex;
+
+  // if(persistence == 0)
+  //   vc_new = asymetricThinningScheme<Complex>(vc, Select, Skel, verbose);
+  // else
+  //   vc_new = persistenceAsymetricThinningScheme<Complex>(vc, Select, Skel,
+  //                                                        persistence, verbose);
 
   auto end = std::chrono::system_clock::now();
   auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(end - start);
@@ -408,6 +455,63 @@ int main(int argc, char* const argv[]) {
       throw IOException();
     }
   }
+#ifdef VISUALIZE
+  if(visualize) {
+    int argc(1);
+    char** argv(nullptr);
+    QApplication app(argc, argv);
+    Viewer3D<> viewer(ks);
+    viewer.show();
+
+    // visualize thin complexes
+    {
+    const auto &thin_complexes = thinning.thin_complexes;
+    const size_t nc = thin_complexes.size();
+    size_t cc = 1;
+    for( auto & tc: thin_complexes) {
+      viewer.setFillColor(Color(100*cc/nc, 100*cc/nc, 0*cc/nc, 255));
+      for(auto it = tc.begin(3) ; it != tc.end(3); ++it) {
+        viewer << it->first;
+      }
+      cc++;
+    }
+    const auto &sub_complexes = thinning.splitted_complexes.sub_complexes;
+    cc = 1;
+    for( auto & tc: sub_complexes) {
+      viewer.setFillColor(Color(100*cc/nc, 100*cc/nc, 0*cc/nc, 10));
+      for(auto it = tc.begin(3) ; it != tc.end(3); ++it) {
+        viewer << it->first;
+      }
+      cc++;
+    }
+    }
+    // // visualize thin block complexes
+    // {
+    // const auto &thin_block_complexes = thinning.thin_block_complexes;
+    // const size_t nc = thin_block_complexes.size();
+    // size_t cc = 1;
+    // for( auto & tc: thin_block_complexes) {
+    //   viewer.setFillColor(Color(100*cc/nc, 0*cc/nc, 100*cc/nc, 255));
+    //   for(auto it = tc.begin(3) ; it != tc.end(3); ++it) {
+    //     viewer << it->first;
+    //   }
+    //   cc++;
+    // }
+    // const auto &sub_complexes = thinning.block_complexes;
+    // cc = 1;
+    // for( auto & tc: sub_complexes) {
+    //   viewer.setFillColor(Color(100*cc/nc, 0*cc/nc, 100*cc/nc, 10));
+    //   for(auto it = tc.begin(3) ; it != tc.end(3); ++it) {
+    //     viewer << it->first;
+    //   }
+    //   cc++;
+    // }
+    // }
+
+    viewer << Viewer3D<>::updateDisplay;
+    app.exec();
+  }
+#endif
 
 #ifdef VISUALIZE
   if(visualize) {
