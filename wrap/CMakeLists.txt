@@ -1,5 +1,6 @@
 # Python wrapping will be one single module with submodules
 set(enabled_libs_ SGCore)
+set(enabled_include_dirs_)
 add_subdirectory(submodules/core)
 # MODULE_EXTRACT
 add_subdirectory(submodules/extract)
@@ -16,6 +17,18 @@ if(SG_MODULE_DYNAMICS)
   add_subdirectory(submodules/dynamics)
   list(APPEND enabled_libs_ SGDynamics)
 endif()
+if(SG_MODULE_VISUALIZE)
+  # add_subdirectory(submodules/visualize)
+  list(APPEND enabled_libs_ SGVisualize)
+endif()
+if(SG_BUILD_SCRIPTS)
+  add_subdirectory(submodules/scripts)
+  list(APPEND enabled_libs_ ${DGTAL_LIBRARIES})
+  list(APPEND enabled_libs_ ${ITK_LIBRARIES})
+  list(APPEND enabled_libs_ ${Boost_LIBRARIES})
+  list(APPEND enabled_include_dirs_ "${CMAKE_SOURCE_DIR}/cpp-scripts/")
+  list(APPEND enabled_include_dirs_ "${DGTAL_INCLUDE_DIRS}")
+endif()
 
 # Add the pybind module
 pybind11_add_module(_sgext
@@ -23,8 +36,24 @@ pybind11_add_module(_sgext
   ${all_modules_python_sources} # all the collected sources in submodules
   )
 target_link_libraries(_sgext PRIVATE ${enabled_libs_})
+target_include_directories(_sgext PRIVATE ${enabled_include_dirs_})
 if(SG_REQUIRES_VTK)
   target_compile_definitions(_sgext PRIVATE SG_USING_VTK)
+endif()
+if(SG_MODULE_ANALYZE)
+  target_compile_definitions(_sgext PRIVATE SG_MODULE_ANALYZE_ENABLED)
+endif()
+if(SG_MODULE_GENERATE)
+  target_compile_definitions(_sgext PRIVATE SG_MODULE_GENERATE_ENABLED)
+endif()
+if(SG_MODULE_DYNAMICS)
+  target_compile_definitions(_sgext PRIVATE SG_MODULE_DYNAMICS_ENABLED)
+endif()
+if(SG_MODULE_VISUALIZE)
+  target_compile_definitions(_sgext PRIVATE SG_MODULE_VISUALIZE_ENABLED)
+endif()
+if(SG_BUILD_SCRIPTS)
+  target_compile_definitions(_sgext PRIVATE SG_MODULE_SCRIPTS_ENABLED)
 endif()
 
 install(TARGETS _sgext
