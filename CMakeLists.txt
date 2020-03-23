@@ -52,8 +52,7 @@ find_package(Boost COMPONENTS
         graph
         serialization
         REQUIRED)
-# Requires version with this PR in: https://github.com/DGtal-team/DGtal/pull/1369
-# Merged in DGtal 1.0.beta
+
 find_package(DGtal REQUIRED 1.0)
 message(STATUS "DGtal version: ${DGtal_VERSION}")
 
