@@ -146,12 +146,12 @@ void export_graph_data_interface(const GraphType & reduced_g,
         const bool verbose = false
         );
 /**
- * Given an input binary image file (that can be read internally ITK)
- * Transform to it a DGtal Object, skeletonize it, and transform it into a
+ * Given an input binary image file holding a thin/skeleton (that can be read internally ITK)
+ * Transform to it a DGtal Object, and transform it into a
  * GraphType.
  */
 GraphType analyze_graph_function(
-        const std::string & filename,
+        const std::string & filename_thin_image,
         bool removeExtraEdges = true,
         bool mergeThreeConnectedNodes = true,
         bool mergeFourConnectedNodes = true,
