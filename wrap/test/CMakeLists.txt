@@ -9,3 +9,8 @@ endif()
 if(SG_MODULE_DYNAMICS)
   add_subdirectory(dynamics)
 endif()
+
+if(SG_BUILD_SCRIPTS)
+  add_subdirectory(scripts)
+  add_subdirectory(itk)
+endif()
