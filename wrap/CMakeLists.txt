@@ -28,6 +28,8 @@ if(SG_BUILD_SCRIPTS)
   list(APPEND enabled_libs_ ${Boost_LIBRARIES})
   list(APPEND enabled_include_dirs_ "${CMAKE_SOURCE_DIR}/cpp-scripts/")
   list(APPEND enabled_include_dirs_ "${DGTAL_INCLUDE_DIRS}")
+  # Add itk wrapping of Image
+  add_subdirectory(itk)
 endif()
 
 # Add the pybind module

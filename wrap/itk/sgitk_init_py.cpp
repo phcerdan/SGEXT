@@ -6,12 +6,10 @@
 #include <pybind11/pybind11.h>
 
 namespace py = pybind11;
-void init_analyze_graph(py::module &);
-void init_thin(py::module &);
+void init_itk_image(py::module &);
 
-void init_sgscripts(py::module & mparent) {
-    auto m = mparent.def_submodule("scripts");
-    m.doc() = "Scripts submodule "; // optional module docstring
-    init_analyze_graph(m);
-    init_thin(m);
+void init_sgitk(py::module & mparent) {
+    auto m = mparent.def_submodule("itk");
+    m.doc() = "ITK wrapping of image "; // optional module docstring
+    init_itk_image(m);
 }
