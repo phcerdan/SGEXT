@@ -28,6 +28,8 @@ if(SG_BUILD_SCRIPTS)
   list(APPEND enabled_libs_ ${Boost_LIBRARIES})
   list(APPEND enabled_include_dirs_ "${CMAKE_SOURCE_DIR}/cpp-scripts/")
   list(APPEND enabled_include_dirs_ "${DGTAL_INCLUDE_DIRS}")
+  # Add itk wrapping of Image
+  add_subdirectory(itk)
 endif()
 
 # Add the pybind module
@@ -51,6 +53,9 @@ if(SG_MODULE_DYNAMICS)
 endif()
 if(SG_MODULE_VISUALIZE)
   target_compile_definitions(_sgext PRIVATE SG_MODULE_VISUALIZE_ENABLED)
+  if(SG_MODULE_VISUALIZE_WITH_QT)
+    target_compile_definitions(_sgext PRIVATE VISUALIZE)
+  endif()
 endif()
 if(SG_BUILD_SCRIPTS)
   target_compile_definitions(_sgext PRIVATE SG_MODULE_SCRIPTS_ENABLED)
