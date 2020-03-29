@@ -12,4 +12,5 @@ endif()
 
 if(SG_BUILD_SCRIPTS)
   add_subdirectory(scripts)
+  add_subdirectory(itk)
 endif()
