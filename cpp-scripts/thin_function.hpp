@@ -120,8 +120,8 @@ inline SkelSelectType skel_select_string_to_enum(const std::string & select_stri
  */
 BinaryImageType::Pointer thin_function(
         const std::string & filename,
-        const SkelType skel_type,
-        const SkelSelectType skel_select_type,
+        const std::string & skel_type_str,
+        const std::string & skel_select_type_str,
         const std::string & output_foldername,
         const int & persistence = 0,
         const std::string & inputDistanceMapImageFilename = "",

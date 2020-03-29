@@ -18,16 +18,26 @@
  *
  * *******************************************************************/
 
+#include "thin_function.hpp"
 #include <pybind11/pybind11.h>
 
 namespace py = pybind11;
-void init_analyze_graph(py::module &);
-void init_thin(py::module &);
-
-void init_sgscripts(py::module & mparent) {
-    auto m = mparent.def_submodule("scripts");
-    m.doc() = "Scripts submodule "; // optional module docstring
-    init_analyze_graph(m);
-    // TODO cannot return an ITK image, not wrapped.
-    init_thin(m);
+using namespace SG;
+void init_thin(py::module &m) {
+    m.def("thin", &thin_function,
+            "Get a skeletonized or thinned image from a binary image.",
+            py::arg("input"),
+            py::arg("skel_type"),
+            py::arg("select_type"),
+            py::arg("out_foldername"),
+            py::arg("persistence") = 0,
+            py::arg("input_distance_map_filename") = "",
+            py::arg("foreground") = "white",
+            py::arg("out_discrete_points_foldername") = "",
+            py::arg("profile") = false,
+            py::arg("verbose") = false,
+            py::arg("visualize") = false,
+            py::arg("thresholdMin") = 0,
+            py::arg("thresholdMax") = 255
+         );
 }
