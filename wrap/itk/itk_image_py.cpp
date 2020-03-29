@@ -19,14 +19,16 @@
  * *******************************************************************/
 
 #include <pybind11/pybind11.h>
+#include <pybind11/numpy.h>
+
+#include "declare_itk_image_py.h"
 
 namespace py = pybind11;
-void init_analyze_graph(py::module &);
-void init_thin(py::module &);
 
-void init_sgscripts(py::module & mparent) {
-    auto m = mparent.def_submodule("scripts");
-    m.doc() = "Scripts submodule "; // optional module docstring
-    init_analyze_graph(m);
-    init_thin(m);
+using IUC3P = itk::Image<unsigned char, 3>::Pointer;
+using IF3P = itk::Image<float, 3>::Pointer;
+void init_itk_image(py::module &m) {
+    declare_itk_image_ptr<IUC3P>(m, "IUC3P");
+    declare_itk_image_ptr<IF3P>(m, "IF3P");
+
 }

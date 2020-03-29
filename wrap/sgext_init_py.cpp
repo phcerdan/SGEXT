@@ -34,6 +34,7 @@ void init_sganalyze(py::module &);
 #endif
 #ifdef SG_MODULE_SCRIPTS_ENABLED
 void init_sgscripts(py::module &);
+void init_sgitk(py::module &);
 #endif
 
 PYBIND11_MODULE(_sgext, m) {
@@ -53,5 +54,6 @@ PYBIND11_MODULE(_sgext, m) {
 #endif
 #ifdef SG_MODULE_SCRIPTS_ENABLED
     init_sgscripts(m);
+    init_sgitk(m);
 #endif
 }
