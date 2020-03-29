@@ -47,8 +47,8 @@ namespace SG {
 // we can provide: a) numpy interface (compatible with ITK python wrap) +
 // origin, spacing, cosines b) itk image in c++ c) actual filename
 BinaryImageType::Pointer thin_function(const std::string &filename,
-        const SkelType skel_type,
-        const SkelSelectType skel_select_type,
+        const std::string & skel_type_str,
+        const std::string & skel_select_type_str,
         const std::string & output_foldername,
         const int & persistence,
         const std::string & inputDistanceMapImageFilename,
@@ -60,6 +60,28 @@ BinaryImageType::Pointer thin_function(const std::string &filename,
         const int thresholdMin,
         const int thresholdMax
         ) {
+  if(verbose) {
+    using DGtal::trace;
+    trace.beginBlock("thin_function parameters:");
+    trace.info() << "skel_type_str: " << skel_type_str << std::endl;
+    trace.info() << "skel_select_type_str: " << skel_select_type_str << std::endl;
+    trace.info() << "output_foldername: " << output_foldername << std::endl;
+    trace.info() << "persistence: " << persistence << std::endl;
+    trace.info() << "inputDistanceMapImageFilename: " << inputDistanceMapImageFilename << std::endl;
+    trace.info() << "foreground: " << foreground << std::endl;
+    trace.info() << "out_sequence_discrete_points_foldername: " << out_sequence_discrete_points_foldername << std::endl;
+    trace.info() << "profile: " << profile << std::endl;
+    trace.info() << "verbose: " << verbose << std::endl;
+    trace.info() << "visualize: " << visualize << std::endl;
+    trace.info() << "thresholdMin: " << thresholdMin << std::endl;
+    trace.info() << "thresholdMax: " << thresholdMax << std::endl;
+    trace.info() << "----------" << std::endl;
+    trace.endBlock();
+  }
+  // Validate input skel method and skel_select
+  auto skel_type = skel_string_to_enum(skel_type_str);
+  auto skel_select_type = skel_select_string_to_enum(skel_select_type_str);
+
   // Get filename without extension (and without folders).
   namespace fs = boost::filesystem;
   const fs::path input_stem = fs::path(filename).stem();
@@ -137,8 +159,8 @@ BinaryImageType::Pointer thin_function(const std::string &filename,
   if(verbose) DGtal::trace.endBlock();
 
   if(verbose) DGtal::trace.beginBlock("load isthmus table");
-  auto &sk = skel_type;
   boost::dynamic_bitset<> isthmus_table;
+  auto &sk = skel_type;
   if(sk == SkelType::isthmus)
     isthmus_table = *DGtal::functions::loadTable(DGtal::isthmusicity::tableIsthmus);
   else if(sk == SkelType::isthmus1)
@@ -174,7 +196,6 @@ BinaryImageType::Pointer thin_function(const std::string &filename,
   std::function<std::pair<typename Complex::Cell, typename Complex::Data>(
       const Complex::Clique&)>
       Select;
-  auto& sel = skel_select_type;
 
   // profile
   auto start = std::chrono::system_clock::now();
@@ -187,6 +208,7 @@ BinaryImageType::Pointer thin_function(const std::string &filename,
   DistanceMapImage distanceMapImage(dummyDomain);
 
 
+  auto &sel = skel_select_type;
   if(sel == SkelSelectType::random)
     Select = DGtal::functions::selectRandom<Complex>;
   else if(sel == SkelSelectType::first)
