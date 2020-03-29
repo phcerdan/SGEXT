@@ -148,12 +148,10 @@ int main(int argc, char* const argv[]) {
     inputDistanceMapImageFilename = inputDistanceMapImageFilename_path.string();
   }
 
-  const auto skel_type = SG::skel_string_to_enum(sk_string);
-  const auto skel_select_type = SG::skel_select_string_to_enum(select_string);
-  thin_function(
+  SG::thin_function(
       filename,
-      skel_type,
-      skel_select_type,
+      sk_string,
+      select_string,
       exportImageFolder,
       persistence,
       inputDistanceMapImageFilename,

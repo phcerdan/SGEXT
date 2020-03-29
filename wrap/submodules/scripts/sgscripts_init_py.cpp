@@ -7,9 +7,12 @@
 
 namespace py = pybind11;
 void init_analyze_graph(py::module &);
+void init_thin(py::module &);
 
 void init_sgscripts(py::module & mparent) {
     auto m = mparent.def_submodule("scripts");
     m.doc() = "Scripts submodule "; // optional module docstring
     init_analyze_graph(m);
+    // TODO cannot return an ITK image, not wrapped.
+    init_thin(m);
 }
