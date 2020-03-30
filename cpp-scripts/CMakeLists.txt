@@ -90,7 +90,7 @@ if(SG_MODULE_ANALYZE)
     target_link_libraries(histograms_from_data SGAnalyze )
 endif()
 
-add_executable(create_distance_map create_distance_map.cpp)
+add_executable(create_distance_map create_distance_map.cpp create_distance_map_function.cpp)
 target_link_libraries(create_distance_map SGCore )
 target_link_libraries(create_distance_map ${ITK_LIBRARIES} )
 target_link_libraries(create_distance_map ${DGTAL_LIBRARIES} )

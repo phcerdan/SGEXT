@@ -20,7 +20,7 @@ import _sgext.scripts as scripts
 import unittest
 import os, tempfile
 
-class TestThin(unittest.TestCase):
+class TestCreateDistanceMap(unittest.TestCase):
     def setUp(self):
         # Create temp directory
         self.test_dir = tempfile.mkdtemp()
@@ -29,11 +29,9 @@ class TestThin(unittest.TestCase):
         if not os.path.exists(self.input):
             raise "Input image for test thin script not found: " + self.input
 
-    def test_thin(self):
-        scripts.thin(input=self.input,
-                     out_folder=self.test_dir,
-                     foreground="black",
-                     skel_type="end", select_type="first",
-                     persistence=2,
-                     visualize=False,
-                     verbose=True)
+    def test_create_distance_map_io(self):
+        scripts.create_distance_map_io(
+            input_file=self.input,
+            out_folder=self.test_dir,
+            foreground="black",
+            verbose=True)

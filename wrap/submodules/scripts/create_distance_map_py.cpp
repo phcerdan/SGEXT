@@ -18,17 +18,23 @@
  *
  * *******************************************************************/
 
+#include "create_distance_map_function.hpp"
 #include <pybind11/pybind11.h>
 
 namespace py = pybind11;
-void init_analyze_graph(py::module &);
-void init_thin(py::module &);
-void init_create_distance_map(py::module &);
+using namespace SG;
+void init_create_distance_map(py::module &m) {
+    m.def("create_distance_map", &create_distance_map_function,
+            "Create distance map using DGtal (high precision). Returns dist_map image.",
+            py::arg("input"),
+            py::arg("verbose") = false
+         );
+    m.def("create_distance_map_io", &create_distance_map_function_io,
+            "Create distance map using DGtal (high precision). Read/write from/to file.",
+            py::arg("input_file"),
+            py::arg("out_folder"),
+            py::arg("foreground") = "white",
+            py::arg("verbose") = false
+         );
 
-void init_sgscripts(py::module & mparent) {
-    auto m = mparent.def_submodule("scripts");
-    m.doc() = "Scripts submodule "; // optional module docstring
-    init_analyze_graph(m);
-    init_thin(m);
-    init_create_distance_map(m);
 }
