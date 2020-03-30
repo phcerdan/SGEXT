@@ -12,5 +12,9 @@ namespace SG {
     constexpr unsigned int BinaryImageDimension = 3;
     using BinaryImagePixelType = unsigned char;
     using BinaryImageType = itk::Image<BinaryImagePixelType, BinaryImageDimension>;
+
+    constexpr unsigned int FloatImageDimension = 3;
+    using FloatImagePixelType = float;
+    using FloatImageType = itk::Image<FloatImagePixelType, FloatImageDimension>;
 } // end ns
 #endif

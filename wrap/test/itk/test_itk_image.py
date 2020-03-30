@@ -15,7 +15,7 @@ class TestITKImagePointer(unittest.TestCase):
         if not os.path.exists(cls.input):
             raise "Input image for thin script in test_itk_image not found: " + cls.input
         cls.img =scripts.thin(input=cls.input,
-                          out_foldername=cls.test_dir,
+                          out_folder=cls.test_dir,
                           foreground="black",
                           skel_type="end", select_type="first",
                           persistence=2,
