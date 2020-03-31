@@ -1,6 +1,7 @@
 set(current_sources_
   sgitk_init_py.cpp
   itk_image_py.cpp
+  itk_view_image_py.cpp
   )
 set(module_name_ ${CMAKE_CURRENT_SOURCE_DIR})
 list(TRANSFORM current_sources_ PREPEND "${module_name_}/")
