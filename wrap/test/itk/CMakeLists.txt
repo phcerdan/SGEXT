@@ -1,5 +1,6 @@
 set(python_tests_
   test_itk_image.py
+  test_itk_view_image.py # Creates windows that have to be manually closed
   )
 
 get_filename_component(module_name_ ${CMAKE_CURRENT_SOURCE_DIR} NAME)

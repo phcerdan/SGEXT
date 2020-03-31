@@ -1,0 +1,44 @@
+"""
+Copyright (C) 2020 Pablo Hernande-Cerdan.
+
+This file is part of SGEXT: http://github.com/phcerdan/sgext.
+
+This file may be used under the terms of the GNU General Public License
+version 3 as published by the Free Software Foundation and appearing in
+the file LICENSE.GPL included in the packaging of this file.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""
+
+import _sgext.itk as itk
+import _sgext.scripts as scripts
+import unittest
+import os, tempfile
+
+class TestITKViewImage(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # Create temp directory
+        cls.test_dir = tempfile.mkdtemp()
+        dirname = os.path.dirname(os.path.abspath(__file__))
+        cls.input = os.path.join(dirname, '../../../images/bX3D.tif')
+        if not os.path.exists(cls.input):
+            raise "Input image for script used in test_view_image not found: " + cls.input
+        cls.img =scripts.create_distance_map_io(input_file=cls.input,
+                          out_folder=cls.test_dir,
+                          foreground="black",
+                          verbose=True)
+
+    # TODO closing is not automated
+    def test_from_file(self):
+        itk.view_image(input_file=self.input, win_title = "Original image (foreground=black)")
+
+    def test_from_sgext_itk_img(self):
+        itk.view_image(input=self.img, win_title = "DMap")
+
