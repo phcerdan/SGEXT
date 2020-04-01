@@ -9,7 +9,9 @@
 
 #include "get_vtk_points_from_graph.hpp"
 #include "graph_points_locator.hpp"
+#ifdef VISUALIZE
 #include "visualize_spatial_graph.hpp"
+#endif
 
 TEST_F(FixtureCloseGraphs, works) {
     std::vector<std::reference_wrapper<const GraphType>> graphs;
@@ -29,6 +31,8 @@ TEST_F(FixtureCloseGraphs, works) {
     EXPECT_EQ(boost::num_vertices(extended_g), boost::num_vertices(moved_g0));
 
     auto points_map_pair = SG::get_vtk_points_from_graph(extended_g);
+#ifdef VISUALIZE
     SG::visualize_spatial_graph_with_points(extended_g, points_map_pair.first,
                                             0.8);
+#endif
 }
