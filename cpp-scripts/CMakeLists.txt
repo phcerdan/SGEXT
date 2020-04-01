@@ -37,6 +37,7 @@ if(VISUALIZE_USING_QT)
 endif()
 
 add_executable(thin thin.cpp thin_function.cpp)
+target_link_libraries(thin SGCore)
 target_link_libraries(thin ${Boost_LIBRARIES} )
 target_link_libraries(thin ${ITK_LIBRARIES} )
 target_link_libraries(thin ${DGTAL_LIBRARIES} )
