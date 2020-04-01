@@ -10,6 +10,10 @@ resources:
 
 variables:
   tag: '$(Build.BuildId)'
+  tag-base: sgext-base
+  tag-sgext: sgext-sgext
+  tag-test: stext-test
+
 
 stages:
 - stage: Build
@@ -21,9 +25,19 @@ stages:
       vmImage: 'ubuntu-latest'
     steps:
     - task: Docker@2
-      displayName: Build an image
+      displayName: Dockerfile-base, build external dependencies
       inputs:
         command: build
         dockerfile: '$(Build.SourcesDirectory)/Dockerfile-base'
         tags: |
           $(tag)
+          $(tag-base)
+    - task: Docker@2
+      displayName: Dockerfile, build SGEXT
+      inputs:
+        command: build
+        dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+        tags: |
+          $(tag)
+          $(tag-sgext)
+
