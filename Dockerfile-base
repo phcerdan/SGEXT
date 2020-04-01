@@ -5,6 +5,7 @@ MAINTAINER Pablo Hernandez Cerdan <pablo.hernandez.cerdan@outlook.com>
 RUN apt-get update && \
     apt-get install -y \
     build-essential  wget  git \
+    software-properties-common \
     ninja-build \
     vim \
     freeglut3-dev \
@@ -39,8 +40,23 @@ RUN apt-get update && \
     libboost-timer-dev \
     libboost-tools-dev \
     libboost-type-erasure-dev \
-    libboost-wave-dev && \
+    libboost-wave-dev  && \
     apt-get autoremove && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Update to g++-9, needs software-properties-common for add-apt-repository
+# And add intel for modern tbb
+RUN wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
+	apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
+    sh -c 'echo deb https://apt.repos.intel.com/tbb all main > /etc/apt/sources.list.d/intel-tbb.list' && \
+    # wget https://apt.repos.intel.com/setup/intelproducts.list -O /etc/apt/sources.list.d/intelproducts.list && \
+    add-apt-repository ppa:ubuntu-toolchain-r/test && \
+    apt-get update && \
+    apt-get install -y g++-9 \
+      intel-tbb-2019.6-070 && \
+    apt-get autoremove && \
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 70 --slave /usr/bin/g++ g++ /usr/bin/g++-7 && \
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /usr/bin/g++ g++ /usr/bin/g++-9 && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Libraries build path
@@ -49,8 +65,8 @@ WORKDIR $BUILD_PATH
 
 # Install modern cmake (to system)
 ENV CMAKE_VERSION_MAJOR 3
-ENV CMAKE_VERSION_MINOR 13
-ENV CMAKE_VERSION_PATCH 3
+ENV CMAKE_VERSION_MINOR 15
+ENV CMAKE_VERSION_PATCH 2
 ENV CMAKE_VERSION ${CMAKE_VERSION_MAJOR}.${CMAKE_VERSION_MINOR}.${CMAKE_VERSION_PATCH}
 RUN wget -qO- "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-Linux-x86_64.tar.gz" \
     | tar --strip-components=1 -xz -C /usr/local
@@ -70,7 +86,7 @@ RUN git config --global advice.detachedHead false
 # ENV PATH $BUILD_PATH/miniconda/bin:${PATH}
 
 # Install VTKv8 latest release
-ENV VTK_GIT_TAG v8.2.0.rc2
+ENV VTK_GIT_TAG v8.2.0
 ENV VTK_BUILD_DIR ${BUILD_PATH}/VTK-build
 ENV VTK_SRC_FOLDER_NAME VTK-src
 ENV VTK_SRC_DIR ${BUILD_PATH}/${VTK_SRC_FOLDER_NAME}

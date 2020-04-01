@@ -24,7 +24,9 @@
 
 #include "get_vtk_points_from_graph.hpp"
 #include "graph_points_locator.hpp"
+#ifdef VISUALIZE
 #include "visualize_spatial_graph.hpp"
+#endif
 
 TEST_F(FixtureSquareCrossGraph,
        spatial_graph_difference_SquareCrossMinusCross) {
@@ -38,8 +40,11 @@ TEST_F(FixtureSquareCrossGraph,
     EXPECT_EQ(boost::num_vertices(g_diff), boost::num_vertices(g_square));
     EXPECT_EQ(boost::num_edges(g_diff), boost::num_edges(g_square));
 
+    //[[maybe_unused]] (c++17)
     auto points_map_pair = SG::get_vtk_points_from_graph(g_diff);
+#ifdef VISUALIZE
     SG::visualize_spatial_graph_with_points(g_diff, points_map_pair.first, 0.8);
+#endif
 }
 
 TEST_F(FixtureSquareCrossGraph,
@@ -54,8 +59,11 @@ TEST_F(FixtureSquareCrossGraph,
     EXPECT_EQ(boost::num_vertices(g_diff), boost::num_vertices(g_cross));
     EXPECT_EQ(boost::num_edges(g_diff), boost::num_edges(g_cross));
 
+    //[[maybe_unused]] (c++17)
     auto points_map_pair = SG::get_vtk_points_from_graph(g_diff);
+#ifdef VISUALIZE
     SG::visualize_spatial_graph_with_points(g_diff, points_map_pair.first, 0.8);
+#endif
 }
 
 // TEST_F(FixtureSquareCrossGraph,
