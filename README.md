@@ -16,6 +16,8 @@ The thin output can also be converted to a Spatial Graph, this is a regular grap
 Using histo.hpp from: https://github.com/phcerdan/histo-header
 SHA: 556ada3ff79c0180a0cbec36ff29a30da5acb367
 
+## [Azure Pipelines](https://dev.azure.com/phcerdan/SGEXT)
+
 ## Docker
 First build the container with all the dependencies, [Dockerfile-base](https://github.com/phcerdan/SGEXT/blob/master/Dockerfile-base).
 
