@@ -10,9 +10,9 @@ resources:
 
 variables:
   tag: '$(Build.BuildId)'
-  tag-base: sgext-base
-  tag-sgext: sgext-sgext
-  tag-test: stext-test
+  tag-base: sgext/base
+  tag-sgext: sgext/sgext
+  tag-test: stext/test
 
 
 stages:
