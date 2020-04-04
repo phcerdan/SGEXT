@@ -1,0 +1,119 @@
+FROM dockcross/manylinux2014-x64
+LABEL MAINTAINER="Pablo Hernandez Cerdan <pablo.hernandez.cerdan@outlook.com>"
+
+# RUN gosu root yum install boost
+#### Global Variables
+ENV BUILD_PATH /work
+WORKDIR $BUILD_PATH
+
+ENV SGEXT_CMAKE_BUILD_TYPE Release
+
+############# VTK ##############
+# VTK requirements
+RUN gosu root yum install -y libXt-devel mesa-libGL-devel
+# Install VTKv8 latest release
+ENV VTK_GIT_TAG v8.2.0
+ENV VTK_BUILD_DIR ${BUILD_PATH}/VTK-build
+ENV VTK_SRC_FOLDER_NAME VTK-src
+ENV VTK_SRC_DIR ${BUILD_PATH}/${VTK_SRC_FOLDER_NAME}
+WORKDIR $BUILD_PATH
+RUN git clone --single-branch https://gitlab.kitware.com/vtk/vtk.git ${VTK_SRC_FOLDER_NAME} && \
+    cd $VTK_SRC_DIR && \
+    git checkout ${VTK_GIT_TAG} && \
+    mkdir ${VTK_BUILD_DIR} && cd ${VTK_BUILD_DIR} && \
+    cmake \
+        -G Ninja \
+        -DCMAKE_BUILD_TYPE:STRING=${SGEXT_CMAKE_BUILD_TYPE} \
+        -DBUILD_SHARED_LIBS:BOOL=ON \
+        -DBUILD_TESTING:BOOL=OFF \
+        -DBUILD_EXAMPLES:BOOL=OFF \
+        ${VTK_SRC_DIR} && \
+    ninja && \
+    find . -name "*.o" -delete && \
+    find ../VTK* -depth -name .git -exec rm -rf '{}' \;
+
+############# ITK ##############
+# Install ITKv5 from git
+ENV ITK_GIT_TAG 25b37f9f720693fd328dc38cbd7ec46d54b8501a
+ENV ITK_BUILD_DIR ${BUILD_PATH}/ITK-build
+ENV ITK_SRC_FOLDER_NAME ITK-src
+ENV ITK_SRC_DIR ${BUILD_PATH}/${ITK_SRC_FOLDER_NAME}
+WORKDIR $BUILD_PATH
+RUN git clone --single-branch https://github.com/InsightSoftwareConsortium/ITK.git ${ITK_SRC_FOLDER_NAME} && \
+    cd $ITK_SRC_DIR && \
+    git checkout ${ITK_GIT_TAG} && \
+    mkdir ${ITK_BUILD_DIR} && cd ${ITK_BUILD_DIR} && \
+    cmake \
+        -G Ninja \
+        -DCMAKE_BUILD_TYPE:STRING=${SGEXT_CMAKE_BUILD_TYPE} \
+        -DModule_ITKVtkGlue:BOOL=ON \
+        -DVTK_DIR:STRING=${VTK_BUILD_DIR} \
+        -DBUILD_TESTING:BOOL=OFF \
+        ${ITK_SRC_DIR} && \
+    ninja && \
+    find . -name "*.o" -delete && \
+    find ../ITK* -depth -name .git -exec rm -rf '{}' \;
+
+
+############# BOOST ##############
+ENV BOOST_VERSION_MAJOR=1
+ENV BOOST_VERSION_MINOR=68
+ENV BOOST_VERSION_PATCH=0
+ENV BOOST_VERSION ${BOOST_VERSION_MAJOR}_${BOOST_VERSION_MINOR}_${BOOST_VERSION_PATCH}
+ENV BOOST_VERSION_DOTS ${BOOST_VERSION_MAJOR}.${BOOST_VERSION_MINOR}.${BOOST_VERSION_PATCH}
+ENV BOOST_SRC_DIR ${BUILD_PATH}/boost-src
+ENV BOOST_BUILD_DIR ${BUILD_PATH}/boost-build
+ENV BOOST_CMAKE_CONFIG_FOLDER ${BOOST_BUILD_DIR}/lib/cmake/Boost-${BOOST_VERSION_DOTS}
+RUN wget "https://dl.bintray.com/boostorg/release/${BOOST_VERSION_DOTS}/source/boost_${BOOST_VERSION}.tar.gz" && \
+    mkdir ${BOOST_SRC_DIR} && \
+    tar --strip-components=1 -xzf boost_${BOOST_VERSION}.tar.gz -C ${BOOST_SRC_DIR} && \
+    rm boost_${BOOST_VERSION}.tar.gz && \
+    cd ${BOOST_SRC_DIR} && \
+    ./bootstrap.sh --prefix=${BOOST_BUILD_DIR} && \
+    ./b2 -j 4 variant=release --without-python install && \
+    rm -rf ${BOOST_SRC_DIR}
+
+
+############# DGtal #############
+# Install DGtal from git
+ENV DGtal_GIT_TAG 71140534477a3dd41ff8311b9176c76a52ec0b97
+ENV DGtal_BUILD_DIR ${BUILD_PATH}/DGtal-build
+ENV DGtal_SRC_FOLDER_NAME DGtal-src
+ENV DGtal_SRC_DIR ${BUILD_PATH}/${DGtal_SRC_FOLDER_NAME}
+
+WORKDIR $BUILD_PATH
+RUN git clone --single-branch https://github.com/DGtal-team/DGtal.git ${DGtal_SRC_FOLDER_NAME} && \
+    cd $DGtal_SRC_DIR && \
+    git checkout ${DGtal_GIT_TAG} && \
+    mkdir ${DGtal_BUILD_DIR} && cd ${DGtal_BUILD_DIR} && \
+    cmake \
+        -G Ninja \
+        -DCMAKE_BUILD_TYPE:STRING=${SGEXT_CMAKE_BUILD_TYPE} \
+        -DBUILD_SHARED_LIBS:BOOL=ON \
+        -DBUILD_TESTING:BOOL=OFF \
+        -DBUILD_EXAMPLES:BOOL=OFF \
+        # TODO: Switch these two ON when CMake is at least 3.15 and remove Boost_ROOT
+        # -DCMAKE_FIND_PACKAGE_PREFER_CONFIG:BOOL=ON \
+        # -DBoost_DIR:STRING=${BOOST_CMAKE_CONFIG_FOLDER} \
+        -DBOOST_ROOT=${BOOST_BUILD_DIR} \
+        -DWITH_ITK:BOOL=ON \
+        -DITK_DIR:STRING=${ITK_BUILD_DIR} \
+        ${DGtal_SRC_DIR} && \
+    ninja && \
+    find . -name "*.o" -delete && \
+    find ../DGtal* -depth -name .git -exec rm -rf '{}' \;
+
+
+# Build-time metadata as defined at http://label-schema.org
+ARG BUILD_DATE
+ARG IMAGE=sgext-linux-base
+ARG VERSION=latest
+ARG VCS_REF
+ARG VCS_URL
+LABEL org.label-schema.build-date=$BUILD_DATE \
+      org.label-schema.name=$IMAGE \
+      org.label-schema.version=$VERSION \
+      org.label-schema.vcs-ref=$VCS_REF \
+      org.label-schema.vcs-url=$VCS_URL \
+      org.label-schema.schema-version="1.0" \
+      build_command="docker build -f Dockerfile-dockcross-manylinux2014-base . -t phcerdan/sgext-linux-base"
