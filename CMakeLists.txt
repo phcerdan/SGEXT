@@ -34,11 +34,15 @@ if(SG_MODULE_VISUALIZE_WITH_QT)
   set(SG_MODULE_VISUALIZE ON)
 endif()
 option(VISUALIZE "Enable visualization with VTK." OFF)
+option(SG_ENABLE_ITK "Use ITK. Required for SCRIPTS, and optionally for VISUALIZE modules." ON)
 option(SG_WRAP_PYTHON "Use pybind11 to create bindings to python." OFF)
 
 
 if(VISUALIZE OR SG_MODULE_VISUALIZE OR SG_MODULE_LOCATE OR SG_MODULE_COMPARE OR SG_MODULE_DYNAMICS_USING_VTK)
   set(SG_REQUIRES_VTK TRUE)
+endif()
+if(SG_BUILD_SCRIPTS OR SG_ENABLE_ITK)
+  set(SG_REQUIRES_ITK TRUE)
 endif()
 
 if(NOT CMAKE_CXX_STANDARD)
@@ -58,39 +62,45 @@ find_package(Boost COMPONENTS
 find_package(DGtal REQUIRED 1.0)
 message(STATUS "DGtal version: ${DGtal_VERSION}")
 
-find_package(ITK CONFIG REQUIRED)
-include(${ITK_USE_FILE})
+if(SG_REQUIRES_ITK)
+  find_package(ITK CONFIG REQUIRED)
+  include(${ITK_USE_FILE})
 
-set(ITKImageIOModule)
-if(${ITK_VERSION} VERSION_LESS "4.13.0")
-  # Create list of avaialble image formats
-  # From: https://discourse.itk.org/t/find-all-available-modules-from-groupio/351/5
-  foreach( mod IN LISTS ITK_MODULES_ENABLED)
-    if( ${mod} MATCHES "IO")
-      list(APPEND ITKImageIOModule ${mod})
-    endif()
-  endforeach()
-else()
-  set(ITKImageIOModule ITKImageIO)
-endif()
+  set(ITKImageIOModule)
+  if(${ITK_VERSION} VERSION_LESS "4.13.0")
+    # Create list of avaialble image formats
+    # From: https://discourse.itk.org/t/find-all-available-modules-from-groupio/351/5
+    foreach( mod IN LISTS ITK_MODULES_ENABLED)
+      if( ${mod} MATCHES "IO")
+        list(APPEND ITKImageIOModule ${mod})
+      endif()
+    endforeach()
+  else()
+    set(ITKImageIOModule ITKImageIO)
+  endif()
 
-set(ITKVtkGlueModule "")
-if(SG_REQUIRES_VTK)
-  set(ITKVtkGlueModule ITKVtkGlue)
-endif()
+  set(ITKVtkGlueModule "")
+  if(SG_REQUIRES_VTK)
+    set(ITKVtkGlueModule ITKVtkGlue)
+  endif()
 
-find_package(ITK REQUIRED COMPONENTS
-  ITKCommon
-  ITKIOImageBase
-  ITKImageGrid
-  ITKImageIntensity
-  ITKImageStatistics
-  ${ITKVtkGlueModule}
-  ${ITKImageIOModule}
-  CONFIG
-)
-message(STATUS "ITK version: ${ITK_VERSION}")
-include(${ITK_USE_FILE})
+  set(itk_components
+    ITKCommon
+    ITKIOImageBase
+    ITKImageGrid
+    ITKImageIntensity
+    ITKImageStatistics
+    ${ITKVtkGlueModule}
+    ${ITKImageIOModule}
+    )
+  find_package(ITK REQUIRED COMPONENTS
+    ${itk_components}
+    CONFIG
+    )
+  message(STATUS "ITK version: ${ITK_VERSION}")
+  include(${ITK_USE_FILE})
+endif() #ITK
+
 set(vtk_qt_components)
 if(SG_MODULE_VISUALIZE_WITH_QT)
   find_package(Qt5 REQUIRED
@@ -109,8 +119,7 @@ endif()
 
 set(_modern_VTK_available 0)
 if(SG_REQUIRES_VTK)
-  # VTK components to handle external dependency histo-header
-  find_package(VTK REQUIRED COMPONENTS
+  set(vtk_components
     vtkChartsCore
     vtkCommonCore
     vtkCommonDataModel
@@ -123,6 +132,10 @@ if(SG_REQUIRES_VTK)
     vtkInteractionWidgets
     vtkViewsInfovis
     ${vtk_qt_components}
+    )
+  # VTK components to handle external dependency histo-header
+  find_package(VTK REQUIRED COMPONENTS
+    ${vtk_components}
     CONFIG
     )
   message(STATUS "VTK version: ${VTK_VERSION}")
