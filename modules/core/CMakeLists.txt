@@ -4,7 +4,8 @@ list(APPEND SG_LIBRARIES ${SG_MODULE_${SG_MODULE_NAME}_LIBRARY})
 set(SG_MODULE_INTERNAL_DEPENDS) # Defined for consistency with other modules
 set(SG_MODULE_${SG_MODULE_NAME}_DEPENDS
   ${SG_MODULE_INTERNAL_DEPENDS}
-  ${Boost_LIBRARIES}
+  Boost::graph
+  Boost::serialization
   histo)
 set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
     bounding_box.cpp
