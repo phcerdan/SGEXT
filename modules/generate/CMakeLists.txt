@@ -1,5 +1,16 @@
-# Dependencies
-find_package(TBB REQUIRED) # For c++17 std::execution::par_unseq
+find_package(TBB QUIET) # For c++17 std::execution::par_unseq
+try_compile(_has_parallel_stl
+  ${CMAKE_BINARY_DIR}
+  ${PROJECT_SOURCE_DIR}/cmake/try_compile_execution_header.cpp
+  LINK_LIBRARIES  ${TBB_LIBRARIES}
+  )
+if(_has_parallel_stl)
+  message(STATUS "module generate -- stl header <execution> is available. Using TBB from ${TBB_INCLUDE_DIR}")
+else()
+  if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 17)
+    message(STATUS "module generate -- can optionally use TBB to use parallel algorithms. Provide -DTBB_DIR to enable it.")
+  endif()
+endif()
 # Fetch perm-montecarlo
 include(FetchContent)
 set(PERM_WRAP_PYTHON ${SG_WRAP_PYTHON})
@@ -71,9 +82,13 @@ set(SG_MODULE_INTERNAL_DEPENDS
   SGCore
   PERMCore # From perm-montecarlo
   )
+set(_optional_depends "")
+if(_has_parallel_stl)
+  list(APPEND _optional_depends ${TBB_LIBRARIES})
+endif()
 set(SG_MODULE_${SG_MODULE_NAME}_DEPENDS
   ${SG_MODULE_INTERNAL_DEPENDS}
-  ${TBB_LIBRARIES}
+  ${_optional_depends}
   histo)
 set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
     generate_common.cpp
@@ -94,7 +109,10 @@ target_include_directories(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   )
-target_include_directories(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} PUBLIC ${TBB_INCLUDE_DIR})
+if(_has_parallel_stl)
+  target_include_directories(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} PUBLIC ${TBB_INCLUDE_DIR})
+  target_compile_definitions(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} PUBLIC -DWITH_PARALLEL_STL)
+endif()
 
 target_link_libraries(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY}
   ${SG_MODULE_${SG_MODULE_NAME}_DEPENDS}
