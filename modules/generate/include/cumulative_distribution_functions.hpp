@@ -8,9 +8,14 @@
 
 #include <algorithm>
 #include <boost/math/constants/constants.hpp> // for pi...
-#include <execution>                          // std::execution::par_unseq
 #include <functional>                         // std::function
 #include <math.h>                             // erf
+
+#ifdef WITH_PARALLEL_STL
+#include <execution>                          // std::execution::par_unseq
+#else
+#include <omp.h>
+#endif
 
 namespace SG {
 
@@ -140,25 +145,33 @@ inline double cumulative_distribution_truncated_power_series_3(
 };
 
 template <typename TArrayType1, typename TArrayType2>
-TArrayType2
-apply_distro(const TArrayType1 &X,
-             std::function<typename TArrayType2::value_type(
-                     const typename TArrayType1::value_type &)> func) {
-    auto policy = std::execution::par_unseq;
-    TArrayType2 F(std::size(X));
-    std::transform(policy, std::begin(X), std::end(X), std::begin(F), func);
-    return F;
-}
-
-template <typename TArrayType1, typename TArrayType2>
 void apply_distro(const TArrayType1 &X,
                   TArrayType2 &F /* output*/,
                   std::function<typename TArrayType2::value_type(
                           const typename TArrayType1::value_type &)> func) {
     assert(std::size(X) == std::size(F));
+#ifdef WITH_PARALLEL_STL
     auto policy = std::execution::par_unseq;
     std::transform(policy, std::begin(X), std::end(X), std::begin(F), func);
+#else
+    const auto nelems = std::size(X);
+#pragma omp parallel for schedule(dynamic)
+    for(unsigned int i = 0; i < nelems ; ++i) {
+        F[i] = func(i);
+    }
+#endif
 }
+
+template <typename TArrayType1, typename TArrayType2>
+TArrayType2
+apply_distro(const TArrayType1 &X,
+             std::function<typename TArrayType2::value_type(
+                     const typename TArrayType1::value_type &)> func) {
+    TArrayType2 F(std::size(X));
+    apply_distro<TArrayType1, TArrayType2>(X, F, func);
+    return F;
+}
+
 
 } // namespace SG
 #endif
