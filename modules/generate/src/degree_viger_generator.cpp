@@ -5,6 +5,7 @@
 
 #include "degree_viger_generator.hpp"
 #include "degree_viger_generator_hash.hpp"
+#include <iterator>
 
 namespace SG {
 

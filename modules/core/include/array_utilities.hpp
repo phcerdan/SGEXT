@@ -13,6 +13,7 @@
 #include <array>
 #include <cmath>
 #include <numeric>
+#include <limits>
 #include <sstream>
 
 namespace ArrayUtilities {
