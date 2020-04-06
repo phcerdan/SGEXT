@@ -7,7 +7,6 @@ add_library(FixtureMatchingGraphs
 target_include_directories(FixtureMatchingGraphs PUBLIC .)
 target_link_libraries(FixtureMatchingGraphs
   SGCore
-  ${Boost_LIBRARIES}
   ${GTEST_LIBRARIES}
   )
 
@@ -17,6 +16,5 @@ add_library(FixtureSquareCrossGraph
 target_include_directories(FixtureSquareCrossGraph PUBLIC .)
 target_link_libraries(FixtureSquareCrossGraph
   SGCore
-  ${Boost_LIBRARIES}
   ${GTEST_LIBRARIES}
   )

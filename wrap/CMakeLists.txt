@@ -25,7 +25,7 @@ if(SG_BUILD_SCRIPTS)
   add_subdirectory(submodules/scripts)
   list(APPEND enabled_libs_ ${DGTAL_LIBRARIES})
   list(APPEND enabled_libs_ ${ITK_LIBRARIES})
-  list(APPEND enabled_libs_ ${Boost_LIBRARIES})
+  list(APPEND enabled_libs_ Boost::filesystem)
   list(APPEND enabled_include_dirs_ "${CMAKE_SOURCE_DIR}/cpp-scripts/")
   list(APPEND enabled_include_dirs_ "${DGTAL_INCLUDE_DIRS}")
   # Add itk wrapping of Image
