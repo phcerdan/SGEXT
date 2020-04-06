@@ -2,24 +2,25 @@ set(SG_MODULE_NAME "Visualize")
 set(SG_MODULE_${SG_MODULE_NAME}_LIBRARY "SG${SG_MODULE_NAME}")
 list(APPEND SG_LIBRARIES ${SG_MODULE_${SG_MODULE_NAME}_LIBRARY})
 set(SG_MODULE_INTERNAL_DEPENDS SGCore)
-set(qt_targets "")
+set(visualize_optional_depends "")
+if(SG_REQUIRES_ITK)
+  list(APPEND visualize_optional_depends ${ITK_LIBRARIES})
+endif()
 if(SG_MODULE_VISUALIZE_WITH_QT)
-    set(qt_targets Qt5::Widgets)
+  list(APPEND visualize_optional_depends Qt5::Widgets)
 endif()
 set(SG_MODULE_${SG_MODULE_NAME}_DEPENDS
     ${SG_MODULE_INTERNAL_DEPENDS}
-    ${ITK_LIBRARIES}
-    ${qt_targets}
+    ${visualize_optional_depends}
     ${VTK_LIBRARIES}
-    ${DGTAL_LIBRARIES} # For visualize_object.hpp
-    histo)
+    )
 set(qt_sources "")
 if(SG_MODULE_VISUALIZE_WITH_QT)
     set(qt_sources visualize_histograms.cpp)
 endif()
 
 set(modern_vtk_sources)
-if(${_modern_VTK_available})
+if(SG_REQUIRES_ITK AND _modern_VTK_available)
   set(modern_vtk_sources
     # Requires OpenGL2
     visualize_spatial_graph_with_image.cpp
@@ -44,9 +45,13 @@ target_include_directories(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} PUBLIC
   )
 target_include_directories(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} PUBLIC
   ${VTK_INCLUDE_DIRS}
-  ${ITK_INCLUDE_DIRS}
   ${DGTAL_INCLUDE_DIRS}
   )
+if(SG_REQUIRES_ITK)
+  target_include_directories(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} PUBLIC
+    ${ITK_INCLUDE_DIRS}
+    )
+endif()
 target_link_libraries(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY}
   PUBLIC
   ${SG_MODULE_${SG_MODULE_NAME}_DEPENDS}
