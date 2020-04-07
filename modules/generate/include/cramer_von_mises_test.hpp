@@ -23,7 +23,9 @@
 
 #include <algorithm>
 #include <assert.h>
+#ifdef WITH_PARALLEL_STL
 #include <execution>
+#endif
 #include <iterator>
 #include <numeric>
 
@@ -44,9 +46,25 @@ constexpr double one_over_six = 1.0 / 6.0;
 template <typename TVector>
 void compute_cumulative_counts(TVector &cumulative_counts_exclusive,
                                const TVector &histo_counts) {
-    std::exclusive_scan(std::execution::par_unseq, std::begin(histo_counts),
-                        std::end(histo_counts),
-                        cumulative_counts_exclusive.begin(), 0.0);
+#ifdef WITH_PARALLEL_STL
+    std::exclusive_scan(
+            std::execution::par_unseq,
+            std::begin(histo_counts),
+            std::end(histo_counts),
+            cumulative_counts_exclusive.begin(), 0.0);
+#else
+    std::partial_sum(
+            std::begin(histo_counts),
+            std::end(histo_counts),
+            cumulative_counts_exclusive.begin());
+    // Transform the partial sum into a exclusive_scan.
+    // Shift container elements to the right, and assign 0 to the first element.
+    std::rotate(
+        cumulative_counts_exclusive.rbegin(),
+        cumulative_counts_exclusive.rbegin() + 1,
+        cumulative_counts_exclusive.rend());
+    cumulative_counts_exclusive[0] = 0.0;
+#endif
 }
 
 template <typename TVector>
@@ -74,8 +92,12 @@ void compute_S(TVectorFloat &S,
     assert(std::size(S) == std::size(F));
     assert(std::size(cumulative_counts_exclusive) == std::size(F));
     std::transform(
-            std::execution::par_unseq, std::begin(cumulative_counts_exclusive),
-            std::end(cumulative_counts_exclusive), std::begin(F), std::begin(S),
+#ifdef WITH_PARALLEL_STL
+            std::execution::par_unseq,
+#endif
+            std::begin(cumulative_counts_exclusive),
+            std::end(cumulative_counts_exclusive),
+            std::begin(F), std::begin(S),
             [&total_counts](const double &M, const double &f) -> double {
                 return M - f * total_counts - 0.5;
             });
@@ -114,9 +136,12 @@ void compute_S_optimized(TVectorFloat &S,
     assert(std::size(S) == std::size(F_optimized));
     assert(std::size(cumulative_counts_exclusive) == std::size(F_optimized));
     std::transform(
-            std::execution::par_unseq, std::begin(cumulative_counts_exclusive),
-            std::end(cumulative_counts_exclusive), std::begin(F_optimized),
-            std::begin(S),
+#ifdef WITH_PARALLEL_STL
+            std::execution::par_unseq,
+#endif
+            std::begin(cumulative_counts_exclusive),
+            std::end(cumulative_counts_exclusive),
+            std::begin(F_optimized), std::begin(S),
             [](const double &M, const double &f) -> double { return M - f; });
 }
 
@@ -150,13 +175,18 @@ void compute_T(TVectorFloat &T,
 
     assert(std::size(T) == std::size(S));
     assert(std::size(T) == std::size(histo_counts));
-    std::transform(std::execution::par_unseq, std::begin(S), std::end(S),
-                   std::begin(histo_counts), std::begin(T),
-                   [](const double &s, const double &m) -> double {
-                       return m * (detail::one_over_six * (m + 1) *
-                                           (6 * s + 2 * m + 1) +
-                                   s * s);
-                   });
+    std::transform(
+#ifdef WITH_PARALLEL_STL
+            std::execution::par_unseq,
+#endif
+            std::begin(S),
+            std::end(S),
+            std::begin(histo_counts), std::begin(T),
+            [](const double &s, const double &m) -> double {
+            return m * (detail::one_over_six * (m + 1) *
+                    (6 * s + 2 * m + 1) +
+                    s * s);
+            });
 }
 template <typename TVectorFloat, typename TVectorInt>
 TVectorFloat compute_T(const TVectorFloat &S, const TVectorInt &histo_counts) {
@@ -179,7 +209,17 @@ double reduce_T(const TVector &T, const size_t &total_counts) {
     const double inverse_square_total_counts =
             1.0 / (total_counts * total_counts);
     return inverse_square_total_counts *
-           std::reduce(std::execution::par_unseq, std::begin(T), std::end(T));
+#ifdef WITH_PARALLEL_STL
+           std::reduce(
+                   std::execution::par_unseq,
+#else
+           std::accumulate(
+#endif
+                   std::begin(T), std::end(T)
+#ifndef WITH_PARALLEL_STL
+                   , 0.
+#endif
+                   );
 }
 
 template <typename TVectorInt, typename TVectorFloat>
