@@ -7,6 +7,7 @@
 #define SG_FORCE_COMPUTE_HPP
 
 #include "system.hpp"
+#include <functional>
 
 namespace SG {
 struct ParticleForce {
