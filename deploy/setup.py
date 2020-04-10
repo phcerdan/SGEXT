@@ -25,9 +25,9 @@ from sgextVersion import get_versions
 #     with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 #         long_description = f.read()
 
-long_description= r'SGEXT is an open-source, cross-platform library for '
-                   'skeletonization of vascular/filaments images and tools for the posterior '
-                   'graph analysis, using a spatial graph as an encriched graph with geometric '
+long_description= r'SGEXT is an open-source, cross-platform library for ' \
+                   'skeletonization of vascular/filaments images and tools for the posterior ' \
+                   'graph analysis, using a spatial graph as an encriched graph with geometric ' \
                    'information.'
 setup(
     name='sgext',
@@ -36,10 +36,23 @@ setup(
     author_email='pablo.hernandez.cerdan@outlook.com',
     packages=['sgext'],
     package_dir={'sgext': 'sgext'},
-    cmake_args=[],
+    cmake_source_dir='../',
+    cmake_args=[
+        '-DSG_BUILD_TESTING:BOOL=OFF',
+        '-DSG_MODULE_ANALYZE:BOOL=ON',
+        '-DSG_MODULE_COMPARE:BOOL=ON',  # VTK
+        '-DSG_MODULE_LOCATE:BOOL=ON',  # VTK
+        '-DSG_MODULE_GENERATE:BOOL=ON', # C++17, optional TBB (recommended)
+        '-DSG_MODULE_DYNAMICS:BOOL=ON', # C++17
+        '-DSG_MODULE_DYNAMICS_USING_VTK:BOOL=OFF',  # VTK
+        '-DSG_BUILD_SCRIPTS:BOOL=ON',  # ITK
+        '-DSG_MODULE_VISUALIZE:BOOL=OFF',  # VTK
+        '-DSG_MODULE_VISUALIZE_WITH_QT:BOOL=OFF'  # QT
+        '-DSG_WRAP_PYTHON:BOOL=ON'
+    ],
+    cmake_target="install",
     py_modules=[
         'sgextVersion',
-        'sgextBuildOptions'
     ],
     download_url=r'https://github.com/phcerdan/SGEXT',
     description=r'SGEXT is an open-source toolkit for skeletonization and graph analysis',
@@ -65,7 +78,7 @@ setup(
         "Operating System :: MacOS"
         ],
     license='GPLv3',
-    keywords=r'SGEXT thinning skeletonization graph complex-networks imaging'
+    keywords=r'SGEXT thinning skeletonization graph complex-networks imaging',
     url=r'https://github.com/phcerdan/SGEXT',
     install_requires=[
     ]

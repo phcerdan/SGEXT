@@ -1,2 +1,2 @@
-scikit-build==0.8.1
+git+git://github.com/phcerdan/scikit-build@add_cmake_target#egg=scikit-build
 numpy
