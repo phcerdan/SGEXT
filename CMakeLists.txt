@@ -220,7 +220,7 @@ if(SG_WRAP_PYTHON)
   endif()
 endif()
 
-set(SG_LIBRARIES "")
+set(SG_LIBRARIES)
 include(SGModuleMacros) # module macros
 add_subdirectory(modules/core)
 if(SG_MODULE_VISUALIZE)
@@ -295,5 +295,11 @@ add_custom_target(install-runtime
   ${CMAKE_COMMAND}
   -DCMAKE_INSTALL_COMPONENT=runtime
   -P "${PROJECT_BINARY_DIR}/cmake_install.cmake"
+  DEPENDS ${SG_LIBRARIES}
   )
+message(STATUS "SG_LIBRARIES: ${SG_LIBRARIES}")
+add_dependencies(install-runtime ${SG_LIBRARIES})
+if(SG_WRAP_PYTHON)
+  add_dependencies(install-runtime _sgext)
+endif()
 
