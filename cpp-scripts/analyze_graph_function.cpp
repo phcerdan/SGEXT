@@ -50,13 +50,15 @@
 #include "spatial_graph_from_object.hpp"
 #include "spatial_graph_utilities.hpp"
 
-#ifdef SG_MODULE_VISUALIZE_ENABLED
+#ifdef SG_MODULE_VISUALIZE_ENABLED_WITH_QT
 // Viewer
 #include <DGtal/io/Color.h>
 #include <DGtal/io/DrawWithDisplay3DModifier.h>
 #include <DGtal/io/colormaps/GradientColorMap.h>
 #include <DGtal/io/viewers/Viewer3D.h>
+#endif
 
+#ifdef SG_MODULE_VISUALIZE_ENABLED
 #include "visualize_spatial_graph.hpp"
 #include "visualize_spatial_graph_with_image.hpp"
 // #include "itkViewImage.h"
