@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 3.8.1)
 if(POLICY CMP0048)
   cmake_policy(SET CMP0048 NEW)
 endif()
+# To use TBB_ROOT in find_package
+if(POLICY CMP0074)
+  cmake_policy(SET CMP0074 NEW)
+endif()
 
 project(SGEXT
   VERSION 0.9.0
@@ -37,6 +41,9 @@ option(VISUALIZE "Enable visualization with VTK." OFF)
 option(SG_ENABLE_ITK "Use ITK. Required for SCRIPTS, and optionally for VISUALIZE modules." OFF)
 option(SG_WRAP_PYTHON "Use pybind11 to create bindings to python." OFF)
 
+set(DEPENDENCIES_BUILD_DIR "" CACHE PATH "Base folder generated from building the sub-project ./dependencies. It contains boost-build, DGtal-build, etc.")
+# The following script will set ITK_DIR, VTK_DIR DGtal_DIR, etc. Based on DEPENDENCIES_BUILD_DIR.
+include(handle_dependencies)
 
 if(VISUALIZE OR SG_MODULE_VISUALIZE OR SG_MODULE_LOCATE OR SG_MODULE_COMPARE OR SG_MODULE_DYNAMICS_USING_VTK)
   set(SG_REQUIRES_VTK TRUE)
@@ -61,6 +68,7 @@ find_package(Boost COMPONENTS
 
 find_package(DGtal REQUIRED 1.0)
 message(STATUS "DGtal version: ${DGtal_VERSION}")
+message(STATUS "DGtal_DIR: ${DGtal_DIR}")
 
 if(SG_REQUIRES_ITK)
   find_package(ITK CONFIG REQUIRED)
@@ -98,6 +106,7 @@ if(SG_REQUIRES_ITK)
     CONFIG
     )
   message(STATUS "ITK version: ${ITK_VERSION}")
+  message(STATUS "ITK_DIR: ${ITK_DIR}")
   include(${ITK_USE_FILE})
 endif() #ITK
 
