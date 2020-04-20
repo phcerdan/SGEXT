@@ -220,7 +220,7 @@ if(SG_WRAP_PYTHON)
   FetchContent_Declare(
     pybind11
     GIT_REPOSITORY https://github.com/pybind/pybind11
-    GIT_TAG v2.4.3
+    GIT_TAG v2.5
   )
   FetchContent_GetProperties(pybind11)
   if(NOT pybind11_POPULATED)
