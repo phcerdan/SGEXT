@@ -9,50 +9,11 @@ ENV SGEXT_SRC_DIR ${BUILD_PATH}/${SGEXT_SRC_FOLDER_NAME}
 # Copy files from current repo into the docker container
 COPY . ${SGEXT_SRC_DIR}
 # Remove _skbuild and dist folders if existant
-RUN cd ${SGEXT_SRC_DIR} && rm -rf ./deploy/_skbuild && rm -rf ./deploy/dist
+# RUN cd ${SGEXT_SRC_DIR} && rm -rf ./deploy/_skbuild && rm -rf ./deploy/dist
 
-# install intel-tbb (from source)
-# ENV TBB_ROOT /work/intel-tbb-install
-# RUN ${SGEXT_SRC_DIR}/deploy/scripts/build-tbb-linux.sh ${TBB_ROOT}
-#
 WORKDIR ${SGEXT_SRC_DIR}/deploy
-# TODO Do it with all the binaries available (no 2.7 needed)
-ENV PYBIN /opt/python/cp38-cp38/bin
-# TODO this is to force to use scikit-build with cmake_target branch
-# Should be removed when merged
-RUN ${PYBIN}/python -m pip uninstall scikit-build -y
-RUN ${PYBIN}/python -m pip install -r requirements-dev.txt
 
-ENV PYTHON_EXECUTABLE=${PYBIN}/python3
-RUN export PYTHON_INCLUDE_DIR=$( find -L ${PYBIN}/../include/ -name Python.h -exec dirname {} \; )
-# TODO remove
-RUN echo "PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}"
-RUN echo "PYTHON_INCLUDE_DIR: ${PYTHON_INCLUDE_DIR}"
-RUN ${PYBIN}/python -m setup bdist_wheel --build-type Release -G Ninja -- \
-        -DSG_BUILD_TESTING:BOOL=ON \
-        -DSG_MODULE_ANALYZE:BOOL=ON \
-        -DSG_MODULE_COMPARE:BOOL=ON \
-        -DSG_MODULE_LOCATE:BOOL=ON \
-        -DSG_MODULE_GENERATE:BOOL=ON \
-        -DSG_MODULE_DYNAMICS:BOOL=ON \
-        -DSG_MODULE_VISUALIZE:BOOL=OFF \
-        -DSG_MODULE_VISUALIZE_WITH_QT:BOOL=OFF \
-        # TODO: Switch these two ON when CMake is at least 3.15 and remove Boost_ROOT
-        # -DCMAKE_FIND_PACKAGE_PREFER_CONFIG:BOOL=ON \
-        # -DBoost_DIR:STRING=${BOOST_CMAKE_CONFIG_FOLDER} \
-        -DBOOST_ROOT=${BOOST_BUILD_DIR} \
-        -DITK_DIR:STRING=${ITK_BUILD_DIR} \
-        -DDGtal_DIR:STRING=${DGtal_BUILD_DIR} \
-        -DSG_WRAP_PYTHON:BOOL=ON \
-        -DPYTHON_EXECUTABLE:FILEPATH=${PYTHON_EXECUTABLE} \
-        -DPYTHON_INCLUDE_DIR=${PYTHON_INCLUDE_DIR}
-
-# auditwheel will bundle shared libraries in the wheel,
-# but they have to be found first using LD_LIBRARY_PATH
-ENV DEPENDENCIES_LD_LIBRARY_PATH="/work/VTK-build/lib:/work/boost-build/lib:/work/DGtal-build/src"
-RUN LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${DEPENDENCIES_LD_LIBRARY_PATH} auditwheel repair ./dist/sgext-*
-# Cleanup
-# RUN ${PYBIN}/python setup.py clean
+RUN ${SGEXT_SRC_DIR}/deploy/scripts/manylinux-build-wheels.sh
 
 # Build-time metadata as defined at http://label-schema.org
 ARG BUILD_DATE
@@ -66,4 +27,6 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.vcs-ref=$VCS_REF \
       org.label-schema.vcs-url=$VCS_URL \
       org.label-schema.schema-version="1.0" \
-      build_command="docker build -f Dockerfile-dockcross-manylinux2014 . -t phcerdan/sgext-linux"
+      build_command="\
+      docker build -f ./deploy/docker/Dockerfile-dockcross-manylinux2014-wheel . -t phcerdan/sgext-linux-wheel; \
+      docker cp $(docker create phcerdan/sgext-linux-wheel:latest):/work/dist /tmp"
