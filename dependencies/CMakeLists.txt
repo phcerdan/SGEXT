@@ -41,6 +41,7 @@ if(WITH_VTK)
 ExternalProject_Add(ep_vtk
   URL ${VTK_URL}
   URL_MD5 ${VTK_URL_MD5}
+  CMAKE_GENERATOR ${CMAKE_GENERATOR}
   SOURCE_DIR ${VTK_SRC_DIR}
   BINARY_DIR ${VTK_BUILD_DIR}
   CMAKE_ARGS
@@ -56,12 +57,14 @@ endif()
 ################### ITK #######################
 #################################################
 if(WITH_ITK)
-  set(ITK_GIT_TAG 25b37f9f720693fd328dc38cbd7ec46d54b8501a)
+  # set(ITK_GIT_TAG v5.1rc03)
+  set(ITK_GIT_TAG HDopen-mingw)
   message(STATUS "ITK_VERSION: ${ITK_GIT_TAG}")
   set(ITK_BUILD_DIR ${OUTPUT_BUILD_DIR}/ITK-build)
   set(ITK_SRC_FOLDER_NAME ITK-src)
   set(ITK_SRC_DIR ${OUTPUT_BUILD_DIR}/${ITK_SRC_FOLDER_NAME})
-  set(ITK_GIT_REPOSITORY "https://github.com/InsightSoftwareConsortium/ITK.git")
+  # set(ITK_GIT_REPOSITORY "https://github.com/InsightSoftwareConsortium/ITK.git")
+  set(ITK_GIT_REPOSITORY "https://github.com/thewtex/ITK.git")
   set(_ITK_depends)
   set(_ITK_optional_cmake_args)
   if(WITH_VTK)
@@ -77,6 +80,7 @@ if(WITH_ITK)
     GIT_TAG ${ITK_GIT_TAG}
     # GIT_SHALLOW TRUE
     GIT_PROGRESS TRUE
+    CMAKE_GENERATOR ${CMAKE_GENERATOR}
     SOURCE_DIR ${ITK_SRC_DIR}
     BINARY_DIR ${ITK_BUILD_DIR}
     CMAKE_ARGS
@@ -107,6 +111,19 @@ endif()
 if( WIN32 )
   set( _boost_bootstrap_command bootstrap.bat )
   set( _boost_b2_command b2.exe )
+  set(_boost_extra_args
+      toolset=msvc
+      )
+endif()
+if ( APPLE )
+  if(${CMAKE_CXX_STANDARD})
+    set(_boost_extra_args
+      toolset=clang
+      cxxflags=-std=c++${CMAKE_CXX_STANDARD}
+      cxxflags=-stdlib=libc++
+      linkflags=-stdlib=libc++
+      )
+  endif()
 endif()
 
 set(BOOST_BUILD_DIR ${OUTPUT_BUILD_DIR}/boost-build)
@@ -117,9 +134,11 @@ ExternalProject_Add(ep_boost
   CONFIGURE_COMMAND ${_boost_bootstrap_command} --prefix=${BOOST_BUILD_DIR}
   BUILD_COMMAND  ${_boost_b2_command} install
      --without-python
+     --without-log
      --threading=multi
      --link=shared
      variant=release
+     ${_boost_extra_args}
      -j${NUM_CORES}
   INSTALL_COMMAND "" # Already installed in BOOST_BUILD_DIR
 )
@@ -149,6 +168,7 @@ ExternalProject_Add(ep_dgtal
   GIT_TAG ${DGtal_GIT_TAG}
   # GIT_SHALLOW TRUE
   GIT_PROGRESS TRUE
+  CMAKE_GENERATOR ${CMAKE_GENERATOR}
   SOURCE_DIR ${DGtal_SRC_DIR}
   BINARY_DIR ${DGtal_BUILD_DIR}
   CMAKE_ARGS

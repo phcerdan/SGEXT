@@ -65,6 +65,8 @@ find_package(Boost COMPONENTS
         graph
         serialization
         REQUIRED)
+message(STATUS "Boost_VERSION: ${Boost_VERSION}")
+message(STATUS "Boost_INCLUDE_DIR: ${Boost_INCLUDE_DIR}")
 
 find_package(DGtal REQUIRED 1.0)
 message(STATUS "DGtal version: ${DGtal_VERSION}")
