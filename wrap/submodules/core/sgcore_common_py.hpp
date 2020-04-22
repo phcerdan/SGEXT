@@ -6,6 +6,8 @@
 #ifndef SGCORE_COMMON_PYBIND_HPP
 #define SGCORE_COMMON_PYBIND_HPP
 
+#include "pybind11_common.h"
 #include <pybind11/stl_bind.h>
+
 PYBIND11_MAKE_OPAQUE(std::array<double, 3>);
 #endif

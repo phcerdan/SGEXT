@@ -3,10 +3,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "write_vtu_file.hpp"
+#include "pybind11_common.h"
 #include "sgdynamics_common_py.hpp"
-
-#include <pybind11/pybind11.h>
+#include "write_vtu_file.hpp"
 
 namespace py = pybind11;
 using namespace SG;
