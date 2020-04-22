@@ -22,6 +22,11 @@ message(STATUS "NUM_CORES: ${NUM_CORES}")
 message(STATUS "WITH_VTK: ${WITH_VTK}")
 message(STATUS "WITH_ITK: ${WITH_ITK}")
 message(STATUS "WITH_TBB: ${WITH_TBB}")
+set(EP_CMAKE_C_FLAGS "" CACHE STRING "Extra CMAKE_C_FLAGS passed to all CMake based ExternalProjects")
+set(EP_CMAKE_CXX_FLAGS "" CACHE STRING "Extra CMAKE_CXX_FLAGS passed to all CMake based ExternalProjects")
+mark_as_advanced(EP_CMAKE_C_FLAGS)
+mark_as_advanced(EP_CMAKE_CXX_FLAGS)
+
 
 ##################################################
 ##################### VTK #######################
@@ -47,6 +52,8 @@ ExternalProject_Add(ep_vtk
   CMAKE_ARGS
   -DCMAKE_BUILD_TYPE:STRING=${SGEXT_CMAKE_BUILD_TYPE}
   -DBUILD_SHARED_LIBS:BOOL=ON
+  -DCMAKE_C_FLAGS=${EP_CMAKE_C_FLAGS}
+  -DCMAKE_CXX_FLAGS=${EP_CMAKE_CXX_FLAGS}
   -DBUILD_TESTING:BOOL=OFF
   -DBUILD_EXAMPLES:BOOL=OFF
   INSTALL_COMMAND ""
@@ -86,6 +93,8 @@ if(WITH_ITK)
     CMAKE_ARGS
     -DCMAKE_BUILD_TYPE:STRING=${SGEXT_CMAKE_BUILD_TYPE}
     -DBUILD_TESTING:BOOL=OFF
+    -DCMAKE_C_FLAGS=${EP_CMAKE_C_FLAGS}
+    -DCMAKE_CXX_FLAGS=${EP_CMAKE_CXX_FLAGS}
     ${_ITK_optional_cmake_args}
     INSTALL_COMMAND ""
     DEPENDS ${_ITK_depends}
@@ -105,12 +114,12 @@ set(BOOST_URL "https://dl.bintray.com/boostorg/release/${BOOST_VERSION_DOTS}/sou
 set(BOOST_URL_MD5 5d8b4503582fffa9eefdb9045359c239)
 
 if( UNIX )
-  set( _boost_bootstrap_command ./bootstrap.sh )
-  set( _boost_b2_command ./b2 )
+  set(_boost_bootstrap_command ./bootstrap.sh)
+  set(_boost_b2_command ./b2)
 endif()
 if( WIN32 )
-  set( _boost_bootstrap_command bootstrap.bat )
-  set( _boost_b2_command b2.exe )
+  set(_boost_bootstrap_command bootstrap.bat)
+  set(_boost_b2_command b2.exe)
   set(_boost_extra_args
       toolset=msvc
       )
@@ -153,10 +162,10 @@ set(DGtal_BUILD_DIR ${OUTPUT_BUILD_DIR}/DGtal-build)
 set(DGtal_SRC_FOLDER_NAME DGtal-src)
 set(DGtal_SRC_DIR ${OUTPUT_BUILD_DIR}/${DGtal_SRC_FOLDER_NAME})
 set(DGtal_GIT_REPOSITORY "https://github.com/DGtal-team/DGtal")
-set(_DGtal_depends)
+set(_DGtal_depends ep_boost)
 set(_DGtal_optional_cmake_args)
 if(WITH_ITK)
-  set(_DGtal_depends ep_itk)
+  list(APPEND _DGtal_depends ep_itk)
   list(APPEND _DGtal_optional_cmake_args
     -DWITH_ITK:BOOL=ON
     -DITK_DIR:STRING=${ITK_BUILD_DIR}
@@ -179,6 +188,8 @@ ExternalProject_Add(ep_dgtal
       -DBOOST_ROOT=${BOOST_BUILD_DIR}
       -DBoost_NO_BOOST_CMAKE:BOOL=ON
       # -DBOOST_DIR=${BOOST_BUILD_DIR}/lib/cmake/
+      -DCMAKE_C_FLAGS=${EP_CMAKE_C_FLAGS}
+      -DCMAKE_CXX_FLAGS=${EP_CMAKE_CXX_FLAGS}
       ${_DGtal_optional_cmake_args}
   INSTALL_COMMAND ""
   DEPENDS ${_DGtal_depends}

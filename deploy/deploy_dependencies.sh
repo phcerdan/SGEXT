@@ -30,9 +30,11 @@ fi
 if [[ $OSTYPE == msys* || $OSTYPE == cygwin ]]; then
   export CMAKE_EXECUTABLE=cmake.exe
   export CMAKE_GENERATOR="Visual Studio 16 2019"
-  export CMAKE_OS_VARIABLES="\
+  export CMAKE_OS_VARIABLES='\
   -DCMAKE_CXX_STANDARD=14 \
-  "
+  -DEP_CMAKE_C_FLAGS="/MP" \
+  -DEP_CMAKE_CXX_FLAGS="/MP" \
+  '
 fi
 
 pushd ${DEPENDENCIES_BUILD_DIR}
@@ -46,4 +48,5 @@ $CMAKE_EXECUTABLE \
   -DWITH_ITK:BOOL=ON \
   || exit 1
 $CMAKE_EXECUTABLE --build .
+$CMAKE_EXECUTABLE --build . --target clean_artifacts
 popd
