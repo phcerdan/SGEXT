@@ -3,9 +3,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+#include "pybind11_common.h"
+#include "../core/sgcore_common_py.hpp" // to make array3d opaque
+
 #include "simulated_annealing_generator.hpp"
-#include <pybind11/pybind11.h>
-// #include <pybind11/stl_bind.h>
 
 namespace py = pybind11;
 using namespace SG;

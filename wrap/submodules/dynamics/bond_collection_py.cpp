@@ -3,12 +3,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "bond_collection.hpp"
-#include "sgdynamics_common_py.hpp"
-
-#include <pybind11/pybind11.h>
+#include "pybind11_common.h"
 // stl.h for binding bond_vector_t (std::vector<std::shared_ptr<Bond>))
 #include <pybind11/stl.h>
+#include "sgdynamics_common_py.hpp"
+
+#include "bond_collection.hpp"
 
 namespace py = pybind11;
 using namespace SG;

@@ -7,6 +7,8 @@
 #define SGDYNAMICS_COMMON_PYBIND_HPP
 
 #include "particle.hpp"
+
+#include "pybind11_common.h"
 #include <pybind11/stl_bind.h>
 // #include "bond.hpp"
 // #include <memory>
