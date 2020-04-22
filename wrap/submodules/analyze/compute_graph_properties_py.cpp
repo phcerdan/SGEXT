@@ -18,10 +18,10 @@
  *
  * *******************************************************************/
 
+#include "pybind11_common.h"
+#include <pybind11/stl.h>
 
 #include "compute_graph_properties.hpp"
-#include <pybind11/stl.h>
-#include <pybind11/pybind11.h>
 
 namespace py = pybind11;
 using namespace SG;

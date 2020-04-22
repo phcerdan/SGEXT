@@ -18,9 +18,9 @@
  *
  * *******************************************************************/
 
+#include "pybind11_common.h"
 // #include "sgextract_common_py.hpp"
 #include "reduce_spatial_graph_via_dfs.hpp"
-#include <pybind11/pybind11.h>
 
 namespace py = pybind11;
 using namespace SG;

@@ -18,7 +18,8 @@
  *
  * *******************************************************************/
 
-#include <pybind11/pybind11.h>
+#include "pybind11_common.h"
+#include "../core/sgcore_common_py.hpp"
 
 namespace py = pybind11;
 void init_simulated_annealing_generator_parameters(py::module &);

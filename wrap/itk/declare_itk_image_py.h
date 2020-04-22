@@ -21,8 +21,7 @@
 #ifndef DECLARE_ITK_IMAGE_PY_H
 #define DECLARE_ITK_IMAGE_PY_H
 
-#include <pybind11/pybind11.h>
-#include <pybind11/numpy.h>
+#include "pybind11_common.h"
 
 #include "itkImage.h"
 #include "itkSmartPointer.h"
@@ -81,8 +80,8 @@ void declare_itk_image_ptr(pybind11::module &m, const std::string &typestr) {
                     const std::string & contiguous) {
                 const auto size = img->GetLargestPossibleRegion().GetSize();
                 const auto shape = (contiguous == "F") ?
-                std::vector{size[2], size[1], size[1]} :
-                std::vector{size[0], size[1], size[2]};
+                std::vector<size_t>{size[2], size[1], size[1]} :
+                std::vector<size_t>{size[0], size[1], size[2]};
                 return py::array(
                         py::dtype::of<typename TImagePointer::ObjectType::PixelType>(),
                         shape,

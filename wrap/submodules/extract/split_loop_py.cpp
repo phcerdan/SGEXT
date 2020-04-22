@@ -18,9 +18,9 @@
  *
  * *******************************************************************/
 
+#include "pybind11_common.h"
 // #include "sgextract_common_py.hpp"
 #include "split_loop.hpp"
-#include <pybind11/pybind11.h>
 
 namespace py = pybind11;
 using namespace SG;

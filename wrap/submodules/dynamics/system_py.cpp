@@ -18,10 +18,11 @@
  *
  * *******************************************************************/
 
+#include "pybind11_common.h"
+
 #include "system.hpp"
 #include "sgdynamics_common_py.hpp"
 
-#include <pybind11/pybind11.h>
 
 namespace py = pybind11;
 using namespace SG;

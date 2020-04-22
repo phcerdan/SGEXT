@@ -21,7 +21,7 @@
 #ifndef DECLARE_ITK_VIEW_IMAGE_PY_H
 #define DECLARE_ITK_VIEW_IMAGE_PY_H
 
-#include <pybind11/pybind11.h>
+#include "pybind11_common.h"
 
 #include "view_image_function.hpp"
 

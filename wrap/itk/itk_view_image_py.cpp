@@ -18,7 +18,7 @@
  *
  * *******************************************************************/
 
-#include <pybind11/pybind11.h>
+#include "pybind11_common.h"
 #include "sgitk_common_py.hpp"
 #include "view_image_function.hpp"
 #include "declare_itk_view_image_py.h"

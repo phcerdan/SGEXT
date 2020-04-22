@@ -18,11 +18,11 @@
  *
  * *******************************************************************/
 
+#include "pybind11_common.h"
+#include "../core/sgcore_common_py.hpp" // to make array3d opaque
+
 #include "contour_length_generator.hpp"
 #include "contour_length_generator_functions.hpp"
-#include "../core/sgcore_common_py.hpp" // to make array3d opaque
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
 namespace py = pybind11;
 using namespace SG;

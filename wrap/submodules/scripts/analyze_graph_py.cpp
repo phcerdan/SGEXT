@@ -18,8 +18,9 @@
  *
  * *******************************************************************/
 
+#include "pybind11_common.h"
+
 #include "analyze_graph_function.hpp"
-#include <pybind11/pybind11.h>
 
 namespace py = pybind11;
 using namespace SG;

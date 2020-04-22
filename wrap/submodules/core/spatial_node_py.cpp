@@ -18,9 +18,10 @@
  *
  * *******************************************************************/
 
+#include "pybind11_common.h"
 #include "sgcore_common_py.hpp"
+
 #include "spatial_node.hpp"
-#include <pybind11/pybind11.h>
 
 namespace py = pybind11;
 using namespace SG;

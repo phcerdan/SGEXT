@@ -18,7 +18,7 @@
  *
  * *******************************************************************/
 
-#include <pybind11/pybind11.h>
+#include "pybind11_common.h"
 #include <pybind11/numpy.h>
 
 #include "sgitk_common_py.hpp"

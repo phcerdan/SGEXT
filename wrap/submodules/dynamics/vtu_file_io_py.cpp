@@ -18,10 +18,9 @@
  *
  * *******************************************************************/
 
-#include "write_vtu_file.hpp"
+#include "pybind11_common.h"
 #include "sgdynamics_common_py.hpp"
-
-#include <pybind11/pybind11.h>
+#include "write_vtu_file.hpp"
 
 namespace py = pybind11;
 using namespace SG;

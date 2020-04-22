@@ -18,8 +18,9 @@
  *
  * *******************************************************************/
 
+#include "pybind11_common.h"
+
 #include "create_distance_map_function.hpp"
-#include <pybind11/pybind11.h>
 
 namespace py = pybind11;
 using namespace SG;

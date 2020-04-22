@@ -18,10 +18,10 @@
  *
  * *******************************************************************/
 
-#include "force_compute.hpp"
+#include "pybind11_common.h"
 #include "sgdynamics_common_py.hpp"
+#include "force_compute.hpp"
 
-#include <pybind11/pybind11.h>
 
 namespace py = pybind11;
 using namespace SG;

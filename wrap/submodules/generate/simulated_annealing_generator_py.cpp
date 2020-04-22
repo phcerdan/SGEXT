@@ -18,9 +18,10 @@
  *
  * *******************************************************************/
 
+#include "pybind11_common.h"
+#include "../core/sgcore_common_py.hpp" // to make array3d opaque
+
 #include "simulated_annealing_generator.hpp"
-#include <pybind11/pybind11.h>
-// #include <pybind11/stl_bind.h>
 
 namespace py = pybind11;
 using namespace SG;

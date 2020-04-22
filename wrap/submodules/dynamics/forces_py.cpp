@@ -18,11 +18,11 @@
  *
  * *******************************************************************/
 
-#include "bonded_forces.hpp"
-#include "unbonded_forces.hpp"
+#include "pybind11_common.h"
 #include "sgdynamics_common_py.hpp"
 
-#include <pybind11/pybind11.h>
+#include "bonded_forces.hpp"
+#include "unbonded_forces.hpp"
 
 namespace py = pybind11;
 using namespace SG;

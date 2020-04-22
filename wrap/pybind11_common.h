@@ -18,13 +18,16 @@
  *
  * *******************************************************************/
 
-#include "pybind11_common.h"
-// #include "sgextract_common_py.hpp"
-#include "remove_extra_edges.hpp"
+// This file should be included in all cpp files using pybind11
+// to avoid -Wodr violation (Warning).
+// See https://github.com/pybind/pybind11/issues/1055
+#ifndef PYBIND11_COMMON_H
+#define PYBIND11_COMMON_H
 
-namespace py = pybind11;
-using namespace SG;
+#include <pybind11/pybind11.h>
+#include <pybind11/functional.h>
+#include <pybind11/stl_bind.h>
+#include <pybind11/stl.h>
+#include "core/sgcore_common_py.hpp" // OPAQUE std::array<double, 3>
 
-void init_remove_extra_edges(py::module &m) {
-    m.def("remove_extra_edges", &remove_extra_edges);
-}
+#endif

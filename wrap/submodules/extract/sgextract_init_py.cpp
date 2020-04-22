@@ -18,7 +18,7 @@
  *
  * *******************************************************************/
 
-#include <pybind11/pybind11.h>
+#include "pybind11_common.h"
 
 namespace py = pybind11;
 void init_split_loop(py::module &);

@@ -18,7 +18,7 @@
  *
  * *******************************************************************/
 
-#include <pybind11/pybind11.h>
+#include "pybind11_common.h"
 #include "sgdynamics_common_py.hpp"
 
 namespace py = pybind11;
