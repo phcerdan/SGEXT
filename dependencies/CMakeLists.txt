@@ -71,11 +71,9 @@ if(WITH_ITK)
   set(ITK_SRC_FOLDER_NAME ITK-src)
   set(ITK_SRC_DIR ${OUTPUT_BUILD_DIR}/${ITK_SRC_FOLDER_NAME})
   set(ITK_GIT_REPOSITORY "https://github.com/InsightSoftwareConsortium/ITK.git")
-  set(_ITK_depends)
-  set(_ITK_optional_cmake_args)
   if(WITH_VTK)
     set(_ITK_depends ep_vtk)
-    list(APPEND _ITK_optional_cmake_args
+    set(_ITK_optional_cmake_args
       -DModule_ITKVtkGlue:BOOL=ON
       -DVTK_DIR:STRING=${VTK_BUILD_DIR}
     )
@@ -140,7 +138,7 @@ ExternalProject_Add(ep_boost
   URL_MD5 ${BOOST_URL_MD5}
   BUILD_IN_SOURCE 1
   CONFIGURE_COMMAND ${_boost_bootstrap_command} --prefix=${BOOST_BUILD_DIR}
-  BUILD_COMMAND  ${_boost_b2_command} install
+  BUILD_COMMAND  ${_boost_b2_command} install --prefix=${BOOST_BUILD_DIR}
      --without-python
      --without-log
      --threading=multi

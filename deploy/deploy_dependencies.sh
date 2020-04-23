@@ -47,6 +47,6 @@ $CMAKE_EXECUTABLE \
   -DWITH_VTK:BOOL=ON \
   -DWITH_ITK:BOOL=ON \
   || exit 1
-$CMAKE_EXECUTABLE --build .
-$CMAKE_EXECUTABLE --build . --target clean_artifacts
+$CMAKE_EXECUTABLE --build . --config $SGEXT_BUILD_TYPE
+$CMAKE_EXECUTABLE --build . --config $SGEXT_BUILD_TYPE --target clean_artifacts
 popd
