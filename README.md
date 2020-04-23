@@ -193,6 +193,22 @@ docker pull phcerdan/sgext-linux
 docker pull phcerdan/sgext-linux-wheel
 ```
 
+### Azure pipelines
+
+```bash
+workon sgext-build
+pip install azure-cli
+az extension add --name azure-devops
+```
+
+Configure a [personal access tokens](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&viewFallbackFrom=vsts&tabs=preview-page#create-personal-access-tokens-to-authenticate-access)
+```bash
+az devops login
+```
+
+Get the buildId from the URL of the build: `https://dev.azure.com/phcerdan/SGEXT/_build/results?buildId=181`
+
+And use the script `./deploy/scripts/download_azure_artifacts.sh $build_id` to download all the wheels (defaults to `/tmp/dist`)
 
 ## Contributors
 

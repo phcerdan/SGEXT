@@ -19,10 +19,10 @@ python -m pip install cmake
 python -m pip install ninja
 python -m pip install -r ${script_dir}/requirements-deploy.txt
 
+  # -DCMAKE_C_FLAGS:STRING=/MP \
+  # -DCMAKE_CXX_FLAGS:STRING=/MP \
 pushd ${script_dir}
 python setup.py bdist_wheel --build-type Release -G "Visual Studio 16 2019" -- \
-  -DCMAKE_C_FLAGS="/MP" \
-  -DCMAKE_CXX_FLAGS="/MP" \
   -DSG_BUILD_TESTING:BOOL=OFF \
   -DSG_MODULE_ANALYZE:BOOL=ON \
   -DSG_MODULE_COMPARE:BOOL=ON \
@@ -31,8 +31,8 @@ python setup.py bdist_wheel --build-type Release -G "Visual Studio 16 2019" -- \
   -DSG_MODULE_DYNAMICS:BOOL=ON \
   -DSG_MODULE_VISUALIZE:BOOL=OFF \
   -DSG_MODULE_VISUALIZE_WITH_QT:BOOL=OFF \
-  -DDEPENDENCIES_BUILD_DIR:PATH=$DEPENDENCIES_BUILD_DIR \
   -DSG_WRAP_PYTHON:BOOL=ON \
+  -DDEPENDENCIES_BUILD_DIR:PATH=$DEPENDENCIES_BUILD_DIR \
   || exit 1
   # ${PYBIN}/python setup.py clean
 popd
