@@ -22,10 +22,6 @@ message(STATUS "NUM_CORES: ${NUM_CORES}")
 message(STATUS "WITH_VTK: ${WITH_VTK}")
 message(STATUS "WITH_ITK: ${WITH_ITK}")
 message(STATUS "WITH_TBB: ${WITH_TBB}")
-set(EP_CMAKE_C_FLAGS "" CACHE STRING "Extra CMAKE_C_FLAGS passed to all CMake based ExternalProjects")
-set(EP_CMAKE_CXX_FLAGS "" CACHE STRING "Extra CMAKE_CXX_FLAGS passed to all CMake based ExternalProjects")
-mark_as_advanced(EP_CMAKE_C_FLAGS)
-mark_as_advanced(EP_CMAKE_CXX_FLAGS)
 
 
 ##################################################
@@ -39,7 +35,7 @@ if(WITH_VTK)
   set(VTK_VERSION_DOTS "${VTK_VERSION_MAJOR}.${VTK_VERSION_MINOR}.${VTK_VERSION_PATCH}")
   message(STATUS "VTK_VERSION: ${VTK_VERSION_DOTS}")
   set(VTK_URL "https://github.com/Kitware/VTK/archive/v${VTK_VERSION_DOTS}.zip")
-  set(VTK_URL_MD5 79db2378c57b7ad5b378929f0c5b4212) 
+  set(VTK_URL_MD5 79db2378c57b7ad5b378929f0c5b4212)
   set(VTK_BUILD_DIR ${OUTPUT_BUILD_DIR}/VTK-build)
   set(VTK_SRC_FOLDER_NAME VTK-src)
   set(VTK_SRC_DIR ${OUTPUT_BUILD_DIR}/${VTK_SRC_FOLDER_NAME})
@@ -52,8 +48,6 @@ ExternalProject_Add(ep_vtk
   CMAKE_ARGS
   -DCMAKE_BUILD_TYPE:STRING=${SGEXT_CMAKE_BUILD_TYPE}
   -DBUILD_SHARED_LIBS:BOOL=ON
-  -DCMAKE_C_FLAGS=${EP_CMAKE_C_FLAGS}
-  -DCMAKE_CXX_FLAGS=${EP_CMAKE_CXX_FLAGS}
   -DBUILD_TESTING:BOOL=OFF
   -DBUILD_EXAMPLES:BOOL=OFF
   INSTALL_COMMAND ""
@@ -90,8 +84,6 @@ if(WITH_ITK)
     CMAKE_ARGS
     -DCMAKE_BUILD_TYPE:STRING=${SGEXT_CMAKE_BUILD_TYPE}
     -DBUILD_TESTING:BOOL=OFF
-    -DCMAKE_C_FLAGS=${EP_CMAKE_C_FLAGS}
-    -DCMAKE_CXX_FLAGS=${EP_CMAKE_CXX_FLAGS}
     ${_ITK_optional_cmake_args}
     INSTALL_COMMAND ""
     DEPENDS ${_ITK_depends}
@@ -185,8 +177,6 @@ ExternalProject_Add(ep_dgtal
       -DBOOST_ROOT=${BOOST_BUILD_DIR}
       -DBoost_NO_BOOST_CMAKE:BOOL=ON
       # -DBOOST_DIR=${BOOST_BUILD_DIR}/lib/cmake/
-      -DCMAKE_C_FLAGS=${EP_CMAKE_C_FLAGS}
-      -DCMAKE_CXX_FLAGS=${EP_CMAKE_CXX_FLAGS}
       ${_DGtal_optional_cmake_args}
   INSTALL_COMMAND ""
   DEPENDS ${_DGtal_depends}

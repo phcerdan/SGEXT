@@ -27,13 +27,16 @@ if [[ $OSTYPE == darwin* ]]; then
 fi
 
 # Windows: git bash (mysys) or WSL (cygwin)
+# In azure-pipelines or github actions, it previously needs:
+# call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+# to find cl.exe
 if [[ $OSTYPE == msys* || $OSTYPE == cygwin ]]; then
-  export CMAKE_EXECUTABLE=cmake.exe
-  export CMAKE_GENERATOR="Visual Studio 16 2019"
+  # export CMAKE_EXECUTABLE=cmake.exe
+  # export CMAKE_GENERATOR="Visual Studio 16 2019"
   export CMAKE_OS_VARIABLES='\
   -DCMAKE_CXX_STANDARD=14 \
-  -DEP_CMAKE_C_FLAGS="/MP" \
-  -DEP_CMAKE_CXX_FLAGS="/MP" \
+  -DCMAKE_C_COMPILER:PATH=cl.exe \
+  -DCMAKE_CXX_COMPILER:PATH=cl.exe \
   '
 fi
 
@@ -47,6 +50,6 @@ $CMAKE_EXECUTABLE \
   -DWITH_VTK:BOOL=ON \
   -DWITH_ITK:BOOL=ON \
   || exit 1
-$CMAKE_EXECUTABLE --build . --config $SGEXT_BUILD_TYPE
-$CMAKE_EXECUTABLE --build . --config $SGEXT_BUILD_TYPE --target clean_artifacts
+$CMAKE_EXECUTABLE --build .
+$CMAKE_EXECUTABLE --build . --target clean_artifacts
 popd
