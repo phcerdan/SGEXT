@@ -89,12 +89,12 @@ stages:
           mkdir $DEPENDENCIES_BUILD_DIR
           echo $DEPENDENCIES_BUILD_DIR
       displayName: "mkdir DEPENDENCIES_BUILD_DIR"
-    - task: Bash@3
-      inputs:
-        targetType: 'inline'
-        script: ./deploy/deploy_dependencies.sh
-        workingDirectory: $(Build.SourcesDirectory)
-        displayName: 'Build dependencies'
+    - script: |
+        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+        ./deploy/deploy_dependencies.sh
+      workingDirectory: $(Build.SourcesDirectory)
+      displayName: 'Build dependencies'
+
     - publish: $(DEPENDENCIES_BUILD_DIR)
       artifact: DEPENDENCIES_BUILD_DIR_WIN
 
@@ -120,13 +120,10 @@ stages:
     - task: UsePythonVersion@0
       inputs:
         versionSpec: '$(python.version)'
-    - task: Bash@3
-      inputs:
-        # use inline to workaround bug where dirname $0 does not work
-        # https://github.com/Microsoft/azure-pipelines-tasks/issues/7934
-        targetType: 'inline'
-        script: ./deploy/deploy_windows_one_python.sh
-        workingDirectory: $(Build.SourcesDirectory)
+    - script: |
+        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+        ./deploy/deploy_windows_one_python.sh
+      workingDirectory: $(Build.SourcesDirectory)
       displayName: 'Build project'
 
     - task: PublishPipelineArtifact@1
