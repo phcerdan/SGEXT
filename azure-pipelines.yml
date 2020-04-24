@@ -6,6 +6,7 @@ stages:
   jobs:
   - job: build_linux # name of the deployment job (A-Z, a-z, 0-9, and underscore)
     displayName: 'DeployLinuxWithDockcross' # friendly name to display in the UI
+    timeoutInMinutes: 0
     pool:                # see the following "Pool" schema
       vmImage: 'ubuntu-18.04'
     steps:
@@ -27,6 +28,7 @@ stages:
   jobs:
   - job: build_dependencies_macos
     displayName: 'BuildDependencies'
+    timeoutInMinutes: 0
     steps:
     - script: |
         mkdir $DEPENDENCIES_BUILD_DIR
@@ -41,6 +43,7 @@ stages:
       artifact: DEPENDENCIES_BUILD_DIR_MACOS
   - job: build_macos
     displayName: 'Build project and deploy'
+    timeoutInMinutes: 0
     dependsOn: build_dependencies_macos
     strategy:
       matrix:
@@ -81,6 +84,7 @@ stages:
   jobs:
   - job: build_dependencies_win
     displayName: 'BuildDependencies'
+    timeoutInMinutes: 0
     steps:
     - task: Bash@3
       inputs:
@@ -91,8 +95,11 @@ stages:
       displayName: "mkdir DEPENDENCIES_BUILD_DIR"
     - script: |
         call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-        ./deploy/deploy_dependencies.sh
-      workingDirectory: $(Build.SourcesDirectory)
+        cd $(DEPENDENCIES_BUILD_DIR)
+        cmake $(Build.SourcesDirectory)\dependencies -G Ninja -DCMAKE_C_COMPILER:FILEPATH="cl.exe" -DCMAKE_CXX_COMPILER:FILEPATH="cl.exe" -DCMAKE_BUILD_TYPE=Release -DWITH_TBB:BOOL=OFF -DWITH_VTK:BOOL=ON -DWITH_ITK:BOOL=ON
+        cmake --build .
+        cmake --build . --target clean_artifacts
+      workingDirectory: $(Agent.BuildDirectory)
       displayName: 'Build dependencies'
 
     - publish: $(DEPENDENCIES_BUILD_DIR)
@@ -101,6 +108,7 @@ stages:
   - job: build_win
     displayName: 'Build project and deploy'
     dependsOn: build_dependencies_win
+    timeoutInMinutes: 0
     strategy:
       matrix:
         Python35:
@@ -122,8 +130,11 @@ stages:
         versionSpec: '$(python.version)'
     - script: |
         call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-        ./deploy/deploy_windows_one_python.sh
-      workingDirectory: $(Build.SourcesDirectory)
+        python -m pip install cmake
+        python -m pip install ninja
+        python -m pip install -r requirements-deploy.txt
+        python setup.py bdist_wheel --build-type Release -G Ninja -- -DCMAKE_C_COMPILER="cl.exe" -DCMAKE_CXX_COMPILER="cl.exe" -DSG_BUILD_TESTING:BOOL=OFF -DSG_MODULE_ANALYZE:BOOL=ON -DSG_MODULE_COMPARE:BOOL=ON -DSG_MODULE_LOCATE:BOOL=ON -DSG_MODULE_GENERATE:BOOL=ON -DSG_MODULE_DYNAMICS:BOOL=ON -DSG_MODULE_VISUALIZE:BOOL=OFF -DSG_MODULE_VISUALIZE_WITH_QT:BOOL=OFF -DSG_WRAP_PYTHON:BOOL=ON -DDEPENDENCIES_BUILD_DIR:PATH=$(DEPENDENCIES_BUILD_DIR)
+      workingDirectory: '$(Build.SourcesDirectory)\deploy'
       displayName: 'Build project'
 
     - task: PublishPipelineArtifact@1
