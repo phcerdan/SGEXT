@@ -28,6 +28,7 @@ fi
 
 # Windows: git bash (mysys) or WSL (cygwin)
 # In azure-pipelines or github actions, it previously needs:
+# Better usee powershell directly and use:
 # call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
 # to find cl.exe
 if [[ $OSTYPE == msys* || $OSTYPE == cygwin ]]; then
