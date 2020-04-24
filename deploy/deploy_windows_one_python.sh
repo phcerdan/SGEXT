@@ -22,7 +22,7 @@ python -m pip install -r ${script_dir}/requirements-deploy.txt
   # -DCMAKE_C_FLAGS:STRING=/MP \
   # -DCMAKE_CXX_FLAGS:STRING=/MP \
 pushd ${script_dir}
-python setup.py bdist_wheel --build-type Release -G "Visual Studio 16 2019" -- \
+python setup.py bdist_wheel --build-type Release -G Ninja -- \
   -DSG_BUILD_TESTING:BOOL=OFF \
   -DSG_MODULE_ANALYZE:BOOL=ON \
   -DSG_MODULE_COMPARE:BOOL=ON \
