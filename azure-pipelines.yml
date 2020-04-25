@@ -95,6 +95,8 @@ stages:
       displayName: "mkdir DEPENDENCIES_BUILD_DIR"
     - script: |
         call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+        powershell -Command "(New-Object Net.WebClient).DownloadFile('https://raw.githubusercontent.com/horta/zlib.install/master/install.bat', 'install.bat')"
+        call "./install.bat"
         cd $(DEPENDENCIES_BUILD_DIR)
         cmake $(Build.SourcesDirectory)\dependencies -G Ninja -DCMAKE_C_COMPILER:FILEPATH="cl.exe" -DCMAKE_CXX_COMPILER:FILEPATH="cl.exe" -DCMAKE_BUILD_TYPE=Release -DWITH_TBB:BOOL=OFF -DWITH_VTK:BOOL=ON -DWITH_ITK:BOOL=ON
         cmake --build .
