@@ -98,13 +98,13 @@ endif()
 ################### BOOST #######################
 #################################################
 set(BOOST_VERSION_MAJOR 1)
-set(BOOST_VERSION_MINOR 68)
+set(BOOST_VERSION_MINOR 72)
 set(BOOST_VERSION_PATCH 0)
 set(BOOST_VERSION "${BOOST_VERSION_MAJOR}_${BOOST_VERSION_MINOR}_${BOOST_VERSION_PATCH}")
 set(BOOST_VERSION_DOTS "${BOOST_VERSION_MAJOR}.${BOOST_VERSION_MINOR}.${BOOST_VERSION_PATCH}")
 message(STATUS "BOOST_VERSION: ${BOOST_VERSION_DOTS}")
 set(BOOST_URL "https://dl.bintray.com/boostorg/release/${BOOST_VERSION_DOTS}/source/boost_${BOOST_VERSION}.tar.gz")
-set(BOOST_URL_MD5 5d8b4503582fffa9eefdb9045359c239)
+set(BOOST_URL_HASH SHA256=c66e88d5786f2ca4dbebb14e06b566fb642a1a6947ad8cc9091f9f445134143f)
 
 if( UNIX )
   set(_boost_bootstrap_command ./bootstrap.sh)
@@ -131,12 +131,15 @@ endif()
 set(BOOST_BUILD_DIR ${OUTPUT_BUILD_DIR}/boost-build)
 ExternalProject_Add(ep_boost
   URL ${BOOST_URL}
-  URL_MD5 ${BOOST_URL_MD5}
+  URL_HASH ${BOOST_URL_MD5}
   BUILD_IN_SOURCE 1
   CONFIGURE_COMMAND ${_boost_bootstrap_command} --prefix=${BOOST_BUILD_DIR}
   BUILD_COMMAND  ${_boost_b2_command} install --prefix=${BOOST_BUILD_DIR}
      --without-python
      --without-log
+     --without-coroutine
+     --without-type_erasure
+     --without-stacktrace
      --threading=multi
      --link=shared
      variant=release
