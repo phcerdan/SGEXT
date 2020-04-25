@@ -152,7 +152,7 @@ ExternalProject_Add(ep_boost
 #################### DGtal #######################
 ##################################################
 
-set(DGtal_GIT_TAG 71140534477a3dd41ff8311b9176c76a52ec0b97)
+set(DGtal_GIT_TAG 66f2ad8cd3103c022747d0ae5a2ef2db0407d393) # 23-April 2020
 message(STATUS "DGtal_VERSION: ${DGtal_GIT_TAG}")
 set(DGtal_BUILD_DIR ${OUTPUT_BUILD_DIR}/DGtal-build)
 set(DGtal_SRC_FOLDER_NAME DGtal-src)
