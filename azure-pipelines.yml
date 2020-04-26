@@ -132,6 +132,8 @@ stages:
         versionSpec: '$(python.version)'
     - script: |
         call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+        powershell -Command "(New-Object Net.WebClient).DownloadFile('https://raw.githubusercontent.com/horta/zlib.install/master/install.bat', 'install.bat')"
+        call "./install.bat"
         python -m pip install cmake
         python -m pip install ninja
         python -m pip install -r requirements-deploy.txt
