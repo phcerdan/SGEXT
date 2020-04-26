@@ -182,9 +182,8 @@ ExternalProject_Add(ep_dgtal
       -DBUILD_SHARED_LIBS:BOOL=ON
       -DBUILD_TESTING:BOOL=OFF
       -DBUILD_EXAMPLES:BOOL=OFF
-      -DBOOST_ROOT=${BOOST_BUILD_DIR}
-      -DBoost_NO_BOOST_CMAKE:BOOL=ON
-      # -DBOOST_DIR=${BOOST_BUILD_DIR}/lib/cmake/
+      -DCMAKE_FIND_PACKAGE_PREFER_CONFIG:BOOL=ON
+      -DBoost_DIR=${BOOST_BUILD_DIR}/lib/cmake/Boost-${BOOST_VERSION_DOTS}
       ${_DGtal_optional_cmake_args}
   INSTALL_COMMAND ""
   DEPENDS ${_DGtal_depends}
