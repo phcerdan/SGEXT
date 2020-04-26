@@ -101,8 +101,7 @@ void declare_itk_image_ptr(pybind11::module &m, const std::string &typestr) {
                     py::array_t<typename TImagePointer::ObjectType::PixelType> np_array) {
                 using PixelType = typename TImagePointer::ObjectType::PixelType;
                 using Image = typename TImagePointer::ObjectType;
-                constexpr auto ImageDimension = Image::ImageDimension;
-                using ImporterType = itk::ImportImageFilter<PixelType, ImageDimension>;
+                using ImporterType = itk::ImportImageFilter<PixelType, Image::ImageDimension>;
                 auto importer = ImporterType::New();
                 importer->SetRegion(img->GetLargestPossibleRegion());
                 importer->SetOrigin(img->GetOrigin());
