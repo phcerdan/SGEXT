@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.13.2)
 project(sgext-dependencies)
 
 # Download/build and optionally install 3rd party dependencies of SGEXT
