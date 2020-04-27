@@ -17,6 +17,8 @@ option(WITH_ITK "Build ITK, DGtal will use it too." ON)
 option(WITH_TBB "Build TBB. Only for Linux (gcc). Needed for gcc for include <execution> (stl_parallel)." ON)
 option(CLEAN_BUILD_ARTIFACTS "Create target clean_artifacts to remove artifacts and external_project folders. Needs to call the target: make/ninja clean_artifacts." ON)
 set(NUM_CORES 8 CACHE STRING "Number of cores passed to make: -jNUM_CORES")
+option(ZLIB_FORCE_STATIC "Remove the dynamic libraries after zlib install" ON)
+mark_as_advanced(ZLIB_FORCE_STATIC)
 message(STATUS "OUTPUT_BUILD_DIR: ${OUTPUT_BUILD_DIR}")
 message(STATUS "NUM_CORES: ${NUM_CORES}")
 message(STATUS "WITH_VTK: ${WITH_VTK}")
@@ -180,6 +182,15 @@ if(_compiler_is_msvc)
         -DBUILD_SHARED_LIBS:BOOL=OFF
         -DCMAKE_INSTALL_PREFIX=${ZLIB_INSTALL_DIR}
     )
+  if(ZLIB_FORCE_STATIC)
+    ExternalProject_Add_Step(
+      ep_zlib zlib_remove_dll
+      COMMENT "Remove zlib.lib and zlib.dll, leaves only zlibstatic.lib"
+      DEPENDEES install
+      COMMAND ${CMAKE_COMMAND} -E remove -f ${ZLIB_INSTALL_DIR}/lib/zlib.lib ${ZLIB_INSTALL_DIR}/bin/zlib.dll
+      )
+  endif()
+
 endif()
 
 ##################################################
