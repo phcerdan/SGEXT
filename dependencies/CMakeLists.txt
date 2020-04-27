@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8.1)
+cmake_minimum_required(VERSION 3.15)
 project(sgext-dependencies)
 
 # Download/build and optionally install 3rd party dependencies of SGEXT
@@ -149,6 +149,40 @@ ExternalProject_Add(ep_boost
 )
 
 ##################################################
+############## zlib (DGtal-dep) ##################
+##################################################
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  set(_compiler_is_msvc ON)
+endif()
+
+if(_compiler_is_msvc)
+  set(ZLIB_GIT_TAG cacf7f1d4e3d44d871b605da3b647f07d718623f) # Version 1.2.11
+  message(STATUS "ZLIB_VERSION: ${ZLIB_GIT_TAG} : Version 1.2.11")
+  set(ZLIB_BUILD_DIR ${OUTPUT_BUILD_DIR}/zlib-build)
+  set(ZLIB_INSTALL_DIR ${OUTPUT_BUILD_DIR}/zlib)
+  set(ZLIB_SRC_FOLDER_NAME zlib-src)
+  set(ZLIB_SRC_DIR ${OUTPUT_BUILD_DIR}/${ZLIB_SRC_FOLDER_NAME})
+  set(ZLIB_GIT_REPOSITORY "https://github.com/madler/zlib")
+
+  ExternalProject_Add(ep_zlib
+    GIT_REPOSITORY ${ZLIB_GIT_REPOSITORY}
+    GIT_TAG ${ZLIB_GIT_TAG}
+    # GIT_SHALLOW TRUE
+    GIT_PROGRESS TRUE
+    CMAKE_GENERATOR ${CMAKE_GENERATOR}
+    SOURCE_DIR ${ZLIB_SRC_DIR}
+    BINARY_DIR ${ZLIB_BUILD_DIR}
+    CMAKE_ARGS
+        -DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}
+        -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
+        -DCMAKE_BUILD_TYPE:STRING=${SGEXT_CMAKE_BUILD_TYPE}
+        -DBUILD_SHARED_LIBS:BOOL=OFF
+        -DCMAKE_INSTALL_PREFIX=${ZLIB_INSTALL_DIR}
+    )
+endif()
+
+##################################################
 #################### DGtal #######################
 ##################################################
 
@@ -165,6 +199,12 @@ if(WITH_ITK)
   list(APPEND _DGtal_optional_cmake_args
     -DWITH_ITK:BOOL=ON
     -DITK_DIR:STRING=${ITK_BUILD_DIR}
+    )
+endif()
+if(_compiler_is_msvc)
+  list(APPEND _DGtal_depends ep_zlib)
+  list(APPEND _DGtal_optional_cmake_args
+    -DZLIB_ROOT=${ZLIB_INSTALL_DIR}
     )
 endif()
 
