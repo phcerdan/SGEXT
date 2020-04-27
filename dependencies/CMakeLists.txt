@@ -49,7 +49,7 @@ ExternalProject_Add(ep_vtk
   -DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}
   -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
   -DCMAKE_BUILD_TYPE:STRING=${SGEXT_CMAKE_BUILD_TYPE}
-  -DBUILD_SHARED_LIBS:BOOL=ON
+  -DBUILD_SHARED_LIBS:BOOL=OFF
   -DBUILD_TESTING:BOOL=OFF
   -DBUILD_EXAMPLES:BOOL=OFF
   INSTALL_COMMAND ""
@@ -86,6 +86,7 @@ if(WITH_ITK)
     -DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}
     -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
     -DCMAKE_BUILD_TYPE:STRING=${SGEXT_CMAKE_BUILD_TYPE}
+    -DBUILD_SHARED_LIBS:BOOL=OFF
     -DBUILD_TESTING:BOOL=OFF
     ${_ITK_optional_cmake_args}
     INSTALL_COMMAND ""
@@ -140,7 +141,7 @@ ExternalProject_Add(ep_boost
      --without-type_erasure
      --without-stacktrace
      --threading=multi
-     --link=shared
+     --link=static
      variant=release
      ${_boost_extra_args}
      -j${NUM_CORES}
