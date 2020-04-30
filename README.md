@@ -19,6 +19,36 @@ SHA: 556ada3ff79c0180a0cbec36ff29a30da5acb367
 
 ## [Azure Pipelines](https://dev.azure.com/phcerdan/SGEXT)
 
+
+## Build dependencies
+This project depends on Boost, DGtal, and optionally VTK and ITK. Also TBB is used for the parallelSTL if c++17 is available.
+
+To handle all these depedencies, a subproject in `./dependencies` has been set up. Using `CMake` `ExternalProject` to download and build
+all the dependencies.
+
+```bash
+mkdir build-sgext-dependencies; cd build-sgext-dependencies;
+cmake ../SGEXT-src/dependencies -DOUTPUT_BUILD_DIR="." -DWITH_TBB:BOOL=OFF -DNUM_CORES=12
+```
+
+## Build
+
+Then pass the selected `OUTPUT_BUILD_DIR` to SGEXT with the option `-DDEPENDENCIES_BUILD_DIR`
+```bash
+mkdir build-sgext; cd build-sgext
+cmake ../SGEXT-src -DCMAKE_BUILD_TYPE=RelWithDebInfo -DDEPENDENCIES_BUILD_DIR="../build-sgext-dependencies"
+```
+
+Or you can also pass each depedency independently:
+- `-DBOOST_ROOT=/path/to/boost` or `-DBOOST_DIR=/path/to/boost/lib/cmake/Boost-x.y.z`
+- `-DDGtal_DIR=/path/to/DGtal-build` or `/path/to/DGtal/lib/cmake`
+- `-DWITH_VTK:BOOL=ON` `-DVTK_DIR:FILEPATH=/path/to/VTK-build` or `/path/to/VTK/lib/cmake`
+- `-DWITH_ITK:BOOL=ON` `-DITK_DIR:FILEPATH=/path/to/ITK-build` or `/path/to/ITK/lib/cmake`
+
+```
+cmake -DBUILD_TYPE:STRING=Release -DWITH_ITK:BOOL=ON -DITK_DIR:PATH=your_path_to_build_dir_ITK ../src
+```
+
 ## Docker
 First build the container with all the dependencies, [Dockerfile-base](https://github.com/phcerdan/SGEXT/blob/master/Dockerfile-base).
 
@@ -41,56 +71,6 @@ You can then test it with `docker run sgext/scripts thin --help`
 ```bash
 `docker run -v <data-dir>:/data sgext/scripts thin --help`
 ```
-
-## Build dependencies
-This project depends on Boost, DGtal, and optionally VTK and ITK. Also TBB is used for the parallelSTL if c++17 is available.
-
-To handle all these depedencies, a subproject in `./dependencies` has been set up. Using `CMake` `ExternalProject` to download and build
-all the dependencies.
-
-```bash
-mkdir build-sgext-dependencies; cd build-sgext-dependencies;
-cmake ../SGEXT-src/dependencies -DOUTPUT_BUILD_DIR="." -DWITH_TBB:BOOL=OFF -DNUM_CORES=12
-```
-
-Then pass the selected `OUTPUT_BUILD_DIR` to SGEXT with the option `-DDEPENDENCIES_BUILD_DIR`
-```bash
-mkdir build-sgext; cd build-sgext
-cmake ../SGEXT-src -DCMAKE_BUILD_TYPE=RelWithDebInfo -DDEPENDENCIES_BUILD_DIR="../build-sgext-dependencies"
-```
-
-
-## Build
-Build ITK
-Build DGtal, with a version with this patch included: (1.0 should be enough)
-https://github.com/DGtal-team/DGtal/pull/1369
-
-```bash
-cd your_favourite_folder
-mkdir DGtal; cd DGtal
-git clone https://github.com/DGtal-team/DGtal src
-#(optional): cd src; hub checkout https://github.com/DGtal-team/DGtal
-mkdir build; cd build;
-cmake -DBUILD_TYPE:STRING=Release -DBUILD_EXAMPLES:BOOL=OFF -DBUILD_TESTING:BOOL=OFF -DWITH_ITK:BOOL=ON -DITK_DIR:PATH=your_path_to_build_dir_ITK ../src
-```
-
-I do have scripts doing the thinning (and post-processing graph analysis) here:
-https://github.com/phcerdan/SGEXT
-
-They add a boost dependency.
-
-So install boost (any non-extremely old version should be ok), using package manager for example.
-And build the scripts
-
-```
-cd your_favourite_folder
-mkdir SGEXT; cd SGEXT
-git clone https://github.com/phcerdan/SGEXT src
-mkdir build; cd build
-cmake -DBUILD_TYPE:STRING=Release -DDGtal_DIR:PATH=/path/DGtal/build -DITK_DIR:PATH=your_path_to_build_dir_ITK ../src
-# if Boost is not the system path, also -DBoost_DIR:PATH=...
-```
-
 
 ## Usage
 The scripts are in folder `cpp-scripts`
