@@ -9,7 +9,9 @@
 #include "array_utilities.hpp"
 #include <math.h>
 
+
 namespace SG {
+
 
 /**
  * Simple linear viscous force, proportional to velocity.
@@ -40,7 +42,8 @@ inline ArrayUtilities::Array3D
 force_linear_drag(double sphere_radius,
                   double fluid_viscosity,
                   const ArrayUtilities::Array3D &velocity) {
-    return force_linear_drag(6.0 * M_PI * sphere_radius * fluid_viscosity,
+    constexpr double m_pi = 3.14159265358979323846;
+    return force_linear_drag(6.0 * m_pi * sphere_radius * fluid_viscosity,
                              velocity);
 }
 

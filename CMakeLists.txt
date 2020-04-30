@@ -1,7 +1,11 @@
-cmake_minimum_required(VERSION 3.8.1)
+cmake_minimum_required(VERSION 3.13.2)
 
 if(POLICY CMP0048)
   cmake_policy(SET CMP0048 NEW)
+endif()
+# To use TBB_ROOT in find_package
+if(POLICY CMP0074)
+  cmake_policy(SET CMP0074 NEW)
 endif()
 
 project(SGEXT
@@ -18,7 +22,7 @@ set(CMAKE_BUILD_PYTHONLIBDIR ${PROJECT_BINARY_DIR}/sgext) # copy python libs at 
 
 include(CMakeDependentOption)
 option(SG_BUILD_SCRIPTS "Build cpp-scripts." ON)
-option(SG_BUILD_TESTING "Enable Tests" ON)
+option(SG_BUILD_TESTING "Enable Tests" OFF)
 option(SG_BUILD_ENABLE_VALGRIND "Enable Valgrind as a memchecker for tests (require debug symbols)" OFF)
 mark_as_advanced(SG_BUILD_ENABLE_VALGRIND)
 option(SG_MODULE_ANALYZE "Analyze the graph properties." ON)
@@ -34,9 +38,12 @@ if(SG_MODULE_VISUALIZE_WITH_QT)
   set(SG_MODULE_VISUALIZE ON)
 endif()
 option(VISUALIZE "Enable visualization with VTK." OFF)
-option(SG_ENABLE_ITK "Use ITK. Required for SCRIPTS, and optionally for VISUALIZE modules." ON)
+option(SG_ENABLE_ITK "Use ITK. Required for SCRIPTS, and optionally for VISUALIZE modules." OFF)
 option(SG_WRAP_PYTHON "Use pybind11 to create bindings to python." OFF)
 
+set(DEPENDENCIES_BUILD_DIR "" CACHE PATH "Base folder generated from building the sub-project ./dependencies. It contains boost-build, DGtal-build, etc.")
+# The following script will set ITK_DIR, VTK_DIR DGtal_DIR, etc. Based on DEPENDENCIES_BUILD_DIR.
+include(handle_dependencies)
 
 if(VISUALIZE OR SG_MODULE_VISUALIZE OR SG_MODULE_LOCATE OR SG_MODULE_COMPARE OR SG_MODULE_DYNAMICS_USING_VTK)
   set(SG_REQUIRES_VTK TRUE)
@@ -58,9 +65,12 @@ find_package(Boost COMPONENTS
         graph
         serialization
         REQUIRED)
+message(STATUS "Boost_VERSION: ${Boost_VERSION}")
+message(STATUS "Boost_INCLUDE_DIR: ${Boost_INCLUDE_DIR}")
 
 find_package(DGtal REQUIRED 1.0)
 message(STATUS "DGtal version: ${DGtal_VERSION}")
+message(STATUS "DGtal_DIR: ${DGtal_DIR}")
 
 if(SG_REQUIRES_ITK)
   find_package(ITK CONFIG REQUIRED)
@@ -98,10 +108,11 @@ if(SG_REQUIRES_ITK)
     CONFIG
     )
   message(STATUS "ITK version: ${ITK_VERSION}")
+  message(STATUS "ITK_DIR: ${ITK_DIR}")
   include(${ITK_USE_FILE})
 endif() #ITK
 
-set(vtk_qt_components)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 if(SG_MODULE_VISUALIZE_WITH_QT)
   find_package(Qt5 REQUIRED
     Widgets
@@ -109,11 +120,17 @@ if(SG_MODULE_VISUALIZE_WITH_QT)
     OpenGL)
   message(STATUS "Qt5 version: ${Qt5_VERSION}")
 
-  if(Qt5_POSITION_INDEPENDENT_CODE)
-    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-  endif()
   set(vtk_qt_components
     vtkGUISupportQt # QVTKWidget.h
+    )
+endif()
+if(SG_MODULE_VISUALIZE)
+  set(vtk_components_visualize
+    vtkInteractionStyle
+    vtkRenderingContextOpenGL2 # avoid vtkContextDevice2D not found at run time
+    vtkRenderingVolumeOpenGL2 # For volume rendering SmartVolumeMapper
+    vtkViewsContext2D
+    vtkInteractionWidgets
     )
 endif()
 
@@ -123,14 +140,11 @@ if(SG_REQUIRES_VTK)
     vtkChartsCore
     vtkCommonCore
     vtkCommonDataModel
-    vtkInteractionStyle
-    vtkRenderingCore
-    vtkRenderingOpenGL2 # avoid vtkRenderer, vtkRenderWindow not found at run time
-    vtkRenderingContextOpenGL2 # avoid vtkContextDevice2D not found at run time
-    vtkRenderingVolumeOpenGL2 # For volume rendering SmartVolumeMapper
-    vtkViewsContext2D
-    vtkInteractionWidgets
+    # avoid AUTOINIT_redefined at build time,
     vtkViewsInfovis
+    vtkRenderingCore
+    vtkRenderingOpenGL2 #  vtkRenderer, vtkRenderWindow not found at run time
+    ${vtk_components_visualize}
     ${vtk_qt_components}
     )
   # VTK components to handle external dependency histo-header
@@ -208,7 +222,7 @@ if(SG_WRAP_PYTHON)
   FetchContent_Declare(
     pybind11
     GIT_REPOSITORY https://github.com/pybind/pybind11
-    GIT_TAG v2.4.3
+    GIT_TAG v2.5
   )
   FetchContent_GetProperties(pybind11)
   if(NOT pybind11_POPULATED)
@@ -217,7 +231,7 @@ if(SG_WRAP_PYTHON)
   endif()
 endif()
 
-set(SG_LIBRARIES "")
+set(SG_LIBRARIES)
 include(SGModuleMacros) # module macros
 add_subdirectory(modules/core)
 if(SG_MODULE_VISUALIZE)
@@ -286,4 +300,17 @@ configure_package_config_file(
   PATH_VARS SGEXT_TARGETS_FILE
   NO_CHECK_REQUIRED_COMPONENTS_MACRO # SGEXT does not provide components
   )
+
+# Add custom target to only install component: runtime (libraries)
+add_custom_target(install-runtime
+  ${CMAKE_COMMAND}
+  -DCMAKE_INSTALL_COMPONENT=runtime
+  -P "${PROJECT_BINARY_DIR}/cmake_install.cmake"
+  DEPENDS ${SG_LIBRARIES}
+  )
+message(STATUS "SG_LIBRARIES: ${SG_LIBRARIES}")
+add_dependencies(install-runtime ${SG_LIBRARIES})
+if(SG_WRAP_PYTHON)
+  add_dependencies(install-runtime _sgext)
+endif()
 

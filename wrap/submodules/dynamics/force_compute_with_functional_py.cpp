@@ -3,9 +3,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "force_compute.hpp"
+#include "pybind11_common.h"
 #include <pybind11/functional.h> // allows wrapping from python to cpp
-#include <pybind11/pybind11.h>
+
+#include "force_compute.hpp"
+
 
 namespace py = pybind11;
 using namespace SG;

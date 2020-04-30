@@ -1,0 +1,32 @@
+FROM phcerdan/sgext-linux-base
+LABEL MAINTAINER="Pablo Hernandez Cerdan <pablo.hernandez.cerdan@outlook.com>"
+
+###################### SGEXT #############
+ENV SGEXT_BUILD_DIR ${BUILD_PATH}/SGEXT-build
+ENV SGEXT_SRC_FOLDER_NAME SGEXT-src
+ENV SGEXT_SRC_DIR ${BUILD_PATH}/${SGEXT_SRC_FOLDER_NAME}
+
+# Copy files from current repo into the docker container
+COPY . ${SGEXT_SRC_DIR}
+# Remove _skbuild and dist folders if existant
+# RUN cd ${SGEXT_SRC_DIR} && rm -rf ./deploy/_skbuild && rm -rf ./deploy/dist
+
+WORKDIR ${SGEXT_SRC_DIR}/deploy
+
+RUN ${SGEXT_SRC_DIR}/deploy/scripts/manylinux-build-wheels.sh
+
+# Build-time metadata as defined at http://label-schema.org
+ARG BUILD_DATE
+ARG IMAGE=sgext-linux-wheel
+ARG VERSION=latest
+ARG VCS_REF
+ARG VCS_URL
+LABEL org.label-schema.build-date=$BUILD_DATE \
+      org.label-schema.name=$IMAGE \
+      org.label-schema.version=$VERSION \
+      org.label-schema.vcs-ref=$VCS_REF \
+      org.label-schema.vcs-url=$VCS_URL \
+      org.label-schema.schema-version="1.0" \
+      build_command="\
+      docker build -f ./deploy/docker/Dockerfile-dockcross-manylinux2014-wheel . -t phcerdan/sgext-linux-wheel; \
+      docker cp $(docker create phcerdan/sgext-linux-wheel:latest):/work/dist /tmp"

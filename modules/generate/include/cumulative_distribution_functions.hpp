@@ -13,7 +13,7 @@
 
 #ifdef WITH_PARALLEL_STL
 #include <execution>                          // std::execution::par_unseq
-#else
+#elif WITH_OPENMP
 #include <omp.h>
 #endif
 
@@ -153,12 +153,14 @@ void apply_distro(const TArrayType1 &X,
 #ifdef WITH_PARALLEL_STL
     auto policy = std::execution::par_unseq;
     std::transform(policy, std::begin(X), std::end(X), std::begin(F), func);
-#else
+#elif WITH_OPENMP
     const auto nelems = std::size(X);
 #pragma omp parallel for schedule(dynamic)
     for(unsigned int i = 0; i < nelems ; ++i) {
         F[i] = func(i);
     }
+#else
+    std::transform(std::begin(X), std::end(X), std::begin(F), func);
 #endif
 }
 
