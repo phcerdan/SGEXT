@@ -48,4 +48,4 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.vcs-ref=$VCS_REF \
       org.label-schema.vcs-url=$VCS_URL \
       org.label-schema.schema-version="1.0" \
-      build_command="docker build -f Dockerfile-dockcross-manylinux2014 . -t phcerdan/sgext-linux"
+      build_command="docker build -f ./deploy/docker/Dockerfile-dockcross-manylinux2014 . -t phcerdan/sgext-linux"

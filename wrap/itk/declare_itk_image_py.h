@@ -6,8 +6,7 @@
 #ifndef DECLARE_ITK_IMAGE_PY_H
 #define DECLARE_ITK_IMAGE_PY_H
 
-#include <pybind11/pybind11.h>
-#include <pybind11/numpy.h>
+#include "pybind11_common.h"
 
 #include "itkImage.h"
 #include "itkSmartPointer.h"
@@ -66,8 +65,8 @@ void declare_itk_image_ptr(pybind11::module &m, const std::string &typestr) {
                     const std::string & contiguous) {
                 const auto size = img->GetLargestPossibleRegion().GetSize();
                 const auto shape = (contiguous == "F") ?
-                std::vector{size[2], size[1], size[1]} :
-                std::vector{size[0], size[1], size[2]};
+                std::vector<size_t>{size[2], size[1], size[1]} :
+                std::vector<size_t>{size[0], size[1], size[2]};
                 return py::array(
                         py::dtype::of<typename TImagePointer::ObjectType::PixelType>(),
                         shape,
@@ -87,8 +86,7 @@ void declare_itk_image_ptr(pybind11::module &m, const std::string &typestr) {
                     py::array_t<typename TImagePointer::ObjectType::PixelType> np_array) {
                 using PixelType = typename TImagePointer::ObjectType::PixelType;
                 using Image = typename TImagePointer::ObjectType;
-                constexpr auto ImageDimension = Image::ImageDimension;
-                using ImporterType = itk::ImportImageFilter<PixelType, ImageDimension>;
+                using ImporterType = itk::ImportImageFilter<PixelType, Image::ImageDimension>;
                 auto importer = ImporterType::New();
                 importer->SetRegion(img->GetLargestPossibleRegion());
                 importer->SetOrigin(img->GetOrigin());

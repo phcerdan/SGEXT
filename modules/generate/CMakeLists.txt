@@ -1,14 +1,26 @@
-find_package(TBB QUIET) # For c++17 std::execution::par_unseq
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  set(_compiler_is_msvc ON)
+  set(_parallel_stl_extra_libraries)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  set(_compiler_is_gnu ON)
+  find_package(TBB QUIET) # For c++17 std::execution::par_unseq in gcc
+  set(_parallel_stl_extra_libraries ${TBB_LIBRARIES})
+endif()
+
 try_compile(_has_parallel_stl
   ${CMAKE_BINARY_DIR}
   ${PROJECT_SOURCE_DIR}/cmake/try_compile_execution_header.cpp
-  LINK_LIBRARIES  ${TBB_LIBRARIES}
+  LINK_LIBRARIES  ${_parallel_stl_extra_libraries}
   )
+
 if(_has_parallel_stl)
-  message(STATUS "module generate -- stl header <execution> is available. Using TBB from ${TBB_INCLUDE_DIR}")
+  message(STATUS "module generate -- stl header <execution> is available.")
+  if(_compiler_is_gnu)
+    message(STATUS "Using TBB from ${TBB_INCLUDE_DIR}")
+  endif()
 else()
-  if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 17)
-    message(STATUS "module generate -- can optionally use TBB to use parallel algorithms. Provide -DTBB_DIR to enable it.")
+  if(_compiler_is_gnu AND ${CMAKE_CXX_STANDARD} GREATER_EQUAL 17)
+    message(STATUS "module generate -- can optionally use TBB to use parallel algorithms in GCC. Provide -DTBB_DIR to enable it.")
   endif()
 endif()
 # Fetch perm-montecarlo
@@ -77,13 +89,13 @@ endif()
 
 set(SG_MODULE_NAME "Generate")
 set(SG_MODULE_${SG_MODULE_NAME}_LIBRARY "SG${SG_MODULE_NAME}")
-list(APPEND SG_LIBRARIES ${SG_MODULE_${SG_MODULE_NAME}_LIBRARY})
+set(SG_LIBRARIES ${SG_LIBRARIES} ${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} PARENT_SCOPE)
 set(SG_MODULE_INTERNAL_DEPENDS
   SGCore
   PERMCore # From perm-montecarlo
   )
 set(_optional_depends "")
-if(_has_parallel_stl)
+if(_has_parallel_stl AND _compiler_is_gnu)
   list(APPEND _optional_depends ${TBB_LIBRARIES})
 endif()
 set(SG_MODULE_${SG_MODULE_NAME}_DEPENDS
@@ -109,9 +121,12 @@ target_include_directories(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   )
+
 if(_has_parallel_stl)
-  target_include_directories(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} PUBLIC ${TBB_INCLUDE_DIR})
   target_compile_definitions(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} PUBLIC -DWITH_PARALLEL_STL)
+  if(_compiler_is_gnu)
+    target_include_directories(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} PUBLIC ${TBB_INCLUDE_DIR})
+  endif()
 endif()
 
 target_link_libraries(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY}
@@ -127,6 +142,7 @@ install(TARGETS ${SG_MODULE_${SG_MODULE_NAME}_LIBRARY}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        COMPONENT runtime
         )
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/

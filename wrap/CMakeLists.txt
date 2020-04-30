@@ -38,6 +38,8 @@ pybind11_add_module(_sgext
   ${all_modules_python_sources} # all the collected sources in submodules
   )
 target_link_libraries(_sgext PRIVATE ${enabled_libs_})
+target_include_directories(_sgext PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}) # For pybind11_common.h
+target_include_directories(_sgext PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/submodules) # For #include "core/sgcore_common_py"
 target_include_directories(_sgext PRIVATE ${enabled_include_dirs_})
 if(SG_REQUIRES_VTK)
   target_compile_definitions(_sgext PRIVATE SG_USING_VTK)
@@ -62,10 +64,13 @@ if(SG_BUILD_SCRIPTS)
 endif()
 
 install(TARGETS _sgext
-  DESTINATION ${CMAKE_INSTALL_PYTHONLIBDIR})
+  DESTINATION ${CMAKE_INSTALL_PYTHONLIBDIR}
+  COMPONENT runtime
+  )
 install(FILES __init__.py
-  DESTINATION ${CMAKE_INSTALL_PYTHONLIBDIR})
-
+  DESTINATION ${CMAKE_INSTALL_PYTHONLIBDIR}
+  COMPONENT runtime
+  )
 # Copy __init__ at configure time
 file(COPY __init__.py DESTINATION ${CMAKE_BUILD_PYTHONLIBDIR})
 # Copy at build time

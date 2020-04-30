@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include <pybind11/pybind11.h>
+#include "pybind11_common.h"
 #include "sgitk_common_py.hpp"
 #include "view_image_function.hpp"
 #include "declare_itk_view_image_py.h"

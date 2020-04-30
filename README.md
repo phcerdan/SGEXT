@@ -16,13 +16,15 @@ The thin output can also be converted to a Spatial Graph, this is a regular grap
 Using histo.hpp from: https://github.com/phcerdan/histo-header
 SHA: 556ada3ff79c0180a0cbec36ff29a30da5acb367
 
+
 ## [Azure Pipelines](https://dev.azure.com/phcerdan/SGEXT)
 
 ## Docker
 First build the container with all the dependencies, [Dockerfile-base](https://github.com/phcerdan/SGEXT/blob/master/Dockerfile-base).
 
 ```bash
-docker build -f Dockerfile-base -t sgext/base .
+cd SGEXT-src
+docker build -f ./dependencies/docker/Dockerfile-base -t sgext/base .
 ```
 
 Then use the [Dockerfile](https://github.com/phcerdan/SGEXT/blob/master/Dockerfile) that copies your local source folder with this repository into the container.
@@ -39,6 +41,24 @@ You can then test it with `docker run sgext/scripts thin --help`
 ```bash
 `docker run -v <data-dir>:/data sgext/scripts thin --help`
 ```
+
+## Build dependencies
+This project depends on Boost, DGtal, and optionally VTK and ITK. Also TBB is used for the parallelSTL if c++17 is available.
+
+To handle all these depedencies, a subproject in `./dependencies` has been set up. Using `CMake` `ExternalProject` to download and build
+all the dependencies.
+
+```bash
+mkdir build-sgext-dependencies; cd build-sgext-dependencies;
+cmake ../SGEXT-src/dependencies -DOUTPUT_BUILD_DIR="." -DWITH_TBB:BOOL=OFF -DNUM_CORES=12
+```
+
+Then pass the selected `OUTPUT_BUILD_DIR` to SGEXT with the option `-DDEPENDENCIES_BUILD_DIR`
+```bash
+mkdir build-sgext; cd build-sgext
+cmake ../SGEXT-src -DCMAKE_BUILD_TYPE=RelWithDebInfo -DDEPENDENCIES_BUILD_DIR="../build-sgext-dependencies"
+```
+
 
 ## Build
 Build ITK
@@ -136,6 +156,59 @@ analyze_graph \
     -v
 ```
 More options are possible, use `--help` for details.
+
+## Dockcross (manylinux2014)
+
+Build base (dependencies) first:
+```bash
+cd SGEXT-src
+docker build -f ./dependencies/docker/Dockerfile-dockcross-manylinux2014-base . -t phcerdan/sgext-linux-base
+```
+Dockerfile using dockcross to compile SGEXT:
+```bash
+docker build -f ./deploy/docker/Dockerfile-dockcross-manylinux2014 . -t phcerdan/sgext-linux-base
+```
+
+Dockerfile using dockcross, scikit-build and auditwheel to create python wheels:
+
+```bash
+docker build -f ./deploy/docker/Dockerfile-dockcross-manylinux2014-wheel . -t phcerdan/sgext-linux-wheel
+```
+
+To copy the wheels generated after auditwheel from the image:
+```bash
+docker cp $(docker create phcerdan/sgext-linux-wheel):/work/SGEXT-src/deploy/wheelhouse/ /tmp
+```
+
+And to upload them to pypi (showing test.pypi)
+```bash
+python3 -m twine upload --repository-url https://test.pypi.org/legacy/ /tmp/wheelhouse/* --verbose
+```
+
+
+These images have also been uploaded to [docker-hub](https://hub.docker.com/repository/docker/phcerdan/sgext-linux-base)
+```bash
+docker pull phcerdan/sgext-linux-base
+docker pull phcerdan/sgext-linux
+docker pull phcerdan/sgext-linux-wheel
+```
+
+### Azure pipelines
+
+```bash
+workon sgext-build
+pip install azure-cli
+az extension add --name azure-devops
+```
+
+Configure a [personal access tokens](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&viewFallbackFrom=vsts&tabs=preview-page#create-personal-access-tokens-to-authenticate-access)
+```bash
+az devops login
+```
+
+Get the buildId from the URL of the build: `https://dev.azure.com/phcerdan/SGEXT/_build/results?buildId=181`
+
+And use the script `./deploy/scripts/download_azure_artifacts.sh $build_id` to download all the wheels (defaults to `/tmp/dist`)
 
 ## Contributors
 
