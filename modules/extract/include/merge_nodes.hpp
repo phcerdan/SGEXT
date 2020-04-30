@@ -34,14 +34,24 @@ namespace SG {
  * Transforming three nodes with degree 3, to one node with degree 3
  * and adding the old nodes into the corresponding spatial edges.
  *
+ *    o                o
+ *    |                |
+ *    o                |
+ *    |\___            |
+ *    |    \           |
+ *    o-----o---o  ->  o---------o
+ *    |                |
+ *    |                |
+ *    o                o
+ *
  * Note: if two of those nodes are connected between them with an
  * extra parallel edge, the merge doesn't happen, example:
  *
- *     (a)
- *      o--
- *(b) o/|  |
- *     \o--
- *     (c)
+ *        (a)
+ *         o--
+ *   (b) o/|  |
+ *        \o--
+ *        (c)
  *
  * See related tests for further details.
  *

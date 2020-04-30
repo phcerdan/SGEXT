@@ -26,12 +26,39 @@ namespace py = pybind11;
 using namespace SG;
 void init_create_distance_map(py::module &m) {
     m.def("create_distance_map", &create_distance_map_function,
-            "Create distance map using DGtal (high precision). Returns dist_map image.",
+            R"delimiter(
+            Create distance map using DGtal (high precision).
+            Returns dist_map image.
+
+            Parameters:
+            ----------
+            input: Image
+                input image generated from sgext functions.
+
+            verbose: bool
+                extra information displayed during the algorithm.
+            )delimiter",
             py::arg("input"),
             py::arg("verbose") = false
          );
     m.def("create_distance_map_io", &create_distance_map_function_io,
-            "Create distance map using DGtal (high precision). Read/write from/to file.",
+            R"delimiter(
+            Create distance map using DGtal (high precision). Read/write from/to file.
+            Parameters:
+            ----------
+            input_file: str
+                input filename holding a binary image.
+
+            out_folder: str
+                output folder to store the results.
+
+            foreground: str
+                [white, black]
+                Invert image if foreground voxels are black.
+
+            verbose: bool
+                extra information displayed during the algorithm.
+            )delimiter",
             py::arg("input_file"),
             py::arg("out_folder"),
             py::arg("foreground") = "white",
