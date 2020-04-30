@@ -16,9 +16,30 @@ The thin output can also be converted to a Spatial Graph, this is a regular grap
 Using histo.hpp from: https://github.com/phcerdan/histo-header
 SHA: 556ada3ff79c0180a0cbec36ff29a30da5acb367
 
+## Python
 
-## [Azure Pipelines](https://dev.azure.com/phcerdan/SGEXT)
+SGEXT is wrapped to python using pybind11, and uploaded regularly to pypi for all platforms (Linux, Windows, MacOS)
+and multiple `python` version (from `3.5` to latest) using azure-pipelines.
 
+```
+pip install sgext
+```
+
+```python
+import sgext
+
+input_filename="/path/to/binary_image.nrrd" # or any format that ITK can read
+out_folder="/path/to/output_folder" # or any format that ITK can read
+
+sgext.scripts.thin(input=input_filename,
+        out_folder=out_folder,
+        foreground="black",
+        skel_type="end",
+        select_type="first",
+        persistence=2,
+        visualize=False,
+        verbose=True)
+"
 
 ## Build dependencies
 This project depends on Boost, DGtal, and optionally VTK and ITK. Also TBB is used for the parallelSTL if c++17 is available.
@@ -174,6 +195,8 @@ docker pull phcerdan/sgext-linux-wheel
 ```
 
 ### Azure pipelines
+
+- [Azure Pipelines](https://dev.azure.com/phcerdan/SGEXT)
 
 ```bash
 workon sgext-build
