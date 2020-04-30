@@ -65,7 +65,8 @@ int main(int argc, char *const argv[]) {
                            "metadata of itk image and apply it.");
     opt_desc.add_options()(
             "output_filename_simple,z", po::bool_switch()->default_value(false),
-            "Filename does not contain the parameters used for this filter.");
+            "Output filename does not contain the parameters used for this "
+            "filter.");
     opt_desc.add_options()("exportReducedGraph_foldername,o", po::value<std::string>(),
                            "Write .dot file with the reduced spatial graph.");
     opt_desc.add_options()("exportData_foldername,d", po::value<std::string>(),
