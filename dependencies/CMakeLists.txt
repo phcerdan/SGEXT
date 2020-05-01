@@ -143,7 +143,7 @@ ExternalProject_Add(ep_boost
      --without-type_erasure
      --without-stacktrace
      --threading=multi
-     --link=static
+     link=static
      variant=release
      ${_boost_extra_args}
      -j${NUM_CORES}

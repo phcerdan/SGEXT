@@ -30,6 +30,7 @@ python setup.py bdist_wheel --build-type Release -G Ninja -- \
   -DSG_MODULE_VISUALIZE_WITH_QT:BOOL=OFF \
   -DSG_WRAP_PYTHON:BOOL=ON \
   -DDEPENDENCIES_BUILD_DIR:PATH=$DEPENDENCIES_BUILD_DIR \
+  -DBoost_USE_STATIC_LIBS:BOOL=ON \
   || exit 1
   # ${PYBIN}/python setup.py clean
 
