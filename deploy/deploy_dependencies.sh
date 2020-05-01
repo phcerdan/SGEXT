@@ -18,6 +18,15 @@ echo OSTYPE: $OSTYPE
 export CMAKE_EXECUTABLE=cmake
 export SGEXT_BUILD_TYPE=Release
 export CMAKE_GENERATOR=Ninja
+
+# linux (default)
+export CMAKE_OS_VARIABLES='\
+  -DCMAKE_CXX_STANDARD=14 \
+  -DCMAKE_C_COMPILER:PATH=gcc \
+  -DCMAKE_CXX_COMPILER:PATH=g++ \
+  '
+
+# macos:
 if [[ $OSTYPE == darwin* ]]; then
   export CMAKE_OS_VARIABLES="\
   -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=10.9 \
