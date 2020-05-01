@@ -4,7 +4,8 @@ project(sgext-dependencies)
 # Download/build and optionally install 3rd party dependencies of SGEXT
 include(ExternalProject)
 
-set(OUTPUT_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE PATH "Base folder where builds and source folder will be installed: i.e. OUTPUT_BUILD_DIR/boost-build")
+set(OUTPUT_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE PATH
+  "Base folder where builds and source folder will be installed: i.e. OUTPUT_BUILD_DIR/boost-build")
 
 if(NOT CMAKE_BUILD_TYPE)
   set(SGEXT_CMAKE_BUILD_TYPE "Release")
@@ -125,6 +126,7 @@ if ( APPLE )
       toolset=clang
       cxxflags=-std=c++${CMAKE_CXX_STANDARD}
       cxxflags=-stdlib=libc++
+      cxxflags=-mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}
       linkflags=-stdlib=libc++
       )
   endif()
