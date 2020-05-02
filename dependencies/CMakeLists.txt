@@ -27,6 +27,14 @@ message(STATUS "WITH_ITK: ${WITH_ITK}")
 message(STATUS "WITH_TBB: ${WITH_TBB}")
 
 
+if(APPLE)
+  set(_cmake_os_flags
+    -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
+    -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
+    )
+endif()
+
+
 ##################################################
 ##################### VTK #######################
 ##################################################
@@ -56,6 +64,7 @@ ExternalProject_Add(ep_vtk
   -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
   -DBUILD_TESTING:BOOL=OFF
   -DBUILD_EXAMPLES:BOOL=OFF
+  ${_cmake_os_flags}
   INSTALL_COMMAND ""
   )
 endif()
@@ -93,6 +102,7 @@ if(WITH_ITK)
     -DBUILD_SHARED_LIBS:BOOL=OFF
     -DBUILD_TESTING:BOOL=OFF
     ${_ITK_optional_cmake_args}
+    ${_cmake_os_flags}
     INSTALL_COMMAND ""
     DEPENDS ${_ITK_depends}
     )
@@ -188,6 +198,7 @@ if(_compiler_is_msvc)
         -DCMAKE_BUILD_TYPE:STRING=${SGEXT_CMAKE_BUILD_TYPE}
         -DBUILD_SHARED_LIBS:BOOL=OFF
         -DCMAKE_INSTALL_PREFIX=${ZLIB_INSTALL_DIR}
+        ${_cmake_os_flags}
     )
   if(ZLIB_FORCE_STATIC)
     ExternalProject_Add_Step(
@@ -244,6 +255,7 @@ ExternalProject_Add(ep_dgtal
       -DCMAKE_FIND_PACKAGE_PREFER_CONFIG:BOOL=ON
       -DBoost_DIR=${BOOST_BUILD_DIR}/lib/cmake/Boost-${BOOST_VERSION_DOTS}
       ${_DGtal_optional_cmake_args}
+      ${_cmake_os_flags}
   INSTALL_COMMAND ""
   DEPENDS ${_DGtal_depends}
   )
