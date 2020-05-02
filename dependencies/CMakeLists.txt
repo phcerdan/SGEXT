@@ -53,6 +53,7 @@ ExternalProject_Add(ep_vtk
   -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
   -DCMAKE_BUILD_TYPE:STRING=${SGEXT_CMAKE_BUILD_TYPE}
   -DBUILD_SHARED_LIBS:BOOL=OFF
+  -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
   -DBUILD_TESTING:BOOL=OFF
   -DBUILD_EXAMPLES:BOOL=OFF
   INSTALL_COMMAND ""
@@ -112,6 +113,9 @@ set(BOOST_URL_HASH SHA256=c66e88d5786f2ca4dbebb14e06b566fb642a1a6947ad8cc9091f9f
 if( UNIX )
   set(_boost_bootstrap_command ./bootstrap.sh)
   set(_boost_b2_command ./b2)
+  set(_boost_extra_args
+     cxxflags=-fPIC
+     )
 endif()
 if( WIN32 )
   set(_boost_bootstrap_command bootstrap.bat)
@@ -123,6 +127,7 @@ endif()
 if ( APPLE )
   if(${CMAKE_CXX_STANDARD})
     set(_boost_extra_args
+      cxxflags=-fPIC
       toolset=clang
       cxxflags=-std=c++${CMAKE_CXX_STANDARD}
       cxxflags=-stdlib=libc++

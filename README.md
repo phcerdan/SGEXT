@@ -57,7 +57,7 @@ cmake ../SGEXT-src/dependencies -DOUTPUT_BUILD_DIR="." -DWITH_TBB:BOOL=OFF -DNUM
 Then pass the selected `OUTPUT_BUILD_DIR` to SGEXT with the option `-DDEPENDENCIES_BUILD_DIR`
 ```bash
 mkdir build-sgext; cd build-sgext
-cmake ../SGEXT-src -DCMAKE_BUILD_TYPE=RelWithDebInfo -DDEPENDENCIES_BUILD_DIR="../build-sgext-dependencies"
+cmake ../SGEXT-src -DCMAKE_BUILD_TYPE=RelWithDebInfo -DDEPENDENCIES_BUILD_DIR="../build-sgext-dependencies" -DBoost_USE_STATIC_LIBS=ON
 ```
 
 Or you can also pass each depedency independently:
