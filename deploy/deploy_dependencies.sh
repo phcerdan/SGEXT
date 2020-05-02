@@ -2,11 +2,17 @@
 
 script_dir=$(cd $(dirname $0) || exit 1; pwd)
 dependencies_src_dir=$script_dir/../dependencies
+echo dependencies_src_dir: $dependencies_src_dir
 
 # REQUIRES existing DEPENDENCIES_BUILD_DIR
 # Requires CMake and Ninja
+python -m pip install --upgrade pip
 python -m pip install cmake
 python -m pip install ninja
+if [[ $OSTYPE == linux* ]]; then
+  export PATH="$PATH:/home/vsts/.local/bin"
+fi
+echo ninja version: $(ninja --version)
 
 if [ ! -d "$DEPENDENCIES_BUILD_DIR" ]; then
   echo ERROR: DEPENDENCIES_BUILD_DIR does not exist: $DEPENDENCIES_BUILD_DIR
@@ -18,13 +24,6 @@ echo OSTYPE: $OSTYPE
 export CMAKE_EXECUTABLE=cmake
 export SGEXT_BUILD_TYPE=Release
 export CMAKE_GENERATOR=Ninja
-
-# linux (default)
-export CMAKE_OS_VARIABLES='\
-  -DCMAKE_CXX_STANDARD=14 \
-  -DCMAKE_C_COMPILER:PATH=gcc \
-  -DCMAKE_CXX_COMPILER:PATH=g++ \
-  '
 
 # macos:
 if [[ $OSTYPE == darwin* ]]; then
