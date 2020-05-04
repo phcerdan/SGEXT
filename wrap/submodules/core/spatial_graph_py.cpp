@@ -4,7 +4,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "pybind11_common.h"
-#include "sgcore_common_py.hpp"
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
 
