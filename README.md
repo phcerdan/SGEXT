@@ -1,3 +1,5 @@
+[![Build Status](https://dev.azure.com/phcerdan/SGEXT/_apis/build/status/phcerdan.SGEXT?branchName=master)](https://dev.azure.com/phcerdan/SGEXT/_build/latest?definitionId=2&branchName=master)
+
 # SGEXT
 
 **S**patial**G**raph **Ext**ractor.
@@ -39,7 +41,7 @@ sgext.scripts.thin(input=input_filename,
         persistence=2,
         visualize=False,
         verbose=True)
-"
+```
 
 ## Build dependencies
 This project depends on Boost, DGtal, and optionally VTK and ITK. Also TBB is used for the parallelSTL if c++17 is available.
