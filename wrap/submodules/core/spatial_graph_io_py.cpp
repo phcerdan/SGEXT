@@ -1,5 +1,4 @@
 #include "pybind11_common.h"
-#include "sgcore_common_py.hpp"
 
 #include "spatial_graph_io.hpp"
 
