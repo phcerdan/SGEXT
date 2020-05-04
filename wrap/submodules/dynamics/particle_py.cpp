@@ -52,6 +52,17 @@ void init_particle(py::module &m) {
         .def(py::init())
         .def_readwrite("id", &Particle::id)
         .def_readwrite("pos", &Particle::pos)
+        .def("set_pos", [](Particle &p,
+                    size_t index,
+                    const ArrayUtilities::Array3D::value_type & in_value
+                    ) {
+                p.pos[index] = in_value;
+                },
+        "p.pos[0] = 3.0 does not modify the position of the particle. "
+        "Use p.set_pos(0, 3.0) instead if only one index needs to be modified. "
+        "Note that changing the whole position works as expected:\n"
+        "p.pos = [3,4,5] or p.pos = p2.pos"
+                )
         .def_readwrite("dynamics", &Particle::dynamics)
         .def_readwrite("material", &Particle::material)
         .def("__str__", [](const Particle &p) {

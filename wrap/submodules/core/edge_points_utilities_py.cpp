@@ -19,7 +19,6 @@
  * *******************************************************************/
 
 #include "pybind11_common.h"
-#include "sgcore_common_py.hpp"
 #include <pybind11/stl.h>
 
 #include "edge_points_utilities.hpp"

@@ -31,7 +31,7 @@ class TestSpatialGraphIo(unittest.TestCase):
     def test_a_write_graphviz_sg(self):
         graph = core.spatial_graph(2);
         sn = core.spatial_node()
-        sn.pos = core.array.array3d(1.0,1.0,1.0)
+        sn.pos = [1.0,1.0,1.0]
         graph.set_vertex(1, sn)
         core.io.write_graphviz_sg(self.graphviz_file, graph)
 
@@ -43,7 +43,7 @@ class TestSpatialGraphIo(unittest.TestCase):
     def test_a_write_serialized_sg(self):
         graph = core.spatial_graph(2);
         sn = core.spatial_node()
-        sn.pos = core.array.array3d(1.0,1.0,1.0)
+        sn.pos = [1.0,1.0,1.0]
         graph.set_vertex(1, sn)
         core.io.write_serialized_sg(self.serialized_file, graph)
 

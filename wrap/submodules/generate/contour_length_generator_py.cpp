@@ -19,7 +19,6 @@
  * *******************************************************************/
 
 #include "pybind11_common.h"
-#include "../core/sgcore_common_py.hpp" // to make array3d opaque
 
 #include "contour_length_generator.hpp"
 #include "contour_length_generator_functions.hpp"

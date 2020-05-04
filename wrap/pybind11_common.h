@@ -28,6 +28,5 @@
 #include <pybind11/functional.h>
 #include <pybind11/stl_bind.h>
 #include <pybind11/stl.h>
-#include "core/sgcore_common_py.hpp" // OPAQUE std::array<double, 3>
 
 #endif

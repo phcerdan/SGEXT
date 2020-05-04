@@ -25,7 +25,7 @@ class TestDynamicsParticleCollection(unittest.TestCase):
         self.collection = dynamics.particle_collection()
         self.particle1 = dynamics.particle()
         self.particle1.id = 1
-        self.particle1.pos = array.array3d(1,1,1)
+        self.particle1.pos = [1,1,1]
         self.particle2 = dynamics.particle()
         self.particle2.id = 2
         self.particles = dynamics.VectorParticles()

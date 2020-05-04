@@ -25,16 +25,16 @@ class System4Fixture:
         # Define particles
         self.particle0 = dynamics.particle()
         self.particle0.id = 0
-        self.particle0.pos = array.array3d(0,0,0)
+        self.particle0.pos = [0,0,0]
         self.particle1 = dynamics.particle()
         self.particle1.id = 1
-        self.particle1.pos = array.array3d(1,0,0)
+        self.particle1.pos = [1,0,0]
         self.particle2 = dynamics.particle()
         self.particle2.id = 2
-        self.particle2.pos = array.array3d(2,0,0)
+        self.particle2.pos = [2,0,0]
         self.particle3 = dynamics.particle()
         self.particle3.id = 3
-        self.particle3.pos = array.array3d(1,2,0)
+        self.particle3.pos = [1,2,0]
         # Define VectorParticles
         self.particles = dynamics.VectorParticles(
             [self.particle0, self.particle1,

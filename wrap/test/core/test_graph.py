@@ -25,16 +25,23 @@ class TestGraph(unittest.TestCase):
         # Constructor
         sn = core.spatial_node()
         self.assertEqual(sn.id, 0)
-        self.assertEqual(sn.pos, core.array.array3d())
+        self.assertEqual(sn.pos, [0,0,0])
         norm = core.array.norm(sn.pos)
         self.assertAlmostEqual(norm, 0.0)
+        self.assertEqual(sn.pos[0], 0)
+        # invalid to modify a readwrite property with  a reference argument
+        # price to pay for non MAKE_OPAQUE
+        sn.pos[0] = 3.0
+        self.assertNotEqual(sn.pos[0], 3.0)
+        sn.set_pos(0, 3.0)
+        self.assertEqual(sn.pos[0], 3.0)
         print(sn)
         print("end test_spatial_node")
 
     def test_spatial_edge(self):
         print("test_spatial_edge")
         se = core.spatial_edge()
-        arr1 = core.array.array3d(1,1,1)
+        arr1 = [1,1,1]
         se.edge_points = [arr1, arr1];
         self.assertEqual(len(se.edge_points),2)
         # iter works for vector and array3d
@@ -66,8 +73,8 @@ class TestGraph(unittest.TestCase):
         self.assertEqual(ed.source, 0)
         self.assertEqual(ed.target, 1)
         se2 = core.spatial_edge()
-        arr0 = core.array.array3d(0,0,0)
-        arr1 = core.array.array3d(1,1,1)
+        arr0 = [0,0,0]
+        arr1 = [1,1,1]
         se2.edge_points = [arr0, arr1];
         [ed, added] = core.graph.add_edge(0,1, se2, graph)
         num_edge_points = core.graph.num_edge_points(graph)
@@ -128,8 +135,8 @@ class TestGraph(unittest.TestCase):
     def test_spatial_graph_vertex_edge(self):
         print("test_spatial_graph_vertex_edge")
         graph = core.spatial_graph(2)
-        arr0 = core.array.array3d(0,0,0)
-        arr1 = core.array.array3d(1,1,1)
+        arr0 = [0,0,0]
+        arr1 = [1,1,1]
         se2 = core.spatial_edge()
         se2.edge_points = [arr0, arr1];
         [ed, added] = core.graph.add_edge(0,1, se2, graph)
@@ -163,16 +170,16 @@ class TestGraph(unittest.TestCase):
     def test_get_all_points(self):
         print("test_get_all_points")
         graph = core.spatial_graph(2)
-        arr0 = core.array.array3d(0,0,0)
+        arr0 = [0,0,0]
         v0 = graph.vertex(0)
         v0.pos = arr0
         graph.set_vertex(0, v0)
-        arr3 = core.array.array3d(3,3,3)
+        arr3 = [3,3,3]
         v1 = graph.vertex(1)
         v1.pos = arr3
         graph.set_vertex(1, v1)
-        arr1 = core.array.array3d(1,1,1)
-        arr2 = core.array.array3d(2,2,2)
+        arr1 = [1,1,1]
+        arr2 = [2,2,2]
         se2 = core.spatial_edge()
         se2.edge_points = [arr1, arr2];
         [ed, added] = core.graph.add_edge(0,1, se2, graph)
