@@ -12,13 +12,13 @@ class ThreeConnectedNodesGraphFixture:
         self.graph = core.spatial_graph(6)
         # Set vertex positions
         v0 = self.graph.vertex(0);
-        v0.pos = core.array.array3d(0,0,0)
+        v0.pos = [0,0,0]
         self.graph.set_vertex(0, v0)
         v1 = self.graph.vertex(1);
-        v1.pos = core.array.array3d(1,1,0)
+        v1.pos = [1,1,0]
         self.graph.set_vertex(1, v1)
         v2 = self.graph.vertex(2);
-        v2.pos = core.array.array3d(1,0,1)
+        v2.pos = [1,0,1]
         self.graph.set_vertex(2, v2)
         # Set edges between three nodes
         core.graph.add_edge(0, 1, core.spatial_edge(), self.graph)
@@ -26,13 +26,13 @@ class ThreeConnectedNodesGraphFixture:
         core.graph.add_edge(1, 2, core.spatial_edge(), self.graph)
         # Add end-points (degree 1)
         v3 = self.graph.vertex(3);
-        v3.pos = core.array.array3d(-1,0,0)
+        v3.pos = [-1,0,0]
         self.graph.set_vertex(3, v3)
         v4 = self.graph.vertex(4);
-        v4.pos = core.array.array3d(1,2,0)
+        v4.pos = [1,2,0]
         self.graph.set_vertex(4, v4)
         v5 = self.graph.vertex(5);
-        v5.pos = core.array.array3d(1,0,2)
+        v5.pos = [1,0,2]
         self.graph.set_vertex(5, v5)
         # Connect end-points
         core.graph.add_edge(0, 3, core.spatial_edge(), self.graph)
@@ -46,7 +46,7 @@ class TestSplitLoop(unittest.TestCase):
     def setUp(self):
         self.graph_loop = core.spatial_graph(1)
         self.ed = core.spatial_edge()
-        self.ed.edge_points = [ core.array.array3d(), core.array.array3d(1,1,1)]
+        self.ed.edge_points = [[0,0,0], [1,1,1]]
         core.graph.add_edge(0,0, self.ed, self.graph_loop)
     def test_split_loop(self):
         loop_vertex_id = 0
