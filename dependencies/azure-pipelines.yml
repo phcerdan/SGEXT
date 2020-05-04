@@ -16,6 +16,8 @@ stages:
         mkdir $DEPENDENCIES_BUILD_DIR
         echo $DEPENDENCIES_BUILD_DIR
       displayName: "mkdir DEPENDENCIES_BUILD_DIR"
+    - script: sudo apt-get -y install libxt-dev libgl1-mesa-dev
+      displayName: "install libXt and opengl dependencies"
     - task: Bash@3
       inputs:
         filePath: '$(Build.SourcesDirectory)/deploy/deploy_dependencies.sh'
