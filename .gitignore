@@ -1,3 +1,5 @@
+# Binder, jupytext artifacts
+binder/notebooks/*.py
 # Deploy artifacts
 deploy/_skbuild/
 deploy/dist/
