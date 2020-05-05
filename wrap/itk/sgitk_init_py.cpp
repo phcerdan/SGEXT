@@ -22,11 +22,13 @@
 
 namespace py = pybind11;
 void init_itk_image(py::module &);
+void init_itk_image_io(py::module &);
 void init_itk_view_image(py::module &);
 
 void init_sgitk(py::module & mparent) {
     auto m = mparent.def_submodule("itk");
     m.doc() = "ITK wrapping of image "; // optional module docstring
     init_itk_image(m);
+    init_itk_image_io(m);
     init_itk_view_image(m);
 }
