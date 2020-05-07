@@ -82,26 +82,38 @@ inline SkelSelectType skel_select_string_to_enum(const std::string & select_stri
 }
 
 /**
+ * Thin input image using DGtal library, with the asymmetric thining algorithm of
+ * Bertrand and Couprie using Voxel Complex.
+ * See: https://dgtal.org/doc/1.0/moduleVoxelComplex.html
  *
- * @param filename
- * @param skel_string type of skeletonization.
+ * @param input_image binary image to thin/skeletonize
+ *
+ * @param skel_type_str type of skeletonization.
  *     Valid options: end, ulti, 1isthmus, isthmus
  *     end: conserve end points
  *     ulti: ultimate skeleton, only conserve points which removal change topology.
  *     it generates a single point centered in any volume without holes.
  *     1isthmus: conserve linear (1D) isthmus
  *     isthmus: conserve surface (2D) isthmus and 1D isthmus.
- * @param select_string type for choosing a voxel (asymmetric thinning).
+ * @param skel_select_type_str type for choosing a voxel (asymmetric thinning).
  *     Valid options: dmax, random, first
  *     dmax: use a distance map to select the Complex with the greates distance map value.
  *     The final skeleton will be a centered medial axis skeleton using this option
  *     random: select a random voxel in case an asymmetric choice is needed.
  *     first: choose the first voxel of the container (its not ordered in any meaningful way)
+ * @param persistence Integer to locally trim non-important branches.
+ * If 0 no persistence algorith.
+ *
+ * @param distance_map_image distance map image used when @ref skel_select_type_str
+ * is dmax
+ * @param profile timing the algorithm
+ *
  * @param verbose extra info
+ *
  * @param visualize visualize the end result.
  *      Only if compile definitions are enabled.
  *
- * @return 
+ * @return thin image
  */
 
 BinaryImageType::Pointer thin_function(
@@ -114,6 +126,47 @@ BinaryImageType::Pointer thin_function(
     const bool verbose = false,
     const bool visualize = false
     );
+
+/**
+ * Thin input image using DGtal library, with the asymmetric thining algorithm of
+ * Bertrand and Couprie using Voxel Complex.
+ * Input is a filename, and it writes the result to a file. It calls @ref thin
+ * function that does not perform io operations.
+ * See: https://dgtal.org/doc/1.0/moduleVoxelComplex.html
+ *
+ * @param filename input filename holding a binary image that will be thinned
+ *
+ * @param skel_type_str type of skeletonization.
+ *     Valid options: end, ulti, 1isthmus, isthmus
+ *     end: conserve end points
+ *     ulti: ultimate skeleton, only conserve points which removal change topology.
+ *     it generates a single point centered in any volume without holes.
+ *     1isthmus: conserve linear (1D) isthmus
+ *     isthmus: conserve surface (2D) isthmus and 1D isthmus.
+ *
+ * @param skel_select_type_str type for choosing a voxel (asymmetric thinning).
+ *     Valid options: dmax, random, first
+ *     dmax: use a distance map to select the Complex with the greates distance map value.
+ *     The final skeleton will be a centered medial axis skeleton using this option
+ *     random: select a random voxel in case an asymmetric choice is needed.
+ *     first: choose the first voxel of the container (its not ordered in any meaningful way)
+ * @param output_foldername folder where output image will be written
+ *
+ * @param inputDistanceMapImageFilename filename holding a distance map image
+ * used when @ref skel_select_type_str is dmax
+ *
+ * @param out_sequence_discrete_points_foldername foldername to save a sequence
+ * of discrete points of the thin results. If string is empty, won't be computed.
+ *
+ * @param profile timing the algorithm
+ *
+ * @param verbose extra info
+ *
+ * @param visualize visualize the end result.
+ *      Only if compile definitions are enabled.
+ *
+ * @return thin image
+ */
 
 BinaryImageType::Pointer thin_function_io(
         const std::string & filename,

@@ -243,10 +243,7 @@ BinaryImageType::Pointer thin_function(
   return changeInfo->GetOutput();
 
 }
-// TODO replace filename for ImageType, and generate other interfaces with
-// filename filename was used in script mode, but with python wrapping in mind,
-// we can provide: a) numpy interface (compatible with ITK python wrap) +
-// origin, spacing, cosines b) itk image in c++ c) actual filename
+
 BinaryImageType::Pointer thin_function_io(const std::string &filename,
         const std::string & skel_type_str,
         const std::string & skel_select_type_str,
