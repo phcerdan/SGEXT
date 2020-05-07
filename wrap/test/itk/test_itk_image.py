@@ -3,8 +3,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import _sgext.itk as itk
-import _sgext.scripts as scripts
+from sgext import itk
+from sgext import scripts
 import unittest
 import os, tempfile
 import numpy as np
@@ -125,20 +125,18 @@ class TestITKImagePointer(unittest.TestCase):
         arr_c = img.to_pyarray(contig='C')
         itk_img_c = itk.GetImageFromArray(arr_c)
         self.assertEqual(arr_c.shape[0], 50)
-        # ITK always assume than input numpy array will be F contig (which is easier!)
-        self.assertEqual(itk_img_f.GetLargestPossibleRegion().GetSize()[0], 7)
         subs = itk.subtract_image_filter(itk_img_c, itk_img_c)
         subs_np = itk.GetArrayViewFromImage(subs) # no-copy
         self.assertEqual(subs_np.max(), 0)
 
         # Test with Fortran contiguous
+        # ITK always assume than input numpy array will be F contig (which is easier!)
         arr_f = img.to_pyarray(contig='F')
         itk_img_f = itk.GetImageFromArray(arr_f)
         self.assertEqual(arr_f.shape[0], 7)
         self.assertEqual(itk_img_f.GetLargestPossibleRegion().GetSize()[0], 50)
 
         # Check usability with a filter
-        itk_img_f.GetLargestPossibleRegion().GetSize()[0]
         subs = itk.subtract_image_filter(itk_img_f, itk_img_f)
         subs_np = itk.GetArrayViewFromImage(subs) # no-copy
         self.assertEqual(subs_np.max(), 0)
