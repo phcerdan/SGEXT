@@ -25,7 +25,7 @@ class TestITKImagePointer(unittest.TestCase):
                           skel_type="end", select_type="first",
                           persistence=2,
                           visualize=False,
-                          verbose=True)
+                          verbose=False)
 
 
     def test_basics(self):
@@ -37,6 +37,43 @@ class TestITKImagePointer(unittest.TestCase):
         self.assertAlmostEqual(image.origin().all(), 0.)
         self.assertAlmostEqual(image.spacing().all(), 1.)
         self.assertAlmostEqual(image.direction()[0,0], 1.)
+
+    def test_set_direction(self):
+        image = itk.IUC3P()
+        np_dir = np.array([[1, 1, 0], [0, 1, 1], [0, 0, 1]])
+        image.set_direction(np_dir)
+        bad_dir = np.array([[1, 1, 0], [0, 1, 1]])
+        self.assertRaises(RuntimeError, image.set_direction, bad_dir)
+        image.set_direction(np.eye(3))
+
+    def test_set_origin(self):
+        image = itk.IUC3P()
+        np_origin = np.array([1, 2, 0])
+        image.set_origin(np_origin)
+        bad_origin = np.array([1, 1])
+        self.assertRaises(RuntimeError, image.set_origin, bad_origin)
+
+    def test_set_spacing(self):
+        image = itk.IUC3P()
+        np_spacing = np.array([1, 2, 1])
+        image.set_spacing(np_spacing)
+        bad_spacing = np.array([1, 1])
+        self.assertRaises(RuntimeError, image.set_spacing, bad_spacing)
+
+    def test_set_region(self):
+        image = itk.IUC3P()
+        np_index = np.array([1, 1, 1])
+        np_size = np.array([5, 6, 7])
+        image.set_region(index=np_index, size=np_size)
+        negative_size = np.array([-5, 6, 7])
+        self.assertRaises(RuntimeError, image.set_region, np_index, negative_size)
+
+    def test_set_size(self):
+        image = itk.IUC3P()
+        np_size = np.array([5, 6, 7])
+        image.set_size(np_size)
+        negative_size = np.array([-5, 6, 7])
+        self.assertRaises(RuntimeError, image.set_size, negative_size)
 
     def test_to_pyarray(self):
         img = self.img
@@ -52,6 +89,29 @@ class TestITKImagePointer(unittest.TestCase):
         # C contiguous
         arr_c = img.to_pyarray(contig="C")
         np.testing.assert_array_equal(arr_c.shape, img.size())
+
+    def test_from_pyarray(self):
+        img = self.img
+        arr_f = img.to_pyarray(contig="F")
+
+        new_img = itk.IUC3P()
+        new_img.from_pyarray(arr_f, contig="F")
+
+        new_arr_f = new_img.to_pyarray(contig="F")
+        # Fortran contiguous (Default)
+        np.testing.assert_array_equal(new_arr_f.shape, [7, 50, 50])
+        # C contiguous
+        new_arr_c = new_img.to_pyarray(contig="C")
+        np.testing.assert_array_equal(new_arr_c.shape, img.size())
+
+        arr_c = img.to_pyarray(contig="C")
+        new_img.from_pyarray(arr_c, contig="C")
+        new_arr_f = new_img.to_pyarray(contig="F")
+        # Fortran contiguous (Default)
+        np.testing.assert_array_equal(new_arr_f.shape, [7, 50, 50])
+        # C contiguous
+        new_arr_c = new_img.to_pyarray(contig="C")
+        np.testing.assert_array_equal(new_arr_c.shape, img.size())
 
     def test_export_to_itk(self):
         try:
