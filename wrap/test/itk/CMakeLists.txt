@@ -2,6 +2,7 @@ set(python_tests_
   test_itk_image.py
   test_itk_image_io.py
   test_itk_view_image.py
+  test_from_to_itk.py
   )
 
 get_filename_component(module_name_ ${CMAKE_CURRENT_SOURCE_DIR} NAME)
@@ -17,8 +18,8 @@ foreach(python_test ${python_tests_})
     -s ${test_folder}
     -p ${python_test}
     )
-  # Append the build folder where python lib is to PYTHONPATH
+  # Append the build folder where sgext python folder is to PYTHONPATH
   # Allowing ctest -R "a_python_test_name_" -V to work
   set_tests_properties(${python_test_name_} PROPERTIES
-    ENVIRONMENT PYTHONPATH=$ENV{PYTHONPATH}:${CMAKE_BUILD_PYTHONLIBDIR})
+    ENVIRONMENT PYTHONPATH=$ENV{PYTHONPATH}:${CMAKE_BUILD_PYTHONLIBDIR}/..)
 endforeach()
