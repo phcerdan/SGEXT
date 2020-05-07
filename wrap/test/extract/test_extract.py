@@ -16,8 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import _sgext.core as core
-import _sgext.extract as extract
+from sgext import core
+from sgext import extract
 import unittest
 
 class ThreeConnectedNodesGraphFixture:

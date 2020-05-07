@@ -16,7 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import _sgext.core.array as array
+from sgext import core
+array = core.array
 import unittest
 
 class TestArray3D(unittest.TestCase):

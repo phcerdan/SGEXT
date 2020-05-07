@@ -16,8 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import _sgext.itk as itk
-import _sgext.scripts as scripts
+from sgext import itk
+from sgext import scripts
 import unittest
 import os, tempfile
 

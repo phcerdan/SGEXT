@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import _sgext.core as core
+from sgext import core
 import unittest
 
 class TestEdgePointsUtilities(unittest.TestCase):

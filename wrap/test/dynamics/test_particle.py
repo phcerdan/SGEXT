@@ -16,8 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import _sgext.dynamics as dynamics
-import _sgext.core.array as array
+from sgext import dynamics
+
 import unittest
 
 class TestDynamicsParticle(unittest.TestCase):

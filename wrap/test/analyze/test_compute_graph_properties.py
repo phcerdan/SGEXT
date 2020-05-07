@@ -16,8 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import _sgext.core as core
-import _sgext.analyze as analyze
+from sgext import core
+from sgext import analyze
 from analyze_fixture import AnalyzeGraphFixture
 import unittest
 
