@@ -272,9 +272,7 @@ BinaryImageType::Pointer thin_function_io(const std::string &filename,
         const std::string & out_sequence_discrete_points_foldername,
         const bool profile,
         const bool verbose,
-        const bool visualize,
-        const int thresholdMin,
-        const int thresholdMax
+        const bool visualize
         ) {
   if(verbose) {
     using DGtal::trace;
@@ -285,8 +283,6 @@ BinaryImageType::Pointer thin_function_io(const std::string &filename,
     trace.info() << "foreground: " << foreground << std::endl;
     trace.info() << "out_sequence_discrete_points_foldername: " <<
       out_sequence_discrete_points_foldername << std::endl;
-    trace.info() << "thresholdMin: " << thresholdMin << std::endl;
-    trace.info() << "thresholdMax: " << thresholdMax << std::endl;
     trace.info() << "----------" << std::endl;
     trace.endBlock();
   }

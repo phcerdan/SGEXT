@@ -131,12 +131,6 @@ verbose: bool
 visualize: bool
     visualize results when finished.
 
-thresholdMin: int
-    only consider foreground values greater than this.
-
-thresholdMax: int
-    only consider foreground values smaller than this.
-
             )delimiter",
             py::arg("input_file"),
             py::arg("skel_type"),
@@ -148,8 +142,6 @@ thresholdMax: int
             py::arg("out_discrete_points_folder") = "",
             py::arg("profile") = false,
             py::arg("verbose") = false,
-            py::arg("visualize") = false,
-            py::arg("thresholdMin") = 0,
-            py::arg("thresholdMax") = 255
+            py::arg("visualize") = false
          );
 }
