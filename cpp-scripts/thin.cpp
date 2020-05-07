@@ -33,10 +33,6 @@ int main(int argc, char* const argv[]) {
   opt_desc.add_options()("foreground,f",
                          po::value<std::string>()->default_value("white"),
                          "foreground color in binary image. [black|white]");
-  opt_desc.add_options()("thresholdMin,m", po::value<int>()->default_value(0),
-                         "threshold min (excluded) to define binary shape");
-  opt_desc.add_options()("thresholdMax,M", po::value<int>()->default_value(255),
-                         "threshold max (included) to define binary shape");
   opt_desc.add_options()(
       "persistence,p", po::value<int>()->default_value(0),
       "persistence value, implies use of persistence algorithm if p>=1");
@@ -78,8 +74,6 @@ int main(int argc, char* const argv[]) {
   bool verbose = vm["verbose"].as<bool>();
   bool output_filename_simple = vm["output_filename_simple"].as<bool>();
   bool profile = vm["profile"].as<bool>();
-  int thresholdMin = vm["thresholdMin"].as<int>();
-  int thresholdMax = vm["thresholdMax"].as<int>();
   int persistence = vm["persistence"].as<int>();
   if(vm.count("persistence") && persistence < 0)
     throw po::validation_error(po::validation_error::invalid_option_value,
@@ -159,9 +153,7 @@ int main(int argc, char* const argv[]) {
       exportSDP,
       profile,
       verbose,
-      visualize,
-      thresholdMin,
-      thresholdMax
+      visualize
       );
 
   /*-------------- End of parse -----------------------------*/
