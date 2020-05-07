@@ -32,7 +32,7 @@ class TestFromToITK(unittest.TestCase):
         cls.input = os.path.join(dirname, '../../../images/bX3D.tif')
         if not os.path.exists(cls.input):
             raise "Input image for thin script in test_from_to_itk not found: " + cls.input
-        cls.img =scripts.thin(input=cls.input,
+        cls.img =scripts.thin_io(input_file=cls.input,
                           out_folder=cls.test_dir,
                           foreground="black",
                           skel_type="end", select_type="first",

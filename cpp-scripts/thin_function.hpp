@@ -118,7 +118,19 @@ inline SkelSelectType skel_select_string_to_enum(const std::string & select_stri
  *
  * @return 
  */
+
 BinaryImageType::Pointer thin_function(
+    const BinaryImageType::Pointer & input_image,
+    const std::string & skel_type_str,
+    const std::string & skel_select_type_str,
+    const int & persistence = 0,
+    const FloatImageType::Pointer & distance_map_image = nullptr,
+    const bool profile = false,
+    const bool verbose = false,
+    const bool visualize = false
+    );
+
+BinaryImageType::Pointer thin_function_io(
         const std::string & filename,
         const std::string & skel_type_str,
         const std::string & skel_select_type_str,

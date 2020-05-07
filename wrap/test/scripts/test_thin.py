@@ -30,7 +30,7 @@ class TestThin(unittest.TestCase):
             raise "Input image for test thin script not found: " + self.input
 
     def test_thin(self):
-        scripts.thin(input=self.input,
+        scripts.thin_io(input_file=self.input,
                      out_folder=self.test_dir,
                      foreground="black",
                      skel_type="end", select_type="first",

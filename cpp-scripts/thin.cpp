@@ -163,7 +163,7 @@ int main(int argc, char* const argv[]) {
     inputDistanceMapImageFilename = inputDistanceMapImageFilename_path.string();
   }
 
-  SG::thin_function(
+  SG::thin_function_io(
       filename,
       sk_string,
       select_string,

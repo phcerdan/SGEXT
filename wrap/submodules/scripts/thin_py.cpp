@@ -31,7 +31,60 @@ Get a skeletonized or thinned image from a binary image.
 
 Parameters:
 ----------
-input: str
+input: BinaryImageType
+    input binary image.
+
+skel_type: str
+    Voxels to keep in the skeletonization process.
+
+    [end, ulti, isthmus]
+    - end: keep end voxels.
+    - ulti: don't keep extra voxels, ultimate skeleton.
+    - isthmus: keep voxels that are isthmuses.
+
+select_type: str
+    [first, random, dmax]
+    - first: the first voxel in the set (no criteria)
+    - random: random voxel in the set.
+    - dmax: choose voxel with greatest distance map value.
+    Strategy to choose voxels in the asymmetric process.
+
+persistence: int
+    if >0, performs a persistence algorithm that prunes
+    branches that are not persistant (less important).
+
+input_distance_map_image: FloatImageType
+    distance map required for select_type dmax option.
+    This option provides a centered skeleton.
+    Use sgext.scripts.create_distance_map function
+    to generate it. Defaults to nullptr
+
+profile: bool
+    time the algorithm
+
+verbose: bool
+    extra information displayed during the algorithm.
+
+visualize: bool
+    visualize results when finished.
+            )delimiter",
+            py::arg("input"),
+            py::arg("skel_type"),
+            py::arg("select_type"),
+            py::arg("persistence") = 0,
+            py::arg("input_distance_map_image") = nullptr,
+            py::arg("profile") = false,
+            py::arg("verbose") = false,
+            py::arg("visualize") = false
+         );
+
+    m.def("thin_io", &thin_function_io,
+            R"delimiter(
+Get a skeletonized or thinned image from a binary image.
+
+Parameters:
+----------
+input_file: str
     input filename holding a binary image.
 
 skel_type: str
@@ -57,7 +110,7 @@ persistence: int
     branches that are not persistant (less important).
 
 input_distance_map_file: str
-    distance map required for select_type dmax option.
+    file holding a distance map. Required for select_type dmax option.
     This option provides a centered skeleton.
     Use sgext.scripts.create_distance_map function
     to generate it
@@ -69,19 +122,23 @@ foreground: str
 out_discrete_points_folder: str
     output skeleton points in a simple file
 
+profile: bool
+    time the algorithm
+
+verbose: bool
+    extra information displayed during the algorithm.
+
+visualize: bool
+    visualize results when finished.
+
 thresholdMin: int
     only consider foreground values greater than this.
 
 thresholdMax: int
     only consider foreground values smaller than this.
 
-profile: bool
-    time the algorithm
-
-verbose: bool
-    extra information displayed during the algorithm.
             )delimiter",
-            py::arg("input"),
+            py::arg("input_file"),
             py::arg("skel_type"),
             py::arg("select_type"),
             py::arg("out_folder"),
