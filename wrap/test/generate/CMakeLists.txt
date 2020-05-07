@@ -17,5 +17,5 @@ foreach(python_test ${python_tests_})
   # Append the build folder where python lib is to PYTHONPATH
   # Allowing ctest -R "a_python_test_name_" -V to work
   set_tests_properties(${python_test_name_} PROPERTIES
-    ENVIRONMENT PYTHONPATH=$ENV{PYTHONPATH}:${CMAKE_BUILD_PYTHONLIBDIR})
+    ENVIRONMENT PYTHONPATH=$ENV{PYTHONPATH}:${CMAKE_BUILD_PYTHONLIBDIR}/..)
 endforeach()

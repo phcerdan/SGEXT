@@ -3,7 +3,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-from sgext import itk
 from sgext import scripts
 import unittest
 import os, tempfile
@@ -29,13 +28,21 @@ class TestFromToITK(unittest.TestCase):
                           verbose=False)
 
     def test_sgext_to_itk(self):
+        try:
+            import itk
+        except:
+            print("Warning: itk python package not found. Not testing sgext_to_itk")
+            return
         img = self.img
         itk_img = from_to.sgext_to_itk(img)
 
         itk_size = itk_img.GetLargestPossibleRegion().GetSize()
-        np.testing.assert_array_equal([itk_size[0], itk_size[1], itk_size[2]], img.size() )
-        itk_spacing = itk_img.Getspacing()
-        np.testing.assert_array_equal([itk_spacing[0], itk_spacing[1], itk_spacing[2]], img.spacing() )
+        np.testing.assert_array_almost_equal([itk_size[0], itk_size[1], itk_size[2]], img.size() )
+        itk_spacing = itk_img.GetSpacing()
+        np.testing.assert_array_almost_equal([itk_spacing[0], itk_spacing[1], itk_spacing[2]], img.spacing() )
 
-        itk_direction = itk_img.Getdirection()
-        np.testing.assert_array_equal([[itk_direction[0]], [itk_direction[1]], [itk_direction[2]]], img.direction() )
+        itk_direction = itk_img.GetDirection().GetVnlMatrix()
+        row0 = [itk_direction.get(0,0), itk_direction.get(0, 1), itk_direction(0,2)]
+        row1 = [itk_direction.get(1,0), itk_direction.get(1, 1), itk_direction(1,2)]
+        row2 = [itk_direction.get(2,0), itk_direction.get(2, 1), itk_direction(2,2)]
+        np.testing.assert_array_almost_equal([row0, row1, row2], img.direction() )
