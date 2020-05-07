@@ -128,9 +128,7 @@ BinaryImageType::Pointer thin_function_io(
         const std::string & out_sequence_discrete_points_foldername = "",
         const bool profile = false,
         const bool verbose = false,
-        const bool visualize = false,
-        const int thresholdMin = 0,
-        const int thresholdMax = 255
+        const bool visualize = false
         );
 
 } // end ns
