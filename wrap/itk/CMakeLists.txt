@@ -11,3 +11,15 @@ set(all_modules_python_sources
   ${all_modules_python_sources}
   ${current_sources_}
   PARENT_SCOPE)
+
+set(_pure_python_files
+  from_to.py
+  )
+
+# Copy pure python at configure time
+file(COPY ${_pure_python_files} DESTINATION ${CMAKE_BUILD_PYTHONLIBDIR})
+# Handle installation of pure python
+install(FILES ${_pure_python_files}
+  DESTINATION ${CMAKE_INSTALL_PYTHONLIBDIR}
+  COMPONENT runtime
+  )
