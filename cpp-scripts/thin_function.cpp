@@ -107,13 +107,8 @@ BinaryImageType::Pointer thin_function(
   using Point = DGtal::Z3i::Point;
 
   KSpace ks;
-  // TODO
-  // TODO
-  // FIX THIS
-  // Domain of kspace must be padded. TODO: pad might not be needed anymore
-  KSpace::Point d1(KSpace::Point::diagonal(1));
-  ks.init(image.domain().lowerBound() - d1, image.domain().upperBound() + d1,
-          true);
+  // No padding of kspace. Requires DGtal v1.1 where VoxelComplex uses PreKCell
+  ks.init(image.domain().lowerBound(), image.domain().upperBound(), true);
   DigitalTopology::ForegroundAdjacency adjF;
   DigitalTopology::BackgroundAdjacency adjB;
   DigitalTopology topo(adjF, adjB, DGtal::DigitalTopologyProperties::JORDAN_DT);
