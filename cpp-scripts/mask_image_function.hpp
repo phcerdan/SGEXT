@@ -39,8 +39,8 @@ namespace SG {
 template<typename TInputImage, typename TMaskImage>
 typename TInputImage::Pointer
 mask_image_function(
-        typename TInputImage::Pointer input,
-        typename TMaskImage::Pointer mask)
+        const typename TInputImage::Pointer & input,
+        const typename TMaskImage::Pointer & mask)
 {
   using MaskFilterType = itk::MaskImageFilter<TInputImage, TMaskImage>;
   auto maskFilter = MaskFilterType::New();

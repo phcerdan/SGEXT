@@ -28,7 +28,7 @@ if(SG_MODULE_LOCATE)
     target_link_libraries(graph_to_vtp ${VTK_LIBRARIES} )
 endif()
 
-add_executable(fill_holes_binary fill_holes_binary.cpp)
+add_executable(fill_holes_binary fill_holes_binary.cpp fill_holes_function.cpp)
 target_link_libraries(fill_holes_binary ${_Boost_components} )
 target_link_libraries(fill_holes_binary ${ITK_LIBRARIES} )
 if(SG_MODULE_VISUALIZE_WITH_QT)
