@@ -215,12 +215,12 @@ endif()
 #################### DGtal #######################
 ##################################################
 
-set(DGtal_GIT_TAG 66f2ad8cd3103c022747d0ae5a2ef2db0407d393) # 23-April 2020
+set(DGtal_GIT_TAG use_precells_voxel_complex) # 10-May-2020
 message(STATUS "DGtal_VERSION: ${DGtal_GIT_TAG}")
 set(DGtal_BUILD_DIR ${OUTPUT_BUILD_DIR}/DGtal-build)
 set(DGtal_SRC_FOLDER_NAME DGtal-src)
 set(DGtal_SRC_DIR ${OUTPUT_BUILD_DIR}/${DGtal_SRC_FOLDER_NAME})
-set(DGtal_GIT_REPOSITORY "https://github.com/DGtal-team/DGtal")
+set(DGtal_GIT_REPOSITORY "https://github.com/phcerdan/DGtal")
 set(_DGtal_depends ep_boost)
 set(_DGtal_optional_cmake_args)
 if(WITH_ITK)
