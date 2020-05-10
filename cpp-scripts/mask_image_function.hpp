@@ -18,19 +18,37 @@
  *
  * *******************************************************************/
 
-#include "pybind11_common.h"
+#ifndef MASK_IMAGE_FUNCTION_HPP
+#define MASK_IMAGE_FUNCTION_HPP
 
-namespace py = pybind11;
-void init_analyze_graph(py::module &);
-void init_thin(py::module &);
-void init_create_distance_map(py::module &);
-void init_mask_image(py::module &);
+#include <itkMaskImageFilter.h>
 
-void init_sgscripts(py::module & mparent) {
-    auto m = mparent.def_submodule("scripts");
-    m.doc() = "Scripts submodule "; // optional module docstring
-    init_analyze_graph(m);
-    init_thin(m);
-    init_create_distance_map(m);
-    init_mask_image(m);
+namespace SG {
+
+/**
+ * Wrap itk::MaskImageFilterType for using it in python sgext
+ * Used in script @sa mask_distance_map_with_thin_image
+ *
+ * @tparam TInputImage
+ * @tparam TMaskImage
+ * @param input
+ * @param mask
+ *
+ * @return masked image
+ */
+template<typename TInputImage, typename TMaskImage>
+typename TInputImage::Pointer
+mask_image_function(
+        typename TInputImage::Pointer input,
+        typename TMaskImage::Pointer mask)
+{
+  using MaskFilterType = itk::MaskImageFilter<TInputImage, TMaskImage>;
+  auto maskFilter = MaskFilterType::New();
+  maskFilter->SetInput(input);
+  maskFilter->SetMaskImage(mask);
+  maskFilter->Update();
+  return maskFilter->GetOutput();
 }
+
+} // end ns SG
+#endif

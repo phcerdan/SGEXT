@@ -18,9 +18,9 @@
  *
  * *******************************************************************/
 
+#include "mask_image_function.hpp"
 #include <itkImageFileReader.h>
 #include <itkImageFileWriter.h>
-#include <itkMaskImageFilter.h>
 
 // boost::program_options
 #include <boost/program_options/options_description.hpp>
@@ -43,11 +43,6 @@ int main(int argc, char* const argv[]) {
                          "Input thin image, this is used as a mask.");
   opt_desc.add_options()("outputFolder,o", po::value<string>()->required(),
                          "Output folder for the distance map.");
-  // opt_desc.add_options()( "visualize,t",
-  // po::bool_switch()->default_value(false), "Visualize object with DGtal.
-  // Requires VISUALIZE option enabled at build."); opt_desc.add_options()(
-  // "foreground,f",  po::value<string>()->default_value("white"), "foreground
-  // color in binary image [black|white]" );
   opt_desc.add_options()("verbose,v", po::bool_switch()->default_value(false),
                          "verbose output.");
 
@@ -93,14 +88,10 @@ int main(int argc, char* const argv[]) {
   readerThinImage->SetFileName(filenameThinImage);
   readerThinImage->Update();
 
-  using MaskFilterType =
-      itk::MaskImageFilter<DistanceMapImageType, ThinImageImageType>;
-  auto maskFilter = MaskFilterType::New();
-  maskFilter->SetInput(readerDistanceMap->GetOutput());
-  maskFilter->SetMaskImage(readerThinImage->GetOutput());
-  // everything not zero in thin image will be conserved from the distance map
-  // image
-  maskFilter->Update();
+  auto masked_image =
+    SG::mask_image_function<DistanceMapImageType, ThinImageImageType>(
+        readerDistanceMap->GetOutput(),
+        readerThinImage->GetOutput());
 
   // Write the image
   using WriterFilterType = itk::ImageFileWriter<DistanceMapImageType>;
@@ -110,7 +101,7 @@ int main(int argc, char* const argv[]) {
       output_folder_path / fs::path(output_file_path.string() + ".nrrd");
   try {
     writer->SetFileName(output_full_path.string().c_str());
-    writer->SetInput(maskFilter->GetOutput());
+    writer->SetInput(masked_image);
     writer->Update();
     if(verbose)
       std::cout << "Output written in: " << output_full_path.string()

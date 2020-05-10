@@ -19,18 +19,38 @@
  * *******************************************************************/
 
 #include "pybind11_common.h"
+#include "scripts_types.hpp"
+
+#include "mask_image_function.hpp"
+#include <string>
 
 namespace py = pybind11;
-void init_analyze_graph(py::module &);
-void init_thin(py::module &);
-void init_create_distance_map(py::module &);
-void init_mask_image(py::module &);
+using namespace SG;
 
-void init_sgscripts(py::module & mparent) {
-    auto m = mparent.def_submodule("scripts");
-    m.doc() = "Scripts submodule "; // optional module docstring
-    init_analyze_graph(m);
-    init_thin(m);
-    init_create_distance_map(m);
-    init_mask_image(m);
+const std::string mask_image_docs =
+R"delimiter(
+Masks input image (Binary or Float) with a binary image.
+
+Parameters:
+----------
+input: BinaryImageType | FloatImageType
+    input image.
+
+mask: BinaryImageType
+    binary image used to mask the input.
+)delimiter";
+
+void init_mask_image(py::module &m) {
+    m.def("mask_image",
+            &SG::mask_image_function<BinaryImageType, BinaryImageType>,
+            mask_image_docs.c_str(),
+            py::arg("input"),
+            py::arg("mask")
+         );
+    m.def("mask_image",
+            &SG::mask_image_function<FloatImageType, BinaryImageType>,
+            mask_image_docs.c_str(),
+            py::arg("input"),
+            py::arg("mask")
+         );
 }
