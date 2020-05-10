@@ -5,12 +5,11 @@
 
 #include <iostream>
 #include <string>
+#include "fill_holes_function.hpp" // fill_holes_voting_iterative_function
 // ITK
 #include <itkImageFileReader.h>
 #include <itkImageFileWriter.h>
 #include <itkInvertIntensityImageFilter.h>
-#include <itkVotingBinaryIterativeHoleFillingImageFilter.h>  // Module ITKLabelVoting
-#include <itkStatisticsImageFilter.h>
 // boost::program_options
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
@@ -50,9 +49,6 @@ int main(int argc, char* const argv[]) {
                          "Folder to export the resulting binary image.");
   opt_desc.add_options()("outputFilename,e", po::value<std::string>(),
                          "FileName of the output (needs outputFolder).");
-  opt_desc.add_options()(
-      "visualize,t", po::bool_switch()->default_value(false),
-      "Visualize thin result. Requires VISUALIZE option at build");
 
   //  Majority is the number of pixels in the neighborhood of an OFF pixel, to
   //  turn it into ON. By default majority = 1, this means that an off pixel
@@ -89,9 +85,6 @@ int main(int argc, char* const argv[]) {
     throw po::validation_error(po::validation_error::invalid_option_value,
                                "foreground");
   bool invert_image = (foreground == "black") ? true : false;
-#ifdef VISUALIZE
-  bool visualize = vm["visualize"].as<bool>();
-#endif
   if(vm.count("outputFolder")) {
     const fs::path output_folder_path{vm["outputFolder"].as<std::string>()};
     if(!fs::exists(output_folder_path)) {
@@ -152,38 +145,14 @@ int main(int argc, char* const argv[]) {
   ImageType::Pointer image =
       (invert_image) ? inverter->GetOutput() : reader->GetOutput();
 
-  using FillingFilterType =
-      itk::VotingBinaryIterativeHoleFillingImageFilter<ImageType>;
-  auto filler = FillingFilterType::New();
-  filler->SetInput(image);
-  if(verbose) {
-    std::cout << "Majority: " << majority << std::endl;
-    std::cout << "Iterations: " << iterations << std::endl;
-    std::cout << "Radius: (" << radius << ", " << radius << ", " << radius
-              << ")" << std::endl;
-  }
-  typedef itk::StatisticsImageFilter<ImageType> StatisticsImageFilterType;
-  typename StatisticsImageFilterType::Pointer statsFilter =
-      StatisticsImageFilterType::New();
-  statsFilter->SetInput(image);
-  statsFilter->Update();
-  statsFilter->UpdateLargestPossibleRegion();
-  auto min_intensity = statsFilter->GetMinimum();
-  auto max_intensity = statsFilter->GetMaximum();
-
-  filler->SetForegroundValue(max_intensity);
-  filler->SetMajorityThreshold(majority);
-  filler->SetMaximumNumberOfIterations(iterations);
-  FillingFilterType::InputSizeType radius_array;
-  radius_array.Fill(radius);
-  filler->SetRadius(radius_array);
-  filler->Update();
+  const auto filled_image = SG::fill_holes_voting_iterative_function(
+      image, radius, majority, iterations, verbose);
 
   using WriterType = itk::ImageFileWriter<ImageType>;
   auto writer = WriterType::New();
   try {
     writer->SetFileName(output_full_path.string().c_str());
-    writer->SetInput(filler->GetOutput());
+    writer->SetInput(filled_image);
     writer->Update();
   } catch(itk::ExceptionObject& e) {
     std::cerr << "Failure writing file: " << output_full_path.string()

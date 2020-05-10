@@ -3,6 +3,7 @@ set(current_sources_
   thin_py.cpp
   create_distance_map_py.cpp
   mask_image_py.cpp
+  fill_holes_py.cpp
   )
 
 if(SG_MODULE_ANALYZE)
@@ -19,6 +20,7 @@ set(all_modules_python_sources
   ${current_sources_}
   ${CMAKE_SOURCE_DIR}/cpp-scripts/thin_function.cpp
   ${CMAKE_SOURCE_DIR}/cpp-scripts/create_distance_map_function.cpp
+  ${CMAKE_SOURCE_DIR}/cpp-scripts/fill_holes_function.cpp
   ${extra_sources_}
   PARENT_SCOPE)
 

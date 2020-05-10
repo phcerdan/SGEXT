@@ -10,6 +10,7 @@ void init_analyze_graph(py::module &);
 void init_thin(py::module &);
 void init_create_distance_map(py::module &);
 void init_mask_image(py::module &);
+void init_fill_holes(py::module &);
 
 void init_sgscripts(py::module & mparent) {
     auto m = mparent.def_submodule("scripts");
@@ -18,4 +19,5 @@ void init_sgscripts(py::module & mparent) {
     init_thin(m);
     init_create_distance_map(m);
     init_mask_image(m);
+    init_fill_holes(m);
 }
