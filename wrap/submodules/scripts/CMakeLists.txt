@@ -2,6 +2,7 @@ set(current_sources_
   sgscripts_init_py.cpp
   thin_py.cpp
   create_distance_map_py.cpp
+  mask_image_py.cpp
   )
 
 if(SG_MODULE_ANALYZE)
