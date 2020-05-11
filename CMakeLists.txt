@@ -302,15 +302,15 @@ configure_package_config_file(
   )
 
 # Add custom target to only install component: runtime (libraries)
-add_custom_target(install-runtime
+add_custom_target(sgext-install-runtime
   ${CMAKE_COMMAND}
   -DCMAKE_INSTALL_COMPONENT=runtime
   -P "${PROJECT_BINARY_DIR}/cmake_install.cmake"
   DEPENDS ${SG_LIBRARIES}
   )
 message(STATUS "SG_LIBRARIES: ${SG_LIBRARIES}")
-add_dependencies(install-runtime ${SG_LIBRARIES})
+add_dependencies(sgext-install-runtime ${SG_LIBRARIES})
 if(SG_WRAP_PYTHON)
-  add_dependencies(install-runtime _sgext)
+  add_dependencies(sgext-install-runtime _sgext)
 endif()
 
