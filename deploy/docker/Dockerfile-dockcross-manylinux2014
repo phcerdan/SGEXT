@@ -22,7 +22,7 @@ RUN cmake \
         -DSG_MODULE_LOCATE:BOOL=ON \
         -DSG_MODULE_GENERATE:BOOL=ON \
         -DSG_MODULE_DYNAMICS:BOOL=ON \
-        -DSG_MODULE_VISUALIZE:BOOL=OFF \
+        -DSG_MODULE_VISUALIZE:BOOL=ON \
         -DSG_MODULE_VISUALIZE_WITH_QT:BOOL=OFF \
         # TODO: Switch these two ON when CMake is at least 3.15 and remove Boost_ROOT
         # -DCMAKE_FIND_PACKAGE_PREFER_CONFIG:BOOL=ON \
