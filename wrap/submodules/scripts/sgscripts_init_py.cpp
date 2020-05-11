@@ -11,7 +11,9 @@ void init_thin(py::module &);
 void init_create_distance_map(py::module &);
 void init_mask_image(py::module &);
 void init_fill_holes(py::module &);
+#ifdef SG_MODULE_VISUALIZE_ENABLED
 void init_visualize_spatial_graph(py::module &);
+#endif
 
 void init_sgscripts(py::module & mparent) {
     auto m = mparent.def_submodule("scripts");
@@ -21,5 +23,7 @@ void init_sgscripts(py::module & mparent) {
     init_create_distance_map(m);
     init_mask_image(m);
     init_fill_holes(m);
+#ifdef SG_MODULE_VISUALIZE_ENABLED
     init_visualize_spatial_graph(m);
+#endif
 }
