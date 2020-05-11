@@ -18,7 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from sgext import core as _core
 
-class AnalyzeGraphFixture:
+class six_nodes:
     def __init__(self):
         self.graph = _core.spatial_graph(6)
         # Set vertex positions
@@ -55,5 +55,4 @@ class AnalyzeGraphFixture:
         _core.graph.add_edge(0, 3, _core.spatial_edge(), self.graph)
         _core.graph.add_edge(1, 4, _core.spatial_edge(), self.graph)
         _core.graph.add_edge(2, 5, _core.spatial_edge(), self.graph)
-        # self.assertEqual(self.graph.num_vertices(), 6)
-        # self.assertEqual(self.graph.num_edges(), 6)
+
