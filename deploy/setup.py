@@ -50,7 +50,7 @@ setup(
         '-DSG_MODULE_VISUALIZE_WITH_QT:BOOL=OFF'  # QT
         '-DSG_WRAP_PYTHON:BOOL=ON'
     ],
-    cmake_install_target="install-runtime",
+    cmake_install_target="sgext-install-runtime",
     py_modules=[
         'sgextVersion',
     ],
