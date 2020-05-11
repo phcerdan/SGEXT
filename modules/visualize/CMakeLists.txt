@@ -23,7 +23,7 @@ set(modern_vtk_sources)
 if(SG_REQUIRES_ITK AND _modern_VTK_available)
   set(modern_vtk_sources
     # Requires OpenGL2
-    visualize_spatial_graph_with_image.cpp
+    # visualize_spatial_graph_with_image.cpp
     )
 endif()
 
