@@ -5,5 +5,5 @@
 
 #include "test_fixtures.hpp"
 
-TEST_F(sg_3D, visualize) { SG::visualize_spatial_graph(g); }
+TEST_F(sg_3D, visualize_spatial_graph) { SG::visualize_spatial_graph(g); }
 
