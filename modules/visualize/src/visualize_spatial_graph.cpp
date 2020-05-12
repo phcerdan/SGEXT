@@ -56,25 +56,26 @@ void visualize_spatial_graph_with_points(const GraphType &sg,
                                          const double lengthX,
                                          const double lengthY,
                                          const double lengthZ) {
-    // Create a renderer, render window, and interactor
+    // Create a renderer, and a InteractorStyle to add to the renderWindow
+    // created from the graphLayoutView.
     auto renderer = vtkSmartPointer<vtkRenderer>::New();
-    auto renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
-    renderWindow->AddRenderer(renderer);
-    auto renderWindowInteractor =
-            vtkSmartPointer<vtkRenderWindowInteractor>::New();
-    renderWindowInteractor->SetRenderWindow(renderWindow);
     auto style = vtkSmartPointer<
             vtkInteractorStyleTrackballCameraGraph>::New(); // like paraview
-    renderWindowInteractor->SetInteractorStyle(style);
 
     // Add actor for points
     auto pointsActor = create_actor_visualize_points_as_cubes(
             points, pointsOpacity, lengthX, lengthY, lengthZ);
     renderer->AddActor(pointsActor);
+    renderer->ResetCamera();
 
     // TODO maybe think about using a GraphItem in a Context instead of the
     // graphLayoutView
     auto graphLayoutView = create_graph_layout_view_from_spatial_graph(sg);
+    // graphLayoutView provides our window and interactor.
+    auto renderWindowInteractor = graphLayoutView->GetInteractor();
+    renderWindowInteractor->SetInteractorStyle(style);
+    auto renderWindow = graphLayoutView->GetRenderWindow();
+    renderWindow->SetNumberOfLayers(2);
     graphLayoutView->GetRenderer()->SetLayer(1);
     graphLayoutView->GetRenderer()->InteractiveOff();
     graphLayoutView->GetRenderer()->SetActiveCamera(
@@ -82,10 +83,8 @@ void visualize_spatial_graph_with_points(const GraphType &sg,
     // Don't make the z buffer transparent of the graph layout
     graphLayoutView->GetRenderer()->EraseOff();
 
-    renderWindow->SetNumberOfLayers(2);
+    renderWindow->AddRenderer(renderer);
 
-    renderWindow->AddRenderer(graphLayoutView->GetRenderer());
-    renderer->ResetCamera();
     renderWindowInteractor->Start();
 }
 } // namespace SG
