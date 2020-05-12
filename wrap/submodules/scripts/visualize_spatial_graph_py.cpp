@@ -40,10 +40,6 @@ input: GraphType
 R"delimiter(
 Visualize the spatial graph with all the edge points.
 
-TODO: WARNING: Buggy, the window does not properly close in ipython.
-Check: https://gitlab.kitware.com/vtk/vtk/-/issues/17251#note_754293
-for any future update on how to solve it.
-
 Parameters:
 ----------
 input: GraphType
