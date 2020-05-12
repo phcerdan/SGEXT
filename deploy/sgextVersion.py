@@ -1,4 +1,4 @@
-VERSION = '0.9.2'
+VERSION = '0.9.3'
 
 def get_versions():
     """Returns versions for the SGEXT Python package.
