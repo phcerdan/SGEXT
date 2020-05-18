@@ -114,10 +114,15 @@ endif() #ITK
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 if(SG_MODULE_VISUALIZE_WITH_QT)
+  if(UNIX)
+    set(extra_qt_components X11Extras)
+  endif()
   find_package(Qt5 REQUIRED
     Widgets
     Xml
-    OpenGL)
+    OpenGL
+    ${extra_qt_components}
+    )
   message(STATUS "Qt5 version: ${Qt5_VERSION}")
 
   set(vtk_qt_components
