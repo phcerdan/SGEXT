@@ -223,7 +223,7 @@ endif()
 #################### DGtal #######################
 ##################################################
 
-set(DGtal_GIT_TAG use_precells_voxel_complex) # 10-May-2020
+set(DGtal_GIT_TAG precells_plus_domain_shift_fix) # 19-May-2020
 message(STATUS "DGtal_VERSION: ${DGtal_GIT_TAG}")
 set(DGtal_BUILD_DIR ${OUTPUT_BUILD_DIR}/DGtal-build)
 set(DGtal_SRC_FOLDER_NAME DGtal-src)
