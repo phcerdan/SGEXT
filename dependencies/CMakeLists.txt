@@ -16,6 +16,7 @@ endif()
 option(WITH_VTK "Build VTK, ITK will use it too, if WITH_ITK is enabled" ON)
 option(WITH_ITK "Build ITK, DGtal will use it too." ON)
 option(WITH_TBB "Build TBB. Only for Linux (gcc). Needed for gcc for include <execution> (stl_parallel)." ON)
+option(WITH_QT5 "Enable Qt5 module for VTK and DGtal. Qt5 and QGLViewer have to be found in the system." OFF)
 option(CLEAN_BUILD_ARTIFACTS "Create target clean_artifacts to remove artifacts and external_project folders. Needs to call the target: make/ninja clean_artifacts." ON)
 set(NUM_CORES 8 CACHE STRING "Number of cores passed to make: -jNUM_CORES")
 option(ZLIB_FORCE_STATIC "Remove the dynamic libraries after zlib install" ON)
@@ -25,6 +26,7 @@ message(STATUS "NUM_CORES: ${NUM_CORES}")
 message(STATUS "WITH_VTK: ${WITH_VTK}")
 message(STATUS "WITH_ITK: ${WITH_ITK}")
 message(STATUS "WITH_TBB: ${WITH_TBB}")
+message(STATUS "WITH_QT5: ${WITH_QT5}")
 
 
 if(APPLE)
@@ -50,6 +52,11 @@ if(WITH_VTK)
   set(VTK_BUILD_DIR ${OUTPUT_BUILD_DIR}/VTK-build)
   set(VTK_SRC_FOLDER_NAME VTK-src)
   set(VTK_SRC_DIR ${OUTPUT_BUILD_DIR}/${VTK_SRC_FOLDER_NAME})
+  if(WITH_QT5)
+    set(_extra_qt5_options
+      -DModule_vtkGUISupportQt=ON
+      )
+  endif()
 ExternalProject_Add(ep_vtk
   URL ${VTK_URL}
   URL_MD5 ${VTK_URL_MD5}
@@ -64,6 +71,7 @@ ExternalProject_Add(ep_vtk
   -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
   -DBUILD_TESTING:BOOL=OFF
   -DBUILD_EXAMPLES:BOOL=OFF
+  ${_extra_qt5_options}
   ${_cmake_os_flags}
   INSTALL_COMMAND ""
   )
@@ -234,6 +242,12 @@ if(_compiler_is_msvc)
   list(APPEND _DGtal_depends ep_zlib)
   list(APPEND _DGtal_optional_cmake_args
     -DZLIB_ROOT=${ZLIB_INSTALL_DIR}
+    )
+endif()
+if(WITH_QT5)
+  list(APPEND _DGtal_optional_cmake_args
+    -DWITH_QT5:BOOL=ON
+    -DWITH_QGLVIEWER:BOOL=ON
     )
 endif()
 
