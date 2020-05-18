@@ -7,6 +7,7 @@
 #include "sgitk_common_py.hpp"
 
 #include "itkImageFileReader.h"
+#include "itkImageFileWriter.h"
 
 namespace py = pybind11;
 
@@ -49,5 +50,42 @@ input_file: string
             ("Read image from file into the binary (IUC3) image "
             "type used internally in sgext.\n" + read_as_common_docs).c_str(),
             py::arg("input_file")
+         );
+// clang-format off
+    const std::string write_common_docs = R"delimiter(
+Write image into file.
+
+Parameters
+==========
+input_image: BinaryImageType || FloatImageType
+    sgext image type (binary or float)
+
+output_file: string
+    filename to save the image
+)delimiter";
+// clang-format on
+    m.def("write",
+            [](SG::IUC3P input_image, const std::string & out_file) -> void {
+                using WriterType = itk::ImageFileWriter<SG::IUC3>;
+                auto writer = WriterType::New();
+                writer->SetInput(input_image);
+                writer->SetFileName(out_file);
+                writer->Update();
+            },
+            write_common_docs.c_str(),
+            py::arg("input_image"),
+            py::arg("output_file")
+         );
+    m.def("write",
+            [](SG::IF3P input_image, const std::string & out_file) -> void {
+                using WriterType = itk::ImageFileWriter<SG::IF3>;
+                auto writer = WriterType::New();
+                writer->SetInput(input_image);
+                writer->SetFileName(out_file);
+                writer->Update();
+            },
+            write_common_docs.c_str(),
+            py::arg("input_image"),
+            py::arg("output_file")
          );
 }
