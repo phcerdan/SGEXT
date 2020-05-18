@@ -328,8 +328,8 @@ BinaryImageType::Pointer thin_function_io(const std::string &filename,
   if(!inputDistanceMapImageFilename.empty()) {
       using DistanceMapReaderType = itk::ImageFileReader<ItkFloatImageType>;
       auto dmap_reader = DistanceMapReaderType::New();
-      reader->SetFileName(inputDistanceMapImageFilename);
-      reader->Update();
+      dmap_reader->SetFileName(inputDistanceMapImageFilename);
+      dmap_reader->Update();
       distance_map_itk_image = dmap_reader->GetOutput();
   }
 
