@@ -54,8 +54,8 @@ void init_particle_force(py::module &m) {
 
 void init_particle_force_compute(py::module &m) {
     auto force_compute_class = py::class_<ParticleForceCompute>(m, "particle_force_compute")
-        .def(py::init<const System &>())
-        .def(py::init<const System &, ParticleForceCompute::force_function_t>())
+        .def(py::init<const System *>())
+        .def(py::init<const System *, ParticleForceCompute::force_function_t>())
         .def("get_type", &ParticleForceCompute::get_type)
         .def("reset_forces_to_zero", &ParticleForceCompute::reset_forces_to_zero)
         .def_readwrite("particle_forces", &ParticleForceCompute::particle_forces)
@@ -73,8 +73,8 @@ void init_bond_force(py::module &m) {
 
 void init_PairBondForce(py::module &m) {
     auto force_compute_class = py::class_<PairBondForce>(m, "pair_bond_force_compute")
-        .def(py::init<const System &>())
-        .def(py::init<const System &, PairBondForce::force_function_t>())
+        .def(py::init<const System *>())
+        .def(py::init<const System *, PairBondForce::force_function_t>())
         .def("get_type", &PairBondForce::get_type)
         .def("reset_forces_to_zero", &PairBondForce::reset_forces_to_zero)
         .def("compute", &PairBondForce::compute);
@@ -83,8 +83,8 @@ void init_PairBondForce(py::module &m) {
 
 void init_PairBondForceWithBond(py::module &m) {
     auto force_compute_class = py::class_<PairBondForceWithBond>(m, "pair_bond_force_with_bond_compute")
-        .def(py::init<const System &>())
-        .def(py::init<const System &, PairBondForceWithBond::force_function_t>())
+        .def(py::init<const System *>())
+        .def(py::init<const System *, PairBondForceWithBond::force_function_t>())
         .def("get_type", &PairBondForceWithBond::get_type)
         .def("reset_forces_to_zero", &PairBondForceWithBond::reset_forces_to_zero)
         .def("reset_bond_forces_to_zero", &PairBondForceWithBond::reset_bond_forces_to_zero)

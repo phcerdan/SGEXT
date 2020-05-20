@@ -53,7 +53,7 @@ ParticleGraphGlueData particles_from_graph(const GraphType &graph) {
     }
     // add bonds
     // BondChain has contour length attribute
-    glue_data.bond_collection = make_unique_bonds_from_system_conexions<BondChain>(*(glue_data.sys));
+    glue_data.bond_collection = make_unique_bonds_from_system_conexions<BondChain>(glue_data.sys.get());
     // iterate over bonds and populate contour length
     for(auto & bond : glue_data.bond_collection.bonds) {
         const auto source_g = graph_particle_map->at(bond->id_a);

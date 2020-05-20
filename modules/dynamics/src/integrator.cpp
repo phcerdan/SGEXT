@@ -22,10 +22,10 @@
 
 namespace SG {
 
-void Integrator::compute_net_forces(System &sys) const {
-    const auto nparts = sys.all.particles.size();
+void Integrator::compute_net_forces(System *sys) const {
+    const auto nparts = sys->all.particles.size();
     for (size_t part_index = 0; part_index < nparts; ++part_index) {
-        auto &net_force = sys.all.particles[part_index].dynamics.net_force;
+        auto &net_force = sys->all.particles[part_index].dynamics.net_force;
         std::fill(net_force.begin(), net_force.end(), 0.0);
         for (auto &force_type : force_types) {
             net_force = ArrayUtilities::plus(
@@ -58,7 +58,7 @@ void IntegratorTwoStep::update(unsigned int time_step) {
     this->compute_net_forces(m_sys);
     this->integrator_method->integrateStepTwo();
     { // TODO remove debug
-        for (auto &particle : m_sys.all.particles) {
+        for (auto &particle : m_sys->all.particles) {
             std::cout << "id: " << particle.id
                 << "; net_force: " << ArrayUtilities::to_string(particle.dynamics.net_force)
                 << std::endl;
@@ -70,11 +70,11 @@ void VerletVelocitiesIntegratorMethod::integrateStepOne() {
     // perform the first half step of velocity verlet
     // r(t+deltaT) = r(t) + v(t)*deltaT + (1/2)a(t)*deltaT^2
     // v(t+deltaT/2) = v(t) + (1/2)a*deltaT
-    const auto nparts = m_sys.all.particles.size();
+    const auto nparts = m_sys->all.particles.size();
     for (unsigned int index = 0; index < nparts; ++index) {
-        auto &position = m_sys.all.particles[index].pos;
-        auto &velocity = m_sys.all.particles[index].dynamics.vel;
-        const auto &acceleration = m_sys.all.particles[index].dynamics.acc;
+        auto &position = m_sys->all.particles[index].pos;
+        auto &velocity = m_sys->all.particles[index].dynamics.vel;
+        const auto &acceleration = m_sys->all.particles[index].dynamics.acc;
         const ArrayUtilities::Array3D dr = ArrayUtilities::plus(
                 ArrayUtilities::product_scalar(velocity, deltaT),
                 ArrayUtilities::product_scalar(acceleration,
@@ -91,13 +91,13 @@ void VerletVelocitiesIntegratorMethod::integrateStepTwo() {
     // first update acceleration from current forces
     // a(t+deltaT) = force/mass
     // v(t+deltaT) = v(t+deltaT/2) + 1/2 * a(t+deltaT)*deltaT
-    const auto nparts = m_sys.all.particles.size();
+    const auto nparts = m_sys->all.particles.size();
     for (unsigned int index = 0; index < nparts; ++index) {
-        // auto & position = m_sys.all.particles[index].pos;
-        auto &velocity = m_sys.all.particles[index].dynamics.vel;
-        auto &acceleration = m_sys.all.particles[index].dynamics.acc;
-        auto &force = m_sys.all.particles[index].dynamics.net_force;
-        const auto &mass = m_sys.all.particles[index].material.mass;
+        // auto & position = m_sys->all.particles[index].pos;
+        auto &velocity = m_sys->all.particles[index].dynamics.vel;
+        auto &acceleration = m_sys->all.particles[index].dynamics.acc;
+        auto &force = m_sys->all.particles[index].dynamics.net_force;
+        const auto &mass = m_sys->all.particles[index].material.mass;
         acceleration = ArrayUtilities::product_scalar(force, 1.0 / mass);
         velocity = ArrayUtilities::plus(
                 velocity,

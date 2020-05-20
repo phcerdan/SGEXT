@@ -28,7 +28,7 @@ namespace py = pybind11;
 using namespace SG;
 
 void init_system(py::module &m) {
-    py::class_<System>(m, "system")
+    py::class_<System, std::shared_ptr<System>>(m, "system")
         .def(py::init())
         .def_readwrite("all", &System::all)
         .def_readwrite("bonds", &System::bonds)

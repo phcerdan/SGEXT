@@ -31,16 +31,16 @@ namespace SG {
 // TODO Add a particle_selector (with lambda), here or on Integrator.
 // Integrator has IntegratorMethods
 struct IntegratorMethod {
-    explicit IntegratorMethod(System &sys)
+    explicit IntegratorMethod(System *sys)
             : m_sys(sys) {}
-    IntegratorMethod(System &sys, double deltaT_input)
+    IntegratorMethod(System *sys, double deltaT_input)
             : m_sys(sys), deltaT(deltaT_input){};
     virtual ~IntegratorMethod(){};
     double deltaT;
     virtual void integrate() = 0;
 
   protected:
-    System &m_sys;
+    System *m_sys;
 };
 
 struct TwoStepIntegratorMethod : public IntegratorMethod {
@@ -82,11 +82,11 @@ struct VerletVelocitiesIntegratorMethod : public TwoStepIntegratorMethod {
 //    plus the forces.
 class Integrator {
   public:
-    explicit Integrator(System &sys) : m_sys(sys), all_old_state(sys.all){};
+    explicit Integrator(System *sys) : m_sys(sys), all_old_state(sys->all){};
     virtual ~Integrator(){};
     virtual void update(unsigned int time_step) = 0;
     /// Compute the sum of forces for each particle and store it in Particle
-    virtual void compute_net_forces(System &sys) const;
+    virtual void compute_net_forces(System *sys) const;
 
     /**
      * add force to the integrator
@@ -116,7 +116,7 @@ class Integrator {
     std::vector<std::shared_ptr<ForceCompute>> force_types;
 
   protected:
-    System &m_sys;
+    System *m_sys;
     ParticleCollection all_old_state;
 };
 

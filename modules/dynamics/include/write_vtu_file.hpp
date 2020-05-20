@@ -32,7 +32,7 @@ namespace SG {
  * @param sys
  * @param file_name
  */
-void write_vtu_file(const System &sys, const std::string &file_name);
+void write_vtu_file(const System * sys, const std::string &file_name);
 /**
  * Populate system from a vtu file (vtkUnstructuredGrid).
  *
@@ -42,7 +42,7 @@ void write_vtu_file(const System &sys, const std::string &file_name);
  *
  * @return
  */
-std::unique_ptr<System> read_vtu_file(const std::string &file_name);
+std::shared_ptr<System> read_vtu_file(const std::string &file_name);
 /**
  * Populate particles in the system, including dynamics (velocity, acceleration)
  * and material properties

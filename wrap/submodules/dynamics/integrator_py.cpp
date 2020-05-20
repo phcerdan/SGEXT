@@ -40,8 +40,8 @@ void init_integrator_methods(py::module &m) {
     //     .def(py::init());
     py::class_<VerletVelocitiesIntegratorMethod,
         std::shared_ptr<VerletVelocitiesIntegratorMethod>>(m, "integrator_method_verlet_velocities")
-        .def(py::init<System&>())
-        .def(py::init<System&, double>())
+        .def(py::init<System*>())
+        .def(py::init<System*, double>())
         .def_readwrite("deltaT", &VerletVelocitiesIntegratorMethod::deltaT);
 }
 
@@ -53,7 +53,7 @@ void init_integrator(py::module &m) {
     //     .def("compute_net_forces", &Integrator::compute_net_forces)
     //     .def("update", &Integrator::update);
     py::class_<IntegratorTwoStep>(m, "integrator_two_step")
-        .def(py::init<System&>())
+        .def(py::init<System*>())
         .def_readwrite("force_types", &IntegratorTwoStep::force_types)
         .def_readwrite("integrator_method", &IntegratorTwoStep::integrator_method)
         .def("compute_net_forces", &IntegratorTwoStep::compute_net_forces)

@@ -32,13 +32,13 @@
 #include <vtkXMLUnstructuredGridReader.h>
 
 namespace SG {
-void write_vtu_file(const System &sys, const std::string &file_name) {
+void write_vtu_file(const System *sys, const std::string &file_name) {
     auto ugrid = vtkUnstructuredGrid::New();
     // Set geometry with position of points
     auto vtk_points = vtkSmartPointer<vtkPoints>::New();
     using particle_id_t = size_t;
     std::unordered_map<particle_id_t, vtkIdType> particle_id_to_vtk_id_map;
-    for (const auto &particle : sys.all.particles) {
+    for (const auto &particle : sys->all.particles) {
         const auto &pos = particle.pos;
         particle_id_to_vtk_id_map[particle.id] =
                 vtk_points->InsertNextPoint(pos[0], pos[1], pos[2]);
@@ -46,7 +46,7 @@ void write_vtu_file(const System &sys, const std::string &file_name) {
     ugrid->SetPoints(vtk_points);
 
     // Set topology using bonds
-    const auto &unique_bonds = sys.bonds.bonds;
+    const auto &unique_bonds = sys->bonds.bonds;
     // auto unique_bonds = SG::unique_bonds(sys);
     if (unique_bonds.empty()) {
         std::cerr << "WARNING: write_vtu_file, the system has no bonds."
@@ -105,7 +105,7 @@ void write_vtu_file(const System &sys, const std::string &file_name) {
     particle_id->SetNumberOfTuples(number_of_points);
 
     size_t counter = 0;
-    for (const auto &particle : sys.all.particles) {
+    for (const auto &particle : sys->all.particles) {
         acc->SetTuple3(counter, particle.dynamics.acc[0],
                        particle.dynamics.acc[1], particle.dynamics.acc[2]);
         vel->SetTuple3(counter, particle.dynamics.vel[0],
@@ -131,8 +131,8 @@ void write_vtu_file(const System &sys, const std::string &file_name) {
     ugrid_writer->Update();
 }
 
-std::unique_ptr<System> read_vtu_file(const std::string &file_name) {
-    auto sys = std::make_unique<System>();
+std::shared_ptr<System> read_vtu_file(const std::string &file_name) {
+    auto sys = std::make_shared<System>();
 
     auto reader = vtkSmartPointer<vtkXMLUnstructuredGridReader>::New();
     reader->SetFileName(file_name.c_str());

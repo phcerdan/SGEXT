@@ -26,14 +26,16 @@
 #include <fstream>
 
 struct IntegratorPairBondForce_Fixture : public ::testing::Test {
-    SG::System sys = SG::System4Fixture();
-    SG::IntegratorTwoStep integrator = SG::IntegratorTwoStep(sys);
+    std::shared_ptr<SG::System> sys =
+        std::static_pointer_cast<SG::System>(
+                std::make_shared<SG::System4Fixture>(SG::System4Fixture()));
+    SG::IntegratorTwoStep integrator = SG::IntegratorTwoStep(sys.get());
     std::shared_ptr<SG::PairBondForce> pair_force;
     double deltaT = 0.4;
     void SetUp() override {
         integrator.integrator_method =
-                std::make_shared<SG::VerletVelocitiesIntegratorMethod>(sys,
-                                                                       deltaT);
+                std::make_shared<SG::VerletVelocitiesIntegratorMethod>(sys.get(),
+                        deltaT);
         // // create pair_force
         // pair_force = integrator.add_force(
         //         std::make_shared<SG::PairBondForce>(sys));
@@ -58,8 +60,8 @@ struct IntegratorPairBondForce_Fixture : public ::testing::Test {
 
 TEST_F(IntegratorPairBondForce_Fixture, IntegratorWorks) {
     // Check System for sanity
-    EXPECT_EQ(sys.all.particles.size(), 4);
-    EXPECT_EQ(sys.conexions.size(), 4);
+    EXPECT_EQ(sys->all.particles.size(), 4);
+    EXPECT_EQ(sys->conexions.size(), 4);
     std::cout << "IntegratorPairBondForce_Fixture: IntegratorWorks"
               << std::endl;
 }
@@ -72,23 +74,23 @@ TEST_F(IntegratorPairBondForce_Fixture, DumpOneParticleTrajectory) {
     const size_t particle_index = 2;
     const std::string base_file =
             "./trajectory_n" + std::to_string(particle_index) + "_t";
-    SG::print(sys.all, std::cout);
+    SG::print(sys->all, std::cout);
     { // time_step = 0
         const size_t time_step = 0;
         const std::string final_file =
                 base_file + std::to_string(time_step) + ".csv";
         std::ofstream fout(final_file);
-        SG::dump_csv(sys.all, fout);
+        SG::dump_csv(sys->all, fout);
     }
     for (size_t time_step = 1; time_step < time_steps; ++time_step) {
         const std::string final_file =
                 base_file + std::to_string(time_step) + ".csv";
         std::ofstream fout(final_file);
         integrator.update(time_step);
-        SG::dump_csv(sys.all, fout);
+        SG::dump_csv(sys->all, fout);
     }
     std::cout << "-------- FINAL SYSTEM --------" << std::endl;
-    SG::print(sys.all, std::cout);
+    SG::print(sys->all, std::cout);
 }
 
 TEST_F(IntegratorPairBondForce_Fixture, DumpAllParticlesTrajectory) {
@@ -103,14 +105,14 @@ TEST_F(IntegratorPairBondForce_Fixture, DumpAllParticlesTrajectory) {
         const std::string final_file =
                 base_file + std::to_string(time_step) + ".csv";
         std::ofstream fout(final_file);
-        SG::dump_csv(sys.all, fout);
+        SG::dump_csv(sys->all, fout);
     }
     for (size_t time_step = 1; time_step < time_steps; ++time_step) {
         const std::string final_file =
                 base_file + std::to_string(time_step) + ".csv";
         std::ofstream fout(final_file);
         integrator.update(time_step);
-        SG::dump_csv(sys.all, fout);
+        SG::dump_csv(sys->all, fout);
     }
 }
 
@@ -126,14 +128,14 @@ TEST_F(IntegratorPairBondForce_Fixture, DumpAllParticlesBonds) {
         const std::string final_file =
                 base_file + std::to_string(time_step) + ".csv";
         std::ofstream fout(final_file);
-        SG::dump_csv(sys.conexions, fout);
+        SG::dump_csv(sys->conexions, fout);
     }
     for (size_t time_step = 1; time_step < time_steps; ++time_step) {
         const std::string final_file =
                 base_file + std::to_string(time_step) + ".csv";
         std::ofstream fout(final_file);
         integrator.update(time_step);
-        SG::dump_csv(sys.conexions, fout);
+        SG::dump_csv(sys->conexions, fout);
     }
 }
 
@@ -148,21 +150,21 @@ TEST_F(IntegratorPairBondForce_Fixture, write_wtu_file) {
         const std::string final_file =
                 base_file + std::to_string(time_step) + ".vtu";
         std::ofstream fout(final_file);
-        SG::write_vtu_file(sys, final_file);
+        SG::write_vtu_file(sys.get(), final_file);
     }
     for (size_t time_step = 1; time_step < time_steps; ++time_step) {
         const std::string final_file =
                 base_file + std::to_string(time_step) + ".vtu";
         std::ofstream fout(final_file);
         integrator.update(time_step);
-        SG::write_vtu_file(sys, final_file);
+        SG::write_vtu_file(sys.get(), final_file);
     }
 }
 
 TEST_F(IntegratorPairBondForce_Fixture,
        test_unique_bonds_from_system_conexions) {
     auto bond_collection =
-            SG::make_unique_bonds_from_system_conexions<SG::Bond>(sys);
+            SG::make_unique_bonds_from_system_conexions<SG::Bond>(sys.get());
     for (const auto &bond : bond_collection.bonds) {
         print(*bond, std::cout);
     }
@@ -172,7 +174,7 @@ TEST_F(IntegratorPairBondForce_Fixture,
 }
 
 TEST_F(IntegratorPairBondForce_Fixture, test_unique_bonds) {
-    auto bonds = SG::unique_bonds(sys);
+    auto bonds = SG::unique_bonds(sys.get());
     for (const auto &bond : bonds) {
         print(bond, std::cout);
     }
@@ -187,11 +189,11 @@ TEST_F(IntegratorPairBondForce_Fixture, bonds_with_properties) {
     const size_t time_steps = 10;
     const std::string base_file = "./system_with_props";
 
-    std::static_pointer_cast<SG::BondChain>(sys.bonds.bonds[0])
+    std::static_pointer_cast<SG::BondChain>(sys->bonds.bonds[0])
             ->length_contour = 100;
-    std::static_pointer_cast<SG::BondChain>(sys.bonds.bonds[1])
+    std::static_pointer_cast<SG::BondChain>(sys->bonds.bonds[1])
             ->length_contour = 2000;
-    std::static_pointer_cast<SG::BondChain>(sys.bonds.bonds[2])
+    std::static_pointer_cast<SG::BondChain>(sys->bonds.bonds[2])
             ->length_contour = 30000;
 
     // time_step = 0
@@ -200,14 +202,14 @@ TEST_F(IntegratorPairBondForce_Fixture, bonds_with_properties) {
         const std::string final_file =
                 base_file + std::to_string(time_step) + ".vtu";
         std::ofstream fout(final_file);
-        SG::write_vtu_file(sys, final_file);
+        SG::write_vtu_file(sys.get(), final_file);
     }
     for (size_t time_step = 1; time_step < time_steps; ++time_step) {
         const std::string final_file =
                 base_file + std::to_string(time_step) + ".vtu";
         std::ofstream fout(final_file);
         integrator.update(time_step);
-        SG::write_vtu_file(sys, final_file);
+        SG::write_vtu_file(sys.get(), final_file);
     }
 }
 
@@ -242,21 +244,21 @@ TEST_F(IntegratorPairBondForce_Fixture, compute_pre_stress) {
         return ArrayUtilities::product_scalar(d_ete, force / d_ete_modulo);
 
     };
-    std::static_pointer_cast<SG::BondChain>(sys.bonds.bonds[0])
+    std::static_pointer_cast<SG::BondChain>(sys->bonds.bonds[0])
             ->length_contour = 100;
-    std::static_pointer_cast<SG::BondChain>(sys.bonds.bonds[1])
+    std::static_pointer_cast<SG::BondChain>(sys->bonds.bonds[1])
             ->length_contour = 100;
-    std::static_pointer_cast<SG::BondChain>(sys.bonds.bonds[2])
+    std::static_pointer_cast<SG::BondChain>(sys->bonds.bonds[2])
             ->length_contour = 100;
 
     // // Regular (variable/dynamic) force
-    auto force_compute_pair_bond = std::make_shared<SG::PairBondForceWithBond>(sys);
+    auto force_compute_pair_bond = std::make_shared<SG::PairBondForceWithBond>(sys.get());
     force_compute_pair_bond->force_function = force_function;
     integrator.add_force(force_compute_pair_bond);
 
     // Use FixedPairBondForceWithBond to set this force
     // Save this pre-stress forces in the integrator
-    auto fixed_force_compute_pair_bond = std::make_shared<SG::FixedPairBondForceWithBond>(sys);
+    auto fixed_force_compute_pair_bond = std::make_shared<SG::FixedPairBondForceWithBond>(sys.get());
     fixed_force_compute_pair_bond->force_function = force_function;
     fixed_force_compute_pair_bond->compute_once();
     fixed_force_compute_pair_bond->negate_forces();
@@ -267,7 +269,7 @@ TEST_F(IntegratorPairBondForce_Fixture, compute_pre_stress) {
         const double fluid_viscosity = 1.0;
         return SG::force_linear_drag(sphere_radius, fluid_viscosity, a.dynamics.vel);
     };
-    auto force_compute_drag = std::make_shared<SG::ParticleForceCompute>(sys);
+    auto force_compute_drag = std::make_shared<SG::ParticleForceCompute>(sys.get());
     force_compute_drag->force_function = force_function_drag;
     integrator.add_force(force_compute_drag);
 
@@ -280,13 +282,13 @@ TEST_F(IntegratorPairBondForce_Fixture, compute_pre_stress) {
         const std::string final_file =
                 base_file + std::to_string(time_step) + ".vtu";
         std::ofstream fout(final_file);
-        SG::write_vtu_file(sys, final_file);
+        SG::write_vtu_file(sys.get(), final_file);
     }
     for (size_t time_step = 1; time_step < time_steps; ++time_step) {
         const std::string final_file =
                 base_file + std::to_string(time_step) + ".vtu";
         std::ofstream fout(final_file);
         integrator.update(time_step);
-        SG::write_vtu_file(sys, final_file);
+        SG::write_vtu_file(sys.get(), final_file);
     }
 }
