@@ -15,13 +15,13 @@ void PairBondForce::compute() {
     reset_forces_to_zero();
 
     size_t current_particle_index = 0;
-    for (auto &particle : m_sys.all.particles) {
-        auto bonds = m_sys.bonds.find_all_bonds_with_id(particle.id);
+    for (auto &particle : m_sys->all.particles) {
+        auto bonds = m_sys->bonds.find_all_bonds_with_id(particle.id);
         for (const auto &bond : bonds) {
             const auto connected_particle_id =
                     (particle.id == bond->id_a) ? bond->id_b : bond->id_a;
             const auto [connected_particle_it, connected_particle_index] =
-                    m_sys.all.find_particle_and_index(connected_particle_id);
+                    m_sys->all.find_particle_and_index(connected_particle_id);
 
             auto &current_particle_force =
                     particle_forces[current_particle_index].force;
@@ -39,7 +39,7 @@ void PairBondForce::compute() {
     // for (auto &p : conexions) {
     //     // Find the particle index
     //     const auto [particle_it, particle_index] =
-    //             m_sys.all.find_particle_and_index(p.particle_id);
+    //             m_sys->all.find_particle_and_index(p.particle_id);
     //     if (particle_index == std::numeric_limits<size_t>::max()) {
     //         throw std::runtime_error("The particle in bonds does not
     //         exist.");
@@ -49,7 +49,7 @@ void PairBondForce::compute() {
     //     // if there is a proper bond between them
     //     for (auto &neighbor_id : p.neighbors) {
     //         const auto [neighbor_particle_it, neighbor_particle_index] =
-    //                 m_sys.all.find_particle_and_index(neighbor_id);
+    //                 m_sys->all.find_particle_and_index(neighbor_id);
     //         const auto &current_neighbor = *neighbor_particle_it;
     //         auto &current_particle_force = forces[particle_index];
     //         // TODO filter by bond type
@@ -75,9 +75,9 @@ void PairBondForceWithBond::compute() {
     // Compute and store forces per bond
     for (auto &bond_force : bond_forces) {
         const auto [p_a, p_a_index] =
-                m_sys.all.find_particle_and_index(bond_force.bond->id_a);
+                m_sys->all.find_particle_and_index(bond_force.bond->id_a);
         const auto [p_b, p_b_index] =
-                m_sys.all.find_particle_and_index(bond_force.bond->id_b);
+                m_sys->all.find_particle_and_index(bond_force.bond->id_b);
         // Assign to bond_force
         bond_force.force = force_function(*p_a, *p_b, *bond_force.bond);
         // Assign to the per particle forces
@@ -123,7 +123,7 @@ void ParticleForceCompute::compute() {
     reset_forces_to_zero();
 
     size_t current_particle_index = 0;
-    for (auto &particle : m_sys.all.particles) {
+    for (auto &particle : m_sys->all.particles) {
         auto &current_particle_force =
             particle_forces[current_particle_index].force;
         assert(particle.id == particle_forces[current_particle_index]

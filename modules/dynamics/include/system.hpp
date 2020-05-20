@@ -6,16 +6,19 @@
 #ifndef SG_SYSTEM_HPP
 #define SG_SYSTEM_HPP
 
+#include <memory> // for std::enable_shared_from_this
+
 #include "bond_collection.hpp"
 #include "particle_collection.hpp"
 #include "particle_neighbors.hpp"
+
 
 namespace SG {
 /**
  * System is a catch all structure to perform simulations,
  * Classes might need a reference to it in the constructor.
  */
-struct System {
+struct System : public std::enable_shared_from_this<System> {
     ParticleCollection all;                ///< all particles
     BondCollection bonds;
     ParticleNeighborsCollection conexions; ///< fixed bonds between particles
@@ -43,14 +46,14 @@ struct System {
  *
  * @return vector with unique Bonds
  */
-std::vector<Bond> unique_bonds(const System &sys);
+std::vector<Bond> unique_bonds(const System * sys);
 
 template<typename TBond>
-BondCollection make_unique_bonds_from_system_conexions(const System &sys) {
+BondCollection make_unique_bonds_from_system_conexions(const System * sys) {
     BondCollection bond_collection;
     bond_collection.sorted = true;
     auto & bonds = bond_collection.bonds;
-    for (const auto &particle_neighbor : sys.conexions) {
+    for (const auto &particle_neighbor : sys->conexions) {
         const auto source_particle_id = particle_neighbor.particle_id;
         for (const auto &neigh : particle_neighbor.neighbors) {
             auto bond_ptr = std::make_shared<TBond>(source_particle_id, neigh);
