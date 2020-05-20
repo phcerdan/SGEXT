@@ -131,7 +131,8 @@ def plot_distances(data, nbins, title=""):
     r_squared_fit = r_squared_from_curve_fit(centers, counts, func, popt)
     # ax.plot(centers, func(centers, *popt),
     centers_smooth = np.linspace(centers.min(), centers.max(), 200)
-    ax.plot(centers_smooth, interpolate.spline(centers, func(centers, *popt), centers_smooth),
+    tck = interpolate.splrep(centers, func(centers, *popt))
+    ax.plot(centers_smooth, interpolate.splev(centers_smooth, tck),
             label='Fit to data:\n $\exp(\mu_l)$ = ' + "{0:.3E}".format(np.exp(popt[0])) +
             '\n $s_l$ = ' + "{0:.3f}".format(popt[1]) +
             '\n$R^2$ = ' + "{0:.5f}".format(r_squared_fit),
@@ -140,7 +141,8 @@ def plot_distances(data, nbins, title=""):
     color_parameters = 'C2'
     r_squared_parameters = r_squared_from_curve_fit(centers, counts, func, pfitted)
     # ax.plot(centers, func(centers, *pfitted),
-    ax.plot(centers_smooth, interpolate.spline(centers, func(centers, *pfitted), centers_smooth),
+    tck = interpolate.splrep(centers, func(centers, *pfitted))
+    ax.plot(centers_smooth, interpolate.splev(centers_smooth, tck),
             label='With Parameters:\n $\exp(\mu_l)$ = ' + "{0:.3E}".format(np.exp(pfitted[0])) +
             '\n $s_l$ = ' + "{0:.3f}".format(pfitted[1]) +
             '\n$R^2$ = ' + "{0:.5f}".format(r_squared_parameters),
