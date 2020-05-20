@@ -51,7 +51,7 @@ void PairBondForce::compute() {
         }
         current_particle_index++;
     }
-    // for (auto &p : conexions.collection) {
+    // for (auto &p : conexions) {
     //     // Find the particle index
     //     const auto [particle_it, particle_index] =
     //             m_sys.all.find_particle_and_index(p.particle_id);

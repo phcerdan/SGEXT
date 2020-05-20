@@ -54,9 +54,7 @@ void dump_csv_data(const ParticleNeighbors &particle_neighbors,
                    bool with_particle_id = true);
 void dump_csv(const ParticleNeighbors &particle_neighbors, std::ostream &os);
 
-struct ParticleNeighborsCollection {
-    std::vector<ParticleNeighbors> collection;
-};
+using ParticleNeighborsCollection = std::vector<ParticleNeighbors>;
 
 void print(const ParticleNeighborsCollection &all_neighbors, std::ostream &os);
 void dump_csv_header(const ParticleNeighborsCollection &all_particle_neighbors,

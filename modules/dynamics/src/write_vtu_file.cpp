@@ -143,10 +143,10 @@ std::unique_ptr<System> read_vtu_file(const std::string &file_name) {
 
     auto &particles = sys->all.particles;
     auto &bonds = sys->bonds.bonds;
-    auto &conexions_collection = sys->conexions.collection;
+    auto &conexions = sys->conexions;
     particles.resize(npoints);
     bonds.resize(ncells);
-    conexions_collection.resize(npoints);
+    conexions.resize(npoints);
 
     read_vtu_point_data(ugrid, sys.get());
     read_vtu_bond_ids(ugrid, sys.get());
