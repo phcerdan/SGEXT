@@ -50,7 +50,7 @@ BondCollection make_unique_bonds_from_system_conexions(const System &sys) {
     BondCollection bond_collection;
     bond_collection.sorted = true;
     auto & bonds = bond_collection.bonds;
-    for (const auto &particle_neighbor : sys.conexions.collection) {
+    for (const auto &particle_neighbor : sys.conexions) {
         const auto source_particle_id = particle_neighbor.particle_id;
         for (const auto &neigh : particle_neighbor.neighbors) {
             auto bond_ptr = std::make_shared<TBond>(source_particle_id, neigh);

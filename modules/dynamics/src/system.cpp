@@ -51,7 +51,7 @@ auto System::all_accelerations_copy() {
 
 std::vector<Bond> unique_bonds(const System &sys) {
     std::vector<Bond> bonds;
-    for (const auto &particle_neighbor : sys.conexions.collection) {
+    for (const auto &particle_neighbor : sys.conexions) {
         const auto source_particle_id = particle_neighbor.particle_id;
         for (const auto &neigh : particle_neighbor.neighbors) {
             Bond bond = {source_particle_id, neigh};
