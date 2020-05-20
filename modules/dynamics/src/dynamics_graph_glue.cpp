@@ -16,7 +16,7 @@ ParticleGraphGlueData particles_from_graph(const GraphType &graph) {
     auto &graph_particle_map = glue_data.graph_particle_map;
     auto &connected_list = glue_data.connected_list;
     particles.reserve(num_vertices);
-    connected_list.collection.reserve(num_vertices);
+    connected_list.reserve(num_vertices);
     // we assign consecutive ids to particle_collection, so it's sorted.
     glue_data.particle_collection.sorted = true;
     size_t particle_id = 0;
@@ -34,7 +34,7 @@ ParticleGraphGlueData particles_from_graph(const GraphType &graph) {
              adj_i != adj_i_end; ++adj_i) {
             connected_particles.neighbors.emplace_back(*adj_i);
         }
-        connected_list.collection.emplace_back(connected_particles);
+        connected_list.emplace_back(connected_particles);
     }
     // add bonds
     // BondChain has contour length attribute

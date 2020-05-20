@@ -44,7 +44,7 @@ struct IntegratorPairBondForce_Fixture : public ::testing::Test {
 TEST_F(IntegratorPairBondForce_Fixture, IntegratorWorks) {
     // Check System for sanity
     EXPECT_EQ(sys.all.particles.size(), 4);
-    EXPECT_EQ(sys.conexions.collection.size(), 4);
+    EXPECT_EQ(sys.conexions.size(), 4);
     std::cout << "IntegratorPairBondForce_Fixture: IntegratorWorks"
               << std::endl;
 }

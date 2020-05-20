@@ -54,7 +54,7 @@ void dump_csv(const ParticleNeighbors &particle_neighbors, std::ostream &os) {
 /**************************************/
 
 void print(const ParticleNeighborsCollection &all_neighbors, std::ostream &os) {
-    for (const auto &p : all_neighbors.collection) {
+    for (const auto &p : all_neighbors) {
         print(p, os);
         os << "--" << std::endl;
     }
@@ -64,7 +64,7 @@ void dump_csv_header(const ParticleNeighborsCollection &all_particle_neighbors,
                      bool add_end_of_line,
                      bool with_particle_id) {
     const bool internal_add_end_of_line = true;
-    dump_csv_header(all_particle_neighbors.collection[0], os, with_particle_id,
+    dump_csv_header(all_particle_neighbors[0], os, with_particle_id,
                     internal_add_end_of_line);
     if (add_end_of_line)
         os << std::endl;
@@ -74,7 +74,7 @@ void dump_csv_data(const ParticleNeighborsCollection &all_particle_neighbors,
                    bool add_end_of_line,
                    bool with_particle_id) {
     const bool internal_add_end_of_line = true;
-    for (const auto &particle_neighbors : all_particle_neighbors.collection) {
+    for (const auto &particle_neighbors : all_particle_neighbors) {
         dump_csv_data(particle_neighbors, os, internal_add_end_of_line,
                       with_particle_id);
     }
