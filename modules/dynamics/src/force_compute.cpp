@@ -81,16 +81,12 @@ void PairBondForceWithBond::compute() {
         // Assign to bond_force
         bond_force.force = force_function(*p_a, *p_b, *bond_force.bond);
         // Assign to the per particle forces
-        auto &force_on_a =
-            particle_forces[p_a_index].force;
-        auto &force_on_b =
-            particle_forces[p_b_index].force;
+        auto &force_on_a = particle_forces[p_a_index].force;
+        auto &force_on_b = particle_forces[p_b_index].force;
         // Bond force is equal to F_{a,b}
-        force_on_a =
-            ArrayUtilities::plus(force_on_a, bond_force.force);
+        force_on_a = ArrayUtilities::plus(force_on_a, bond_force.force);
         // change sign of bond_force for the F_{b,a}
-        force_on_b =
-            ArrayUtilities::minus(force_on_b, bond_force.force);
+        force_on_b = ArrayUtilities::minus(force_on_b, bond_force.force);
     }
 };
 
@@ -108,12 +104,12 @@ void FixedPairBondForceWithBond::compute_once() {
     this->forces_are_populated = true;
 }
 void FixedPairBondForceWithBond::negate_forces() {
-      for(auto & pf : particle_forces) {
+    for (auto &pf : particle_forces) {
         pf.force = ArrayUtilities::negate(pf.force);
-      }
-      for(auto & bf : bond_forces) {
+    }
+    for (auto &bf : bond_forces) {
         bf.force = ArrayUtilities::negate(bf.force);
-      }
+    }
 }
 
 void ParticleForceCompute::compute() {
@@ -125,15 +121,14 @@ void ParticleForceCompute::compute() {
     size_t current_particle_index = 0;
     for (auto &particle : m_sys->all.particles) {
         auto &current_particle_force =
-            particle_forces[current_particle_index].force;
-        assert(particle.id == particle_forces[current_particle_index]
-                .particle_id &&
-                "particle ids are not synchronized in "
-                "PairBondeForce:compute(), they should be sorted as well as "
-                "all the particles.");
-        current_particle_force = ArrayUtilities::plus(
-                current_particle_force,
-                force_function(particle));
+                particle_forces[current_particle_index].force;
+        assert(particle.id ==
+                       particle_forces[current_particle_index].particle_id &&
+               "particle ids are not synchronized in "
+               "PairBondeForce:compute(), they should be sorted as well as "
+               "all the particles.");
+        current_particle_force = ArrayUtilities::plus(current_particle_force,
+                                                      force_function(particle));
         current_particle_index++;
     }
 }

@@ -16,8 +16,7 @@ namespace SG {
 // TODO Add a particle_selector (with lambda), here or on Integrator.
 // Integrator has IntegratorMethods
 struct IntegratorMethod {
-    explicit IntegratorMethod(System *sys)
-            : m_sys(sys) {}
+    explicit IntegratorMethod(System *sys) : m_sys(sys) {}
     IntegratorMethod(System *sys, double deltaT_input)
             : m_sys(sys), deltaT(deltaT_input){};
     virtual ~IntegratorMethod(){};

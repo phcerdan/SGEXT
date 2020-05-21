@@ -40,7 +40,8 @@ struct ParticleCollection {
         constexpr auto comp = [](const Particle &p, const size_t &value) {
             return p.id < value;
         };
-        const auto lower_bound_search_it = std::lower_bound(first, last, id_value, comp);
+        const auto lower_bound_search_it =
+                std::lower_bound(first, last, id_value, comp);
 
         if (lower_bound_search_it == last ||
             id_value < (*lower_bound_search_it).id) {
