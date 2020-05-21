@@ -22,11 +22,11 @@
 #include <memory>
 
 #ifdef SG_USING_VTK
-#include <vtkIdList.h>
-#include <vtkLine.h>
 #include <vtkCellData.h>
 #include <vtkDoubleArray.h>
+#include <vtkIdList.h>
 #include <vtkIdTypeArray.h>
+#include <vtkLine.h>
 #endif
 
 namespace SG {
@@ -86,15 +86,14 @@ Bond::add_to_vtu(vtkUnstructuredGrid *ugrid,
     return ugrid->InsertNextCell(line->GetCellType(), vtk_id_list);
 }
 
-vtkIdType Bond::append_to_vtu(
-        vtkUnstructuredGrid *ugrid,
-        const vtkIdType &cell_id) {
+vtkIdType Bond::append_to_vtu(vtkUnstructuredGrid *ugrid,
+                              const vtkIdType &cell_id) {
     auto cell_data = ugrid->GetCellData();
     // Number Of Cells is set in the first bonds sweep from add_to_vtu.
     const auto ncells = ugrid->GetNumberOfCells();
     const std::string array_name_ids = "bond_ids";
     auto ids_array = cell_data->GetArray(array_name_ids.c_str());
-    if(!ids_array) { // create array if doesn't exists
+    if (!ids_array) { // create array if doesn't exists
         auto vtk_array = vtkIdTypeArray::New();
         vtk_array->SetName(array_name_ids.c_str());
         vtk_array->SetNumberOfComponents(2);
@@ -107,18 +106,18 @@ vtkIdType Bond::append_to_vtu(
     cell_data->Update();
     return cell_id;
 }
-vtkIdType BondChain::append_to_vtu(
-        vtkUnstructuredGrid *ugrid,
-        const vtkIdType &cell_id) {
+vtkIdType BondChain::append_to_vtu(vtkUnstructuredGrid *ugrid,
+                                   const vtkIdType &cell_id) {
     // call base class first to populate ugrid with its data
     Bond::append_to_vtu(ugrid, cell_id);
     auto cell_data = ugrid->GetCellData();
     // Number Of Cells is set in the first bonds sweep from add_to_vtu.
     const auto ncells = ugrid->GetNumberOfCells();
-    // Add array (of size number of cells) to hold contour length, only if doesn't exist already
+    // Add array (of size number of cells) to hold contour length, only if
+    // doesn't exist already
     const std::string array_name = "contour_length";
     auto contour_array = cell_data->GetArray(array_name.c_str());
-    if(!contour_array) { // create array if doesn't exists
+    if (!contour_array) { // create array if doesn't exists
         auto vtk_array = vtkDoubleArray::New();
         vtk_array->SetName(array_name.c_str());
         vtk_array->SetNumberOfComponents(1);

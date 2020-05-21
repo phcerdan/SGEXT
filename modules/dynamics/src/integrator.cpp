@@ -48,9 +48,9 @@ void IntegratorTwoStep::update(unsigned int time_step) {
             std::cout << "force_type: " << force_type->get_type() << std::endl;
             for (auto &particle_force : force_type->particle_forces) {
                 std::cout << "Particle: " << particle_force.particle_id
-                    << ", force: "
-                    << ArrayUtilities::to_string(particle_force.force)
-                    << std::endl;
+                          << ", force: "
+                          << ArrayUtilities::to_string(particle_force.force)
+                          << std::endl;
             }
         }
     }
@@ -59,9 +59,9 @@ void IntegratorTwoStep::update(unsigned int time_step) {
     this->integrator_method->integrateStepTwo();
     { // TODO remove debug
         for (auto &particle : m_sys->all.particles) {
-            std::cout << "id: " << particle.id
-                << "; net_force: " << ArrayUtilities::to_string(particle.dynamics.net_force)
-                << std::endl;
+            std::cout << "id: " << particle.id << "; net_force: "
+                      << ArrayUtilities::to_string(particle.dynamics.net_force)
+                      << std::endl;
         }
     }
 };

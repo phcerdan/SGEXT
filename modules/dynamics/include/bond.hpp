@@ -58,9 +58,8 @@ struct Bond {
     virtual vtkIdType
     add_to_vtu(vtkUnstructuredGrid *ugrid,
                const particle_id_to_vtk_id_map_t &particle_id_to_vtk_id_map);
-    virtual vtkIdType
-    append_to_vtu(vtkUnstructuredGrid *ugrid,
-               const vtkIdType &cell_id);
+    virtual vtkIdType append_to_vtu(vtkUnstructuredGrid *ugrid,
+                                    const vtkIdType &cell_id);
 #endif // SG_USING_VTK
 };
 

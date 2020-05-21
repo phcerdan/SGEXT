@@ -24,9 +24,7 @@
 #include "array_utilities.hpp"
 #include <math.h>
 
-
 namespace SG {
-
 
 /**
  * Simple linear viscous force, proportional to velocity.

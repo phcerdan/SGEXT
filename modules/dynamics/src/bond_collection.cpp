@@ -41,11 +41,13 @@ BondCollection::find_bond(size_t bond_id_a, size_t bond_id_b) const {
 };
 BondCollection::bond_vector_t
 BondCollection::find_all_bonds_with_id(size_t bond_id_any) {
-    return find_all_bonds_with_id(std::begin(bonds), std::end(bonds), bond_id_any);
+    return find_all_bonds_with_id(std::begin(bonds), std::end(bonds),
+                                  bond_id_any);
 };
 BondCollection::bond_vector_t
 BondCollection::find_all_bonds_with_id(size_t bond_id_any) const {
-    return find_all_bonds_with_id(std::begin(bonds), std::end(bonds), bond_id_any);
+    return find_all_bonds_with_id(std::begin(bonds), std::end(bonds),
+                                  bond_id_any);
 };
 
 void print(const BondCollection &collection,
@@ -53,7 +55,8 @@ void print(const BondCollection &collection,
            bool each_bond_in_new_line) {
     const bool internal_do_not_add_end_of_line = false;
     for (const auto &bond_ptr : collection.bonds) {
-        print(*std::static_pointer_cast<BondChain>(bond_ptr), os, internal_do_not_add_end_of_line);
+        print(*std::static_pointer_cast<BondChain>(bond_ptr), os,
+              internal_do_not_add_end_of_line);
         if (each_bond_in_new_line)
             os << std::endl;
         else

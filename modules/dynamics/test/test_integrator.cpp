@@ -26,34 +26,36 @@
 #include <fstream>
 
 struct IntegratorPairBondForce_Fixture : public ::testing::Test {
-    std::shared_ptr<SG::System> sys =
-        std::static_pointer_cast<SG::System>(
-                std::make_shared<SG::System4Fixture>(SG::System4Fixture()));
+    std::shared_ptr<SG::System> sys = std::static_pointer_cast<SG::System>(
+            std::make_shared<SG::System4Fixture>(SG::System4Fixture()));
     SG::IntegratorTwoStep integrator = SG::IntegratorTwoStep(sys.get());
     std::shared_ptr<SG::PairBondForce> pair_force;
     double deltaT = 0.4;
     void SetUp() override {
         integrator.integrator_method =
-                std::make_shared<SG::VerletVelocitiesIntegratorMethod>(sys.get(),
-                        deltaT);
+                std::make_shared<SG::VerletVelocitiesIntegratorMethod>(
+                        sys.get(), deltaT);
         // // create pair_force
         // pair_force = integrator.add_force(
         //         std::make_shared<SG::PairBondForce>(sys));
         // pair_force->force_function = [](const SG::Particle &a,
         //                                 const SG::Particle &b,
         //                                 const SG::Bond &chain) {
-        //     const auto d_ete = ArrayUtilities::minus(b.pos, a.pos); // F_{a, b}
-        //     const auto d_ete_modulo = ArrayUtilities::norm(d_ete);
-        //     const auto &l_contour_length =
+        //     const auto d_ete = ArrayUtilities::minus(b.pos, a.pos); // F_{a,
+        //     b} const auto d_ete_modulo = ArrayUtilities::norm(d_ete); const
+        //     auto &l_contour_length =
         //             static_cast<const SG::BondChain &>(chain).length_contour;
         //     std::cout << "[" << a.id << ", " << b.id
-        //               << "] lengh_contour: " << l_contour_length << std::endl;
+        //               << "] lengh_contour: " << l_contour_length <<
+        //               std::endl;
         //     const double l_persistence = 1000;
-        //     const double relative_extension = d_ete_modulo / l_contour_length;
-        //     const double monomer_anisotropy_inverse = 1 / l_persistence;
-        //     const auto force = SG::force_extension_ev_wlc_normalized(
+        //     const double relative_extension = d_ete_modulo /
+        //     l_contour_length; const double monomer_anisotropy_inverse = 1 /
+        //     l_persistence; const auto force =
+        //     SG::force_extension_ev_wlc_normalized(
         //             relative_extension, monomer_anisotropy_inverse);
-        //     return ArrayUtilities::product_scalar(d_ete, force / d_ete_modulo);
+        //     return ArrayUtilities::product_scalar(d_ete, force /
+        //     d_ete_modulo);
         // };
     }
 };
@@ -223,9 +225,8 @@ TEST_F(IntegratorPairBondForce_Fixture, read_vtu_file) {
 
 // TODO Incomplete, develop and make it into a function
 TEST_F(IntegratorPairBondForce_Fixture, compute_pre_stress) {
-    auto force_function = [](const SG::Particle &a,
-                                       const SG::Particle &b,
-                                       const SG::Bond &chain) {
+    auto force_function = [](const SG::Particle &a, const SG::Particle &b,
+                             const SG::Bond &chain) {
         const auto d_ete = ArrayUtilities::minus(b.pos, a.pos); // F_{a, b}
         const auto d_ete_modulo = ArrayUtilities::norm(d_ete);
         const auto &l_contour_length =
@@ -242,7 +243,6 @@ TEST_F(IntegratorPairBondForce_Fixture, compute_pre_stress) {
                 relative_extension);
         // d_ete/d_ete_modulo is the unitary vector, in the direction F_{a,b}
         return ArrayUtilities::product_scalar(d_ete, force / d_ete_modulo);
-
     };
     std::static_pointer_cast<SG::BondChain>(sys->bonds.bonds[0])
             ->length_contour = 100;
@@ -252,13 +252,15 @@ TEST_F(IntegratorPairBondForce_Fixture, compute_pre_stress) {
             ->length_contour = 100;
 
     // // Regular (variable/dynamic) force
-    auto force_compute_pair_bond = std::make_shared<SG::PairBondForceWithBond>(sys.get());
+    auto force_compute_pair_bond =
+            std::make_shared<SG::PairBondForceWithBond>(sys.get());
     force_compute_pair_bond->force_function = force_function;
     integrator.add_force(force_compute_pair_bond);
 
     // Use FixedPairBondForceWithBond to set this force
     // Save this pre-stress forces in the integrator
-    auto fixed_force_compute_pair_bond = std::make_shared<SG::FixedPairBondForceWithBond>(sys.get());
+    auto fixed_force_compute_pair_bond =
+            std::make_shared<SG::FixedPairBondForceWithBond>(sys.get());
     fixed_force_compute_pair_bond->force_function = force_function;
     fixed_force_compute_pair_bond->compute_once();
     fixed_force_compute_pair_bond->negate_forces();
@@ -267,9 +269,11 @@ TEST_F(IntegratorPairBondForce_Fixture, compute_pre_stress) {
     auto force_function_drag = [](const SG::Particle &a) {
         const double sphere_radius = 1.0;
         const double fluid_viscosity = 1.0;
-        return SG::force_linear_drag(sphere_radius, fluid_viscosity, a.dynamics.vel);
+        return SG::force_linear_drag(sphere_radius, fluid_viscosity,
+                                     a.dynamics.vel);
     };
-    auto force_compute_drag = std::make_shared<SG::ParticleForceCompute>(sys.get());
+    auto force_compute_drag =
+            std::make_shared<SG::ParticleForceCompute>(sys.get());
     force_compute_drag->force_function = force_function_drag;
     integrator.add_force(force_compute_drag);
 

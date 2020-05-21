@@ -37,11 +37,11 @@ struct BondCollection {
     void sort();
 
     static constexpr auto comparator_bond = [](const std::shared_ptr<Bond> &b,
-            const Bond &comp_bond) {
+                                               const Bond &comp_bond) {
         return *b < comp_bond;
     };
     static constexpr auto comparator_id_a = [](const std::shared_ptr<Bond> &b,
-            const size_t &comp_bond_id) {
+                                               const size_t &comp_bond_id) {
         return b->id_a < comp_bond_id;
     };
     template <typename ForwardIt>
@@ -62,9 +62,10 @@ struct BondCollection {
     }
 
     template <typename ForwardIt>
-    inline bond_vector_t find_all_bonds_with_id(const ForwardIt &first,
-                                        const ForwardIt &last,
-                                        size_t input_bond_id_any) const {
+    inline bond_vector_t
+    find_all_bonds_with_id(const ForwardIt &first,
+                           const ForwardIt &last,
+                           size_t input_bond_id_any) const {
         if (!sorted) {
             throw std::runtime_error("BondCollection not sorted before a find. "
                                      "Call sort() first.");
