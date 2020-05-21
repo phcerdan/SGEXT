@@ -47,24 +47,11 @@ TEST_F(ParticleGraphGlueData_Fixture, works) {
 
     EXPECT_EQ(std::size(particle_graph_data.particle_collection.particles), 4);
     EXPECT_EQ(std::size(*(particle_graph_data.particle_graph_map)), 4);
-    EXPECT_EQ(
-            std::size(
-                    particle_graph_data.connected_list[0].neighbors),
-            1);
-    EXPECT_EQ(
-            std::size(
-                    particle_graph_data.connected_list[1].neighbors),
-            3);
-    EXPECT_EQ(
-            std::size(
-                    particle_graph_data.connected_list[2].neighbors),
-            1);
-    EXPECT_EQ(
-            std::size(
-                    particle_graph_data.connected_list[3].neighbors),
-            1);
-    auto &neighbors =
-            particle_graph_data.connected_list[1].neighbors;
+    EXPECT_EQ(std::size(particle_graph_data.connected_list[0].neighbors), 1);
+    EXPECT_EQ(std::size(particle_graph_data.connected_list[1].neighbors), 3);
+    EXPECT_EQ(std::size(particle_graph_data.connected_list[2].neighbors), 1);
+    EXPECT_EQ(std::size(particle_graph_data.connected_list[3].neighbors), 1);
+    auto &neighbors = particle_graph_data.connected_list[1].neighbors;
     // Check ids of neighbors are correct
     EXPECT_EQ(neighbors.at(0), 0);
     EXPECT_EQ(neighbors.at(1), 2);

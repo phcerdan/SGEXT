@@ -4,8 +4,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "dynamics_graph_glue.hpp"
-#include "system.hpp"
 #include "edge_points_utilities.hpp" // for contour_length
+#include "system.hpp"
 
 namespace SG {
 ParticleGraphGlueData particles_from_graph(const GraphType &graph) {
@@ -38,15 +38,18 @@ ParticleGraphGlueData particles_from_graph(const GraphType &graph) {
     }
     // add bonds
     // BondChain has contour length attribute
-    glue_data.bond_collection = make_unique_bonds_from_system_conexions<BondChain>(glue_data.sys.get());
+    glue_data.bond_collection =
+            make_unique_bonds_from_system_conexions<BondChain>(
+                    glue_data.sys.get());
     // iterate over bonds and populate contour length
-    for(auto & bond : glue_data.bond_collection.bonds) {
+    for (auto &bond : glue_data.bond_collection.bonds) {
         const auto source_g = graph_particle_map->at(bond->id_a);
         const auto target_g = graph_particle_map->at(bond->id_b);
         // graph is undirected, source, target does not matter
         const auto [edge_desc, exists] = boost::edge(source_g, target_g, graph);
         assert(exists == true && "Edge has to exist");
-        std::static_pointer_cast<BondChain>(bond)->length_contour = contour_length(edge_desc, graph);
+        std::static_pointer_cast<BondChain>(bond)->length_contour =
+                contour_length(edge_desc, graph);
     }
 
     return glue_data;

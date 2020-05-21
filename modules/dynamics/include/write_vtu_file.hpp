@@ -17,7 +17,7 @@ namespace SG {
  * @param sys
  * @param file_name
  */
-void write_vtu_file(const System * sys, const std::string &file_name);
+void write_vtu_file(const System *sys, const std::string &file_name);
 /**
  * Populate system from a vtu file (vtkUnstructuredGrid).
  *
