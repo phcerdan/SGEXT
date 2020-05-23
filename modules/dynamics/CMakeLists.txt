@@ -8,6 +8,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_DEPENDS
 set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
     dynamics_graph_glue.cpp
     force_compute.cpp
+    force_functions.cpp
     integrator.cpp
     particle.cpp
     bond.cpp
