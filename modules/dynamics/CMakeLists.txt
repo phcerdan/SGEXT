@@ -6,7 +6,6 @@ set(SG_MODULE_${SG_MODULE_NAME}_DEPENDS
   ${SG_MODULE_INTERNAL_DEPENDS}
   )
 set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
-    dynamics.cpp
     dynamics_graph_glue.cpp
     force_compute.cpp
     integrator.cpp

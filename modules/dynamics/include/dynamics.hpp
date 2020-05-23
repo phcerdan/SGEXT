@@ -8,7 +8,5 @@
 
 #include "bonded_forces.hpp"   // connected/bonded forces (connected by chains)
 #include "unbonded_forces.hpp" // excluded volume (collisions), hydrodynamics
-namespace SG {
-void hola();
-} // namespace SG
+
 #endif

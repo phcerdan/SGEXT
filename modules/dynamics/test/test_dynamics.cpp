@@ -7,7 +7,6 @@
 #include "dynamics_common_data.hpp"
 #include "gmock/gmock.h"
 
-TEST(Dynamics, works) { SG::hola(); }
 struct ParticleCollection_Fixture : public ::testing::Test {
     SG::ParticleCollection collection;
     SG::Particle a;
