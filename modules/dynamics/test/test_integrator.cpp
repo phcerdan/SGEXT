@@ -233,7 +233,7 @@ TEST_F(IntegratorPairBondForce_Fixture, compute_pre_stress) {
                 static_cast<const SG::BondChain &>(chain).length_contour;
         std::cout << "wlc_petrosyan_normalized force. ";
         std::cout << "[" << a.id << ", " << b.id
-                  << "] lengh_contour: " << l_contour_length << std::endl;
+                  << "] contour_length: " << l_contour_length << std::endl;
         const double relative_extension = d_ete_modulo / l_contour_length;
         // const double l_persistence = 1000;
         // const double monomer_anisotropy_inverse = 1 / l_persistence;

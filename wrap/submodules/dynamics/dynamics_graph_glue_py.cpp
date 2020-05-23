@@ -21,35 +21,22 @@
 #include "pybind11_common.h"
 #include "sgdynamics_common_py.hpp"
 
-namespace py = pybind11;
-void init_particle(py::module &);
-void init_bond(py::module &);
-void init_particle_collection(py::module &);
-void init_bond_collection(py::module &);
-void init_system(py::module &);
-void init_integrator_methods(py::module &);
-void init_forces(py::module &);
-void init_force_compute(py::module &);
-void init_integrator(py::module &);
-void init_dynamics_graph_glue(py::module &);
-#ifdef SG_USING_VTK
-void init_vtu_file_io(py::module &);
-#endif
+#include "dynamics_graph_glue.hpp"
 
-void init_sgdynamics(py::module & mparent) {
-    auto m = mparent.def_submodule("dynamics");
-    m.doc() = "Dynamics submodule"; // optional module docstring
-    init_particle(m);
-    init_bond(m);
-    init_particle_collection(m);
-    init_bond_collection(m);
-    init_system(m);
-    init_integrator_methods(m);
-    init_forces(m);
-    init_force_compute(m);
-    init_integrator(m);
-    init_dynamics_graph_glue(m);
-#ifdef SG_USING_VTK
-    init_vtu_file_io(m);
-#endif
+namespace py = pybind11;
+using namespace SG;
+
+void init_dynamics_graph_glue(py::module &m) {
+    py::class_<ParticleGraphGlueData>(m, "particle_graph_glue_data")
+        .def(py::init())
+        .def_readwrite("sys", &ParticleGraphGlueData::sys)
+        .def("get_particle_graph_map", [](const ParticleGraphGlueData &obj) {
+                return *(obj.particle_graph_map);
+                })
+        .def("get_graph_particle_map", [](const ParticleGraphGlueData &obj) {
+                return *(obj.graph_particle_map);
+                })
+        ;
+
+    m.def("particle_from_graph", &particles_from_graph);
 }

@@ -16,6 +16,8 @@ set(current_sources_
   force_compute_py.cpp
   force_compute_with_functional_py.cpp
   integrator_py.cpp
+  # Glues
+  dynamics_graph_glue_py.cpp
   ${files_using_vtk}
   )
 set(module_name_ ${CMAKE_CURRENT_SOURCE_DIR})

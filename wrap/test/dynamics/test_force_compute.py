@@ -28,9 +28,14 @@ class TestDynamicsForceCompute(unittest.TestCase):
         self.fixture = System4Fixture()
 
     def test_particle_force_compute(self):
-        self.force_compute = dynamics.particle_force_compute(self.fixture.system)
+        self.force_compute = dynamics.force_compute_particle(self.fixture.system)
         self.assertEqual(self.force_compute.get_type(), "ParticleForceCompute")
     def test_force_function_wrapping_works_with_python_functions(self):
-        self.force_compute = dynamics.particle_force_compute(self.fixture.system)
+        self.force_compute = dynamics.force_compute_particle(self.fixture.system)
         self.force_compute.force_function = a_particle_force
+        self.force_compute.compute()
+    def test_force_function_wrapping_works_with_cpp_wrapped_functions(self):
+        self.force_compute = dynamics.force_compute_pair_bond_with_bond(self.fixture.system)
+        self.force_compute.force_function = dynamics.forces.force_function_wlc_petrosyan_normalized
+        self.fixture.system.all.sort()
         self.force_compute.compute()

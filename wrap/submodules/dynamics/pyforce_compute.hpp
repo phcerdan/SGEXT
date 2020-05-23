@@ -18,16 +18,32 @@
  *
  * *******************************************************************/
 
-#ifndef SGDYNAMICS_COMMON_PYBIND_HPP
-#define SGDYNAMICS_COMMON_PYBIND_HPP
+#ifndef SG_PYFORCE_COMPUTE_HPP
+#define SG_PYFORCE_COMPUTE_HPP
 
-#include "particle.hpp"
+#include "sgdynamics_common_py.hpp"
+#include "force_compute.hpp"
 
-#include "pybind11_common.h"
-#include <pybind11/stl_bind.h>
-// #include "bond.hpp"
-// #include <memory>
+namespace SG {
 
-PYBIND11_MAKE_OPAQUE(std::vector<SG::Particle>);
-// PYBIND11_MAKE_OPAQUE(std::vector<std::shared_ptr<SG::Bond>>);
+struct PyForceCompute : public ForceCompute {
+    /* Inherit the constructors */
+    using ForceCompute::ForceCompute;
+    /* Trampoline (need one for each virtual function) */
+    void compute() override {
+        PYBIND11_OVERLOAD_PURE(
+                void,             /* Return type */
+                ForceCompute, /* Parent class */
+                compute /* Name of function in C++ (must match Python name) */
+        );
+    }
+    std::string get_type() override {
+        PYBIND11_OVERLOAD(
+                std::string,             /* Return type */
+                ForceCompute, /* Parent class */
+                get_type /* Name of function in C++ (must match Python name) */
+        );
+    }
+};
+} // end namespace SG
 #endif
