@@ -15,5 +15,4 @@
 
 PYBIND11_MAKE_OPAQUE(std::vector<SG::Particle>);
 // PYBIND11_MAKE_OPAQUE(std::vector<std::shared_ptr<SG::Bond>>);
-
 #endif

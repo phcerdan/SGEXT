@@ -15,7 +15,7 @@
 namespace SG {
 /**
  * System is a catch all structure to perform simulations,
- * Classes might need a reference to it in the constructor.
+ * Classes might need a pointer to it in the constructor.
  */
 struct System : public std::enable_shared_from_this<System> {
     ParticleCollection all; ///< all particles
