@@ -223,12 +223,12 @@ endif()
 #################### DGtal #######################
 ##################################################
 
-set(DGtal_GIT_TAG precells_plus_domain_shift_fix) # 19-May-2020
+set(DGtal_GIT_TAG 92ab4d0d62f0e5490f1890efdf904547d17515b9) # 25-May-2020
 message(STATUS "DGtal_VERSION: ${DGtal_GIT_TAG}")
 set(DGtal_BUILD_DIR ${OUTPUT_BUILD_DIR}/DGtal-build)
 set(DGtal_SRC_FOLDER_NAME DGtal-src)
 set(DGtal_SRC_DIR ${OUTPUT_BUILD_DIR}/${DGtal_SRC_FOLDER_NAME})
-set(DGtal_GIT_REPOSITORY "https://github.com/phcerdan/DGtal")
+set(DGtal_GIT_REPOSITORY "https://github.com/DGtal-team/DGtal")
 set(_DGtal_depends ep_boost)
 set(_DGtal_optional_cmake_args)
 if(WITH_ITK)
