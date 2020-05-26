@@ -6,23 +6,24 @@ ENV SGEXT_BUILD_DIR ${BUILD_PATH}/SGEXT-build
 ENV SGEXT_SRC_FOLDER_NAME SGEXT-src
 ENV SGEXT_SRC_DIR ${BUILD_PATH}/${SGEXT_SRC_FOLDER_NAME}
 
+# intel-tbb (installed via yum)
+# RUN gosu root yum install -y tbb-devel
+# ENV TBB_ROOT /opt/intel/tbb
+
 # Copy files from current repo into the docker container
 WORKDIR ${SGEXT_BUILD_DIR}
 COPY . ${SGEXT_SRC_DIR}
 
-# intel-tbb (installed via yum)
-RUN gosu root yum install -y tbb-devel
-# ENV TBB_ROOT /opt/intel/tbb
 RUN cmake \
         -G Ninja \
         -DCMAKE_BUILD_TYPE:STRING=Release \
-        -DSG_BUILD_TESTING:BOOL=ON \
+        -DSG_BUILD_TESTING:BOOL=OFF \
         -DSG_MODULE_ANALYZE:BOOL=ON \
         -DSG_MODULE_COMPARE:BOOL=ON \
         -DSG_MODULE_LOCATE:BOOL=ON \
         -DSG_MODULE_GENERATE:BOOL=ON \
         -DSG_MODULE_DYNAMICS:BOOL=ON \
-        -DSG_MODULE_VISUALIZE:BOOL=OFF \
+        -DSG_MODULE_VISUALIZE:BOOL=ON \
         -DSG_MODULE_VISUALIZE_WITH_QT:BOOL=OFF \
         # TODO: Switch these two ON when CMake is at least 3.15 and remove Boost_ROOT
         # -DCMAKE_FIND_PACKAGE_PREFER_CONFIG:BOOL=ON \
