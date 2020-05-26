@@ -31,8 +31,6 @@ option(SG_MODULE_LOCATE "Use VTK KDtree for graph point location." ON)
 option(SG_MODULE_VISUALIZE "Functions to visualize spatial graphs and histograms." ON)
 option(SG_MODULE_GENERATE "Generate a graph with desired statistical parameters using simulated annealing." ON)
 option(SG_MODULE_DYNAMICS "Perform coarse grained dynamics simulation in the network." ON)
-option(SG_MODULE_DYNAMICS_USING_VTK "Force enabling VTK in the dynamics module." OFF)
-mark_as_advanced(SG_MODULE_DYNAMICS_USING_VTK)
 option(SG_MODULE_VISUALIZE_WITH_QT "Use QT for some visualizations. It will also enable SG_MODULE_VISUALIZE." OFF)
 if(SG_MODULE_VISUALIZE_WITH_QT)
   set(SG_MODULE_VISUALIZE ON)
@@ -45,7 +43,7 @@ set(DEPENDENCIES_BUILD_DIR "" CACHE PATH "Base folder generated from building th
 # The following script will set ITK_DIR, VTK_DIR DGtal_DIR, etc. Based on DEPENDENCIES_BUILD_DIR.
 include(handle_dependencies)
 
-if(VISUALIZE OR SG_MODULE_VISUALIZE OR SG_MODULE_LOCATE OR SG_MODULE_COMPARE OR SG_MODULE_DYNAMICS_USING_VTK)
+if(VISUALIZE OR SG_MODULE_VISUALIZE OR SG_MODULE_LOCATE OR SG_MODULE_COMPARE)
   set(SG_REQUIRES_VTK TRUE)
 endif()
 if(SG_BUILD_SCRIPTS OR SG_ENABLE_ITK)
