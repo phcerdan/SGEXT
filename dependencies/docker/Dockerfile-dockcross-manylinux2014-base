@@ -98,6 +98,7 @@ RUN git clone --single-branch https://github.com/DGtal-team/DGtal.git ${DGtal_SR
         -DBOOST_ROOT=${BOOST_BUILD_DIR} \
         -DWITH_ITK:BOOL=ON \
         -DITK_DIR:STRING=${ITK_BUILD_DIR} \
+        -DWITH_OPENMP:BOOL=ON \
         ${DGtal_SRC_DIR} && \
     ninja && \
     find . -name "*.o" -delete && \
