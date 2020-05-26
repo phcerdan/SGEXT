@@ -82,18 +82,18 @@ TEST(contour_length, corner_case_1) {
     sg[0].pos = p0;
     sg[1].pos = p3;
     SG::SpatialEdge se;
-    se.edge_points.insert(std::end(se.edge_points), {{178, 160, 47},
-                                                     {178, 160, 48},
-                                                     {178, 160, 49},
-                                                     {178, 160, 50},
-                                                     {179, 159, 51},
-                                                     {180, 160, 52},
-                                                     {181, 161, 51},
-                                                     {180, 161, 50},
-                                                     {180, 161, 49},
-                                                     {180, 161, 48},
-                                                     {180, 161, 47},
-                                                     {180, 161, 46}});
+    se.edge_points = SG::SpatialEdge::PointContainer({{178, 160, 47},
+                                                      {178, 160, 48},
+                                                      {178, 160, 49},
+                                                      {178, 160, 50},
+                                                      {179, 159, 51},
+                                                      {180, 160, 52},
+                                                      {181, 161, 51},
+                                                      {180, 161, 50},
+                                                      {180, 161, 49},
+                                                      {180, 161, 48},
+                                                      {180, 161, 47},
+                                                      {180, 161, 46}});
     auto edge = boost::add_edge(0, 1, se, sg);
     EXPECT_NO_THROW(SG::contour_length(edge.first, sg));
 }

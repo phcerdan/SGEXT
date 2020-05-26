@@ -58,10 +58,10 @@ struct sg_square_expected : public SpatialGraphBaseFixture {
         g[1].pos = {{1, 1, 0}};
 
         SG::SpatialEdge se01_1;
-        se01_1.edge_points.insert(std::end(se01_1.edge_points), {{1, 0, 0}});
+        se01_1.edge_points.emplace_back(ArrayUtilities::Array3D{{1, 0, 0}});
         add_edge(0, 1, se01_1, g);
         SG::SpatialEdge se01_2;
-        se01_2.edge_points.insert(std::end(se01_2.edge_points), {{0, 1, 0}});
+        se01_2.edge_points.emplace_back(ArrayUtilities::Array3D({{0, 1, 0}}));
         add_edge(0, 1, se01_2, g);
     }
 };
@@ -101,10 +101,10 @@ struct sg_square_plus_one_expected : public SpatialGraphBaseFixture {
         g[2].pos = {{0, -1, 0}};
 
         SG::SpatialEdge se01_1;
-        se01_1.edge_points.insert(std::end(se01_1.edge_points), {{1, 0, 0}});
+        se01_1.edge_points.emplace_back(ArrayUtilities::Array3D({{1, 0, 0}}));
         add_edge(0, 1, se01_1, g);
         SG::SpatialEdge se01_2;
-        se01_2.edge_points.insert(std::end(se01_2.edge_points), {{0, 1, 0}});
+        se01_2.edge_points.emplace_back(ArrayUtilities::Array3D({{0, 1, 0}}));
         add_edge(0, 1, se01_2, g);
 
         add_edge(0, 2, g);
