@@ -45,7 +45,7 @@ setup(
         '-DSG_MODULE_GENERATE:BOOL=ON', # C++17, optional TBB (recommended)
         '-DSG_MODULE_DYNAMICS:BOOL=ON', # C++17
         '-DSG_BUILD_SCRIPTS:BOOL=ON',  # ITK
-        '-DSG_MODULE_VISUALIZE:BOOL=OFF',  # VTK
+        '-DSG_MODULE_VISUALIZE:BOOL=ON',  # VTK
         '-DSG_MODULE_VISUALIZE_WITH_QT:BOOL=OFF'  # QT
         '-DSG_WRAP_PYTHON:BOOL=ON'
     ],
