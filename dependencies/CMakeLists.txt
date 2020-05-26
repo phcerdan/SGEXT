@@ -15,7 +15,7 @@ endif()
 
 option(WITH_VTK "Build VTK, ITK will use it too, if WITH_ITK is enabled" ON)
 option(WITH_ITK "Build ITK, DGtal will use it too." ON)
-option(WITH_OPENMP "Build DGtal with OPENMP support." ON)
+option(WITH_OPENMP "Build DGtal with OPENMP support." OFF)
 option(WITH_TBB "Build TBB. Only for Linux (gcc). Needed for gcc for include <execution> (stl_parallel)." ON)
 option(WITH_QT5 "Enable Qt5 module for VTK and DGtal. Qt5 and QGLViewer have to be found in the system." OFF)
 option(CLEAN_BUILD_ARTIFACTS "Create target clean_artifacts to remove artifacts and external_project folders. Needs to call the target: make/ninja clean_artifacts." ON)
