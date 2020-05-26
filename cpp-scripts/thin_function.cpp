@@ -22,7 +22,7 @@
 #include <DGtal/topology/VoxelComplexFunctions.h>
 
 #include <DGtal/topology/NeighborhoodConfigurations.h>
-#include <DGtal/topology/tables/NeighborhoodTables.h>
+#include <DGtal/topology/tables/NeighborhoodLUT.h>
 
 // Iterate for sequence discrete points
 #include <itkIndexRange.h>
@@ -112,16 +112,16 @@ BinaryImageType::Pointer thin_function(
 
     vc.construct(image_set);
   }
-  vc.setSimplicityTable(DGtal::functions::loadTable(DGtal::simplicity::tableSimple26_6));
+  vc.setSimplicityTable(DGtal::simplicity::LUTSimple26_6);
   if(verbose) DGtal::trace.endBlock();
 
   if(verbose) DGtal::trace.beginBlock("load isthmus table");
   boost::dynamic_bitset<> isthmus_table;
   auto &sk = skel_type;
   if(sk == SkelType::isthmus)
-    isthmus_table = *DGtal::functions::loadTable(DGtal::isthmusicity::tableIsthmus);
+    isthmus_table = *DGtal::isthmusicity::LUTIsthmus;
   else if(sk == SkelType::isthmus1)
-    isthmus_table = *DGtal::functions::loadTable(DGtal::isthmusicity::tableOneIsthmus);
+    isthmus_table = *DGtal::isthmusicity::LUTOneIsthmus;
   if(verbose) DGtal::trace.endBlock();
 
 

@@ -76,13 +76,13 @@ RUN wget "https://dl.bintray.com/boostorg/release/${BOOST_VERSION_DOTS}/source/b
 
 ############# DGtal #############
 # Install DGtal from git
-ENV DGtal_GIT_TAG 71140534477a3dd41ff8311b9176c76a52ec0b97
+ENV DGtal_GIT_TAG add_dgtal_lut
 ENV DGtal_BUILD_DIR ${BUILD_PATH}/DGtal-build
 ENV DGtal_SRC_FOLDER_NAME DGtal-src
 ENV DGtal_SRC_DIR ${BUILD_PATH}/${DGtal_SRC_FOLDER_NAME}
 
 WORKDIR $BUILD_PATH
-RUN git clone --single-branch https://github.com/DGtal-team/DGtal.git ${DGtal_SRC_FOLDER_NAME} && \
+RUN git clone https://github.com/phcerdan/DGtal.git ${DGtal_SRC_FOLDER_NAME} && \
     cd $DGtal_SRC_DIR && \
     git checkout ${DGtal_GIT_TAG} && \
     mkdir ${DGtal_BUILD_DIR} && cd ${DGtal_BUILD_DIR} && \
@@ -92,6 +92,7 @@ RUN git clone --single-branch https://github.com/DGtal-team/DGtal.git ${DGtal_SR
         -DBUILD_SHARED_LIBS:BOOL=ON \
         -DBUILD_TESTING:BOOL=OFF \
         -DBUILD_EXAMPLES:BOOL=OFF \
+        -DWITH_DGtalLUT:BOOL=ON \
         # TODO: Switch these two ON when CMake is at least 3.15 and remove Boost_ROOT
         # -DCMAKE_FIND_PACKAGE_PREFER_CONFIG:BOOL=ON \
         # -DBoost_DIR:STRING=${BOOST_CMAKE_CONFIG_FOLDER} \
