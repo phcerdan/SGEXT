@@ -83,10 +83,10 @@ TEST_F(default_image, transform_graph_to_physical_space) {
     g[1].pos = {{1, 1, 0}};
 
     SG::SpatialEdge se01_1;
-    se01_1.edge_points.insert(std::end(se01_1.edge_points), {{1, 0, 0}});
+    se01_1.edge_points.emplace_back(SG::SpatialEdge::PointType({{1, 0, 0}}));
     auto edge1 = add_edge(0, 1, se01_1, g);
     SG::SpatialEdge se01_2;
-    se01_2.edge_points.insert(std::end(se01_2.edge_points), {{0, 1, 0}});
+    se01_2.edge_points.emplace_back(SG::SpatialEdge::PointType({{0, 1, 0}}));
     auto edge2 = add_edge(0, 1, se01_2, g);
 
     SG::transform_graph_to_physical_space<ImageType>(g, this->image);
@@ -115,10 +115,10 @@ TEST_F(non_default_image, transform_graph_to_physical_space) {
     g[1].pos = {{1, 1, 0}};
 
     SG::SpatialEdge se01_1;
-    se01_1.edge_points.insert(std::end(se01_1.edge_points), {{1, 0, 0}});
+    se01_1.edge_points.emplace_back(SG::SpatialEdge::PointType({{1, 0, 0}}));
     auto edge1 = add_edge(0, 1, se01_1, g);
     SG::SpatialEdge se01_2;
-    se01_2.edge_points.insert(std::end(se01_2.edge_points), {{0, 1, 0}});
+    se01_2.edge_points.emplace_back(SG::SpatialEdge::PointType({{0, 1, 0}}));
     auto edge2 = add_edge(0, 1, se01_2, g);
 
     SG::transform_graph_to_physical_space<ImageType>(g, this->image);
@@ -149,14 +149,10 @@ TEST_F(non_default_image, transform_graph_to_index_space) {
     g[1].pos = {{101.0, 100.1, 100.0}};
 
     SG::SpatialEdge se01_1;
-    se01_1.edge_points.insert(std::end(se01_1.edge_points),
-                              // 1, 0, 0
-                              {{101, 100.0, 100.0}});
+    se01_1.edge_points = SG::SpatialEdge::PointContainer({{101, 100.0, 100.0}});
     auto edge1 = add_edge(0, 1, se01_1, g);
     SG::SpatialEdge se01_2;
-    se01_2.edge_points.insert(std::end(se01_2.edge_points),
-                              // 0, 1, 0
-                              {{100.0, 100.1, 100.0}});
+    se01_2.edge_points = SG::SpatialEdge::PointContainer({{100.0, 100.1, 100.0}});
     auto edge2 = add_edge(0, 1, se01_2, g);
 
     SG::transform_graph_to_index_space<ImageType>(g, this->image);
