@@ -95,17 +95,23 @@ inline SkelSelectType skel_select_string_to_enum(const std::string & select_stri
  *     it generates a single point centered in any volume without holes.
  *     1isthmus: conserve linear (1D) isthmus
  *     isthmus: conserve surface (2D) isthmus and 1D isthmus.
+ *
  * @param skel_select_type_str type for choosing a voxel (asymmetric thinning).
  *     Valid options: dmax, random, first
  *     dmax: use a distance map to select the Complex with the greates distance map value.
  *     The final skeleton will be a centered medial axis skeleton using this option
  *     random: select a random voxel in case an asymmetric choice is needed.
  *     first: choose the first voxel of the container (its not ordered in any meaningful way)
+ *
+ * @param tables_folder Path where to find look up tables from DGtal.
+ *     Simplicity and Isthmusicity tables.
+ *
  * @param persistence Integer to locally trim non-important branches.
  * If 0 no persistence algorith.
  *
  * @param distance_map_image distance map image used when @ref skel_select_type_str
  * is dmax
+ *
  * @param profile timing the algorithm
  *
  * @param verbose extra info
@@ -120,6 +126,7 @@ BinaryImageType::Pointer thin_function(
     const BinaryImageType::Pointer & input_image,
     const std::string & skel_type_str,
     const std::string & skel_select_type_str,
+    const std::string & tables_folder,
     const int & persistence = 0,
     const FloatImageType::Pointer & distance_map_image = nullptr,
     const bool profile = false,
@@ -150,7 +157,11 @@ BinaryImageType::Pointer thin_function(
  *     The final skeleton will be a centered medial axis skeleton using this option
  *     random: select a random voxel in case an asymmetric choice is needed.
  *     first: choose the first voxel of the container (its not ordered in any meaningful way)
+ *
  * @param output_foldername folder where output image will be written
+ *
+ * @param tables_folder Path where to find look up tables from DGtal.
+ *     Simplicity and Isthmusicity tables.
  *
  * @param inputDistanceMapImageFilename filename holding a distance map image
  * used when @ref skel_select_type_str is dmax
@@ -173,6 +184,7 @@ BinaryImageType::Pointer thin_function_io(
         const std::string & skel_type_str,
         const std::string & skel_select_type_str,
         const std::string & output_foldername,
+        const std::string & tables_folder,
         const int & persistence = 0,
         const std::string & inputDistanceMapImageFilename = "",
         // itk_filters

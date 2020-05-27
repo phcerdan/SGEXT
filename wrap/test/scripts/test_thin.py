@@ -4,6 +4,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 from sgext import scripts
+from sgext import tables_folder
 import unittest
 import os, tempfile
 
@@ -21,6 +22,7 @@ class TestThin(unittest.TestCase):
                      out_folder=self.test_dir,
                      foreground="black",
                      skel_type="end", select_type="first",
+                     tables_folder=tables_folder,
                      persistence=2,
                      visualize=False,
                      verbose=True)
