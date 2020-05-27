@@ -22,7 +22,13 @@
 #include <DGtal/topology/VoxelComplexFunctions.h>
 
 #include <DGtal/topology/NeighborhoodConfigurations.h>
+// NeighborhoodTables.h contains strings with full-paths of the system where
+// DGtal was originally built or installed. So it cannot be used when DGtal
+// library is redistributed/packaged. However, it can be used to get the filenames
+// of the tables, but the full-path itself would not exist.
 #include <DGtal/topology/tables/NeighborhoodTables.h>
+// A runtime argument needs to point to the data folder where the look-up tables
+// were deployed.
 
 // Iterate for sequence discrete points
 #include <itkIndexRange.h>
@@ -48,6 +54,7 @@ BinaryImageType::Pointer thin_function(
     const BinaryImageType::Pointer & input_image,
     const std::string & skel_type_str,
     const std::string & skel_select_type_str,
+    const std::string & tables_folder,
     const int & persistence,
     const FloatImageType::Pointer & distance_map_image,
     const bool profile,
@@ -70,9 +77,17 @@ BinaryImageType::Pointer thin_function(
     trace.endBlock();
   }
 
+  namespace fs = boost::filesystem;
   // Validate input skel method and skel_select
   auto skel_type = skel_string_to_enum(skel_type_str);
   auto skel_select_type = skel_select_string_to_enum(skel_select_type_str);
+  const fs::path tables_folder_path{tables_folder};
+  if(!fs::exists(tables_folder_path)) {
+    throw std::runtime_error("tables_folder " + tables_folder_path.string() +
+        " doesn't exist in the filesystem.\n"
+        "tables_folder should point to the folder "
+        "where DGtal tables are: i.e simplicity_table26_6.zlib");
+  }
 
   // Convert to DGtal Container
   using Domain = DGtal::Z3i::Domain;
@@ -112,16 +127,23 @@ BinaryImageType::Pointer thin_function(
 
     vc.construct(image_set);
   }
-  vc.setSimplicityTable(DGtal::functions::loadTable(DGtal::simplicity::tableSimple26_6));
+  const fs::path maybe_wrong_tableSimple26_6{DGtal::simplicity::tableSimple26_6};
+  const fs::path tableSimple26_6 = tables_folder_path / maybe_wrong_tableSimple26_6.filename();
+  vc.setSimplicityTable(DGtal::functions::loadTable(tableSimple26_6.string()));
   if(verbose) DGtal::trace.endBlock();
 
   if(verbose) DGtal::trace.beginBlock("load isthmus table");
   boost::dynamic_bitset<> isthmus_table;
   auto &sk = skel_type;
-  if(sk == SkelType::isthmus)
-    isthmus_table = *DGtal::functions::loadTable(DGtal::isthmusicity::tableIsthmus);
-  else if(sk == SkelType::isthmus1)
-    isthmus_table = *DGtal::functions::loadTable(DGtal::isthmusicity::tableOneIsthmus);
+  if(sk == SkelType::isthmus) {
+    const fs::path maybe_wrong_tableIsthmus{DGtal::isthmusicity::tableIsthmus};
+    const fs::path tableIsthmus = tables_folder_path / maybe_wrong_tableIsthmus.filename();
+    isthmus_table = *DGtal::functions::loadTable(tableIsthmus.string());
+  } else if(sk == SkelType::isthmus1) {
+    const fs::path maybe_wrong_tableOneIsthmus{DGtal::isthmusicity::tableOneIsthmus};
+    const fs::path tableOneIsthmus = tables_folder_path / maybe_wrong_tableOneIsthmus.filename();
+    isthmus_table = *DGtal::functions::loadTable(tableOneIsthmus.string());
+  }
   if(verbose) DGtal::trace.endBlock();
 
 
@@ -243,6 +265,7 @@ BinaryImageType::Pointer thin_function_io(const std::string &filename,
         const std::string & skel_type_str,
         const std::string & skel_select_type_str,
         const std::string & output_foldername,
+        const std::string & tables_folder,
         const int & persistence,
         const std::string & inputDistanceMapImageFilename,
         const std::string & foreground,
@@ -318,7 +341,9 @@ BinaryImageType::Pointer thin_function_io(const std::string &filename,
       distance_map_itk_image = dmap_reader->GetOutput();
   }
 
-  auto thin_image = thin_function(handle_out, skel_type_str, skel_select_type_str, persistence, distance_map_itk_image, profile, verbose, visualize);
+  auto thin_image = thin_function(
+      handle_out, skel_type_str, skel_select_type_str, tables_folder,
+      persistence, distance_map_itk_image, profile, verbose, visualize);
 
   // Export
   // Export sequence of discrete points
