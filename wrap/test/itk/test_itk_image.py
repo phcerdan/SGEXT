@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from sgext import itk
 from sgext import scripts
+from sgext import tables_folder
 import unittest
 import os, tempfile
 import numpy as np
@@ -36,6 +37,7 @@ class TestITKImagePointer(unittest.TestCase):
                           out_folder=cls.test_dir,
                           foreground="black",
                           skel_type="end", select_type="first",
+                          tables_folder=tables_folder,
                           persistence=2,
                           visualize=False,
                           verbose=False)

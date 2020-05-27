@@ -20,6 +20,14 @@
 
 #include <iostream>
 
+// NeighborhoodTables.h contains strings with full-paths of the system where
+// DGtal was originally built or installed. So it cannot be used when DGtal
+// library is redistributed/packaged. However, it can be used to get the filenames
+// of the tables, but the full-path itself would not exist.
+// However we use it here to provide a default value for tables_folder.
+#include <DGtal/topology/tables/NeighborhoodTables.h>
+
+
 // boost::program_options
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
@@ -34,6 +42,9 @@ namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 
 int main(int argc, char* const argv[]) {
+  const fs::path maybe_wrong_tableSimple26_6{DGtal::simplicity::tableSimple26_6};
+  const std::string tables_folder_default =
+    maybe_wrong_tableSimple26_6.parent_path().string();
   /*-------------- Parse command line -----------------------------*/
   po::options_description opt_desc("Allowed options are: ");
   opt_desc.add_options()("help,h", "display this message.");
@@ -70,6 +81,10 @@ int main(int argc, char* const argv[]) {
   opt_desc.add_options()("inputDistanceMapImageFilename,d", po::value<std::string>(),
                          "Input 3D Distance Map Image from script "
                          "create_distance_map. Used with option --select=dmax");
+  opt_desc.add_options()(
+      "tables_folder,l", po::value<std::string>()->default_value(tables_folder_default),
+      "Folder where the DGtal look-up-tables are located. "
+      "For example simplicity_table26_6.zlib");
 
   po::variables_map vm;
   try {
@@ -157,11 +172,21 @@ int main(int argc, char* const argv[]) {
     inputDistanceMapImageFilename = inputDistanceMapImageFilename_path.string();
   }
 
+  const auto tables_folder = vm["tables_folder"].as<std::string>();
+  const fs::path tables_folder_path{tables_folder};
+  if(!fs::exists(tables_folder_path)) {
+    std::cerr << "tables_folder doesn't exist : "
+      << tables_folder_path.string() << std::endl;
+    throw po::validation_error(po::validation_error::invalid_option_value,
+        "tables_folder_path");
+  }
+
   SG::thin_function_io(
       filename,
       sk_string,
       select_string,
       exportImageFolder,
+      tables_folder,
       persistence,
       inputDistanceMapImageFilename,
       foreground,

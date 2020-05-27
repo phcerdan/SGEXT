@@ -94,6 +94,13 @@ install(DIRECTORY fixtures
   DESTINATION ${CMAKE_INSTALL_PYTHONLIBDIR}
   COMPONENT runtime
   )
+# Copy and install tables (package_data)
+set(table_folder "${CMAKE_SOURCE_DIR}/deploy/sgext/tables")
+file(COPY ${table_folder} DESTINATION ${CMAKE_BUILD_PYTHONLIBDIR})
+install(DIRECTORY ${table_folder}
+  DESTINATION ${CMAKE_INSTALL_PYTHONLIBDIR}
+  COMPONENT runtime
+  )
 
 if(SG_BUILD_TESTING)
   add_subdirectory(test)

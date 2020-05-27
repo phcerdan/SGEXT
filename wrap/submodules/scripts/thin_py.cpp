@@ -49,6 +49,12 @@ select_type: str
     - dmax: choose voxel with greatest distance map value.
     Strategy to choose voxels in the asymmetric process.
 
+table_folder: str
+    Location of the DGtal look-up-tables for simplicity and isthmusicity,
+    for example simplicity_table26_6.zlib.
+    These tables are distributed with the sgext package. Use the variable
+    'sgext.tables_folder'.
+
 persistence: int
     if >0, performs a persistence algorithm that prunes
     branches that are not persistant (less important).
@@ -71,6 +77,7 @@ visualize: bool
             py::arg("input"),
             py::arg("skel_type"),
             py::arg("select_type"),
+            py::arg("tables_folder"),
             py::arg("persistence") = 0,
             py::arg("input_distance_map_image") = nullptr,
             py::arg("profile") = false,
@@ -105,6 +112,12 @@ select_type: str
 out_folder: str
     output folder to store the results.
 
+table_folder: str
+    Location of the DGtal look-up-tables for simplicity and isthmusicity,
+    for example simplicity_table26_6.zlib.
+    These tables are distributed with the sgext package. Use the variable
+    'sgext.tables_folder'.
+
 persistence: int
     if >0, performs a persistence algorithm that prunes
     branches that are not persistant (less important).
@@ -136,6 +149,7 @@ visualize: bool
             py::arg("skel_type"),
             py::arg("select_type"),
             py::arg("out_folder"),
+            py::arg("tables_folder"),
             py::arg("persistence") = 0,
             py::arg("input_distance_map_file") = "",
             py::arg("foreground") = "white",

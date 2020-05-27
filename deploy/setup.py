@@ -36,6 +36,9 @@ setup(
     author_email='pablo.hernandez.cerdan@outlook.com',
     packages=['sgext'],
     package_dir={'sgext': 'sgext'},
+    package_data={
+        'sgext': ['tables/*.zlib']
+    },
     cmake_source_dir='../',
     cmake_args=[
         '-DSG_BUILD_TESTING:BOOL=OFF',

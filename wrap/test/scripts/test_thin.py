@@ -17,6 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 from sgext import scripts
+from sgext import tables_folder
 import unittest
 import os, tempfile
 
@@ -34,6 +35,7 @@ class TestThin(unittest.TestCase):
                      out_folder=self.test_dir,
                      foreground="black",
                      skel_type="end", select_type="first",
+                     tables_folder=tables_folder,
                      persistence=2,
                      visualize=False,
                      verbose=True)
