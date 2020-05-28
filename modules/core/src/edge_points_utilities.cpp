@@ -80,6 +80,57 @@ double contour_length(const GraphType::edge_descriptor e, const GraphType &sg) {
     return dist_to_source + edge_points_length(se) + dist_to_target;
 }
 
+bool check_edge_points_are_contiguous(
+        SpatialEdge::PointContainer &edge_points) {
+    bool all_points_contigous = true;
+    if (edge_points.empty()) {
+        return all_points_contigous;
+    }
+    const auto num_points = edge_points.size();
+    const auto num_distances = num_points - 1;
+    std::vector<double> distances_between_contigous_points(num_distances);
+    for (auto i = 0; i < num_distances; ++i) {
+        distances_between_contigous_points[i] =
+                ArrayUtilities::distance(edge_points[i], edge_points[i + 1]);
+    }
+
+    // Assuming spacing = [1.0, 1.0, 1.0]
+    const double expected_min_distance = 1.0;
+    const double expected_max_distance = sqrt(3.0);
+    // + 2.0 * std::numeric_limits<double>::epsilon();
+    const auto comma_separated_points = true;
+    for (auto i = 0; i < num_distances; ++i) {
+        const auto &dist = distances_between_contigous_points[i];
+        if (dist - expected_max_distance >
+            2.0 * std::numeric_limits<double>::epsilon()) {
+            all_points_contigous = false;
+#if !defined(NDEBUG)
+            const auto pA = ArrayUtilities::to_string(edge_points[i],
+                                                      comma_separated_points);
+            const auto pB = ArrayUtilities::to_string(edge_points[i + 1],
+                                                      comma_separated_points);
+            std::cerr << "FAIL. Points at index " << i << ": ||{" + pA
+                      << "} - {" + pB + "}|| = " << dist
+                      << ". But the difference should be less than "
+                      << expected_max_distance << std::endl;
+#endif
+        } else if (dist - expected_min_distance < 0) {
+            all_points_contigous = false;
+#if !defined(NDEBUG)
+            const auto pA = ArrayUtilities::to_string(edge_points[i],
+                                                      comma_separated_points);
+            const auto pB = ArrayUtilities::to_string(edge_points[i + 1],
+                                                      comma_separated_points);
+            std::cerr << "FAIL. Points at index " << i << ": ||{" + pA
+                      << "} - {" + pB + "}|| = " << dist
+                      << ". But the difference should be greater than "
+                      << expected_min_distance << std::endl;
+#endif
+        }
+    }
+    return all_points_contigous;
+}
+
 void insert_unique_edge_point_with_distance_order(
         SpatialEdge::PointContainer &edge_points,
         const SpatialEdge::PointType &new_point) {

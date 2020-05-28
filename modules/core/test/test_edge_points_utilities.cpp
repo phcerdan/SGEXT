@@ -143,3 +143,19 @@ TEST(insert_edge_point, with_distance_order) {
     EXPECT_ANY_THROW(SG::insert_unique_edge_point_with_distance_order(
             edge_points, new_point4));
 }
+
+TEST(check_edge_points_are_contiguous, when_they_are_not) {
+    SG::SpatialEdge::PointType p0 = {{0, 0, 0}};
+    SG::SpatialEdge::PointType p1 = {{1, 0, 0}};
+    SG::SpatialEdge::PointType p2 = {{4, 0, 0}};
+    SG::SpatialEdge::PointContainer edge_points = {{p0, p1, p2}};
+    EXPECT_FALSE(SG::check_edge_points_are_contiguous(edge_points));
+}
+
+TEST(check_edge_points_are_contiguous, when_they_are) {
+    SG::SpatialEdge::PointType p0 = {{0, 0, 0}};
+    SG::SpatialEdge::PointType p1 = {{1, 0, 0}}; // min_expected_difference: 1.0
+    SG::SpatialEdge::PointType p2 = {{2, 1, 1}}; // max_expected_difference: sqrt(3)
+    SG::SpatialEdge::PointContainer edge_points = {{p0, p1, p2}};
+    EXPECT_TRUE(SG::check_edge_points_are_contiguous(edge_points));
+}

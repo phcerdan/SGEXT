@@ -33,6 +33,18 @@ class TestEdgePointsUtilities(unittest.TestCase):
         self.assertEqual(len(point_container), 3)
         self.assertEqual(len(new_point_container), 4)
 
+    def test_check_edge_points_are_contiguous(self):
+        point0 = [0,0,0]
+        point1 = [1,0,0]
+        point2 = [2,0,0]
+        point_container = [point0, point1, point2]
+        are_contiguous = core.check_edge_points_are_contiguous(point_container)
+        self.assertTrue(are_contiguous)
+        point5 = [0,0,5]
+        point_container = [point0, point1, point2, point5]
+        are_contiguous = core.check_edge_points_are_contiguous(point_container)
+        self.assertFalse(are_contiguous)
+
 if __name__ == '__main__':
     unittest.main()
 
