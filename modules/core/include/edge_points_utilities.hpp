@@ -81,6 +81,19 @@ void insert_unique_edge_point_with_distance_order(
         SpatialEdge::PointContainer &edge_points,
         const SpatialEdge::PointType &new_point);
 
+/**
+ * Check the edge points are all contiguous/connected.
+ * The DFS algorithm keep them ordered, but merging edges can cause problems.
+ * It only works when spacing is 1.0, when we are working in the index space.
+ *
+ * In debug mode it prints in std::cerr the failing points.
+ *
+ * PRECONDITION: only works in index space where spacing is [1.0, 1.0, 1.0]
+ * @param edge_points to check.
+ *
+ * @return true if all points are contiguous
+ */
+bool check_edge_points_are_contiguous(SpatialEdge::PointContainer &edge_points);
 } // namespace SG
 
 #endif
