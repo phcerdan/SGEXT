@@ -215,17 +215,33 @@ convert_to_vtk_unstructured_grid_with_edge_points(const GraphType &sg) {
         auto &sg_edge = sg[*ei];
         // Add vtkPolyLine
         auto &sg_edge_points = sg_edge.edge_points;
+        // Check if the first point in edge_points, is closer to source, or to
+        // target. Only do the check if there is at least one edge_point.
+        const bool source_is_closer_to_begin =
+                sg_edge_points.empty()
+                        ? true
+                        : ArrayUtilities::distance(sg[source].pos,
+                                                   sg_edge_points[0]) <
+                                  ArrayUtilities::distance(sg[target].pos,
+                                                           sg_edge_points[0]);
         {
             auto vtk_id_list = vtkIdList::New();
-            // TODO are you sure source is connecte dto sg_edge_points[0], or is
-            // it connected to sg_edge_points.back()
-            vtk_id_list->InsertNextId(vertex_id_map.at(source));
+            if (source_is_closer_to_begin) {
+                vtk_id_list->InsertNextId(vertex_id_map.at(source));
+            } else {
+                vtk_id_list->InsertNextId(vertex_id_map.at(target));
+            }
+
             // Insert edge_points first
             for (const auto &p : sg_edge_points) {
                 vtk_id_list->InsertNextId(
                         vtk_points->InsertNextPoint(p[0], p[1], p[2]));
             }
-            vtk_id_list->InsertNextId(vertex_id_map.at(target));
+            if (source_is_closer_to_begin) {
+                vtk_id_list->InsertNextId(vertex_id_map.at(target));
+            } else {
+                vtk_id_list->InsertNextId(vertex_id_map.at(source));
+            }
 
             auto poly_line = vtkPolyLine::New();
             ugrid->InsertNextCell(poly_line->GetCellType(), vtk_id_list);
