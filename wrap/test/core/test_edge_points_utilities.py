@@ -13,6 +13,15 @@ class TestEdgePointsUtilities(unittest.TestCase):
         contour = core.edge_points_length(se)
         self.assertGreaterEqual(contour, 1)
 
+    def test_ete_distance(self):
+        graph = core.spatial_graph(2)
+        sn = core.spatial_node()
+        sn.pos = [1.0,1.0,1.0]
+        graph.set_vertex(1, sn)
+        [ed, added] = core.graph.add_edge(0,1,core.spatial_edge(), graph)
+        ete_distance = core.ete_distance(ed, graph)
+        self.assertGreaterEqual(ete_distance, 1)
+
     def test_contour_length(self):
         graph = core.spatial_graph(2)
         sn = core.spatial_node()
