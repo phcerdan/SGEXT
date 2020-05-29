@@ -11,6 +11,15 @@
 
 namespace SG {
 
+double ete_distance(const GraphType::edge_descriptor &edge_desc,
+                    const GraphType &sg) {
+    const auto source = boost::source(edge_desc, sg);
+    const auto target = boost::target(edge_desc, sg);
+    const auto &source_pos = sg[source].pos;
+    const auto &target_pos = sg[target].pos;
+    return ArrayUtilities::distance(target_pos, source_pos);
+}
+
 double edge_points_length(const SpatialEdge &se) {
     const auto &eps = se.edge_points;
     size_t npoints = eps.size();
@@ -24,11 +33,12 @@ double edge_points_length(const SpatialEdge &se) {
     return length;
 }
 
-double contour_length(const GraphType::edge_descriptor e, const GraphType &sg) {
-    const auto &se = sg[e];
+double contour_length(const GraphType::edge_descriptor &edge_desc,
+                      const GraphType &sg) {
+    const auto &se = sg[edge_desc];
     const auto &eps = se.edge_points;
-    auto source = boost::source(e, sg);
-    auto target = boost::target(e, sg);
+    auto source = boost::source(edge_desc, sg);
+    auto target = boost::target(edge_desc, sg);
     if (eps.empty())
         return ArrayUtilities::distance(sg[target].pos, sg[source].pos);
     // Because the graph is unordered, source and target are not guaranteed
