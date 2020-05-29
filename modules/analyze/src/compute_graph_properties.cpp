@@ -46,10 +46,8 @@ std::vector<double> compute_ete_distances(const SG::GraphType &sg,
         if (ignore_end_nodes &&
             (boost::degree(source, sg) == 1 || boost::degree(target, sg) == 1))
             continue;
-        const auto &source_pos = sg[source].pos;
-        const auto &target_pos = sg[target].pos;
-        ete_distances.emplace_back(
-                ArrayUtilities::distance(target_pos, source_pos));
+
+        ete_distances.emplace_back(SG::ete_distance(*ei, sg));
     }
     return ete_distances;
 }

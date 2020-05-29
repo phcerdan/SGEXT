@@ -26,6 +26,18 @@
 
 namespace SG {
 
+/**
+ * Computes the distance between the source and target nodes of the edge.
+ * Ignores edge_points.
+ *
+ * @param edge_desc edge descriptor of the edge.
+ * @param sg input graph
+ *
+ * @return distance between source and target nodes of the edge
+ */
+double ete_distance(const GraphType::edge_descriptor &edge_desc,
+                    const GraphType &sg);
+
 /** Compute the length between the first edge point and the last.
  * It sums the distance between every pair of consecutive points.
  * returning 0.0 if there are less than two points in the edge.
@@ -55,12 +67,13 @@ double edge_points_length(const SpatialEdge &se);
  * PRECONDITION: the edge points should be ordered/connected as they are after
  DFS.
 
- * @param e edge descriptor of the edge.
+ * @param edge_desc edge descriptor of the edge.
  * @param sg input graph
  *
  * @return contour distance between source and target of input edge.
  */
-double contour_length(const GraphType::edge_descriptor e, const GraphType &sg);
+double contour_length(const GraphType::edge_descriptor &edge_desc,
+                      const GraphType &sg);
 
 /**
  * Insert point in the input container.

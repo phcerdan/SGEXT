@@ -27,6 +27,10 @@ namespace py = pybind11;
 using namespace SG;
 
 void init_edge_points_utilities(py::module &m) {
+    m.def("ete_distance", &ete_distance, R"(
+Computes the distance between the source and target nodes of the edge.
+Ignores edge_points.
+    )");
     m.def("edge_points_length", &edge_points_length, R"(
 Computes the length of the edge without taking into account the node points.
 It requires the edge_points to be contiguous/ordered.
