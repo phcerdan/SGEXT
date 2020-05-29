@@ -11,11 +11,21 @@ namespace py = pybind11;
 using namespace SG;
 
 void init_bond(py::module &m) {
+    py::class_<BondProperties, std::shared_ptr<BondProperties>>(m, "bond_properties")
+        .def(py::init())
+        .def(py::init<const size_t &>())
+        .def_readwrite("tag", &BondProperties::tag)
+        .def("__str__", [](const BondProperties &properties) {
+                std::stringstream os;
+                print(properties, os);
+                return os.str();
+        });
     py::class_<Bond, std::shared_ptr<Bond>>(m, "bond")
         .def(py::init())
         .def(py::init<const size_t &, const size_t&>())
         .def_readwrite("id_a", &Bond::id_a)
         .def_readwrite("id_b", &Bond::id_b)
+        .def_readwrite("properties", &Bond::properties)
         .def("sort", [](Bond& bond){
                 sort(bond);
                 })
@@ -47,4 +57,18 @@ void init_bond(py::module &m) {
         .def(py::init<const size_t &, const size_t&>())
         .def(py::init<const size_t &, const size_t&, const double &>())
         .def_readwrite("length_contour", &BondChain::length_contour);
+
+    py::class_<BondPropertiesPhysical, std::shared_ptr<BondPropertiesPhysical>,
+        BondProperties>(m, "bond_properties_physical")
+        .def(py::init())
+        .def(py::init<const size_t &>())
+        .def(py::init<const size_t &, const double &, const double &>())
+        .def(py::init<const double &, const double &>())
+        .def_readwrite("persistence_length", &BondPropertiesPhysical::persistence_length)
+        .def_readwrite("kT", &BondPropertiesPhysical::kT)
+        .def("__str__", [](const BondPropertiesPhysical &properties) {
+                std::stringstream os;
+                print(properties, os);
+                return os.str();
+        });
 }
