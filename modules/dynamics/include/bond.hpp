@@ -22,6 +22,7 @@
 #define SG_BOND_HPP
 #include <cstddef>
 #include <ostream>
+#include <memory>
 #ifdef SG_USING_VTK
 #include <unordered_map>
 #include <vtkUnstructuredGrid.h>
@@ -29,10 +30,28 @@
 
 namespace SG {
 
+struct BondProperties
+{
+    size_t tag;
+
+    BondProperties() = default;
+    explicit BondProperties(const size_t &tag) : tag(tag){};
+    BondProperties(const BondProperties &) = default;
+    BondProperties(BondProperties &&) = default;
+    BondProperties &operator=(const BondProperties &) = default;
+    BondProperties &operator=(BondProperties &&) = default;
+    virtual ~BondProperties() = default;
+};
+
+void print(const BondProperties &properties,
+           std::ostream &os,
+           bool add_end_of_line = true);
+
 struct Bond {
     // id of bonded particles
     size_t id_a;
     size_t id_b;
+    std::shared_ptr<BondProperties> properties;
     Bond() = default;
     Bond(const size_t &a, const size_t &b) : id_a(a), id_b(b){};
     Bond(const Bond &) = default;
@@ -92,6 +111,23 @@ struct BondChain : public Bond {
 void print(const BondChain &bonded_pair,
            std::ostream &os,
            bool add_end_of_line);
+
+struct BondPropertiesPhysical : public BondProperties
+{
+    using BondProperties::BondProperties;
+    BondPropertiesPhysical(const size_t & tag,
+            const double & persistence_length,
+            const double & kT):
+        BondProperties(tag), persistence_length(persistence_length), kT(kT){};
+    BondPropertiesPhysical(const double & persistence_length, const double & kT):
+        BondProperties(), persistence_length(persistence_length), kT(kT){};
+    double persistence_length;
+    double kT;
+};
+
+void print(const BondPropertiesPhysical &properties,
+           std::ostream &os,
+           bool add_end_of_line = true);
 
 } // namespace SG
 #endif
