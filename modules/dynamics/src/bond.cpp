@@ -35,6 +35,14 @@ bool operator<(const Bond &lhs, const Bond &rhs) {
     return false;
 }
 
+void print(const BondProperties &properties,
+           std::ostream &os,
+           bool add_end_of_line) {
+    os << "tag: " << properties.tag;
+    if (add_end_of_line)
+        os << std::endl;
+}
+
 void print(const Bond &bonded_pair, std::ostream &os, bool add_end_of_line) {
     os << "[" << bonded_pair.id_a;
     os << ", ";
@@ -116,4 +124,14 @@ vtkIdType BondChain::append_to_vtu(vtkUnstructuredGrid *ugrid,
     return cell_id;
 }
 #endif // SG_USING_VTK
+
+void print(const BondPropertiesPhysical &properties,
+           std::ostream &os,
+           bool add_end_of_line) {
+    print(static_cast<BondProperties>(properties), os, true);
+    os << "persistence_length: " << properties.persistence_length << std::endl;
+    os << "kT: " << properties.kT;
+    if (add_end_of_line)
+        os << std::endl;
+}
 } // namespace SG
