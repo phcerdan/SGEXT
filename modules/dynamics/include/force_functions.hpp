@@ -38,9 +38,13 @@ using force_function_particles_with_bond_t =
  * force_function computing relative_extension from contour length.
 
  * Returns an array representing the vector of the resulting force of applying
- * force_extension_wlc_petrosyan_normalized(relative_extension).
+ * force_extension_wlc_petrosyan(relative_extension, persistence_length, kT)
  * Where relative_extension = end_to_end_distance / contour_length
  * The direction of the force is from the first particle to the second (F_{ab})
+ *
+ * Note that this function needs the bond to have properties derived from
+ * BondPropertiesPhysical, which contains persistence_length and kT.
+ * Those physical parameters should be set before calling this force.
  *
  * @param a first particle
  * @param b second particle
@@ -48,7 +52,7 @@ using force_function_particles_with_bond_t =
  *
  * @return F_{a,b}
  */
-ArrayUtilities::Array3D force_function_wlc_petrosyan_normalized(
+ArrayUtilities::Array3D force_function_wlc_petrosyan(
         const SG::Particle &a, const SG::Particle &b, const SG::Bond &chain);
 } // end namespace SG
 #endif

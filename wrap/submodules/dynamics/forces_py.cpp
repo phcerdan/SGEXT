@@ -67,15 +67,19 @@ void init_unbonded_forces(py::module &m) {
 }
 
 void init_force_compute_functions(py::module &m) {
-    const std::string force_function_wlc_petrosyan_normalized_doc = R"delimiter(
+    const std::string force_function_wlc_petrosyan_doc = R"delimiter(
 force_function computing relative_extension from contour length.
 
 Returns an array representing the vector of the resulting force of applying
-force_extension_wlc_petrosyan_normalized(relative_extension).
+force_extension_wlc_petrosyand(relative_extension).
 Where relative_extension = end_to_end_distance / contour_length
 The direction of the force is from the first particle to the second (F_{ab})
+
+Note that this function needs the bond to have properties derived from
+BondPropertiesPhysical, which contains persistence_length and kT.
+Those physical parameters should be set before calling this force.
 )delimiter";
-    m.def("force_function_wlc_petrosyan_normalized", &force_function_wlc_petrosyan_normalized,
-            force_function_wlc_petrosyan_normalized_doc.c_str());
+    m.def("force_function_wlc_petrosyan", &force_function_wlc_petrosyan,
+            force_function_wlc_petrosyan_doc.c_str());
 
 }

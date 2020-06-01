@@ -21,19 +21,33 @@
 #include "force_functions.hpp"
 
 namespace SG {
-ArrayUtilities::Array3D force_function_wlc_petrosyan_normalized(
+ArrayUtilities::Array3D force_function_wlc_petrosyan(
         const SG::Particle &a, const SG::Particle &b, const SG::Bond &chain) {
     const auto d_ete_vector = ArrayUtilities::minus(b.pos, a.pos); // F_{a, b}
     const auto d_ete_modulo = ArrayUtilities::norm(d_ete_vector);
+    // handle chains with same start/end particles (zero force)
+    if(d_ete_modulo <= 2.0 * std::numeric_limits<double>::epsilon()) {
+        return ArrayUtilities::Array3D();
+    }
     const auto &l_contour_length =
             static_cast<const SG::BondChain &>(chain).length_contour;
     const double relative_extension = d_ete_modulo / l_contour_length;
     // TODO handle relative_extension ~ 1 (wlc_petrosyan_normalized
     // would diverge)
-    const auto force =
-            SG::force_extension_wlc_petrosyan_normalized(relative_extension);
+    // TODO: THis is a hack, if relative extension is close to one return zero.
+    // Most of the close-to-one relative extension comes from really short edges.
+    if(relative_extension > 0.97) {
+        return ArrayUtilities::Array3D();
+    }
+    const auto bond_properties_physical =
+            std::static_pointer_cast<SG::BondPropertiesPhysical>(chain.properties);
+    const auto force_modulo = SG::force_extension_wlc_petrosyan(
+            d_ete_modulo, l_contour_length,
+            bond_properties_physical->persistence_length,
+            bond_properties_physical->kT);
     // d_ete_vector/d_ete_modulo is the unitary vector, in the direction
     // F_{a,b}
-    return ArrayUtilities::product_scalar(d_ete_vector, force / d_ete_modulo);
+    return ArrayUtilities::product_scalar(d_ete_vector,
+                                          force_modulo / d_ete_modulo);
 };
 } // end namespace SG
