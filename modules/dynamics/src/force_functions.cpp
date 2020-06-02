@@ -54,17 +54,6 @@ ArrayUtilities::Array3D force_function_wlc_petrosyan(const SG::Particle &a,
             bond_properties_physical->persistence_length;
     const auto kT = bond_properties_physical->kT;
 
-    if (persistence_length < std::numeric_limits<double>::epsilon()) {
-        throw std::runtime_error(
-                "persistence_length is zero. Set the bond_physical_properties "
-                "with persistence_length before using this force.");
-    }
-
-    if (kT < std::numeric_limits<double>::epsilon()) {
-        throw std::runtime_error("kT is zero. Set the bond_physical_properties "
-                                 "with kT before using this force.");
-    }
-
     const auto force_modulo = SG::force_extension_wlc_petrosyan(
             d_ete_modulo, l_contour_length, persistence_length, kT);
     // d_ete_vector/d_ete_modulo is the unitary vector, in the direction
