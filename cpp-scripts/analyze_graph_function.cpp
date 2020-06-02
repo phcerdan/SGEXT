@@ -227,7 +227,7 @@ void export_graph_interface(GraphType & reduced_g,
     }
     if(exportSerialized) {
         fs::path output_full_path =
-            output_folder_path / fs::path(output_full_string + ".txt");
+            output_folder_path / fs::path(output_full_string + "_serialized.txt");
         SG::write_serialized_sg(output_full_path.string(), reduced_g);
         if (verbose) {
             std::cout << "Output reduced graph (serialized) to: "
@@ -306,7 +306,7 @@ void export_graph_data_interface(const GraphType & reduced_g,
 
     fs::path data_output_full_path =
         data_output_folder_path /
-        fs::path(output_full_string + ".txt");
+        fs::path(output_full_string + "_data.txt");
     std::ofstream data_out;
     data_out.setf(std::ios_base::fixed, std::ios_base::floatfield);
     data_out.open(data_output_full_path.string().c_str());
