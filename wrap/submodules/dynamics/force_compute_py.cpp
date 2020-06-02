@@ -13,7 +13,8 @@ namespace py = pybind11;
 using namespace SG;
 
 void init_particle_force(py::module &m);
-void init_particle_force_compute(py::module &m);
+void init_ParticleForceCompute(py::module &m);
+void init_ParticleRandomForceCompute(py::module &m);
 void init_bond_force(py::module &m);
 void init_PairBondForceWithBond(py::module &m);
 void init_FixedPairBondForceWithBond(py::module &m);
@@ -35,7 +36,8 @@ void init_force_compute(py::module &m) {
         .def("get_type", &ForceCompute::get_type)
         ;
     init_particle_force(m);
-    init_particle_force_compute(m);
+    init_ParticleForceCompute(m);
+    init_ParticleRandomForceCompute(m);
     init_bond_force(m);
     init_PairBondForceWithBond(m);
     init_FixedPairBondForceWithBond(m);
@@ -49,13 +51,35 @@ void init_particle_force(py::module &m) {
         .def_readwrite("force", &ParticleForce::force);
 }
 
-void init_particle_force_compute(py::module &m) {
+void init_ParticleForceCompute(py::module &m) {
     auto force_compute_class = py::class_<ParticleForceCompute, ForceCompute,
         std::shared_ptr<ParticleForceCompute>>(m, "force_compute_particle")
         .def(py::init<const System *>())
         .def(py::init<const System *, ParticleForceCompute::force_function_t>())
         ;
     wrap_force_function_with_functional(force_compute_class);
+}
+
+void init_ParticleRandomForceCompute(py::module &m) {
+    auto force_compute_class =
+            py::class_<ParticleRandomForceCompute, ParticleForceCompute,
+                       std::shared_ptr<ParticleRandomForceCompute>>(
+                    m, "force_compute_particle_random");
+    force_compute_class.def(py::init<const System *>());
+    force_compute_class.def(
+            py::init<const System *,
+                     ParticleRandomForceCompute::force_function_t>());
+    force_compute_class.def(
+            py::init<const System *, const double &, const double &,
+                     const double &, const size_t &>(),
+            py::arg("sys"), py::arg("kT"), py::arg("gamma"), py::arg("deltaT"),
+            py::arg("dimension") = 3);
+    force_compute_class.def_readonly("modulo", &ParticleRandomForceCompute::_modulo);
+    force_compute_class.def_readonly("kT", &ParticleRandomForceCompute::kT);
+    force_compute_class.def_readonly("gamma", &ParticleRandomForceCompute::gamma);
+    force_compute_class.def_readonly("dimension", &ParticleRandomForceCompute::dimension);
+    force_compute_class.def_readonly("deltaT", &ParticleRandomForceCompute::deltaT);
+    ;
 }
 
 void init_bond_force(py::module &m) {
