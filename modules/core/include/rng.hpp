@@ -10,8 +10,8 @@ kind of external source of seed). STATUS: NO multi-thread safety tested.
   @version 1.0
 **/
 
-#ifndef RNG_UTILS_HPP
-#define RNG_UTILS_HPP
+#ifndef SG_RNG_UTILS_HPP
+#define SG_RNG_UTILS_HPP
 
 #include <array>
 #include <boost/math/constants/constants.hpp> // for pi definition
@@ -27,6 +27,7 @@ namespace RNG {
 // double const static pi=4.0*std::atan(1.); ///< Custom pi definition.
 /**  Boost definition -simple double. You can template it with long double. */
 double const static pi = boost::math::constants::pi<double>();
+double const static two_pi = boost::math::constants::two_pi<double>();
 /**Engine (uniform distribution random generator), using Marsenne generator.
  * Engine is static thread_local because it returns that kind of variable.
  * Do you want to tag static and thread_local the uniform_real_distribution?
@@ -104,7 +105,7 @@ inline double rand_pi() {
  * @return double from [0, 2pi)
  */
 inline double rand_2pi() {
-    static thread_local std::uniform_real_distribution<double> uid(0.0, 2 * pi);
+    static thread_local std::uniform_real_distribution<double> uid(0.0, two_pi);
     return uid(engine());
 }
 /** @brief randompos generation; domain: surface of sphere of radius r.
@@ -113,7 +114,8 @@ inline double rand_2pi() {
  */
 inline std::array<double, 3> random_orientation(const double &r) {
     // Math notation: phi=[0,pi], theta=[0,2pi]
-    double phi = rand_pi(), theta = rand_2pi();
+    const double phi = rand_pi();
+    const double theta = rand_2pi();
     return {r * sin(phi) * cos(theta), r * sin(phi) * sin(theta), r * cos(phi)};
 }
 /**

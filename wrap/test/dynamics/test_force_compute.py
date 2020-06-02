@@ -22,7 +22,15 @@ class TestDynamicsForceCompute(unittest.TestCase):
         self.force_compute.force_function = a_particle_force
         self.force_compute.compute()
     def test_force_function_wrapping_works_with_cpp_wrapped_functions(self):
-        self.force_compute = dynamics.force_compute_pair_bond_with_bond(self.fixture.system)
-        self.force_compute.force_function = dynamics.forces.force_function_wlc_petrosyan_normalized
         self.fixture.system.all.sort()
+        self.force_compute = dynamics.force_compute_pair_bond_with_bond(self.fixture.system)
+        self.force_compute.force_function = dynamics.forces.force_function_wlc_petrosyan
+        # Expected exception because bonds.properties are not populated with persistence_length and kT
+        with self.assertRaises(RuntimeError):
+            self.force_compute.compute()
+        # Populate bonds.properties
+        props = dynamics.bond_properties_physical(1.0, 1.0)
+        for bond in self.fixture.system.bonds.bonds:
+            bond.properties = props
+
         self.force_compute.compute()
