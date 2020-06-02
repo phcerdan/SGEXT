@@ -44,6 +44,9 @@ void read_graphviz_sg(std::istream &is, GraphType &graph) {
 void read_graphviz_sg(const std::string &input_file, GraphType &graph) {
     auto dp = get_read_dynamic_properties_sg(graph);
     std::ifstream ifile(input_file);
+    if(!ifile.is_open()) {
+        throw std::runtime_error("Failed to read input_file: " + input_file + ".");
+    }
     boost::read_graphviz(ifile, graph, dp);
 }
 
@@ -69,6 +72,9 @@ void read_serialized_sg(std::istream &is, GraphType &graph) {
 }
 void read_serialized_sg(const std::string &input_file, GraphType &graph) {
     std::ifstream ifile(input_file);
+    if(!ifile.is_open()) {
+        throw std::runtime_error("Failed to read input_file: " + input_file + ".");
+    }
     read_serialized_sg(ifile, graph);
 }
 
