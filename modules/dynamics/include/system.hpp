@@ -19,8 +19,8 @@ namespace SG {
  */
 struct System : public std::enable_shared_from_this<System> {
     ParticleCollection all; ///< all particles
-    BondCollection bonds;
-    ParticleNeighborsCollection conexions; ///< fixed bonds between particles
+    BondCollection bonds; ///< fixed bonds between particles
+    ParticleNeighborsCollection conexions;
     /** Dynamic neighbors per particle based on positions. */
     ParticleNeighborsCollection collision_neighbor_list;
     // Helpers to get references of data.
