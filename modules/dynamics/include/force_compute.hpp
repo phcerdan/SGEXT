@@ -70,13 +70,55 @@ struct ParticleForceCompute : public ForceCompute {
     force_function_t force_function;
 
     using ForceCompute::ForceCompute;
-    ParticleForceCompute(const System *sys, force_function_t force_function)
-            : ForceCompute(sys), force_function(force_function) {}
+    ParticleForceCompute(const System *sys, force_function_t in_force_function)
+            : ForceCompute(sys), force_function(in_force_function) {}
 
     void compute() override;
     inline virtual std::string get_type() override {
         return "ParticleForceCompute";
     };
+};
+
+struct ParticleRandomForceCompute : public ParticleForceCompute {
+    using ParticleForceCompute::ParticleForceCompute;
+    /**
+     * Initialize the force_function to a random
+     * force that can be used in langevin and brownian
+     * dynamics.
+     *
+     * The modulo of the force is:
+     * |Force| = sqrt(2 * dimension * kT * gamma / deltaT)
+     * where dimension is 3 by default.
+     *
+     * @param sys system (for base class)
+     * @param kT temperature
+     * @param gamma drag coefficient
+     * @param deltaT time step
+     */
+    ParticleRandomForceCompute(const System *sys,
+                               const double &kT,
+                               const double &gamma /* drag */,
+                               const double &deltaT,
+                               const size_t &dimension = 3);
+
+    inline virtual std::string get_type() override {
+        return "ParticleRandomForceCompute";
+    };
+
+    /** These variables can only be set via constructor. */
+    /** Temperature */
+    const double kT = 0.0;
+    /** Drag coefficient. */
+    const double gamma = 0.0;
+    /** Time step */
+    const double deltaT = 0.0;
+    /** Dimension of the system. */
+    const size_t dimension = 3;
+    /** The internal value used for computing the force.
+     * Computed using the constructor variables.
+     * _modulo = sqrt(2 * dimension * kT * gamma / deltaT)
+     * */
+    const double _modulo = 0;
 };
 
 /**
@@ -88,8 +130,8 @@ struct PairBondForce : public ForceCompute {
     force_function_t force_function;
 
     using ForceCompute::ForceCompute;
-    PairBondForce(const System *sys, force_function_t force_function)
-            : ForceCompute(sys), force_function(force_function) {}
+    PairBondForce(const System *sys, force_function_t in_force_function)
+            : ForceCompute(sys), force_function(in_force_function) {}
 
     void compute() override;
     inline virtual std::string get_type() override { return "PairBondForce"; };
@@ -128,9 +170,9 @@ struct PairBondForceWithBond : public ForceCompute {
             bond_forces.emplace_back(bond.get(), ArrayUtilities::Array3D());
         }
     }
-    PairBondForceWithBond(const System *sys, force_function_t force_function)
+    PairBondForceWithBond(const System *sys, force_function_t in_force_function)
             : PairBondForceWithBond(sys) {
-        force_function = force_function;
+        force_function = in_force_function;
     }
 
     void compute() override;
@@ -159,6 +201,7 @@ struct FixedPairBondForceWithBond : public PairBondForceWithBond {
         return "FixedPairBondForceWithBond";
     };
 };
+
 
 } // namespace SG
 #endif

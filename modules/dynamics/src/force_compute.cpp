@@ -20,6 +20,7 @@
 
 #include "force_compute.hpp"
 #include "particle_collection.hpp"
+#include "rng.hpp" // from core module
 
 namespace SG {
 void PairBondForce::compute() {
@@ -146,6 +147,20 @@ void ParticleForceCompute::compute() {
                                                       force_function(particle));
         current_particle_index++;
     }
+}
+
+ParticleRandomForceCompute::ParticleRandomForceCompute(
+        const System *sys,
+        const double &kT,
+        const double &gamma /* drag */,
+        const double &deltaT,
+        const size_t &dimension)
+        : ParticleForceCompute(sys), kT(kT), gamma(gamma), deltaT(deltaT), dimension(dimension), _modulo(sqrt(2 * dimension * kT * gamma / deltaT)) {
+    const auto &modulo = _modulo;
+    this->force_function =
+            [&modulo](const Particle &particle) -> ArrayUtilities::Array3D {
+                return RNG::random_orientation(modulo);
+    };
 }
 
 }; // namespace SG
