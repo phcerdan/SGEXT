@@ -159,16 +159,19 @@ bool isequalthan(const TData &v1, const TData &v2) {
  */
 template <typename PRECI = double, typename PRECI_INTEGER = unsigned long int>
 struct Histo {
+    using BreaksType = std::vector<PRECI>;
+    using RangeType = std::pair<PRECI, PRECI>;
+    using CountsType = std::vector<PRECI_INTEGER>;
     /************* DATA *****************/
     /** Low and upper limit for breaks. */
-    std::pair<PRECI, PRECI> range;
+    RangeType range;
     /** Value of the breaks between bins, [low,...,upper].
      *  size.breaks = size.counts + 1. */
-    std::vector<PRECI> breaks;
+    BreaksType breaks;
     /** breaks.size() - 1 */
     unsigned long int bins{0};
     /** int vector holding the counts for each breaks interval.*/
-    std::vector<PRECI_INTEGER> counts;
+    CountsType counts;
     /** name/description of the histogram */
     std::string name;
 
@@ -200,7 +203,7 @@ struct Histo {
      */
     template <typename TData>
     Histo(const std::vector<TData> &data,
-          const std::pair<PRECI, PRECI> &input_range,
+          const RangeType &input_range,
           histo::breaks_method method = Scott) {
         range = input_range;
         breaks = CalculateBreaks(data, range, method);
@@ -218,7 +221,7 @@ struct Histo {
      */
     template <typename TData>
     Histo(const std::vector<TData> &data,
-          const std::vector<PRECI> &input_breaks) {
+          const BreaksType &input_breaks) {
         breaks = input_breaks;
         if (!CheckIfMonotonicallyIncreasing(breaks))
             throw histo_error("input_breaks are not monotocally increasing");
@@ -229,8 +232,8 @@ struct Histo {
     };
 
     /********* PUBLIC METHODS ***********/
-    std::vector<PRECI> ComputeBinCenters() const {
-        std::vector<PRECI> centers(this->counts.size());
+    BreaksType ComputeBinCenters() const {
+        BreaksType centers(this->counts.size());
         for (unsigned long long i = 0; i < this->counts.size(); i++) {
             double break_width = (this->breaks[i + 1] - this->breaks[i]) / 2.0;
             centers[i] = this->breaks[i] + break_width;
@@ -354,7 +357,7 @@ struct Histo {
      * @return Reference to the data member @sa counts
      */
     template <typename TData>
-    std::vector<PRECI_INTEGER> &FillCounts(const std::vector<TData> &data) {
+    CountsType &FillCounts(const std::vector<TData> &data) {
         for (auto &v : data) {
             counts[IndexFromValue(v)]++;
         }
@@ -405,7 +408,7 @@ struct Histo {
     /** @} */
   protected:
     bool CheckIfMonotonicallyIncreasing(
-            const std::vector<PRECI> &input_breaks) const {
+            const BreaksType &input_breaks) const {
         auto prev_value = input_breaks[0];
         for (auto it = input_breaks.begin() + 1, it_end = input_breaks.end();
              it != it_end; it++) {
@@ -426,8 +429,8 @@ struct Histo {
      * @return Reference to data member: breaks.
      */
     template <typename TData>
-    std::vector<PRECI> &CalculateBreaks(const std::vector<TData> &data,
-                                        const std::pair<PRECI, PRECI> &rang,
+    BreaksType &CalculateBreaks(const std::vector<TData> &data,
+                                        const RangeType &rang,
                                         histo::breaks_method method) {
         switch (method) {
         case Scott:
@@ -440,7 +443,7 @@ struct Histo {
     };
 
     bool
-    CheckBreaksAreEquidistant(const std::vector<PRECI> &input_breaks) const {
+    CheckBreaksAreEquidistant(const BreaksType &input_breaks) const {
         PRECI diff = input_breaks[1] - input_breaks[0];
         for (auto it = input_breaks.begin() + 1, it_end = input_breaks.end();
              it != it_end; it++) {
@@ -453,8 +456,8 @@ struct Histo {
         return true;
     };
 
-    bool BalanceBreaksWithRange(std::vector<PRECI> &input_breaks,
-                                std::pair<PRECI, PRECI> input_range) {
+    bool BalanceBreaksWithRange(BreaksType &input_breaks,
+                                RangeType input_range) {
         if (!CheckBreaksAreEquidistant(input_breaks)) {
             std::ostream_iterator<PRECI> out_it(std::cerr, ", ");
             std::copy(input_breaks.begin(), input_breaks.end(), out_it);
@@ -525,12 +528,12 @@ struct Histo {
         diff = rhs - lhs;
         diff_isZero = isequalthan<PRECI>(diff, 0);
     };
-    void ShiftBreaks(std::vector<PRECI> &input_breaks, const PRECI &d) const {
+    void ShiftBreaks(BreaksType &input_breaks, const PRECI &d) const {
         for (auto &v : input_breaks) {
             v = v + d;
         }
     };
-    void ShrinkOrExpandBreaks(std::vector<PRECI> &input_breaks,
+    void ShrinkOrExpandBreaks(BreaksType &input_breaks,
                               const PRECI &d) const {
         unsigned long int i{0};
         for (auto &v : input_breaks) {
@@ -548,8 +551,8 @@ struct Histo {
      * @return Reference to data member: breaks.
      */
     template <typename TData>
-    std::vector<PRECI> &ScottMethod(const std::vector<TData> &data,
-                                    const std::pair<PRECI, PRECI> &rang) {
+    BreaksType &ScottMethod(const std::vector<TData> &data,
+                                    const RangeType &rang) {
         PRECI sigma = variance_welford<PRECI>(data);
         // cbrt is cubic root
         PRECI width =
