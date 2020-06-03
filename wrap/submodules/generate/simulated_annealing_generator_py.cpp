@@ -190,12 +190,15 @@ void init_simulated_annealing_generator(py::module &m) {
                  &simulated_annealing_generator::engine)
             .def_readwrite("graph",
                  &simulated_annealing_generator::graph_)
-            // TODO wrap histograms
+            .def_readwrite("histo_ete_distances",
+                 &simulated_annealing_generator::histo_ete_distances_)
+            .def_readwrite("histo_ete_cosines",
+                 &simulated_annealing_generator::histo_cosines_)
             .def_readwrite("target_cumulative_distro_histo_ete_distances",
                  &simulated_annealing_generator::target_cumulative_distro_histo_ete_distances_)
             .def_readwrite("target_cumulative_distro_histo_cosines",
                  &simulated_annealing_generator::target_cumulative_distro_histo_cosines_)
-            .def("__repr__", [](const simulated_annealing_generator &sa) {
+            .def("__str__", [](const simulated_annealing_generator &sa) {
                 std::stringstream os;
                 sa.print(os);
                 return os.str();

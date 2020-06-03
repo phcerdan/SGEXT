@@ -6,6 +6,7 @@
 #include "pybind11_common.h"
 
 namespace py = pybind11;
+void init_histo(py::module &);
 void init_simulated_annealing_generator_parameters(py::module &);
 void init_simulated_annealing_generator(py::module &);
 void init_contour_length_generator(py::module &);
@@ -13,6 +14,7 @@ void init_contour_length_generator(py::module &);
 void init_sggenerate(py::module & mparent) {
     auto m = mparent.def_submodule("generate");
     m.doc() = "Generate submodule"; // optional module docstring
+    init_histo(m);
     init_simulated_annealing_generator_parameters(m);
     init_simulated_annealing_generator(m);
     init_contour_length_generator(m);
