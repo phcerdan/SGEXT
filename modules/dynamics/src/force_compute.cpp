@@ -95,14 +95,21 @@ void PairBondForceWithBond::compute() {
         const auto [p_b, p_b_index] =
                 m_sys->all.find_particle_and_index(bond_force.bond->id_b);
         // Assign to bond_force
+        // Bond force is equal to F_{a,b}
         bond_force.force = force_function(*p_a, *p_b, *bond_force.bond);
+        // Translating a bond force using as a reference the force
+        // from particle a to b, (i.e. F_{a,b}) to each particle.
+        // We divide the bond force by half, and apply each half to each particle,
+        // changing the sign.
+        // (the particles are always at the two ends of the bond).
+        const auto half_bond_force =  ArrayUtilities::product_scalar(bond_force.force, 0.5);
         // Assign to the per particle forces
         auto &force_on_a = particle_forces[p_a_index].force;
         auto &force_on_b = particle_forces[p_b_index].force;
-        // Bond force is equal to F_{a,b}
-        force_on_a = ArrayUtilities::plus(force_on_a, bond_force.force);
+        // F_{a,b}
+        force_on_a = ArrayUtilities::plus(force_on_a, half_bond_force);
         // change sign of bond_force for the F_{b,a}
-        force_on_b = ArrayUtilities::minus(force_on_b, bond_force.force);
+        force_on_b = ArrayUtilities::minus(force_on_b, half_bond_force);
     }
 };
 
