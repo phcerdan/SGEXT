@@ -1,5 +1,5 @@
 set(python_tests_
-  test_simulated_annealing_generator.py
+  test_histo.py
   )
 get_filename_component(module_name_ ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 set(test_folder "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -19,5 +19,3 @@ foreach(python_test ${python_tests_})
   set_tests_properties(${python_test_name_} PROPERTIES
     ENVIRONMENT PYTHONPATH=$ENV{PYTHONPATH}:${CMAKE_BUILD_PYTHONLIBDIR}/..)
 endforeach()
-
-add_subdirectory(histo)
