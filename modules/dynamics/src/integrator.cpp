@@ -81,7 +81,7 @@ void VerletVelocitiesIntegratorMethod::integrateStepTwo() {
         // auto & position = m_sys->all.particles[index].pos;
         auto &velocity = m_sys->all.particles[index].dynamics.vel;
         auto &acceleration = m_sys->all.particles[index].dynamics.acc;
-        auto &force = m_sys->all.particles[index].dynamics.net_force;
+        const auto &force = m_sys->all.particles[index].dynamics.net_force;
         const auto &mass = m_sys->all.particles[index].material.mass;
         acceleration = ArrayUtilities::product_scalar(force, 1.0 / mass);
         velocity = ArrayUtilities::plus(
