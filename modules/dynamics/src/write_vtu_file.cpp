@@ -53,7 +53,8 @@ void write_vtu_file(const System *sys, const std::string &file_name) {
                   << std::endl;
     }
     // Allocate Number of cells, i.e number of bonds in the system;
-    ugrid->Allocate(unique_bonds.size());
+    const auto number_of_bonds = unique_bonds.size();
+    ugrid->Allocate(number_of_bonds);
     std::vector<vtkIdType> cell_ids;
     for (const auto &bond : unique_bonds) {
         // This adds cells (Bond adds vtkLines, but it can be overriden by
@@ -64,11 +65,26 @@ void write_vtu_file(const System *sys, const std::string &file_name) {
     // second sweep to append data dynamically depending on the type of Bond,
     // (because vtk arrays needs to know the total number of cells beforehand)
     {
+        auto ete_distance_array = vtkDoubleArray::New();
+        ete_distance_array->SetName("ete_distance");
+        ete_distance_array->SetNumberOfComponents(1);
+        ete_distance_array->SetNumberOfTuples(number_of_bonds);
+        auto cell_data = ugrid->GetCellData();
+        cell_data->AddArray(ete_distance_array);
+
         size_t cell_id_index = 0;
         for (const auto &bond : unique_bonds) {
+            // add end-to-end distance between particles
+            const auto ete_distance = ArrayUtilities::distance(
+                    sys->all.binary_find(bond->id_a)->pos,
+                    sys->all.binary_find(bond->id_b)->pos);
+            ete_distance_array->SetTuple1(cell_ids[cell_id_index], ete_distance);
+            // dynamically add extra quantities (depending on bond type)
             bond->append_to_vtu(ugrid, cell_ids[cell_id_index]);
             cell_id_index++;
         }
+        // update ete_distance_array
+        cell_data->Update();
     }
 
     auto point_data = ugrid->GetPointData();
