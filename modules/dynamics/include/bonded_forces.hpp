@@ -164,11 +164,9 @@ force_extension_wlc_petrosyan_normalized(const double &relative_extension) {
                    one_minus_relative_extension) -
            0.25;
 }
-inline double force_extension_wlc_petrosyan(const double &z_extension,
-                                            const double &l_contour,
+inline double force_extension_wlc_petrosyan(const double & relative_extension,
                                             const double &l_persistence,
                                             const double &kT) {
-    const double relative_extension = z_extension / l_contour;
     return kT / l_persistence *
            force_extension_wlc_petrosyan_normalized(relative_extension);
 };
