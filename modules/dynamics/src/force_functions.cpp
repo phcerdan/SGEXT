@@ -17,14 +17,14 @@ ArrayUtilities::Array3D force_function_wlc_petrosyan(const SG::Particle &a,
     }
     const auto &l_contour_length =
             static_cast<const SG::BondChain &>(chain).length_contour;
-    const double relative_extension = d_ete_modulo / l_contour_length;
+    double relative_extension = d_ete_modulo / l_contour_length;
     // TODO handle relative_extension ~ 1 (wlc_petrosyan_normalized
     // would diverge)
     // TODO: THis is a hack, if relative extension is close to one return zero.
     // Most of the close-to-one relative extension comes from really short
     // edges.
-    if (relative_extension > 0.97) {
-        return ArrayUtilities::Array3D();
+    if (relative_extension > 0.98) {
+        relative_extension = 0.98;
     }
     const auto bond_properties_physical =
             std::dynamic_pointer_cast<SG::BondPropertiesPhysical>(
@@ -40,7 +40,7 @@ ArrayUtilities::Array3D force_function_wlc_petrosyan(const SG::Particle &a,
     const auto kT = bond_properties_physical->kT;
 
     const auto force_modulo = SG::force_extension_wlc_petrosyan(
-            d_ete_modulo, l_contour_length, persistence_length, kT);
+            relative_extension, persistence_length, kT);
     // d_ete_vector/d_ete_modulo is the unitary vector, in the direction
     // F_{a,b}
     return ArrayUtilities::product_scalar(d_ete_vector,
