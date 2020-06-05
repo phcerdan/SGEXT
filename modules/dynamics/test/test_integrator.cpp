@@ -241,14 +241,14 @@ TEST_F(IntegratorPairBondForce_Fixture, compute_pre_stress) {
 
     // // Regular (variable/dynamic) force
     auto force_compute_pair_bond =
-            std::make_shared<SG::PairBondForceWithBond>(sys.get());
+            std::make_shared<SG::PairBondForce>(sys.get());
     force_compute_pair_bond->force_function = force_function;
     integrator.add_force(force_compute_pair_bond);
 
-    // Use FixedPairBondForceWithBond to set this force
+    // Use FixedPairBondForce to set this force
     // Save this pre-stress forces in the integrator
     auto fixed_force_compute_pair_bond =
-            std::make_shared<SG::FixedPairBondForceWithBond>(sys.get());
+            std::make_shared<SG::FixedPairBondForce>(sys.get());
     fixed_force_compute_pair_bond->force_function = force_function;
     fixed_force_compute_pair_bond->compute_once();
     fixed_force_compute_pair_bond->negate_forces();
@@ -285,7 +285,7 @@ TEST_F(IntegratorPairBondForce_Fixture, compute_pre_stress) {
     }
 }
 
-TEST_F(IntegratorPairBondForce_Fixture, PairBondForceWithBond) {
+TEST_F(IntegratorPairBondForce_Fixture, PairBondForce) {
     // Set persistence length of bonds
     const double persistence_length = 1;
     const double kT = 1;
@@ -293,11 +293,11 @@ TEST_F(IntegratorPairBondForce_Fixture, PairBondForceWithBond) {
     for(auto & bond : sys->bonds.bonds) {
         bond->properties = properties;
     }
-    auto force_compute =SG::PairBondForceWithBond(
+    auto force_compute =SG::PairBondForce(
                 sys.get(),
                 SG::force_function_wlc_petrosyan);
     auto force_compute_bond =
-        std::make_shared<SG::PairBondForceWithBond>(
+        std::make_shared<SG::PairBondForce>(
                 sys.get(),
                 SG::force_function_wlc_petrosyan
                 );

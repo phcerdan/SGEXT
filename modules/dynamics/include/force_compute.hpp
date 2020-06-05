@@ -8,6 +8,7 @@
 
 #include "system.hpp"
 #include <functional>
+#include <set>
 
 namespace SG {
 struct ParticleForce {
@@ -107,28 +108,9 @@ struct ParticleRandomForceCompute : public ParticleForceCompute {
 };
 
 /**
- * ForceCompute between a pair of Particles
+ * Structure used to store BondForces (instead of particle forces) in
+ * PairBondForce and derived classes.
  */
-struct PairBondForce : public ForceCompute {
-    using force_function_t = std::function<ArrayUtilities::Array3D(
-            const Particle &, const Particle &, const Bond &)>;
-    force_function_t force_function;
-
-    using ForceCompute::ForceCompute;
-    PairBondForce(const System *sys, force_function_t in_force_function)
-            : ForceCompute(sys), force_function(in_force_function) {}
-
-    void compute() override;
-    inline virtual std::string get_type() override { return "PairBondForce"; };
-
-  protected:
-    const ParticleNeighborsCollection &conexions = m_sys->conexions;
-};
-
-// TODO Add BondForce and BondForceCompute given force per bond
-// This should compute the force F_ab only once (per bond) and assign the force
-// to the particles i.e F_ab = - F_ba
-//
 struct BondForce {
     Bond *bond; // not owning
     ArrayUtilities::Array3D force;
@@ -142,21 +124,48 @@ struct BondForce {
     ~BondForce() = default;
 };
 
-struct PairBondForceWithBond : public ForceCompute {
+/**
+ * PairBondForce is a ForceCompute that computes the force F_ab only once
+ * (per bond) and assign the force to the two particles i.e F_ab = - F_ba
+ */
+struct PairBondForce : public ForceCompute {
     using force_function_t = std::function<ArrayUtilities::Array3D(
             const Particle &, const Particle &, const Bond &)>;
     force_function_t force_function;
     std::vector<BondForce> bond_forces;
 
     using ForceCompute::ForceCompute;
-    PairBondForceWithBond(const System *sys) : ForceCompute(sys) {
+
+    /**
+     * Only apply the force if the bonds share any tag with @ref in_tags.
+     *
+     * @param sys shared system
+     * @param in_tags container with tags
+     */
+    void only_apply_to_bonds_with_tags(const System *sys,
+                                       const BondProperties::tags_t &in_tags);
+
+    PairBondForce(const System *sys) : ForceCompute(sys) {
         bond_forces.reserve(sys->bonds.bonds.size());
         for (const auto &bond : sys->bonds.bonds) {
             bond_forces.emplace_back(bond.get(), ArrayUtilities::Array3D());
         }
     }
-    PairBondForceWithBond(const System *sys, force_function_t in_force_function)
-            : PairBondForceWithBond(sys) {
+    PairBondForce(const System *sys,
+                  const BondProperties::tags_t &in_only_apply_to_bond_with_tags)
+            : ForceCompute(sys) {
+              only_apply_to_bonds_with_tags(sys, in_only_apply_to_bond_with_tags);
+    }
+
+    PairBondForce(const System *sys, force_function_t in_force_function)
+            : PairBondForce(sys) {
+        force_function = in_force_function;
+    }
+
+    PairBondForce(const System *sys,
+        force_function_t in_force_function,
+        const BondProperties::tags_t &in_only_apply_to_bond_with_tags)
+            : PairBondForce(sys, in_only_apply_to_bond_with_tags) {
         force_function = in_force_function;
     }
 
@@ -168,22 +177,19 @@ struct PairBondForceWithBond : public ForceCompute {
     };
 
     inline virtual std::string get_type() override {
-        return "PairBondForceWithBond";
+        return "PairBondForce";
     };
-
-  protected:
-    const ParticleNeighborsCollection &conexions = m_sys->conexions;
 };
 
-struct FixedPairBondForceWithBond : public PairBondForceWithBond {
+struct FixedPairBondForce : public PairBondForce {
     bool forces_are_populated = false;
 
-    using PairBondForceWithBond::PairBondForceWithBond;
+    using PairBondForce::PairBondForce;
     void compute() override;
     void compute_once();
     void negate_forces();
     inline virtual std::string get_type() override {
-        return "FixedPairBondForceWithBond";
+        return "FixedPairBondForce";
     };
 };
 

@@ -16,13 +16,11 @@ void init_particle_force(py::module &m);
 void init_ParticleForceCompute(py::module &m);
 void init_ParticleRandomForceCompute(py::module &m);
 void init_bond_force(py::module &m);
-void init_PairBondForceWithBond(py::module &m);
-void init_FixedPairBondForceWithBond(py::module &m);
+void init_PairBondForce(py::module &m);
+void init_FixedPairBondForce(py::module &m);
 // Wrap to avoid including pybind11/funtional.h in this translation unit
 void wrap_force_function_with_functional(py::class_<ParticleForceCompute, ForceCompute,
         std::shared_ptr<ParticleForceCompute>> &c);
-void wrap_force_function_with_functional(py::class_<PairBondForceWithBond, ForceCompute,
-        std::shared_ptr<PairBondForceWithBond>> &c);
 void wrap_force_function_with_functional(py::class_<PairBondForce, ForceCompute,
         std::shared_ptr<PairBondForce>> &c);
 
@@ -39,8 +37,8 @@ void init_force_compute(py::module &m) {
     init_ParticleForceCompute(m);
     init_ParticleRandomForceCompute(m);
     init_bond_force(m);
-    init_PairBondForceWithBond(m);
-    init_FixedPairBondForceWithBond(m);
+    init_PairBondForce(m);
+    init_FixedPairBondForce(m);
 }
 
 void init_particle_force(py::module &m) {
@@ -92,30 +90,25 @@ void init_bond_force(py::module &m) {
 
 void init_PairBondForce(py::module &m) {
     auto force_compute_class = py::class_<PairBondForce, ForceCompute,
-        std::shared_ptr<PairBondForce>>(m, "force_compute_pair_bond")
+         std::shared_ptr<PairBondForce>>(m, "force_compute_pair_bond")
         .def(py::init<const System *>())
+        .def(py::init<const System *, const BondProperties::tags_t &>())
         .def(py::init<const System *, PairBondForce::force_function_t>())
+        .def(py::init<const System *, PairBondForce::force_function_t, const BondProperties::tags_t &>())
+        .def_readwrite("bond_forces", &PairBondForce::bond_forces)
+        .def("only_apply_to_bonds_with_tags", &PairBondForce::only_apply_to_bonds_with_tags,
+                "Only apply the force if the bonds share any tag with the input tags")
         ;
     wrap_force_function_with_functional(force_compute_class);
 }
 
-void init_PairBondForceWithBond(py::module &m) {
-    auto force_compute_class = py::class_<PairBondForceWithBond, ForceCompute,
-         std::shared_ptr<PairBondForceWithBond>>(m, "force_compute_pair_bond_with_bond")
-        .def(py::init<const System *>())
-        .def(py::init<const System *, PairBondForceWithBond::force_function_t>())
-        .def_readwrite("bond_forces", &PairBondForceWithBond::bond_forces)
-        ;
-    wrap_force_function_with_functional(force_compute_class);
-}
-
-void init_FixedPairBondForceWithBond(py::module &m) {
-    auto force_compute_class = py::class_<FixedPairBondForceWithBond,
-         PairBondForceWithBond,
-         std::shared_ptr<FixedPairBondForceWithBond>>(m, "force_compute_fixed_pair_bond_with_bond")
-        .def("get_type", &FixedPairBondForceWithBond::get_type)
-        .def("compute", &FixedPairBondForceWithBond::compute)
-        .def("compute_once", &FixedPairBondForceWithBond::compute_once)
-        .def("negate_forces", &FixedPairBondForceWithBond::negate_forces);
+void init_FixedPairBondForce(py::module &m) {
+    auto force_compute_class = py::class_<FixedPairBondForce,
+         PairBondForce,
+         std::shared_ptr<FixedPairBondForce>>(m, "force_compute_fixed_pair_bond")
+        .def("get_type", &FixedPairBondForce::get_type)
+        .def("compute", &FixedPairBondForce::compute)
+        .def("compute_once", &FixedPairBondForce::compute_once)
+        .def("negate_forces", &FixedPairBondForce::negate_forces);
     // wrap_force_function_with_functional(force_compute_class);
 }
