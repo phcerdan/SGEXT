@@ -23,7 +23,7 @@ class TestDynamicsForceCompute(unittest.TestCase):
         self.force_compute.compute()
     def test_force_function_wrapping_works_with_cpp_wrapped_functions(self):
         self.fixture.system.all.sort()
-        self.force_compute = dynamics.force_compute_pair_bond_with_bond(self.fixture.system)
+        self.force_compute = dynamics.force_compute_pair_bond(self.fixture.system)
         self.force_compute.force_function = dynamics.forces.force_function_wlc_petrosyan
         # Expected exception because bonds.properties are not populated with persistence_length and kT
         with self.assertRaises(RuntimeError):

@@ -50,6 +50,15 @@ ParticleGraphGlueData particles_from_graph(const GraphType &graph) {
         assert(exists == true && "Edge has to exist");
         std::static_pointer_cast<BondChain>(bond)->length_contour =
                 contour_length(edge_desc, graph);
+        // Tag bonds that correspond to free-chains (where any of the two
+        // particles have degree 1)
+        const auto degree_source = boost::degree(source_g, graph);
+        const auto degree_target = boost::degree(target_g, graph);
+        if (degree_source == 1 || degree_target == 1) {
+            bond->properties->tags.insert(tag_bond_free_chain);
+        } else {
+            bond->properties->tags.insert(tag_bond_contour_length_chain);
+        }
     }
 
     return glue_data;

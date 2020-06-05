@@ -35,10 +35,43 @@ bool operator<(const Bond &lhs, const Bond &rhs) {
     return false;
 }
 
+std::string tag_bond_int_to_string(const int &tag_bond_int)
+{
+    switch(tag_bond_int) {
+        case tag_bond_chain:
+            return tag_bond_chain_char;
+            break;
+        case tag_bond_contour_length_chain:
+            return tag_bond_contour_length_chain_char;
+            break;
+        case tag_bond_free_chain:
+            return tag_bond_free_chain_char;
+            break;
+        default:
+            return std::to_string(tag_bond_int);
+    }
+}
+int tag_bond_string_to_int(const std::string &tag_bond_string)
+{
+    if(tag_bond_string == tag_bond_chain_char)
+        return tag_bond_chain;
+    else if(tag_bond_string == tag_bond_contour_length_chain_char)
+        return tag_bond_contour_length_chain;
+    else if(tag_bond_string == tag_bond_free_chain_char)
+        return tag_bond_free_chain;
+    else
+        return std::stoi(tag_bond_string);
+}
+
 void print(const BondProperties &properties,
            std::ostream &os,
            bool add_end_of_line) {
-    os << "tag: " << properties.tag;
+    os << "tags: [ ";
+    for (const auto & tag : properties.tags) {
+        os << tag_bond_int_to_string(tag) << ", ";
+    }
+    os << " ]";
+
     if (add_end_of_line)
         os << std::endl;
 }
@@ -47,7 +80,8 @@ void print(const Bond &bonded_pair, std::ostream &os, bool add_end_of_line) {
     os << "[" << bonded_pair.id_a;
     os << ", ";
     os << bonded_pair.id_b;
-    os << "]";
+    os << "] ";
+    print(*bonded_pair.properties, os, false);
     if (add_end_of_line)
         os << std::endl;
 };
