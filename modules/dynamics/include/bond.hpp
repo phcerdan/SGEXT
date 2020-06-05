@@ -23,19 +23,35 @@
 #include <cstddef>
 #include <ostream>
 #include <memory>
+#include <set>
 #ifdef SG_USING_VTK
 #include <unordered_map>
 #include <vtkUnstructuredGrid.h>
 #endif // SG_USING_VTK
 
 namespace SG {
+/// Chain without any explicit property.
+static constexpr int tag_bond_chain = 1000;
+static constexpr auto tag_bond_chain_char = "chain";
+/// Any node with degree == 1
+static constexpr int tag_bond_free_chain = 1001;
+static constexpr auto tag_bond_free_chain_char = "free chain";
+/// Contains contour length
+static constexpr int tag_bond_contour_length_chain = 1002;
+static constexpr auto tag_bond_contour_length_chain_char = "contour length chain";
+
+std::string tag_bond_int_to_string(const int &tag_bond_int);
+int tag_bond_string_to_int(const std::string &tag_bond_string);
 
 struct BondProperties
 {
-    size_t tag;
+    using tag_t = int;
+    using tags_t = std::set<tag_t>;
+    tags_t tags;
 
     BondProperties() = default;
-    explicit BondProperties(const size_t &tag) : tag(tag){};
+    explicit BondProperties(const int &tag) : tags({tag}){};
+    explicit BondProperties(const tags_t &tags) : tags(tags){};
     BondProperties(const BondProperties &) = default;
     BondProperties(BondProperties &&) = default;
     BondProperties &operator=(const BondProperties &) = default;
@@ -52,8 +68,12 @@ struct Bond {
     size_t id_a;
     size_t id_b;
     std::shared_ptr<BondProperties> properties;
-    Bond() = default;
-    Bond(const size_t &a, const size_t &b) : id_a(a), id_b(b){};
+    Bond(){
+        properties = std::make_shared<BondProperties>();
+    };
+    Bond(const size_t &a, const size_t &b) : id_a(a), id_b(b){
+        properties = std::make_shared<BondProperties>();
+    };
     Bond(const Bond &) = default;
     Bond(Bond &&) = default;
     Bond &operator=(const Bond &) = default;
@@ -100,8 +120,8 @@ struct BondChain : public Bond {
     double length_contour = 1.0;
     BondChain(const size_t &a,
               const size_t &b,
-              const double &input_contour_lenght)
-            : Bond(a, b), length_contour(input_contour_lenght){};
+              const double &input_contour_length)
+            : Bond(a, b), length_contour(input_contour_length){};
     using Bond::Bond;
 #ifdef SG_USING_VTK
     vtkIdType append_to_vtu(vtkUnstructuredGrid *ugrid,
@@ -115,12 +135,20 @@ void print(const BondChain &bonded_pair,
 struct BondPropertiesPhysical : public BondProperties
 {
     using BondProperties::BondProperties;
-    BondPropertiesPhysical(const size_t & tag,
+
+    BondPropertiesPhysical(const double & persistence_length, const double & kT):
+        BondProperties(), persistence_length(persistence_length), kT(kT){};
+
+    BondPropertiesPhysical(const tags_t & tags,
+            const double & persistence_length,
+            const double & kT):
+        BondProperties(tags), persistence_length(persistence_length), kT(kT){};
+
+    BondPropertiesPhysical(const int & tag,
             const double & persistence_length,
             const double & kT):
         BondProperties(tag), persistence_length(persistence_length), kT(kT){};
-    BondPropertiesPhysical(const double & persistence_length, const double & kT):
-        BondProperties(), persistence_length(persistence_length), kT(kT){};
+
     double persistence_length;
     double kT;
 };

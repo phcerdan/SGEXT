@@ -26,10 +26,20 @@ namespace py = pybind11;
 using namespace SG;
 
 void init_bond(py::module &m) {
+    auto mtags = m.def_submodule("tags", "Submodule containing values for tags");
+    mtags.def("tag_bond_int_to_string", &tag_bond_int_to_string,
+            "Convert a tag to a pretty string");
+    mtags.def("tag_bond_string_to_int", &tag_bond_string_to_int,
+            "Convert a tag from string to an int (usable in bond_properties).");
+    mtags.attr("chain") = pybind11::int_(tag_bond_chain);
+    mtags.attr("free_chain") = pybind11::int_(tag_bond_free_chain);
+    mtags.attr("contour_length_chain") = pybind11::int_(tag_bond_contour_length_chain);
+
     py::class_<BondProperties, std::shared_ptr<BondProperties>>(m, "bond_properties")
         .def(py::init())
-        .def(py::init<const size_t &>())
-        .def_readwrite("tag", &BondProperties::tag)
+        .def(py::init<const BondProperties::tag_t &>())
+        .def(py::init<const BondProperties::tags_t &>())
+        .def_readwrite("tags", &BondProperties::tags)
         .def("__str__", [](const BondProperties &properties) {
                 std::stringstream os;
                 print(properties, os);
@@ -76,8 +86,8 @@ void init_bond(py::module &m) {
     py::class_<BondPropertiesPhysical, std::shared_ptr<BondPropertiesPhysical>,
         BondProperties>(m, "bond_properties_physical")
         .def(py::init())
-        .def(py::init<const size_t &>())
-        .def(py::init<const size_t &, const double &, const double &>())
+        .def(py::init<const BondProperties::tag_t &, const double &, const double &>())
+        .def(py::init<const BondProperties::tags_t &, const double &, const double &>())
         .def(py::init<const double &, const double &>())
         .def_readwrite("persistence_length", &BondPropertiesPhysical::persistence_length)
         .def_readwrite("kT", &BondPropertiesPhysical::kT)

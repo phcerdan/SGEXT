@@ -25,64 +25,8 @@
 namespace SG {
 void PairBondForce::compute() {
     if (!force_function) {
-        throw std::runtime_error("force_function is not set in PairBondForce");
-    }
-
-    reset_forces_to_zero();
-
-    size_t current_particle_index = 0;
-    for (auto &particle : m_sys->all.particles) {
-        auto bonds = m_sys->bonds.find_all_bonds_with_id(particle.id);
-        for (const auto &bond : bonds) {
-            const auto connected_particle_id =
-                    (particle.id == bond->id_a) ? bond->id_b : bond->id_a;
-            const auto [connected_particle_it, connected_particle_index] =
-                    m_sys->all.find_particle_and_index(connected_particle_id);
-
-            auto &current_particle_force =
-                    particle_forces[current_particle_index].force;
-            assert(particle.id == particle_forces[current_particle_index]
-                                          .particle_id &&
-                   "particle ids are not synchronized in "
-                   "PairBondeForce:compute(), they should be sorted as well as "
-                   "all the particles.");
-            current_particle_force = ArrayUtilities::plus(
-                    current_particle_force,
-                    force_function(particle, *connected_particle_it, *bond));
-        }
-        current_particle_index++;
-    }
-    // for (auto &p : conexions) {
-    //     // Find the particle index
-    //     const auto [particle_it, particle_index] =
-    //             m_sys->all.find_particle_and_index(p.particle_id);
-    //     if (particle_index == std::numeric_limits<size_t>::max()) {
-    //         throw std::runtime_error("The particle in bonds does not
-    //         exist.");
-    //     }
-    //     const auto &current_particle = *particle_it;
-    //     // Apply force_function between current particle and its neighbors
-    //     // if there is a proper bond between them
-    //     for (auto &neighbor_id : p.neighbors) {
-    //         const auto [neighbor_particle_it, neighbor_particle_index] =
-    //                 m_sys->all.find_particle_and_index(neighbor_id);
-    //         const auto &current_neighbor = *neighbor_particle_it;
-    //         auto &current_particle_force = forces[particle_index];
-    //         // TODO filter by bond type
-    //         // Find bond
-    //         BondChain chain = {1, 2, 2.0};
-    //         current_particle_force = ArrayUtilities::plus(
-    //                 current_particle_force,
-    //                 force_function(current_particle, current_neighbor,
-    //                 chain));
-    //     }
-    // }
-}
-
-void PairBondForceWithBond::compute() {
-    if (!force_function) {
         throw std::runtime_error(
-                "force_function is not set in PairBondForceWithBond");
+                "force_function is not set in PairBondForce");
     }
 
     reset_forces_to_zero();
@@ -113,20 +57,34 @@ void PairBondForceWithBond::compute() {
     }
 };
 
-void FixedPairBondForceWithBond::compute() {
+void PairBondForce::only_apply_to_bonds_with_tags(
+        const System *sys, const BondProperties::tags_t &in_tags) {
+    for (const auto &bond : sys->bonds.bonds) {
+        const auto &bond_tags = bond->properties->tags;
+        std::vector<BondProperties::tags_t::value_type> tags_intersection;
+        std::set_intersection(in_tags.begin(), in_tags.end(), bond_tags.begin(),
+                              bond_tags.end(),
+                              std::back_inserter(tags_intersection));
+        if (!tags_intersection.empty()) {
+            bond_forces.emplace_back(bond.get(), ArrayUtilities::Array3D());
+        }
+    }
+}
+
+void FixedPairBondForce::compute() {
     // do nothing, the forces are fixed and set in compute_once()
     if (!forces_are_populated) {
         throw std::runtime_error(
-                "FixedPairBondForceWithBond forces need to be populated before "
+                "FixedPairBondForce forces need to be populated before "
                 "calling compute(). Use compute_once(), or manually set "
                 "forces_are_populated to true.");
     }
 }
-void FixedPairBondForceWithBond::compute_once() {
-    PairBondForceWithBond::compute();
+void FixedPairBondForce::compute_once() {
+    PairBondForce::compute();
     this->forces_are_populated = true;
 }
-void FixedPairBondForceWithBond::negate_forces() {
+void FixedPairBondForce::negate_forces() {
     for (auto &pf : particle_forces) {
         pf.force = ArrayUtilities::negate(pf.force);
     }
@@ -137,7 +95,7 @@ void FixedPairBondForceWithBond::negate_forces() {
 
 void ParticleForceCompute::compute() {
     if (!force_function) {
-        throw std::runtime_error("force_function is not set in PairBondForce");
+        throw std::runtime_error("force_function is not set in ParticleForceCompute");
     }
     reset_forces_to_zero();
 

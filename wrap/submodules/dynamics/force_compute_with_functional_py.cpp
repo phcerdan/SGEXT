@@ -38,10 +38,6 @@ void wrap_force_function_with_functional(
     c.def_readwrite("force_function", &ParticleForceCompute::force_function);
 }
 void wrap_force_function_with_functional(
-        py::class_<PairBondForceWithBond, ForceCompute, std::shared_ptr<PairBondForceWithBond>> &c) {
-    c.def_readwrite("force_function", &PairBondForceWithBond::force_function);
-}
-void wrap_force_function_with_functional(
         py::class_<PairBondForce, ForceCompute, std::shared_ptr<PairBondForce>> &c) {
     c.def_readwrite("force_function", &PairBondForce::force_function);
 }
