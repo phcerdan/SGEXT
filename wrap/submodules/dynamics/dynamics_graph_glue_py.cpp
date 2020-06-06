@@ -38,5 +38,5 @@ void init_dynamics_graph_glue(py::module &m) {
                 })
         ;
 
-    m.def("particle_from_graph", &particles_from_graph);
+    m.def("particles_from_graph", &particles_from_graph);
 }
