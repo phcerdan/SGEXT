@@ -27,7 +27,6 @@
 #include <vtkCamera.h>
 #include <vtkImageMapper.h>
 #include <vtkImagePlaneWidget.h>
-#include <vtkInteractorStyleRubberBand3D.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderer.h>
@@ -52,12 +51,14 @@
 #include "convert_to_vtk_graph.hpp"
 #include "transform_to_physical_point.hpp"
 
+#include "vtkInteractorStyleTrackballCameraGraph.h"
+
 namespace SG {
 template <typename TImage>
 void visualize_spatial_graph_with_image(
         const GraphType &sg,
         const TImage *img,
-        const std::string &win_title = "itkViewGraph",
+        const std::string &win_title = "sgext: SpatialGrap and Image",
         size_t win_x = 600,
         size_t win_y = 600) {
     typedef itk::ImageToVTKImageFilter<TImage> ConnectorType;
@@ -66,65 +67,32 @@ void visualize_spatial_graph_with_image(
     connector->Update();
     connector->UpdateLargestPossibleRegion();
 
-    // Setup renderers
-    vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
-
-    // Setup render window
-    vtkSmartPointer<vtkRenderWindow> renderWindow =
-            vtkSmartPointer<vtkRenderWindow>::New();
-    renderWindow->SetWindowName(win_title.c_str());
-    renderWindow->SetSize(win_x, win_y);
-    renderWindow->AddRenderer(renderer);
-
-    // Setup render window interactor
-    vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor =
-            vtkSmartPointer<vtkRenderWindowInteractor>::New();
-    vtkSmartPointer<vtkInteractorStyleRubberBand3D> style =
-            vtkSmartPointer<vtkInteractorStyleRubberBand3D>::New();
-    renderWindowInteractor->SetInteractorStyle(style);
-
-    // Render and start interaction
-    renderWindowInteractor->SetRenderWindow(renderWindow);
-
-    typedef itk::StatisticsImageFilter<TImage> FilterType;
-    typename FilterType::Pointer filter = FilterType::New();
-    filter->SetInput(img);
-    filter->Update();
-    filter->UpdateLargestPossibleRegion();
-    double min_intensity = filter->GetMinimum();
-    double max_intensity = filter->GetMaximum();
+    using StatisticsImageFilter = itk::StatisticsImageFilter<TImage>;
+    auto stats_filter = StatisticsImageFilter::New();
+    stats_filter->SetInput(img);
+    stats_filter->Update();
+    stats_filter->UpdateLargestPossibleRegion();
+    double min_intensity = stats_filter->GetMinimum();
+    double max_intensity = stats_filter->GetMaximum();
 
     auto volumeMapper = vtkSmartPointer<vtkSmartVolumeMapper>::New();
     volumeMapper->SetBlendModeToIsoSurface(); // only supported in GPU OpenGL2
     volumeMapper->SetInputData(connector->GetOutput());
 
     auto opacityFun = vtkSmartPointer<vtkPiecewiseFunction>::New();
-    // opacityFun->AddPoint(0.0, 0.0);
-    // opacityFun->AddPoint(0.1, 0.0);
-    // opacityFun->AddPoint(255, 1.0);
-    opacityFun->AddPoint(0.0, 0.0, 0.5, 1.0);
-    opacityFun->AddPoint(0.1, 0.0, 0.5, 1.0);
-    opacityFun->AddPoint(max_intensity, 1.0, 1.0, 1.0);
+    opacityFun->AddPoint(min_intensity, 0.2);
+    opacityFun->AddPoint(max_intensity, 0.2);
 
     auto colorFun = vtkSmartPointer<vtkColorTransferFunction>::New();
-    colorFun->AddRGBPoint(0.0, 0, 0, 0, 0.0, 1.0);
-    colorFun->AddRGBPoint(0.1, 100, 100, 100, 0.5, 1.0);
-    colorFun->AddRGBPoint(max_intensity, 100, 100, 100, 1.0, 1.0);
-    // colorFun->AddRGBPoint(0.0  ,0.0,0.0,1.0);
-    // colorFun->AddRGBPoint(1.0  ,100.0,100.0,100.0);
-    // colorFun->AddRGBPoint(40.0  ,1.0,0.0,0.0);
-    // colorFun->AddRGBPoint(255.0,1.0,1.0,1.0);
+    // A palid blue
+    colorFun->AddRGBPoint(min_intensity, 0.0, 1.0, 1.0);
+    colorFun->AddRGBPoint(max_intensity, 0.0, 1.0, 1.0);
 
     auto volumeProperty = vtkSmartPointer<vtkVolumeProperty>::New();
-    // volumeProperty->SetIndependentComponents(independentComponents);
     volumeProperty->SetColor(colorFun);
     volumeProperty->SetScalarOpacity(opacityFun);
     volumeProperty->GetIsoSurfaceValues()->SetNumberOfContours(1);
-    // volumeProperty->GetIsoSurfaceValues()->SetValue(0, 1);
     volumeProperty->GetIsoSurfaceValues()->SetValue(0, max_intensity);
-    // volumeProperty->SetInterpolationTypeToLinear();
-    // volumeProperty->ShadeOff();
-    // volumeProperty->SetInterpolationType(VTK_LINEAR_INTERPOLATION);
 
     auto volume = vtkSmartPointer<vtkVolume>::New();
     volume->SetMapper(volumeMapper);
@@ -149,25 +117,30 @@ void visualize_spatial_graph_with_image(
     }
     volume->SetUserMatrix(mat);
 
-    // moved to the bottom
-    // renderer->ResetCamera();
-    // renderWindowInteractor->Initialize();
-    // renderWindowInteractor->Start();
 
+    // Setup renderer and style
+    auto renderer = vtkSmartPointer<vtkRenderer>::New();
+    renderer->AddViewProp(volume);
+    auto style = vtkSmartPointer<
+        vtkInteractorStyleTrackballCameraGraph>::New(); // like paraview
+
+    // graphLayoutView provides our window and interactor
     auto graphLayoutView = create_graph_layout_view_from_spatial_graph(sg);
+    auto renderWindowInteractor = graphLayoutView->GetInteractor();
+    renderWindowInteractor->SetInteractorStyle(style);
+    auto renderWindow = graphLayoutView->GetRenderWindow();
+    renderWindow->SetWindowName(win_title.c_str());
+    renderWindow->SetSize(win_x, win_y);
+    renderWindow->SetNumberOfLayers(2);
     // From: https://www.vtk.org/Wiki/VTK/Examples/Cxx/Images/BackgroundImage
     graphLayoutView->GetRenderer()->SetLayer(1);
     graphLayoutView->GetRenderer()->InteractiveOff();
     graphLayoutView->GetRenderer()->SetActiveCamera(
             renderer->GetActiveCamera());
-
-    renderWindow->SetNumberOfLayers(2);
-    // renderer->SetLayer(0); // This is the default
-    renderWindow->AddRenderer(graphLayoutView->GetRenderer());
     // Don't make the z buffer transparent of the graph layout
     graphLayoutView->GetRenderer()->EraseOff();
 
-    renderer->AddViewProp(volume);
+    renderWindow->AddRenderer(renderer);
 
     // Flip camera because VTK-ITK different corner for origin.
     vtkCamera *cam = renderer->GetActiveCamera();

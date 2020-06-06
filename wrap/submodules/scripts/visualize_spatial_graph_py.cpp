@@ -22,10 +22,14 @@
 
 #include "visualize_spatial_graph.hpp"
 #include "get_vtk_points_from_graph.hpp"
+#include "visualize_spatial_graph_with_image.hpp"
+#include "scripts_types.hpp" // For BinaryImageType
 
 namespace py = pybind11;
 using namespace SG;
 void init_visualize_spatial_graph(py::module &m) {
+
+/* ************************************************** */
 
     m.def("view_spatial_graph", &visualize_spatial_graph,
 R"delimiter(
@@ -38,6 +42,8 @@ input: GraphType
 )delimiter",
             py::arg("input")
             );
+
+/* ************************************************** */
 
     m.def("view_spatial_graph_with_points",
     [](
@@ -71,6 +77,44 @@ lengthX,Y,Z: float
             py::arg("lengthX") = 1.0,
             py::arg("lengthY") = 1.0,
             py::arg("lengthZ") = 1.0
+            );
+
+/* ************************************************** */
+
+    m.def("view_spatial_graph_with_binary_image",
+    [](
+    const GraphType & graph,
+    const BinaryImageType::Pointer & image,
+    const std::string & win_title,
+    size_t & win_x,
+    size_t & win_y
+    ) {
+    return visualize_spatial_graph_with_image<BinaryImageType>(
+            graph, image, win_title, win_x, win_y);
+    },
+R"delimiter(
+Visualize the spatial graph along a binary image. The binary image can be the original
+binary image before the thinning.
+
+Parameters:
+----------
+graph: GraphType
+    Spatial graph to visualize
+
+image: BinaryImageType
+    input binary image
+
+win_title: str
+    title of the vtk window
+
+winX,Y: int
+    length of the side (X, Y) of the window.
+)delimiter",
+            py::arg("graph"),
+            py::arg("image"),
+            py::arg("win_title") = "sgext: SpatialGraph and Image",
+            py::arg("wix_x") = 600,
+            py::arg("win_y") = 600
             );
 
 }
