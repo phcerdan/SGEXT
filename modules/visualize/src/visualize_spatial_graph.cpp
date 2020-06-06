@@ -33,14 +33,14 @@ create_graph_layout_view_from_spatial_graph(const GraphType &sg) {
                                                        // paraview
     graphLayoutView->SetInteractorStyle(style);
     graphLayoutView->SetColorVertices(true);
+    // graphLayoutView->SetVertexLabelVisibility(true);
+    // graphLayoutView->SetHideVertexLabelsOnInteraction(true);
     // graphLayoutView->SetGlyphType(7);
 
     // Flip camera because VTK-ITK different corner for origin.
     flip_camera(graphLayoutView->GetRenderer()->GetActiveCamera());
 
     graphLayoutView->ResetCamera();
-    // graphLayoutView->Render();
-    // graphLayoutView->GetInteractor()->Start();
     return graphLayoutView;
 }
 
