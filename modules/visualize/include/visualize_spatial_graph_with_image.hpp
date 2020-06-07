@@ -35,6 +35,7 @@
 
 #include "convert_to_vtk_graph.hpp"
 #include "transform_to_physical_point.hpp"
+#include "get_vtk_points_from_graph.hpp"
 
 #include "vtkInteractorStyleTrackballCameraGraph.h"
 
@@ -43,6 +44,8 @@ template <typename TImage>
 void visualize_spatial_graph_with_image(
         const GraphType &sg,
         const TImage *img,
+        const bool with_edge_points = false,
+        const std::array<double, 3> cube_length = {{1.0, 1.0, 1.0}},
         const std::string &win_title = "sgext: SpatialGrap and Image",
         size_t win_x = 600,
         size_t win_y = 600) {
@@ -126,6 +129,15 @@ void visualize_spatial_graph_with_image(
     graphLayoutView->GetRenderer()->EraseOff();
 
     renderWindow->AddRenderer(renderer);
+
+    if(with_edge_points)
+    {
+        const double pointsOpacity = 0.8;
+        auto points_map_pair = SG::get_vtk_points_from_graph(sg);
+        auto pointsActor = create_actor_visualize_points_as_cubes(
+                points_map_pair.first, pointsOpacity, cube_length);
+        renderer->AddActor(pointsActor);
+    }
 
     // Flip camera because VTK-ITK different corner for origin.
     vtkCamera *cam = renderer->GetActiveCamera();
