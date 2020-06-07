@@ -49,14 +49,12 @@ input: GraphType
     [](
     const GraphType & graph,
     const double & opacity,
-    const double & lengthX,
-    const double & lengthY,
-    const double & lengthZ
+    const std::array<double, 3> cube_length
     ) {
     const auto points_map_pair = get_vtk_points_from_graph(graph);
     visualize_spatial_graph_with_points(
         graph, points_map_pair.first,
-        opacity, lengthX, lengthY, lengthZ);
+        opacity, cube_length);
     },
 R"delimiter(
 Visualize the spatial graph with all the edge points.
@@ -69,14 +67,12 @@ input: GraphType
 opacity: float
     opacity of the points
 
-lengthX,Y,Z: float
-    length of the side (X, Y or Z) of the hyper-rectangle representing a point.
+cube_length: 3D Array (list)
+    3D array with cube length (X, Y and Z) of the hyper-rectangle representing a point.
 )delimiter",
             py::arg("input"),
             py::arg("opacity") = 0.8,
-            py::arg("lengthX") = 1.0,
-            py::arg("lengthY") = 1.0,
-            py::arg("lengthZ") = 1.0
+            py::arg("cube_length") = std::array<double, 3>({{1.0, 1.0, 1.0}})
             );
 
 /* ************************************************** */
@@ -85,12 +81,14 @@ lengthX,Y,Z: float
     [](
     const GraphType & graph,
     const BinaryImageType::Pointer & image,
+    const bool with_edge_points,
+    const std::array<double, 3> cube_length,
     const std::string & win_title,
     size_t & win_x,
     size_t & win_y
     ) {
     return visualize_spatial_graph_with_image<BinaryImageType>(
-            graph, image, win_title, win_x, win_y);
+            graph, image, with_edge_points, cube_length, win_title, win_x, win_y);
     },
 R"delimiter(
 Visualize the spatial graph along a binary image. The binary image can be the original
@@ -104,6 +102,13 @@ graph: GraphType
 image: BinaryImageType
     input binary image
 
+with_edge_points: bool
+    draw the edge points of the graph edges
+
+cube_length: 3D Array (list)
+    3D array with the dimensions of the hypercube representing the edge_points
+    (only used when with_edge_points = true
+
 win_title: str
     title of the vtk window
 
@@ -112,6 +117,8 @@ winX,Y: int
 )delimiter",
             py::arg("graph"),
             py::arg("image"),
+            py::arg("with_edge_points") = false,
+            py::arg("cube_length") = std::array<double, 3>({{1.0,1.0,1.0}}),
             py::arg("win_title") = "sgext: SpatialGraph and Image",
             py::arg("wix_x") = 600,
             py::arg("win_y") = 600

@@ -65,12 +65,11 @@ void visualize_spatial_graph(const GraphType &sg) {
     graphLayoutView->GetInteractor()->Start();
 }
 
-void visualize_spatial_graph_with_points(const GraphType &sg,
-                                         vtkPoints *points,
-                                         const double pointsOpacity,
-                                         const double lengthX,
-                                         const double lengthY,
-                                         const double lengthZ) {
+void visualize_spatial_graph_with_points(
+        const GraphType &sg,
+        vtkPoints *points,
+        const double pointsOpacity,
+        const std::array<double, 3> cube_length) {
     // Create a renderer, and a InteractorStyle to add to the renderWindow
     // created from the graphLayoutView.
     auto renderer = vtkSmartPointer<vtkRenderer>::New();
@@ -79,7 +78,7 @@ void visualize_spatial_graph_with_points(const GraphType &sg,
 
     // Add actor for points
     auto pointsActor = create_actor_visualize_points_as_cubes(
-            points, pointsOpacity, lengthX, lengthY, lengthZ);
+            points, pointsOpacity, cube_length);
     renderer->AddActor(pointsActor);
     renderer->ResetCamera();
 

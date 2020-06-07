@@ -36,11 +36,10 @@ create_graph_layout_view_from_spatial_graph(const GraphType &sg);
  */
 void visualize_spatial_graph(const GraphType &sg);
 
-void visualize_spatial_graph_with_points(const GraphType &sg,
-                                         vtkPoints *points,
-                                         const double pointsOpacity = 0.8,
-                                         const double lengthX = 1.0,
-                                         const double lengthY = 1.0,
-                                         const double lengthZ = 1.0);
+void visualize_spatial_graph_with_points(
+        const GraphType &sg,
+        vtkPoints *points,
+        const double pointsOpacity = 0.8,
+        const std::array<double, 3> cube_length = {{1.0, 1.0, 1.0}});
 } // namespace SG
 #endif
