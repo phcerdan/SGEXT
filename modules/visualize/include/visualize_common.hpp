@@ -9,6 +9,8 @@
 #include <vtkCamera.h>
 #include <vtkSmartPointer.h>
 
+#include <array>
+
 namespace SG {
 /**
  * Flip camera because VTK-ITK different corner for origin.
@@ -28,9 +30,6 @@ void flip_camera(vtkCamera *cam);
 vtkSmartPointer<vtkActor> create_actor_visualize_points_as_cubes(
         /* const */ vtkPoints *points,
         const double inputOpacity = 0.8,
-        const double lengthX = 1.0,
-        const double lengthY = 1.0,
-        const double lengthZ = 1.0);
-
+        const std::array<double, 3> cube_length = {{1.0, 1.0, 1.0}});
 } // namespace SG
 #endif
