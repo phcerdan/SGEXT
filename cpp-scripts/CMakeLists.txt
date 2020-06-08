@@ -1,7 +1,6 @@
 set(_scripts_targets
     thin
     analyze_graph
-    full_graph
     histograms_from_data
     create_distance_map
     mask_distance_map_with_thin_image
@@ -75,22 +74,6 @@ if(SG_MODULE_ANALYZE)
         if(SG_MODULE_VISUALIZE_WITH_QT)
             target_compile_definitions(analyze_graph PUBLIC SG_MODULE_VISUALIZE_ENABLED_WITH_QT)
         endif()
-    endif()
-endif()
-
-if(SG_MODULE_ANALYZE)
-    add_executable(full_graph full_graph.cpp)
-    target_link_libraries(full_graph SGExtract SGAnalyze)
-    target_link_libraries(full_graph ${_Boost_components})
-    target_link_libraries(full_graph
-        ${ITK_LIBRARIES}
-        ${DGTAL_LIBRARIES}
-        )
-    target_include_directories(full_graph PRIVATE ${DGTAL_INCLUDE_DIRS})
-    if(SG_MODULE_VISUALIZE_WITH_QT)
-        target_link_libraries(full_graph SGVisualize )
-        # target_link_libraries(full_graph Qt5::Widgets Qt5::Xml )
-        target_compile_definitions(full_graph PUBLIC VISUALIZE)
     endif()
 endif()
 
