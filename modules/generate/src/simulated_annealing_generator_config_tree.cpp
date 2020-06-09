@@ -19,7 +19,7 @@ void simulated_annealing_generator_config_tree::load(
 }
 
 void simulated_annealing_generator_config_tree::save(
-        const std::string &filename) {
+        const std::string &filename) const {
     pt::ptree tree;
     this->save_cosine(tree);
     this->save_degree(tree);
@@ -43,7 +43,7 @@ void simulated_annealing_generator_config_tree::load_domain(pt::ptree &tree) {
     domain_params.domain[2] = tree.get<double>("domain.z");
 }
 
-void simulated_annealing_generator_config_tree::save_domain(pt::ptree &tree) {
+void simulated_annealing_generator_config_tree::save_domain(pt::ptree &tree) const {
     const auto boundary_condition_str =
             ArrayUtilities::boundary_condition_to_string(
                     domain_params.boundary_condition);
@@ -71,7 +71,7 @@ void simulated_annealing_generator_config_tree::load_transition(
 }
 
 void simulated_annealing_generator_config_tree::save_transition(
-        pt::ptree &tree) {
+        pt::ptree &tree) const {
     tree.put("transition.energy", transition_params.energy);
     tree.put("transition.energy_initial", transition_params.energy_initial);
     tree.put("transition.accepted_transitions",
@@ -103,7 +103,7 @@ void simulated_annealing_generator_config_tree::load_degree(pt::ptree &tree) {
     degree_params.min_degree = tree.get<size_t>("degree.min_degree");
     degree_params.max_degree = tree.get<size_t>("degree.max_degree");
 }
-void simulated_annealing_generator_config_tree::save_degree(pt::ptree &tree) {
+void simulated_annealing_generator_config_tree::save_degree(pt::ptree &tree) const {
     tree.put("degree.mean", degree_params.mean);
     tree.put("degree.min_degree", degree_params.min_degree);
     tree.put("degree.max_degree", degree_params.max_degree);
@@ -119,7 +119,7 @@ void simulated_annealing_generator_config_tree::load_ete_distance(
 }
 
 void simulated_annealing_generator_config_tree::save_ete_distance(
-        pt::ptree &tree) {
+        pt::ptree &tree) const {
     tree.put("ete_distance.num_bins", ete_distance_params.num_bins);
     tree.put("ete_distance.physical_normal_mean",
              ete_distance_params.physical_normal_mean);
@@ -143,7 +143,7 @@ void simulated_annealing_generator_config_tree::load_physical_scaling(
 }
 
 void simulated_annealing_generator_config_tree::save_physical_scaling(
-        pt::ptree &tree) {
+        pt::ptree &tree) const {
     tree.put("physical_scaling.num_vertices",
              physical_scaling_params.num_vertices);
     tree.put("physical_scaling.node_density",
@@ -181,11 +181,20 @@ void simulated_annealing_generator_config_tree::load_cosine(pt::ptree &tree) {
     }
 }
 
-void simulated_annealing_generator_config_tree::save_cosine(pt::ptree &tree) {
+void simulated_annealing_generator_config_tree::save_cosine(pt::ptree &tree) const {
     tree.put("cosine.b1", cosine_params.b1);
     tree.put("cosine.b2", cosine_params.b2);
     tree.put("cosine.b3", cosine_params.b3);
     tree.put("cosine.num_bins", cosine_params.num_bins);
+}
+
+void simulated_annealing_generator_config_tree::print(std::ostream &os) const {
+    domain_params.print(os);
+    degree_params.print(os);
+    ete_distance_params.print(os);
+    cosine_params.print(os);
+    physical_scaling_params.print(os);
+    transition_params.print(os);
 }
 
 } // end namespace SG
