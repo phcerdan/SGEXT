@@ -113,6 +113,8 @@ void simulated_annealing_generator::init_graph_degree(
     const double q = 1.0 / (degree_params.mean - 2.0);
     const size_t min_degree_allowed = degree_params.min_degree;
     const size_t max_degree_allowed = degree_params.max_degree;
+    const double percentage_of_one_degree_nodes =
+        degree_params.percentage_of_one_degree_nodes;
 
     // Generate a degree_sequence
     std::vector<int> degree_sequence;
@@ -123,7 +125,7 @@ void simulated_annealing_generator::init_graph_degree(
         degree_sequence =
                 generate_degree_sequence_geometric_distribution_bounded(
                         num_vertices, q, min_degree_allowed,
-                        max_degree_allowed);
+                        max_degree_allowed, percentage_of_one_degree_nodes);
         sum = std::accumulate(std::begin(degree_sequence),
                               std::end(degree_sequence), 0);
         iteration++;
@@ -420,8 +422,7 @@ void simulated_annealing_generator::print(std::ostream &os, int spaces) const {
        << std::left << std::setw(spaces)
        << "Nodes_N= " << boost::num_vertices(graph_) << '\n'
        << std::left << std::setw(spaces)
-       << "Edges_E= " << boost::num_edges(graph_) << '\n'
-       << std::left << std::setw(spaces) << '\n';
+       << "Edges_E= " << boost::num_edges(graph_) << '\n';
     domain_params.print(os, spaces);
     physical_scaling_params.print(os, spaces);
     ete_distance_params.print(os, spaces);
