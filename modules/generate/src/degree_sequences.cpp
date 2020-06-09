@@ -27,7 +27,8 @@ std::vector<int> generate_degree_sequence_geometric_distribution_bounded(
         const size_t num_vertices,
         const double &x,
         const size_t min_degree_allowed,
-        const size_t max_degree_allowed) {
+        const size_t max_degree_allowed,
+        const double &percentage_of_one_degree_nodes) {
     assert(min_degree_allowed < max_degree_allowed);
     std::vector<int> degree_sequence(num_vertices);
     const size_t max_iterations = 100;
@@ -35,7 +36,12 @@ std::vector<int> generate_degree_sequence_geometric_distribution_bounded(
         int rand_degree = 0;
         size_t iteration = 0;
         do {
-            rand_degree = RNG::random_geometric(x) + min_degree_allowed;
+            // First RNG between one_degree_nodes or the geometric_distribution
+            if(RNG::rand01() < percentage_of_one_degree_nodes) {
+                rand_degree = 1;
+            } else {
+                rand_degree = RNG::random_geometric(x) + min_degree_allowed;
+            }
             iteration++;
         } while (rand_degree > max_degree_allowed &&
                  iteration < max_iterations);

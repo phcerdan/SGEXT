@@ -95,6 +95,8 @@ void init_simulated_annealing_generator_parameters(py::module &m) {
                            &degree_distribution_parameters::min_degree)
             .def_readwrite("max_degree",
                            &degree_distribution_parameters::max_degree)
+            .def_readwrite("percentage_of_one_degree_nodes",
+                           &degree_distribution_parameters::percentage_of_one_degree_nodes)
             .def("__repr__", [](const degree_distribution_parameters &p) {
                 std::stringstream os;
                 p.print(os);

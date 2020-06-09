@@ -134,9 +134,13 @@ struct transition_parameters {
 };
 
 struct degree_distribution_parameters {
+    /** Parameters for a shifted geometrical_random_distribution */
     double mean = 3.379692;
     size_t min_degree = 3;
     size_t max_degree = 999;
+    /** Optional parameter to include a delta distribution for degree 1
+     * (dead-ends chains). Independent of the geometrical_random_distribution*/
+    double percentage_of_one_degree_nodes = 0.;
     inline void print(std::ostream &os, int spaces = 35) const {
         os << "%/******DEGREE DISTRIBUTION "
               "PARAMETERS************/"
@@ -145,7 +149,10 @@ struct degree_distribution_parameters {
            << std::left << std::setw(spaces) << "min_degree= " << min_degree
            << '\n'
            << std::left << std::setw(spaces) << "max_degree= " << max_degree
-           << std::endl;
+           << '\n'
+           << std::left << std::setw(spaces)
+           << "percentage_of_one_degree_nodes= "
+           << percentage_of_one_degree_nodes << std::endl;
     }
 };
 
