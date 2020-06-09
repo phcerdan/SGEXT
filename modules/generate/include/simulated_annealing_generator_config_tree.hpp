@@ -60,13 +60,18 @@ struct simulated_annealing_generator_config_tree {
      *
      * @param output json file
      */
-    void save(const std::string &filename);
-    void save_transition(boost::property_tree::ptree &tree);
-    void save_domain(boost::property_tree::ptree &tree);
-    void save_degree(boost::property_tree::ptree &tree);
-    void save_ete_distance(boost::property_tree::ptree &tree);
-    void save_cosine(boost::property_tree::ptree &tree);
-    void save_physical_scaling(boost::property_tree::ptree &tree);
+    void save(const std::string &filename) const;
+    void save_transition(boost::property_tree::ptree &tree) const;
+    void save_domain(boost::property_tree::ptree &tree) const;
+    void save_degree(boost::property_tree::ptree &tree) const;
+    void save_ete_distance(boost::property_tree::ptree &tree) const;
+    void save_cosine(boost::property_tree::ptree &tree) const;
+    void save_physical_scaling(boost::property_tree::ptree &tree) const;
+
+    /**
+     * Print all parameters to os.
+     */
+    void print(std::ostream & os) const;
 };
 } // namespace SG
 #endif

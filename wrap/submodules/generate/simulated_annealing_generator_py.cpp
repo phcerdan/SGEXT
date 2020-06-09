@@ -175,7 +175,14 @@ void init_simulated_annealing_generator_parameters(py::module &m) {
                            &simulated_annealing_generator_config_tree::
                                    physical_scaling_params)
             .def("load", &simulated_annealing_generator_config_tree::load)
-            .def("save", &simulated_annealing_generator_config_tree::save);
+            .def("save", &simulated_annealing_generator_config_tree::save)
+            .def("__str__",
+                    [](const simulated_annealing_generator_config_tree & self){
+                     std::stringstream os;
+                     self.print(os);
+                     return os.str();
+                    })
+            ;
 }
 
 void init_simulated_annealing_generator(py::module &m) {
