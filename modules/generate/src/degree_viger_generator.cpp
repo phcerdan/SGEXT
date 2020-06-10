@@ -48,7 +48,7 @@ create_graph_from_degree_sequence(const std::vector<int> &degree_sequence) {
     verbose = true;
 #endif
     auto &gh = generator;
-    gh.shuffle(5 * gh.arcs_, 100 * gh.arcs_,
+    gh.shuffle(gh.arcs_, 2 * gh.arcs_,
                degree_viger_generator::ShuffleType::OPTIMAL_HEURISTICS,
                verbose);
 
