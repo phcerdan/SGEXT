@@ -196,7 +196,8 @@ void init_simulated_annealing_generator(py::module &m) {
             .def("save_parameters_to_configuration_tree",
                  &simulated_annealing_generator::save_parameters_to_configuration_tree)
             .def("engine",
-                 &simulated_annealing_generator::engine)
+                 &simulated_annealing_generator::engine,
+                 py::arg("reset_steps") = false)
             .def_readwrite("graph",
                  &simulated_annealing_generator::graph_)
             .def_readwrite("histo_ete_distances",
