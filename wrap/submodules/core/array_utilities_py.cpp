@@ -6,6 +6,7 @@
 #include "pybind11_common.h"
 
 #include "array_utilities.hpp"
+#include "boundary_conditions.hpp"
 
 namespace py = pybind11;
 using namespace ArrayUtilities;

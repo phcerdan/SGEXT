@@ -1,6 +1,7 @@
 set(current_sources_
   sgcore_init_py.cpp
   array_utilities_py.cpp
+  boundary_conditions_py.cpp
   spatial_node_py.cpp
   spatial_edge_py.cpp
   spatial_graph_py.cpp
