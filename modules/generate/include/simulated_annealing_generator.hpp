@@ -188,11 +188,16 @@ class simulated_annealing_generator {
      * The simulation stops when any of MAX_ENGINE_ITERATIONS,
      * MAX_CONSECUTIVE_FAILURES, or ENERGY_CONVERGENCE criterias are met.
      *
+     * @param reset_steps if true, set transition_params.steps_performed = 0
+     * if false, it just continues from whatever the value of that parameter.
+     * steps_performed defaults to zero, but this would allow to continue a
+     * simulation that was stopped.
+     *
      * As output, the transition parameters are populated with the
      * simulation results and the graph_ is modified to follow the input
      * distributions.
      */
-    void engine();
+    void engine(const bool &reset_steps = false);
     simulated_annealing_generator::transition check_transition();
     void set_boundary_condition(const ArrayUtilities::boundary_condition &bc);
     void print(std::ostream &os, int spaces = 35) const;

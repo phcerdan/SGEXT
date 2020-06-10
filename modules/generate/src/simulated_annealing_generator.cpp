@@ -262,9 +262,10 @@ void simulated_annealing_generator::init_histograms(
             histo_cosines_.ComputeBinCenters(), cosines_cumulative_func);
     this->populate_histogram_cosines();
 }
-void simulated_annealing_generator::engine() {
+void simulated_annealing_generator::engine(const bool &reset_steps) {
     const auto t_start = std::chrono::high_resolution_clock::now();
-    size_t steps = 0;
+    auto & steps = transition_params.steps_performed;
+    if(reset_steps) steps = 0;
     /****** For reporting progress **********/
     const double log_size =
             std::log10(transition_params.MAX_ENGINE_ITERATIONS) - 2;
