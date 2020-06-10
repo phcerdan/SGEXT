@@ -69,6 +69,8 @@ void init_simulated_annealing_generator_parameters(py::module &m) {
             .def_readwrite("temp_current", &transition_parameters::temp_current)
             .def_readwrite("temp_cooling_rate",
                            &transition_parameters::temp_cooling_rate)
+            .def_readwrite("steps_performed",
+                           &transition_parameters::steps_performed)
             .def_readwrite("MAX_CONSECUTIVE_FAILURES",
                            &transition_parameters::MAX_CONSECUTIVE_FAILURES)
             .def_readwrite("MAX_ENGINE_ITERATIONS",
