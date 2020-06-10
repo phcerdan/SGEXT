@@ -20,23 +20,13 @@
 
 #include "pybind11_common.h"
 
-namespace py = pybind11;
-void init_array3d(py::module &);
-void init_boundary_conditions(py::module &);
-void init_spatial_node(py::module &);
-void init_spatial_edge(py::module &);
-void init_spatial_graph(py::module &);
-void init_edge_points_utilities(py::module &);
-void init_spatial_graph_io(py::module &);
+#include "boundary_conditions.hpp"
 
-void init_sgcore(py::module & mparent) {
-    auto m = mparent.def_submodule("core");
-    m.doc() = "Core submodule "; // optional module docstring
-    init_array3d(m);
-    init_boundary_conditions(m);
-    init_edge_points_utilities(m);
-    init_spatial_node(m);
-    init_spatial_edge(m);
-    init_spatial_graph(m);
-    init_spatial_graph_io(m);
+namespace py = pybind11;
+using namespace ArrayUtilities;
+
+void init_boundary_conditions(py::module &m) {
+    py::enum_<boundary_condition>(m, "boundary_condition")
+        .value("NONE", boundary_condition::NONE)
+        .value("PERIODIC", boundary_condition::PERIODIC);
 }
