@@ -52,8 +52,12 @@ struct physical_scaling_parameters {
 
 struct transition_parameters {
 
-    double energy = 0.0;         ///< Current energy or score.
-    double energy_initial = 0.0; ///< Energy after network initialization.
+    /** Current energy or score. */
+    double energy = 0.0;
+    /** Number of steps performed in the simulation. */
+    size_t steps_performed = 0;
+    /** Energy after network initialization.*/
+    double energy_initial = 0.0;
     /** accepted transition:ACCEPTED since engine() started. */
     size_t accepted_transitions = 0;
     /** total transition::REJECTED since engine() started. */
@@ -91,6 +95,8 @@ struct transition_parameters {
               "PARAMETERS*****************/"
            << '\n'
            << std::left << std::setw(spaces) << "E= " << energy << '\n'
+           << std::left << std::setw(spaces)
+           << "steps_performed= " << steps_performed << '\n'
            << std::left << std::setw(spaces) << "E_initial= " << energy_initial
            << '\n'
            << std::left << std::setw(spaces)
@@ -113,8 +119,18 @@ struct transition_parameters {
            << std::left << std::setw(spaces)
            << "temp_cooling_rate= " << temp_cooling_rate << '\n'
            << std::left << std::setw(spaces)
-           << "update_step_move_node_max_step= "
-           << update_step_move_node_max_step_distance << '\n';
+           << "MAX_CONSECUTIVE_FAILURES= " << MAX_CONSECUTIVE_FAILURES << '\n'
+           << std::left << std::setw(spaces)
+           << "MAX_ENGINE_ITERATIONS= " << MAX_ENGINE_ITERATIONS << '\n'
+           << std::left << std::setw(spaces)
+           << "ENERGY_CONVERGENCE= " << ENERGY_CONVERGENCE << '\n'
+           << std::left << std::setw(spaces)
+           << "UPDATE_STEP_MOVE_NODE_PROBABILITY= "
+           << UPDATE_STEP_MOVE_NODE_PROBABILITY << '\n'
+           << std::left << std::setw(spaces)
+           << "update_step_move_node_max_step_distance= "
+           << update_step_move_node_max_step_distance << '\n'
+        ;
     }
 };
 
