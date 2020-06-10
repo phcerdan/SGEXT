@@ -55,8 +55,29 @@ void simulated_annealing_generator_config_tree::save_domain(pt::ptree &tree) con
 
 void simulated_annealing_generator_config_tree::load_transition(
         pt::ptree &tree) {
+    transition_params.energy =
+            tree.get<double>("transition.energy");
+    transition_params.steps_performed =
+            tree.get<size_t>("transition.steps_performed");
+    transition_params.energy_initial =
+            tree.get<double>("transition.energy_initial");
+    transition_params.accepted_transitions =
+            tree.get<size_t>("transition.accepted_transitions");
+    transition_params.rejected_transitions =
+            tree.get<size_t>("transition.rejected_transitions");
+    transition_params.high_temp_transitions =
+            tree.get<size_t>("transition.high_temp_transitions");
+    transition_params.consecutive_failures =
+            tree.get<size_t>("transition.consecutive_failures");
+    transition_params.time_elapsed =
+            tree.get<double>("transition.time_elapsed");
+    transition_params.temp_current =
+            tree.get<double>("transition.temp_current");
+    transition_params.temp_initial =
+            tree.get<double>("transition.temp_initial");
     transition_params.temp_cooling_rate =
             tree.get<double>("transition.temp_cooling_rate");
+
     transition_params.MAX_CONSECUTIVE_FAILURES =
             tree.get<size_t>("transition.MAX_CONSECUTIVE_FAILURES");
     transition_params.MAX_ENGINE_ITERATIONS =
@@ -73,6 +94,7 @@ void simulated_annealing_generator_config_tree::load_transition(
 void simulated_annealing_generator_config_tree::save_transition(
         pt::ptree &tree) const {
     tree.put("transition.energy", transition_params.energy);
+    tree.put("transition.steps_performed", transition_params.steps_performed);
     tree.put("transition.energy_initial", transition_params.energy_initial);
     tree.put("transition.accepted_transitions",
              transition_params.accepted_transitions);
@@ -87,6 +109,7 @@ void simulated_annealing_generator_config_tree::save_transition(
     tree.put("transition.temp_initial", transition_params.temp_initial);
     tree.put("transition.temp_cooling_rate",
              transition_params.temp_cooling_rate);
+
     tree.put("transition.MAX_CONSECUTIVE_FAILURES",
              transition_params.MAX_CONSECUTIVE_FAILURES);
     tree.put("transition.MAX_ENGINE_ITERATIONS",
@@ -102,11 +125,15 @@ void simulated_annealing_generator_config_tree::load_degree(pt::ptree &tree) {
     degree_params.mean = tree.get<double>("degree.mean");
     degree_params.min_degree = tree.get<size_t>("degree.min_degree");
     degree_params.max_degree = tree.get<size_t>("degree.max_degree");
+    degree_params.percentage_of_one_degree_nodes =
+        tree.get<double>("degree.percentage_of_one_degree_nodes");
 }
 void simulated_annealing_generator_config_tree::save_degree(pt::ptree &tree) const {
     tree.put("degree.mean", degree_params.mean);
     tree.put("degree.min_degree", degree_params.min_degree);
     tree.put("degree.max_degree", degree_params.max_degree);
+    tree.put("degree.percentage_of_one_degree_nodes",
+            degree_params.percentage_of_one_degree_nodes);
 }
 
 void simulated_annealing_generator_config_tree::load_ete_distance(
