@@ -88,6 +88,9 @@ void declare_histo(pybind11::module &m, const std::string &typestr) {
     histo.def_readwrite("bins", &Histogram::bins);
     histo.def_readwrite("counts", &Histogram::counts);
     histo.def_readwrite("name", &Histogram::name);
+    histo.def("mean", [](const Histogram &histo) {
+            return Mean(histo);
+            });
 #ifdef SG_USING_VTK
     histo.def("visualize", [](const Histogram &histo) -> void {
         visualize_histo<Histogram>(histo);
