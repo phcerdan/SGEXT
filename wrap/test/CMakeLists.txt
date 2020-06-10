@@ -14,3 +14,7 @@ if(SG_BUILD_SCRIPTS)
   add_subdirectory(scripts)
   add_subdirectory(itk)
 endif()
+
+if(SG_MODULE_VISUALIZE)
+  add_subdirectory(visualize)
+endif()
