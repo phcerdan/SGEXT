@@ -351,7 +351,14 @@ simulated_annealing_generator::energy_ete_distances_extra_penalty() const {
     // Hint, use the histograms and the distances stores in update_steps
     // Or accumulate in the histograms
     // Or, instead of average, any test of the tail of the distro.
-    return 0.0;
+    // Use penalty from Lindstrom et al:
+    // "Finite-strain, finite-size mechanics of rigidly cross-linked
+    // biopolymer-networks."
+    const double penalize_long_fibers =
+            std::abs(histo::Mean(histo_ete_distances_) /
+                             ete_distance_params.normalized_normal_mean -
+                     1);
+    return penalize_long_fibers;
 }
 
 double simulated_annealing_generator::energy_cosines() const {
@@ -365,8 +372,9 @@ double simulated_annealing_generator::energy_cosines() const {
                                            total_counts_cosines_);
 }
 double simulated_annealing_generator::energy_cosines_extra_penalty() const {
-    return histo_cosines_.counts.back() /
+    const auto last_bin_penalty = histo_cosines_.counts.back() /
            static_cast<double>(histo_cosines_.bins);
+    return last_bin_penalty;
 }
 double simulated_annealing_generator::compute_energy() const {
     const double test_ete_distances = energy_ete_distances();
