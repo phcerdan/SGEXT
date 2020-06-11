@@ -429,6 +429,7 @@ void simulated_annealing_generator::print(std::ostream &os, int spaces) const {
     ete_distance_params.print(os, spaces);
     degree_params.print(os, spaces);
     cosine_params.print(os, spaces);
+    transition_params.print(os, spaces);
     os << "%/************HISTOGRAM BINS RELATED*****************/" << '\n'
        << '\n'
        << std::left << std::setw(spaces) << "DistancesNumberElements= "
@@ -449,11 +450,25 @@ void simulated_annealing_generator::print(std::ostream &os, int spaces) const {
        << std::left << std::setw(spaces)
        << "CosinesNumberOfBins= " << histo_cosines_.bins << '\n'
        << '\n';
-    transition_params.print(os, spaces);
+    os << "%/************CURRENT ENERGY INFO ****************/" << '\n';
+    const auto en_ete = energy_ete_distances();
+    const auto en_ete_extra_penalty = energy_ete_distances_extra_penalty();
+    const auto en_ete_von_mises = en_ete - en_ete_extra_penalty;
+    const auto en_cosines = energy_cosines();
+    const auto en_cosines_extra_penalty = energy_cosines_extra_penalty();
+    const auto en_cosines_von_mises = en_cosines - en_cosines_extra_penalty;
     os << std::left << std::setw(spaces)
-       << "von_mises_test-distances= " << energy_ete_distances() << '\n'
+       << "energy_ete_distances= " << en_ete << '\n'
        << std::left << std::setw(spaces)
-       << "von_mises_test-cosines= " << energy_cosines() << '\n';
+       << "energy_ete_distances von_mises part" << en_ete_von_mises << '\n'
+       << std::left << std::setw(spaces)
+       << "energy_ete_distances extra_penaly= " << en_ete_extra_penalty << '\n';
+    os << std::left << std::setw(spaces)
+       << "energy_cosines= " << en_cosines << '\n'
+       << std::left << std::setw(spaces)
+       << "energy_cosines von_mises part" << en_cosines_von_mises << '\n'
+       << std::left << std::setw(spaces)
+       << "energy_cosines extra_penaly= " << en_cosines_extra_penalty << '\n';
 }
 
 void simulated_annealing_generator::print_histo_and_target_distribution(

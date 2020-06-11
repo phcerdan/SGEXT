@@ -210,6 +210,20 @@ void init_simulated_annealing_generator(py::module &m) {
                  &simulated_annealing_generator::target_cumulative_distro_histo_ete_distances_)
             .def_readwrite("target_cumulative_distro_histo_cosines",
                  &simulated_annealing_generator::target_cumulative_distro_histo_cosines_)
+            .def("print_histo_and_target_distribution_ete_distances",
+                    [](const simulated_annealing_generator &sa) {
+                std::stringstream os;
+                sa.print_histo_and_target_distribution_ete_distances(os);
+                return os.str();
+                })
+            .def("set_boundary_condition",
+                    &simulated_annealing_generator::set_boundary_condition)
+            .def("print_histo_and_target_distribution_cosines",
+                    [](const simulated_annealing_generator &sa) {
+                std::stringstream os;
+                sa.print_histo_and_target_distribution_cosines(os);
+                return os.str();
+                })
             .def("__str__", [](const simulated_annealing_generator &sa) {
                 std::stringstream os;
                 sa.print(os);
