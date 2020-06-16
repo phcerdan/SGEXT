@@ -20,10 +20,14 @@ Parameters:
 input: Image
     input image generated from sgext functions.
 
+use_itk: bool
+    use itk for computing the distance map
+
 verbose: bool
     extra information displayed during the algorithm.
             )delimiter",
             py::arg("input"),
+            py::arg("use_itk") = false,
             py::arg("verbose") = false
          );
     m.def("create_distance_map_io", &create_distance_map_function_io,
@@ -41,12 +45,16 @@ foreground: str
     [white, black]
     Invert image if foreground voxels are black.
 
+use_itk: bool
+    use itk for computing the distance map
+
 verbose: bool
     extra information displayed during the algorithm.
             )delimiter",
             py::arg("input_file"),
             py::arg("out_folder"),
             py::arg("foreground") = "white",
+            py::arg("use_itk") = false,
             py::arg("verbose") = false
          );
 

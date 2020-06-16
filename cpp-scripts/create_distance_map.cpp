@@ -12,45 +12,51 @@
 
 namespace po = boost::program_options;
 
-int main(int argc, char* const argv[]) {
-  /*-------------- Parse command line -----------------------------*/
-  po::options_description opt_desc("Allowed options are: ");
-  opt_desc.add_options()("help,h", "display this message.");
-  opt_desc.add_options()("input,i", po::value<std::string>()->required(),
-                         "Input thin image.");
-  opt_desc.add_options()("outputFolder,o", po::value<std::string>()->required(),
-                         "Output folder for the distance map.");
-  // opt_desc.add_options()( "visualize,t",
-  // po::bool_switch()->default_value(false), "Visualize object with DGtal.
-  // Requires VISUALIZE option enabled at build.");
-  opt_desc.add_options()("foreground,f",
-                         po::value<std::string>()->default_value("white"),
-                         "foreground color in binary image [black|white]");
-  opt_desc.add_options()("verbose,v", po::bool_switch()->default_value(false),
-                         "verbose output.");
+int main(int argc, char *const argv[]) {
+    /*-------------- Parse command line -----------------------------*/
+    po::options_description opt_desc("Allowed options are: ");
+    opt_desc.add_options()("help,h", "display this message.");
+    opt_desc.add_options()("input,i", po::value<std::string>()->required(),
+                           "Input thin image.");
+    opt_desc.add_options()("outputFolder,o",
+                           po::value<std::string>()->required(),
+                           "Output folder for the distance map.");
+    // opt_desc.add_options()( "visualize,t",
+    // po::bool_switch()->default_value(false), "Visualize object with DGtal.
+    // Requires VISUALIZE option enabled at build.");
+    opt_desc.add_options()("foreground,f",
+                           po::value<std::string>()->default_value("white"),
+                           "foreground color in binary image [black|white]");
+    opt_desc.add_options()("use_itk_approximate,a",
+                           po::bool_switch()->default_value(false),
+                           "approximate dmap using itk (Chamfer distance).");
+    opt_desc.add_options()("verbose,v", po::bool_switch()->default_value(false),
+                           "verbose output.");
 
-  po::variables_map vm;
-  try {
-    po::store(po::parse_command_line(argc, argv, opt_desc), vm);
-    if(vm.count("help") || argc <= 1) {
-      std::cout << "Basic usage:\n" << opt_desc << "\n";
-      return EXIT_SUCCESS;
+    po::variables_map vm;
+    try {
+        po::store(po::parse_command_line(argc, argv, opt_desc), vm);
+        if (vm.count("help") || argc <= 1) {
+            std::cout << "Basic usage:\n" << opt_desc << "\n";
+            return EXIT_SUCCESS;
+        }
+        po::notify(vm);
+    } catch (const std::exception &e) {
+        std::cerr << e.what() << std::endl;
+        return EXIT_FAILURE;
     }
-    po::notify(vm);
-  } catch(const std::exception& e) {
-    std::cerr << e.what() << std::endl;
-    return EXIT_FAILURE;
-  }
 
-  std::string filename = vm["input"].as<std::string>();
-  std::string outputFolder = vm["outputFolder"].as<std::string>();
-  ;
-  bool verbose = vm["verbose"].as<bool>();
-  std::string foreground = vm["foreground"].as<std::string>();
-  if(vm.count("foreground") &&
-     (!(foreground == "white" || foreground == "black")))
-    throw po::validation_error(po::validation_error::invalid_option_value,
-                               "foreground");
+    std::string filename = vm["input"].as<std::string>();
+    std::string outputFolder = vm["outputFolder"].as<std::string>();
+    ;
+    bool verbose = vm["verbose"].as<bool>();
+    bool use_itk_approximate = vm["use_itk_approximate"].as<bool>();
+    std::string foreground = vm["foreground"].as<std::string>();
+    if (vm.count("foreground") &&
+        (!(foreground == "white" || foreground == "black")))
+        throw po::validation_error(po::validation_error::invalid_option_value,
+                                   "foreground");
 
-  SG::create_distance_map_function_io(filename, outputFolder, foreground, verbose);
+    SG::create_distance_map_function_io(filename, outputFolder, foreground,
+                                        use_itk_approximate, verbose);
 }

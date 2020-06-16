@@ -22,6 +22,15 @@ namespace SG {
  */
 typename FloatImageType::Pointer create_distance_map_function(
         const typename BinaryImageType::Pointer & input_img,
+        const bool use_itk_approximate = false,
+        const bool verbose = false
+        );
+typename FloatImageType::Pointer create_distance_map_function_with_dgtal(
+        const typename BinaryImageType::Pointer & input_img,
+        const bool verbose = false
+        );
+typename FloatImageType::Pointer create_distance_map_function_with_itk(
+        const typename BinaryImageType::Pointer & input_img,
         const bool verbose = false
         );
 
@@ -37,6 +46,7 @@ typename FloatImageType::Pointer create_distance_map_function_io(
         const std::string & input_img_file,
         const std::string & outputFolder,
         const std::string & foreground = "white",
+        const bool use_itk_approximate = false,
         const bool verbose = false
         );
 
