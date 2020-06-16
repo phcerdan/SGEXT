@@ -17,15 +17,15 @@ class TestITKViewImage(unittest.TestCase):
         cls.input = os.path.join(dirname, '../../../images/bX3D.tif')
         if not os.path.exists(cls.input):
             raise "Input image for script used in test_view_image not found: " + cls.input
-        cls.img =scripts.create_distance_map_io(input_file=cls.input,
-                          out_folder=cls.test_dir,
-                          foreground="black",
-                          verbose=True)
 
     # TODO closing is not automated
     def test_from_file(self):
         itk.view_image(input_file=self.input, win_title = "Original image (foreground=black)")
 
     def test_from_sgext_itk_img(self):
-        itk.view_image(input=self.img, win_title = "DMap")
-
+        dmap =scripts.create_distance_map_io(input_file=self.input,
+                          out_folder=self.test_dir,
+                          foreground="black",
+                          use_itk=False,
+                          verbose=True)
+        itk.view_image(input=dmap, win_title = "DMap")

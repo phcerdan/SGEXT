@@ -22,13 +22,47 @@
 #include <itkImageFileWriter.h>
 #include <itkChangeInformationImageFilter.h>
 #include <itkInvertIntensityImageFilter.h>
+// Compute DMap using ITK instead of DGtal
+#include <itkApproximateSignedDistanceMapImageFilter.h>
+#include <itkThresholdImageFilter.h>
+#include <itkAbsImageFilter.h>
 
 // Boost Filesystem
 #include <boost/filesystem.hpp>
 
 namespace SG {
 
-typename FloatImageType::Pointer create_distance_map_function(
+
+typename FloatImageType::Pointer create_distance_map_function_with_itk(
+        const typename BinaryImageType::Pointer & input_img,
+        const bool verbose)
+{
+    using DistanceMapFilter =
+            itk::ApproximateSignedDistanceMapImageFilter<BinaryImageType,
+                                                         FloatImageType>;
+    auto dmap_filter = DistanceMapFilter::New();
+    dmap_filter->SetOutsideValue(0);
+    dmap_filter->SetInsideValue(255);
+    dmap_filter->SetInput(input_img);
+
+    // Theshold and abs filters to be analogous of the DGtal results of DMap.
+    // Not interested in dmap values outside of the object.
+    using ThresholdFilterType = itk::ThresholdImageFilter<FloatImageType>;
+    auto threshold_filter = ThresholdFilterType::New();
+    threshold_filter->SetInput(dmap_filter->GetOutput());
+    threshold_filter->SetOutsideValue(0);
+    threshold_filter->ThresholdAbove(0);
+
+    // The dmap values inside the object are negative
+    using AbsFilterType = itk::AbsImageFilter<FloatImageType, FloatImageType>;
+    auto abs_filter = AbsFilterType::New();
+    abs_filter->SetInput(threshold_filter->GetOutput());
+    abs_filter->InPlaceOn();
+    abs_filter->Update();
+    return abs_filter->GetOutput();
+}
+
+typename FloatImageType::Pointer create_distance_map_function_with_dgtal(
         const typename BinaryImageType::Pointer & input_img,
         const bool verbose
         )
@@ -79,11 +113,22 @@ typename FloatImageType::Pointer create_distance_map_function(
     return changeInfo->GetOutput();
 }
 
+typename FloatImageType::Pointer
+create_distance_map_function(const typename BinaryImageType::Pointer &input_img,
+                             const bool use_itk_approximate,
+                             const bool verbose) {
+    if (use_itk_approximate) {
+        return create_distance_map_function_with_itk(input_img, verbose);
+    } else {
+        return create_distance_map_function_with_dgtal(input_img, verbose);
+    }
+}
 
 typename FloatImageType::Pointer create_distance_map_function_io(
         const std::string & input_filename,
         const std::string & outputFolder,
         const std::string & foreground,
+        const bool use_itk_approximate,
         const bool verbose
         )
 {
@@ -133,7 +178,8 @@ typename FloatImageType::Pointer create_distance_map_function_io(
         : Image::ITKImagePointer(reader->GetOutput());
 
     using ItkFloatImageType = SG::FloatImageType;
-    const ItkFloatImageType::Pointer output_float_img = create_distance_map_function(handle_out, verbose);
+    const ItkFloatImageType::Pointer output_float_img =
+        create_distance_map_function(handle_out, use_itk_approximate, verbose);
 
     // Write the image
     using ITKImageWriter = itk::ImageFileWriter<ItkFloatImageType>;

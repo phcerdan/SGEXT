@@ -21,4 +21,5 @@ class TestCreateDistanceMap(unittest.TestCase):
             input_file=self.input,
             out_folder=self.test_dir,
             foreground="black",
+            use_itk=False,
             verbose=True)
