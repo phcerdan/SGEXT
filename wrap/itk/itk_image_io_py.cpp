@@ -65,27 +65,33 @@ output_file: string
 )delimiter";
 // clang-format on
     m.def("write",
-            [](SG::IUC3P input_image, const std::string & out_file) -> void {
+            [](SG::IUC3P input_image, const std::string & out_file,
+                const bool & compression) -> void {
                 using WriterType = itk::ImageFileWriter<SG::IUC3>;
                 auto writer = WriterType::New();
                 writer->SetInput(input_image);
                 writer->SetFileName(out_file);
+                writer->SetUseCompression(compression);
                 writer->Update();
             },
             write_common_docs.c_str(),
             py::arg("input_image"),
-            py::arg("output_file")
+            py::arg("output_file"),
+            py::arg("compression") = true
          );
     m.def("write",
-            [](SG::IF3P input_image, const std::string & out_file) -> void {
+            [](SG::IF3P input_image, const std::string & out_file,
+                const bool & compression) -> void {
                 using WriterType = itk::ImageFileWriter<SG::IF3>;
                 auto writer = WriterType::New();
                 writer->SetInput(input_image);
                 writer->SetFileName(out_file);
+                writer->SetUseCompression(compression);
                 writer->Update();
             },
             write_common_docs.c_str(),
             py::arg("input_image"),
-            py::arg("output_file")
+            py::arg("output_file"),
+            py::arg("compression") = true
          );
 }
