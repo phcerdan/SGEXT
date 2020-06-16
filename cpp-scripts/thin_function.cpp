@@ -399,6 +399,7 @@ BinaryImageType::Pointer thin_function_io(const std::string &filename,
   // Write the image
   using ITKImageWriter = itk::ImageFileWriter<ItkImageType>;
   auto writer = ITKImageWriter::New();
+  writer->UseCompressionOn();
   try {
     writer->SetFileName(output_full_path.string().c_str());
     writer->SetInput(thin_image);

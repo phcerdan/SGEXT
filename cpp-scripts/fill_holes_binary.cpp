@@ -168,6 +168,7 @@ int main(int argc, char* const argv[]) {
   try {
     writer->SetFileName(output_full_path.string().c_str());
     writer->SetInput(filled_image);
+    writer->UseCompressionOn();
     writer->Update();
   } catch(itk::ExceptionObject& e) {
     std::cerr << "Failure writing file: " << output_full_path.string()
