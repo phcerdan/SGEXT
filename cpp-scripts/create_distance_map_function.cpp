@@ -187,6 +187,7 @@ typename FloatImageType::Pointer create_distance_map_function_io(
     try {
         writer->SetFileName(output_full_path.string().c_str());
         writer->SetInput(output_float_img);
+        writer->UseCompressionOn();
         writer->Update();
     } catch(itk::ExceptionObject& e) {
         std::cerr << "Failure writing file: " << output_full_path.string()

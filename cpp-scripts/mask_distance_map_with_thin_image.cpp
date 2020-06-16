@@ -81,6 +81,7 @@ int main(int argc, char* const argv[]) {
   // Write the image
   using WriterFilterType = itk::ImageFileWriter<DistanceMapImageType>;
   auto writer = WriterFilterType::New();
+  writer->UseCompressionOn();
   const fs::path output_folder_path{outputFolder};
   fs::path output_full_path =
       output_folder_path / fs::path(output_file_path.string() + ".nrrd");
