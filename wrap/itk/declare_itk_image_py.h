@@ -227,7 +227,7 @@ void declare_itk_image_ptr(pybind11::module &m, const std::string &typestr) {
                 // importer->SetDirection(img->GetDirection());
                 // img owns the buffer, not the import filter
                 const bool importImageFilterWillOwnTheBuffer = false;
-                auto * data = static_cast<typename TImagePointer::ObjectType::PixelType*>(info.ptr);
+                const auto data = static_cast<typename TImagePointer::ObjectType::PixelType*>(info.ptr);
                 const auto numberOfPixels = np_array.size();
                 importer->SetImportPointer(
                         data, numberOfPixels, importImageFilterWillOwnTheBuffer);

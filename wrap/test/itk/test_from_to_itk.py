@@ -48,16 +48,35 @@ class TestFromToITK(unittest.TestCase):
         except:
             print("Warning: itk python package not found. Not testing sgext_to_itk")
             return
+        print("test_sgext_to_itk")
         img = self.img
         itk_img = from_to.sgext_to_itk(img)
 
         itk_size = itk_img.GetLargestPossibleRegion().GetSize()
-        np.testing.assert_array_almost_equal([itk_size[0], itk_size[1], itk_size[2]], img.size() )
+        np.testing.assert_array_almost_equal([itk_size[0], itk_size[1], itk_size[2]],
+                                             img.size() )
         itk_spacing = itk_img.GetSpacing()
-        np.testing.assert_array_almost_equal([itk_spacing[0], itk_spacing[1], itk_spacing[2]], img.spacing() )
+        np.testing.assert_array_almost_equal([itk_spacing[0], itk_spacing[1], itk_spacing[2]],
+                                             img.spacing() )
 
         itk_direction = itk_img.GetDirection().GetVnlMatrix()
         row0 = [itk_direction.get(0,0), itk_direction.get(0, 1), itk_direction(0,2)]
         row1 = [itk_direction.get(1,0), itk_direction.get(1, 1), itk_direction(1,2)]
         row2 = [itk_direction.get(2,0), itk_direction.get(2, 1), itk_direction(2,2)]
         np.testing.assert_array_almost_equal([row0, row1, row2], img.direction() )
+
+    def test_itk_to_sgext(self):
+        try:
+            import itk
+        except:
+            print("Warning: itk python package not found. Not testing itk_to_sgext")
+            return
+        print("test_itk_to_sgext")
+        itk_img = itk.imread(self.input)
+        print(type(itk_img))
+        sgext_img = from_to.itk_to_sgext(itk_img)
+        itk_spacing = itk_img.GetSpacing()
+        np.testing.assert_array_almost_equal(sgext_img.spacing(),
+                                             [itk_spacing[0], itk_spacing[1], itk_spacing[2]])
+        import sgext
+        sgext.itk.view_image(sgext_img, "itk_to_sgext")
