@@ -1,23 +1,31 @@
 import sys as _sys
 import sgext as _sgext
 
-def itk_to_sgext(itk_image, sgext_type="float"):
+def itk_to_sgext(itk_image):
     try:
         import itk as _itk
     except ModuleNotFoundError as e:
         print("This function needs itk, pip install itk")
         raise e
 
-    valid_types = ["float", "binary"]
-    if sgext_type not in valid_types:
-        raise TypeError("sgext_type {} not valid. Valid types are {}".format(sgext_type, valid_types))
+    # Dev: it fails without View (copying it), probably because python
+    # doesn't handle the memory of the copy as we might expect.
+    # Other option would be to perform the copy here, and let ImportImageFilter
+    # (used in from_pyarray function) to handle the memory.
+    np_array = _itk.GetArrayViewFromImage(itk_image)
+    if np_array.ndim != 3:
+        raise TypeError("itk_image has dimension {}. Valid type is {}".format(np_array.ndim, 3))
 
-    if sgext_type == "float":
+    dtype = np_array.dtype
+    valid_dtypes = ["uint8", "float"]
+    if dtype not in valid_dtypes:
+        raise TypeError("dtype of the itk_image {} not valid. Valid types are {}".format(dtype, valid_dtypes))
+
+    if dtype == "float":
         sgext_image = _sgext.itk.IF3P()
-    elif sgext_type == "binary":
+    elif dtype == "uint8":
         sgext_image = _sgext.itk.IUC3P()
-
-    sgext_image.from_pyarray(_itk.GetArrayFromImage(itk_image))
+    sgext_image.from_pyarray(np_array)
     origin = itk_image.GetOrigin()
     sgext_image.set_origin(_itk.numpy.array([origin[0], origin[1], origin[2]]))
     spacing = itk_image.GetSpacing()
