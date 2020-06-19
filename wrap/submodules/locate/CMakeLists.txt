@@ -1,6 +1,7 @@
 set(current_sources_
   sglocate_init_py.cpp
   get_vtk_points_from_graph_py.cpp
+  graph_points_locator_py.cpp
   )
 set(module_name_ ${CMAKE_CURRENT_SOURCE_DIR})
 list(TRANSFORM current_sources_ PREPEND "${module_name_}/")

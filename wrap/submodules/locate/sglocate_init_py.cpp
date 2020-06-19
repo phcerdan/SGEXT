@@ -8,9 +8,11 @@
 
 namespace py = pybind11;
 void init_get_vtk_points_from_graph(py::module &m);
+void init_graph_points_locator(py::module &m);
 
 void init_sglocate(py::module & mparent) {
     auto m = mparent.def_submodule("locate");
     m.doc() = "Locate submodule "; // optional module docstring
     init_get_vtk_points_from_graph(m);
+    init_graph_points_locator(m);
 }
