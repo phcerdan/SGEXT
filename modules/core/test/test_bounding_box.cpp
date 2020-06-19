@@ -71,3 +71,38 @@ TEST(bounding_box, is_inside) {
     pos = {{1.0, 1.0, 1.0}};
     EXPECT_TRUE(SG::is_inside(pos, box));
 }
+
+TEST(bounding_box, build_enclosing_box) {
+    SG::BoundingBox box0;
+    box0.ini = {{0, 1, 2}};
+    box0.end = {{1, 2, 3}};
+
+    SG::BoundingBox box1;
+    box1.ini = {{0.5, 0.5, 0.5}};
+    box1.end = {{4, 5, 6}};
+
+    SG::BoundingBox box2;
+    box2.ini = {{-2, -3, -4}};
+    box2.end = {{0.5, 0.5, 0.5}};
+
+    std::vector<SG::BoundingBox> boxes = {box0, box1, box2};
+    const auto enclosing_box = SG::BoundingBox::BuildEnclosingBox(boxes);
+    EXPECT_FLOAT_EQ(enclosing_box.ini[0], -2);
+    EXPECT_FLOAT_EQ(enclosing_box.ini[1], -3);
+    EXPECT_FLOAT_EQ(enclosing_box.ini[2], -4);
+    EXPECT_FLOAT_EQ(enclosing_box.end[0], 4);
+    EXPECT_FLOAT_EQ(enclosing_box.end[1], 5);
+    EXPECT_FLOAT_EQ(enclosing_box.end[2], 6);
+}
+
+TEST(bounding_box, are_bounds_inside) {
+    SG::BoundingBox box;
+    box.ini = {{0, 0, 0}};
+    box.end = {{1, 1, 1}};
+
+    SG::BoundingBox external_box;
+    box.ini = {{0, 0, 0}};
+    box.end = {{2, 2, 2}};
+
+    EXPECT_TRUE(box.are_bounds_inside(external_box));
+}
