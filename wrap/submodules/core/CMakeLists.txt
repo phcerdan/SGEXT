@@ -7,6 +7,7 @@ set(current_sources_
   spatial_graph_py.cpp
   spatial_graph_io_py.cpp
   edge_points_utilities_py.cpp
+  bounding_box_py.cpp
   )
 set(module_name_ ${CMAKE_CURRENT_SOURCE_DIR})
 list(TRANSFORM current_sources_ PREPEND "${module_name_}/")

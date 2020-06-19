@@ -3,6 +3,7 @@ set(python_tests_
   test_edge_points_utilities.py
   test_graph.py
   test_spatial_graph_io.py
+  test_bounding_box.py
   )
 
 get_filename_component(module_name_ ${CMAKE_CURRENT_SOURCE_DIR} NAME)
