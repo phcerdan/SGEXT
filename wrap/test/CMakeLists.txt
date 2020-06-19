@@ -18,3 +18,7 @@ endif()
 if(SG_MODULE_VISUALIZE)
   add_subdirectory(visualize)
 endif()
+
+if(SG_MODULE_LOCATE)
+  add_subdirectory(locate)
+endif()
