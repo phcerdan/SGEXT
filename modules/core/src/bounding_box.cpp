@@ -88,18 +88,33 @@ BoundingBox::BuildEnclosingBox(const std::vector<double *> &bounds_vector) {
     double zMax = std::numeric_limits<double>::min();
 
     for (const auto &bounds : bounds_vector) {
-        if (bounds[0] < xMin)
-            xMin = bounds[0];
-        if (bounds[2] < yMin)
-            yMin = bounds[2];
-        if (bounds[4] < zMin)
-            zMin = bounds[4];
-        if (bounds[1] > xMax)
-            xMax = bounds[1];
-        if (bounds[3] > yMax)
-            yMax = bounds[3];
-        if (bounds[5] > zMax)
-            zMax = bounds[5];
+        xMin = bounds[0] < xMin ? bounds[0] : xMin;
+        yMin = bounds[2] < yMin ? bounds[2] : yMin;
+        zMin = bounds[4] < zMin ? bounds[4] : zMin;
+        xMax = bounds[1] > xMax ? bounds[1] : xMax;
+        yMax = bounds[3] > yMax ? bounds[3] : yMax;
+        zMax = bounds[5] > zMax ? bounds[5] : zMax;
+    }
+
+    return BoundingBox(xMin, xMax, yMin, yMax, zMin, zMax);
+}
+
+BoundingBox BoundingBox::BuildEnclosingBox(
+        const std::vector<BoundingBox> &bounding_box_vector) {
+    double xMin = std::numeric_limits<double>::max();
+    double yMin = std::numeric_limits<double>::max();
+    double zMin = std::numeric_limits<double>::max();
+    double xMax = std::numeric_limits<double>::min();
+    double yMax = std::numeric_limits<double>::min();
+    double zMax = std::numeric_limits<double>::min();
+
+    for (const auto &box : bounding_box_vector) {
+        xMin = box.ini[0] < xMin ? box.ini[0] : xMin;
+        yMin = box.ini[1] < yMin ? box.ini[1] : yMin;
+        zMin = box.ini[2] < zMin ? box.ini[2] : zMin;
+        xMax = box.end[0] > xMax ? box.end[0] : xMax;
+        yMax = box.end[1] > yMax ? box.end[1] : yMax;
+        zMax = box.end[2] > zMax ? box.end[2] : zMax;
     }
 
     return BoundingBox(xMin, xMax, yMin, yMax, zMin, zMax);
@@ -135,15 +150,32 @@ bool BoundingBox::are_bounds_inside(double *external_bounds) const {
            external_bounds[5] >= ini[2] && external_bounds[5] <= end[2];
 }
 
-void BoundingBox::Print(double *b, const std::string &label) const {
-    std::cout << label << ": ";
-    std::cout << b[0] << ", " << b[1] << ", " << b[2] << ", " << b[3] << ", "
-              << b[4] << ", " << b[5] << ", " << std::endl;
+bool BoundingBox::are_bounds_inside(const BoundingBox &external_box) const {
+    return is_point_inside(external_box.ini) &&
+           is_point_inside(external_box.end);
 }
 
-void BoundingBox::Print(const std::string &label) const {
-    double bounds[6];
-    this->GetBounds(bounds);
-    this->Print(bounds, label);
+void BoundingBox::Print(double *b,
+                        const std::string &label,
+                        std::ostream &os) const {
+
+    os << label << ": " << std::endl;
+    os << " Xmin, Xmax: (" << b[0] << ", " << b[1] << "), " << std::endl;
+    os << " Ymin, Ymax: (" << b[2] << ", " << b[3] << "), " << std::endl;
+    os << " Zmin, Zmax: (" << b[4] << ", " << b[5] << "), " << std::endl;
+}
+
+void BoundingBox::Print(const std::string &label, std::ostream &os, bool one_line) const {
+    if(one_line) {
+        const bool comma_separated = true;
+        const auto label_with_space = !label.empty() ? label + " " : label;
+        os << label_with_space << "ini: (" <<
+            ArrayUtilities::to_string(ini, comma_separated) << ") | end: (" <<
+            ArrayUtilities::to_string(end, comma_separated) << ")" << std::endl;
+    } else {
+        double bounds[6];
+        this->GetBounds(bounds);
+        this->Print(bounds, label, os);
+    }
 }
 } // namespace SG
