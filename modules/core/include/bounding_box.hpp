@@ -23,6 +23,7 @@
 
 #include "common_types.hpp" // PointType typedef
 #include <vector>
+#include <iostream>
 
 namespace SG {
 
@@ -76,13 +77,22 @@ struct BoundingBox {
     void GetBounds(double *bounds) const;
     static BoundingBox
     BuildEnclosingBox(const std::vector<double *> &bounds_vector);
+    static BoundingBox
+    BuildEnclosingBox(const std::vector<BoundingBox> &bounding_box_vector);
     PointType GetSize() const;
     PointType GetRadius() const;
     PointType GetCenter() const;
     bool is_point_inside(const PointType &input_point) const;
+    /// Check bounds of this box are inside external_bounds/box
     bool are_bounds_inside(double *external_bounds) const;
-    void Print(double *bounds, const std::string &label = "BoundingBox") const;
-    void Print(const std::string &label = "BoundingBox") const;
+    bool are_bounds_inside(const BoundingBox & external_box) const;
+    void Print(double *bounds,
+               const std::string &label = "BoundingBox",
+               std::ostream &os = std::cout) const;
+    void Print(const std::string &label = "BoundingBox",
+               std::ostream &os = std::cout,
+               bool one_line = true
+               ) const;
 };
 
 inline bool is_inside(const PointType &input, const BoundingBox &box) {
