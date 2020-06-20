@@ -35,8 +35,8 @@ namespace SG {
  * the graph should be still precise with high
  * confidence.
  *
- * The result will the scaffold where more branches from high info graphs will
- * be added.
+ * The result will be the scaffold where more branches from high info graphs
+ * will be added.
  *
  * @tparam SpatialGraph
  * @tparam VertexMap

@@ -29,8 +29,8 @@ struct AddGraphPeninsulasResult {
  * @param graphs
  * @param high_info_graph_index
  * @param extended_graph_index
+ * @param mergePointsLocator
  * @param idMap
- * @param octree
  * @param radius_touch
  * @param verbose
  */
@@ -38,7 +38,7 @@ AddGraphPeninsulasResult add_graph_peninsulas(
         const std::vector<std::reference_wrapper<const GraphType>> &graphs,
         size_t extended_graph_index,
         size_t high_info_graph_index,
-        vtkPointLocator *mergePoints,
+        vtkPointLocator *mergePointsLocator,
         std::unordered_map<vtkIdType, std::vector<graph_descriptor>> &idMap,
         double radius_touch,
         bool verbose);

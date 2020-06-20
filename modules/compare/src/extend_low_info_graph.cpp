@@ -9,6 +9,19 @@
 
 namespace SG {
 
+/**
+ * Extend the low info graph using high info graphs
+ *
+ * See @ref extend_low_info_graph_visitor
+ *
+ * @param graphs the first graph is the low info graph
+ * @param idMap map between vtk and graph_descriptors
+ * @param octree locator
+ * @param radius for octree
+ * @param verbose
+ *
+ * @return extended low info graph
+ */
 GraphType extend_low_info_graph_via_dfs(
         const std::vector<std::reference_wrapper<const GraphType>> &graphs,
         std::unordered_map<vtkIdType, std::vector<graph_descriptor>> &idMap,
