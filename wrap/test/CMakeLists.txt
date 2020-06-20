@@ -22,3 +22,7 @@ endif()
 if(SG_MODULE_LOCATE)
   add_subdirectory(locate)
 endif()
+
+if(SG_MODULE_COMPARE)
+  add_subdirectory(compare)
+endif()
