@@ -4,7 +4,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "pybind11_common.h"
-#include "sglocate_common.h"
+#include "sglocate_common.h" // define holder for vtkSmartPointer
 
 #include "get_vtk_points_from_graph.hpp"
 
