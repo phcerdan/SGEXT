@@ -25,6 +25,7 @@
 
 #include <vtkIdList.h>
 #include <vtkPoints.h>
+#include <vtkPointLocator.h>
 
 namespace py = pybind11;
 using namespace SG;
@@ -71,7 +72,26 @@ void init_graph_points_locator(py::module &m) {
     m.def("build_octree_locator",
           [](const vtkSmartPointer<vtkPoints> &input_points) {
               return build_octree_locator(input_points.Get());
-          });
+          },
+          R"(
+Computes an efficient octree point locator from a set of points.
+          )");
+
+    m.def("build_octree_locator",
+          [](const vtkSmartPointer<vtkPointLocator> &input_locator) {
+              return build_octree_locator(input_locator->GetPoints());
+          },
+          R"(
+Convenient method to compute the octree locator from a regular vtkPointLocator.
+
+In C++ the following is used:
+build_octree_locator(input_locator.GetPoints())
+
+But in python it's not possible to access the raw pointer returned in
+input_locator.GetPoints()
+
+So this overload provides a workaround.
+          )");
 
     /* *********************************************************************/
 

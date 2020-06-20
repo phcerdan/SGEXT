@@ -19,7 +19,7 @@
  * *******************************************************************/
 
 #include "pybind11_common.h"
-#include "sglocate_common.h" // define holder for vtkPoints
+#include "sglocate_common.h" // define holder for vtkSmartPointer
 
 namespace py = pybind11;
 void init_get_vtk_points_from_graph(py::module &m);

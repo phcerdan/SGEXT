@@ -19,7 +19,7 @@
  * *******************************************************************/
 
 #include "pybind11_common.h"
-#include "sglocate_common.h"
+#include "sglocate_common.h" // define holder for vtkSmartPointer
 
 #include "get_vtk_points_from_graph.hpp"
 
