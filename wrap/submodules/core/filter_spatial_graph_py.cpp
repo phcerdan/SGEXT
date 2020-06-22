@@ -20,27 +20,21 @@
 
 #include "pybind11_common.h"
 
-namespace py = pybind11;
-void init_array3d(py::module &);
-void init_boundary_conditions(py::module &);
-void init_spatial_node(py::module &);
-void init_spatial_edge(py::module &);
-void init_spatial_graph(py::module &);
-void init_edge_points_utilities(py::module &);
-void init_spatial_graph_io(py::module &);
-void init_bounding_box(py::module &);
-void init_filter_spatial_graph(py::module &);
+#include "filter_spatial_graph.hpp"
 
-void init_sgcore(py::module & mparent) {
-    auto m = mparent.def_submodule("core");
-    m.doc() = "Core submodule "; // optional module docstring
-    init_array3d(m);
-    init_boundary_conditions(m);
-    init_edge_points_utilities(m);
-    init_spatial_node(m);
-    init_spatial_edge(m);
-    init_spatial_graph(m);
-    init_spatial_graph_io(m);
-    init_bounding_box(m);
-    init_filter_spatial_graph(m);
+namespace py = pybind11;
+using namespace SG;
+
+void init_filter_spatial_graph(py::module &m) {
+    m.def("largest_connected_component", &copy_largest_connected_component,
+            R"(
+Create a new graph holding the largest component of the input graph.
+
+Vertex and Edge indices are not shared between the input graph and the output.
+See @filter_component_graphs in the C++ side if this is needed.
+
+Parameters:
+---------
+input_graph: GraphType
+)");
 }

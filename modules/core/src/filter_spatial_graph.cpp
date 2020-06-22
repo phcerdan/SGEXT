@@ -128,4 +128,29 @@ filter_component_graphs(const GraphType &inputGraph) {
     return filter_component_graphs(inputGraph, num_of_components,
                                    components_map);
 }
+
+GraphType copy_largest_connected_component(const GraphType &inputGraph) {
+    auto filtered_graphs = filter_component_graphs(inputGraph);
+    // Get the largest component
+    std::vector<size_t> comp_graph_num_vertices;
+    for (const auto &comp_graph : filtered_graphs) {
+        // Compute the number of vertices of the filtered_graph
+        // Remember that num_vertices of a filtered_graph returns the vertices
+        // of the underlying (parent) graph, so we have to use boost::vertices
+        using vertex_iterator =
+                boost::graph_traits<ComponentGraphType>::vertex_iterator;
+        vertex_iterator vi, vi_end;
+        std::tie(vi, vi_end) = boost::vertices(comp_graph);
+        comp_graph_num_vertices.emplace_back(std::distance(vi, vi_end));
+    }
+    const auto max_element_it = std::max_element(
+            comp_graph_num_vertices.cbegin(), comp_graph_num_vertices.cend());
+
+    const size_t largest_component_graph_index =
+            std::distance(comp_graph_num_vertices.cbegin(), max_element_it);
+    GraphType largest_component_graph;
+    boost::copy_graph(filtered_graphs[largest_component_graph_index],
+                      largest_component_graph);
+    return largest_component_graph;
+}
 } // namespace SG
