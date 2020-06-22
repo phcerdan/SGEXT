@@ -35,7 +35,10 @@
 namespace SG {
 
 vtkSmartPointer<vtkGraphLayoutView>
-create_graph_layout_view_from_spatial_graph(const GraphType &sg) {
+create_graph_layout_view_from_spatial_graph(const GraphType &sg,
+                                            const std::string &winTitle,
+                                            const size_t &winWidth,
+                                            const size_t &winHeight) {
     vtkSmartPointer<vtkMutableUndirectedGraph> vtk_graph =
             convert_to_vtk_graph(sg);
 
@@ -54,14 +57,25 @@ create_graph_layout_view_from_spatial_graph(const GraphType &sg) {
 
     // Flip camera because VTK-ITK different corner for origin.
     flip_camera(graphLayoutView->GetRenderer()->GetActiveCamera());
+    // Set the window tittle and size.
+    auto renderWindow = graphLayoutView->GetRenderWindow();
+    renderWindow->SetWindowName(winTitle.c_str());
+    renderWindow->SetSize(winWidth, winHeight);
 
     graphLayoutView->ResetCamera();
     return graphLayoutView;
 }
 
-void visualize_spatial_graph(const GraphType &sg) {
-    auto graphLayoutView = create_graph_layout_view_from_spatial_graph(sg);
+void visualize_spatial_graph(const GraphType &sg,
+                             const std::string &winTitle,
+                             const size_t &winWidth,
+                             const size_t &winHeight) {
+    auto graphLayoutView = create_graph_layout_view_from_spatial_graph(
+            sg, winTitle, winWidth, winHeight);
     graphLayoutView->Render();
+    // Note: Start() will block the main thread, if you want fancy non-blocking
+    // windows, you neeed to delegate them to other threads or use Qt...
+    // https://discourse.vtk.org/t/interactor-start-blocking-execution/1095/6
     graphLayoutView->GetInteractor()->Start();
 }
 
@@ -69,7 +83,10 @@ void visualize_spatial_graph_with_points(
         const GraphType &sg,
         vtkPoints *points,
         const double pointsOpacity,
-        const std::array<double, 3> cube_length) {
+        const std::array<double, 3> cube_length,
+        const std::string &winTitle,
+        const size_t &winWidth,
+        const size_t &winHeight) {
     // Create a renderer, and a InteractorStyle to add to the renderWindow
     // created from the graphLayoutView.
     auto renderer = vtkSmartPointer<vtkRenderer>::New();
@@ -84,7 +101,8 @@ void visualize_spatial_graph_with_points(
 
     // TODO maybe think about using a GraphItem in a Context instead of the
     // graphLayoutView
-    auto graphLayoutView = create_graph_layout_view_from_spatial_graph(sg);
+    auto graphLayoutView = create_graph_layout_view_from_spatial_graph(
+            sg, winTitle, winWidth, winHeight);
     // graphLayoutView provides our window and interactor.
     auto renderWindowInteractor = graphLayoutView->GetInteractor();
     renderWindowInteractor->SetInteractorStyle(style);
