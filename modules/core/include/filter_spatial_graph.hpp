@@ -85,5 +85,19 @@ std::vector<ComponentGraphType> filter_component_graphs(
         const size_t num_of_components,
         const std::unordered_map<GraphType::vertex_descriptor, int>
                 &components_map);
+
+/**
+ * Create a new graph holding the largest component of the input graph.
+ *
+ * If you want to work with filtered_graph, use @sa filter_component_graphs
+ * Pleae note that after the copy, the returned graph won't share verted or
+ * edge indices with the original graph. Use the filtered_graph interface
+ * if you need them.
+ *
+ * @param inputGraph input spatial graph
+ *
+ * @return largest component graph
+ */
+GraphType copy_largest_connected_component(const GraphType &inputGraph);
 } // namespace SG
 #endif
