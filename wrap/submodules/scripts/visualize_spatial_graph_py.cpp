@@ -5,43 +5,50 @@
 
 #include "pybind11_common.h"
 
-#include "visualize_spatial_graph.hpp"
 #include "get_vtk_points_from_graph.hpp"
-#include "visualize_spatial_graph_with_image.hpp"
 #include "scripts_types.hpp" // For BinaryImageType
+#include "visualize_spatial_graph.hpp"
+#include "visualize_spatial_graph_with_image.hpp"
 
 namespace py = pybind11;
 using namespace SG;
 void init_visualize_spatial_graph(py::module &m) {
 
-/* ************************************************** */
+    /* ************************************************** */
 
     m.def("view_spatial_graph", &visualize_spatial_graph,
-R"delimiter(
+          R"delimiter(
 Visualize the spatial graph
 
 Parameters:
 ----------
 input: GraphType
     Spatial graph to visualize
+
+win_title: str
+    Title of the visualizing window
+
+win_x,y: int
+    length of the side (x, y) of the window.
 )delimiter",
-            py::arg("input")
-            );
+          py::arg("input"),
+          py::arg("win_title") = SG::defaults::graph_layout_win_title,
+          py::arg("win_x") = SG::defaults::graph_layout_win_width,
+          py::arg("win_y") = SG::defaults::graph_layout_win_height);
 
-/* ************************************************** */
+    /* ************************************************** */
 
-    m.def("view_spatial_graph_with_points",
-    [](
-    const GraphType & graph,
-    const double & opacity,
-    const std::array<double, 3> cube_length
-    ) {
-    const auto points_map_pair = get_vtk_points_from_graph(graph);
-    visualize_spatial_graph_with_points(
-        graph, points_map_pair.first,
-        opacity, cube_length);
-    },
-R"delimiter(
+    m.def(
+            "view_spatial_graph_with_points",
+            [](const GraphType &graph, const double &opacity,
+               const std::array<double, 3> cube_length,
+               const std::string &winTitle, const size_t &win_x,
+               const size_t &win_y) {
+                const auto points_map_pair = get_vtk_points_from_graph(graph);
+                visualize_spatial_graph_with_points(
+                        graph, points_map_pair.first, opacity, cube_length);
+            },
+            R"delimiter(
 Visualize the spatial graph with all the edge points.
 
 Parameters:
@@ -54,28 +61,32 @@ opacity: float
 
 cube_length: 3D Array (list)
     3D array with cube length (X, Y and Z) of the hyper-rectangle representing a point.
+
+win_title: str
+    Title of the visualizing window
+
+win_x,y: int
+    length of the side (x, y) of the window.
 )delimiter",
-            py::arg("input"),
-            py::arg("opacity") = 0.8,
-            py::arg("cube_length") = std::array<double, 3>({{1.0, 1.0, 1.0}})
-            );
+            py::arg("input"), py::arg("opacity") = 0.8,
+            py::arg("cube_length") = std::array<double, 3>({{1.0, 1.0, 1.0}}),
+            py::arg("win_title") = SG::defaults::graph_layout_win_title,
+            py::arg("win_x") = SG::defaults::graph_layout_win_width,
+            py::arg("win_y") = SG::defaults::graph_layout_win_height);
 
-/* ************************************************** */
+    /* ************************************************** */
 
-    m.def("view_spatial_graph_with_binary_image",
-    [](
-    const GraphType & graph,
-    const BinaryImageType::Pointer & image,
-    const bool with_edge_points,
-    const std::array<double, 3> cube_length,
-    const std::string & win_title,
-    size_t & win_x,
-    size_t & win_y
-    ) {
-    return visualize_spatial_graph_with_image<BinaryImageType>(
-            graph, image, with_edge_points, cube_length, win_title, win_x, win_y);
-    },
-R"delimiter(
+    m.def(
+            "view_spatial_graph_with_binary_image",
+            [](const GraphType &graph, const BinaryImageType::Pointer &image,
+               const bool with_edge_points,
+               const std::array<double, 3> cube_length,
+               const std::string &win_title, size_t &win_x, size_t &win_y) {
+                return visualize_spatial_graph_with_image<BinaryImageType>(
+                        graph, image, with_edge_points, cube_length, win_title,
+                        win_x, win_y);
+            },
+            R"delimiter(
 Visualize the spatial graph along a binary image. The binary image can be the original
 binary image before the thinning.
 
@@ -97,16 +108,12 @@ cube_length: 3D Array (list)
 win_title: str
     title of the vtk window
 
-winX,Y: int
-    length of the side (X, Y) of the window.
+win_x,y: int
+    length of the side (x, y) of the window.
 )delimiter",
-            py::arg("graph"),
-            py::arg("image"),
+            py::arg("graph"), py::arg("image"),
             py::arg("with_edge_points") = false,
-            py::arg("cube_length") = std::array<double, 3>({{1.0,1.0,1.0}}),
+            py::arg("cube_length") = std::array<double, 3>({{1.0, 1.0, 1.0}}),
             py::arg("win_title") = "sgext: SpatialGraph and Image",
-            py::arg("wix_x") = 600,
-            py::arg("win_y") = 600
-            );
-
+            py::arg("wix_x") = 600, py::arg("win_y") = 600);
 }

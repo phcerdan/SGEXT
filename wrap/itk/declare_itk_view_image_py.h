@@ -28,8 +28,8 @@ void declare_itk_view_image(pybind11::module &m, const std::string &typestr) {
             help_str.c_str(),
             py::arg("input"),
             py::arg("win_title") = SG::defaults::view_image_win_title,
-            py::arg("win_width") = SG::defaults::view_image_win_width,
-            py::arg("win_height") = SG::defaults::view_image_win_height
+            py::arg("win_x") = SG::defaults::view_image_win_width,
+            py::arg("win_y") = SG::defaults::view_image_win_height
          );
 }
 #endif
