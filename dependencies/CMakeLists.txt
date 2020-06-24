@@ -38,6 +38,16 @@ if(APPLE)
     )
 endif()
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  # Used to compile zlib in windows with msvc
+  set(_compiler_is_msvc ON)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  # Used for boost in unix when the compiler is clang
+  set(_compiler_is_clang ON)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  # Used to disable compilation of DGtal with gcc10.1
+  set(_compiler_is_gnu ON)
+endif()
 
 ##################################################
 ##################### VTK #######################
@@ -138,6 +148,12 @@ if( UNIX )
   set(_boost_extra_args
      cxxflags=-fPIC
      )
+  if(_compiler_is_clang)
+    set(_boost_extra_args
+      cxxflags=-fPIC
+      toolset=clang
+      )
+  endif()
 endif()
 if( WIN32 )
   set(_boost_bootstrap_command bootstrap.bat)
@@ -183,10 +199,6 @@ ExternalProject_Add(ep_boost
 ############## zlib (DGtal-dep) ##################
 ##################################################
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  set(_compiler_is_msvc ON)
-endif()
-
 if(_compiler_is_msvc)
   set(ZLIB_GIT_TAG cacf7f1d4e3d44d871b605da3b647f07d718623f) # Version 1.2.11
   message(STATUS "ZLIB_VERSION: ${ZLIB_GIT_TAG} : Version 1.2.11")
@@ -226,6 +238,11 @@ endif()
 ##################################################
 #################### DGtal #######################
 ##################################################
+if(_compiler_is_gnu AND CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 10.1)
+  message("CMAKE_CXX_COMPILER_VERSION: ${CMAKE_CXX_COMPILER_VERSION}")
+  message(FATAL_ERROR "DGtal cannot be compiled in GCC 10.1 due to a bug in the compiler."
+    "Try llvm, or other version of gcc. Issue: https://github.com/DGtal-team/DGtal/issues/1501")
+endif()
 
 set(DGtal_GIT_TAG 92ab4d0d62f0e5490f1890efdf904547d17515b9) # 25-May-2020
 message(STATUS "DGtal_VERSION: ${DGtal_GIT_TAG}")
@@ -287,7 +304,7 @@ ExternalProject_Add(ep_dgtal
 #################### TBB #######################
 ##################################################
 if(WITH_TBB)
-  if(UNIX AND NOT APPLE)
+  if(UNIX AND NOT APPLE AND NOT _compiler_is_clang)
     set(TBB_VERSION "2020.2")
     message(STATUS "TBB_VERSION: ${TBB_VERSION}")
     set(TBB_URL "https://github.com/intel/tbb/archive/v${TBB_VERSION}.tar.gz")
