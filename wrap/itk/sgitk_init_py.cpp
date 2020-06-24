@@ -24,6 +24,7 @@ namespace py = pybind11;
 void init_itk_image(py::module &);
 void init_itk_image_io(py::module &);
 void init_itk_view_image(py::module &);
+void init_transform_to_physical_point_with_itk(py::module &);
 
 void init_sgitk(py::module & mparent) {
     auto m = mparent.def_submodule("itk");
@@ -31,4 +32,5 @@ void init_sgitk(py::module & mparent) {
     init_itk_image(m);
     init_itk_image_io(m);
     init_itk_view_image(m);
+    init_transform_to_physical_point_with_itk(m);
 }

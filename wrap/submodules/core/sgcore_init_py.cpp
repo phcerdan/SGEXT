@@ -30,6 +30,7 @@ void init_edge_points_utilities(py::module &);
 void init_spatial_graph_io(py::module &);
 void init_bounding_box(py::module &);
 void init_filter_spatial_graph(py::module &);
+void init_transform_to_physical_point_without_itk(py::module &);
 
 void init_sgcore(py::module & mparent) {
     auto m = mparent.def_submodule("core");
@@ -43,4 +44,5 @@ void init_sgcore(py::module & mparent) {
     init_spatial_graph_io(m);
     init_bounding_box(m);
     init_filter_spatial_graph(m);
+    init_transform_to_physical_point_without_itk(m);
 }
