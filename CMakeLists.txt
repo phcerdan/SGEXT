@@ -10,7 +10,7 @@ endif()
 
 project(SGEXT
   VERSION 0.9.0
-  LANGUAGES CXX)
+  LANGUAGES CXX C)
 message(STATUS "SGEXT version: ${SGEXT_VERSION}")
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
