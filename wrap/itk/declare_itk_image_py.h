@@ -73,10 +73,10 @@ inline void set_region(
     if (data_size[0] < 0 || data_size[1] < 0 || data_size[2] <0) {
         throw std::runtime_error(
                 "In set_regions, input size cannot be negative.");
+    }
     itk_size[0] = data_size[0];
     itk_size[1] = data_size[1];
     itk_size[2] = data_size[2];
-    }
     RegionType itk_region(itk_index, itk_size);
     img->SetRegions(itk_region);
     img->Allocate();
