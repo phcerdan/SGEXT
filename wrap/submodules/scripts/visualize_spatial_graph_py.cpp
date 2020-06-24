@@ -115,5 +115,5 @@ win_x,y: int
             py::arg("with_edge_points") = false,
             py::arg("cube_length") = std::array<double, 3>({{1.0, 1.0, 1.0}}),
             py::arg("win_title") = "sgext: SpatialGraph and Image",
-            py::arg("wix_x") = 600, py::arg("win_y") = 600);
+            py::arg("win_x") = 600, py::arg("win_y") = 600);
 }
