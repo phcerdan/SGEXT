@@ -11,6 +11,76 @@
 
 namespace SG {
 
+/**
+ *
+ *      D0, D1, D2
+ * D =  D3, D4, D5
+ *      D6, D7, D8
+ *
+ *
+ */
+using DirectionMatrixType = std::array<double, 9>;
+
+/**
+ *
+ * Prefer using an ITK image (optimized)
+ *
+ * ITK transform index to physical point. See:
+ * https://discourse.itk.org/t/solved-transformindextophysicalpoint-manually/1031/10
+ * @param input_array
+ * @param origin
+ * @param spacing
+ * @param direction
+ *
+ * @return physical point
+ */
+inline SG::PointType
+index_array_to_physical_space_array(const SG::PointType &input_array,
+                                    const SG::PointType &origin,
+                                    const SG::PointType &spacing,
+                                    const SG::DirectionMatrixType &direction) {
+    // clang-format off
+    const SG::PointType physical_array({
+        origin[0] +
+        (direction[0] * spacing[0]) * input_array[0] +
+        (direction[1] * spacing[1]) * input_array[1] +
+        (direction[2] * spacing[2]) * input_array[2],
+
+        origin[1] +
+        (direction[3] * spacing[0]) * input_array[0] +
+        (direction[4] * spacing[1]) * input_array[1] +
+        (direction[5] * spacing[2]) * input_array[2],
+
+        origin[2] +
+        (direction[6] * spacing[0]) * input_array[0] +
+        (direction[7] * spacing[1]) * input_array[1] +
+        (direction[8] * spacing[2]) * input_array[2]
+    });
+    // clang-format on
+    return physical_array;
+}
+
+inline void
+transform_graph_to_physical_space(SG::GraphAL &sg,
+                                  const SG::PointType &origin,
+                                  const SG::PointType &spacing,
+                                  const SG::DirectionMatrixType &direction) {
+    // Loop over all nodes and transform pos.
+    auto verts = boost::vertices(sg);
+    for (auto &&vi = verts.first; vi != verts.second; ++vi) {
+        sg[*vi].pos = std::move(index_array_to_physical_space_array(
+                sg[*vi].pos, origin, spacing, direction));
+    }
+    // Loop over all edges and transform edge_points
+    auto edges = boost::edges(sg);
+    for (auto ei = edges.first; ei != edges.second; ++ei) {
+        for (auto &&ep : sg[*ei].edge_points) {
+            ep = std::move(index_array_to_physical_space_array(
+                    ep, origin, spacing, direction));
+        }
+    }
+};
+
 template <typename TImage>
 SG::PointType
 index_array_to_physical_space_array(const SG::PointType &input_array,
