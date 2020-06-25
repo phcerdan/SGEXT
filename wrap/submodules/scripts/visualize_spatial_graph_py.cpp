@@ -61,7 +61,8 @@ win_x,y: int
                const size_t &win_y) {
                 const auto points_map_pair = get_vtk_points_from_graph(graph);
                 visualize_spatial_graph_with_points(
-                        graph, points_map_pair.first, opacity, cube_length);
+                        graph, points_map_pair.first, opacity, cube_length,
+                        winTitle, win_x, win_y);
             },
             R"delimiter(
 Visualize the spatial graph with all the edge points.
