@@ -208,7 +208,7 @@ struct ExtendLowInfoGraphVisitor : public boost::default_dfs_visitor {
             // If there is no vertex, associate it to the source or target of
             // the edge.
             auto closeIdList = graph_closest_points_by_radius_locator(
-                    input_sg[u].pos, m_octree, m_point_id_graphs_map, m_radius);
+                    input_sg[u].pos, m_octree, m_radius);
             std::vector<IdWithGraphDescriptor>
                     closest_existing_descriptor_by_graph =
                             closest_existing_descriptors_by_graph(

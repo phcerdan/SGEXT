@@ -223,8 +223,6 @@ TEST_F(GraphPointLocatorMatchingFixture, graph_closest_n_points_locator) {
     graphs.push_back(std::cref(g0));
     graphs.push_back(std::cref(g1));
     auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs, &box);
-    auto &mergePoints = merger_map_pair.first;
-    auto &idMap = merger_map_pair.second;
     auto octree = SG::build_octree_locator(merger_map_pair.first->GetPoints());
 
     std::cout << "Print octree:" << std::endl;
@@ -233,7 +231,7 @@ TEST_F(GraphPointLocatorMatchingFixture, graph_closest_n_points_locator) {
     SG::PointType testPoint = {{3, 0, 0}};
     const size_t closest_n_points = 1;
     auto closest_id_list = SG::graph_closest_n_points_locator(
-            testPoint, octree, idMap, closest_n_points);
+            testPoint, octree, closest_n_points);
     std::cout << "Print test point: ";
     SG::print_pos(std::cout, testPoint);
     std::cout << std::endl;
@@ -243,7 +241,7 @@ TEST_F(GraphPointLocatorMatchingFixture, graph_closest_n_points_locator) {
     EXPECT_EQ(closest_id_list->GetId(0), expected_closest_id);
 
     testPoint = {{3.1, 0, 0}};
-    EXPECT_EQ(SG::graph_closest_n_points_locator(testPoint, octree, idMap,
+    EXPECT_EQ(SG::graph_closest_n_points_locator(testPoint, octree,
                                                  closest_n_points)
                       ->GetId(0),
               expected_closest_id);
@@ -258,12 +256,12 @@ TEST_F(GraphPointLocatorMatchingFixture,
     auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs, &box);
     auto &mergePoints = merger_map_pair.first;
     auto &idMap = merger_map_pair.second;
-    auto octree = SG::build_octree_locator(merger_map_pair.first->GetPoints());
+    auto octree = SG::build_octree_locator(mergePoints->GetPoints());
 
     SG::PointType testPoint = {{3, 0, 0}};
     const size_t closest_n_points = 5;
     auto closest_id_list = SG::graph_closest_n_points_locator(
-            testPoint, octree, idMap, closest_n_points);
+            testPoint, octree, closest_n_points);
     auto out_gdescs =
             SG::closest_existing_descriptors_by_graph(closest_id_list, idMap);
 
@@ -298,12 +296,12 @@ TEST_F(GraphPointLocatorMatchingFixture,
     auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs, &box);
     auto &mergePoints = merger_map_pair.first;
     auto &idMap = merger_map_pair.second;
-    auto octree = SG::build_octree_locator(merger_map_pair.first->GetPoints());
+    auto octree = SG::build_octree_locator(mergePoints->GetPoints());
 
     SG::PointType testPoint = {{3.0, 0, 0}};
     double radius = 10.0;
     auto closest_id_list = SG::graph_closest_points_by_radius_locator(
-            testPoint, octree, idMap, radius);
+            testPoint, octree, radius);
     auto out_gdescs =
             SG::closest_existing_descriptors_by_graph(closest_id_list, idMap);
     const auto &gdesc0 = out_gdescs[0].descriptor;
@@ -329,7 +327,7 @@ TEST_F(GraphPointLocatorMatchingFixture,
     auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs, &box);
     auto &mergePoints = merger_map_pair.first;
     auto &idMap = merger_map_pair.second;
-    auto octree = SG::build_octree_locator(merger_map_pair.first->GetPoints());
+    auto octree = SG::build_octree_locator(mergePoints->GetPoints());
     octree->SetDebug(true);
     octree->Print(std::cout);
 
@@ -361,7 +359,7 @@ TEST_F(GraphPointLocatorMatchingFixture,
     // EXPECT_EQ(unsortedIdList->GetId(0), expected_closest_id);
 
     auto closest_id_list = SG::graph_closest_points_by_radius_locator(
-            testPoint, octree, idMap, radius);
+            testPoint, octree, radius);
     EXPECT_TRUE(closest_id_list->GetNumberOfIds() > 0);
     // EXPECT_EQ(closest_id_list->GetId(0), expected_closest_id);
     std::cout << "Print closest id_list for radius " << radius << std::endl;
@@ -395,12 +393,12 @@ TEST_F(GraphPointLocatorMatchingFixture,
     auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs, &box);
     auto &mergePoints = merger_map_pair.first;
     auto &idMap = merger_map_pair.second;
-    auto octree = SG::build_octree_locator(merger_map_pair.first->GetPoints());
+    auto octree = SG::build_octree_locator(mergePoints->GetPoints());
 
     SG::PointType testPoint = {{100.0, 0, 0}};
     double radius = 2.0;
     auto closest_id_list = SG::graph_closest_points_by_radius_locator(
-            testPoint, octree, idMap, radius);
+            testPoint, octree, radius);
     auto out_gdescs =
             SG::closest_existing_descriptors_by_graph(closest_id_list, idMap);
     EXPECT_FALSE(out_gdescs[0].exist);
@@ -452,8 +450,7 @@ TEST_F(GraphPointLocatorCloseFixture, graph_closest_n_points_locator) {
     graphs.push_back(std::cref(moved_g1));
     auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs, &box);
     auto &mergePoints = merger_map_pair.first;
-    auto &idMap = merger_map_pair.second;
-    auto octree = SG::build_octree_locator(merger_map_pair.first->GetPoints());
+    auto octree = SG::build_octree_locator(mergePoints->GetPoints());
     size_t expected_num_unique_points = 12; // (2 + 3) + (4 + 3);
     EXPECT_EQ(mergePoints->GetPoints()->GetNumberOfPoints(),
               expected_num_unique_points);
@@ -466,7 +463,7 @@ TEST_F(GraphPointLocatorCloseFixture, graph_closest_n_points_locator) {
     SG::PointType testPoint = {{3, 0.1, 0.5}};
     const size_t closest_n_points = 1;
     auto closest_id_list = SG::graph_closest_n_points_locator(
-            testPoint, octree, idMap, closest_n_points);
+            testPoint, octree, closest_n_points);
 
     std::cout << "Print test point: ";
     SG::print_pos(std::cout, testPoint);
@@ -490,7 +487,7 @@ TEST_F(GraphPointLocatorCloseFixture,
     SG::PointType testPoint = {{3, 0.1, 0.5}};
     const size_t closest_n_points = 5;
     auto closest_id_list = SG::graph_closest_n_points_locator(
-            testPoint, octree, idMap, closest_n_points);
+            testPoint, octree, closest_n_points);
 
     auto out_gdescs =
             SG::closest_existing_descriptors_by_graph(closest_id_list, idMap);
@@ -525,12 +522,12 @@ TEST_F(GraphPointLocatorCloseFixture,
     auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs, &box);
     auto &mergePoints = merger_map_pair.first;
     auto &idMap = merger_map_pair.second;
-    auto octree = SG::build_octree_locator(merger_map_pair.first->GetPoints());
+    auto octree = SG::build_octree_locator(mergePoints->GetPoints());
 
     SG::PointType testPoint = {{3.0, 0, 0}};
     double radius = 1.0;
     auto closest_id_list = SG::graph_closest_points_by_radius_locator(
-            testPoint, octree, idMap, radius);
+            testPoint, octree, radius);
     auto out_gdescs =
             SG::closest_existing_descriptors_by_graph(closest_id_list, idMap);
     const auto &gdesc0 = out_gdescs[0].descriptor;

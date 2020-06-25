@@ -24,8 +24,8 @@
 #include "graph_points_locator.hpp"
 
 #include <vtkIdList.h>
-#include <vtkPoints.h>
 #include <vtkPointLocator.h>
+#include <vtkPoints.h>
 
 namespace py = pybind11;
 using namespace SG;
@@ -69,19 +69,21 @@ void init_graph_points_locator(py::module &m) {
 
     /* *********************************************************************/
 
-    m.def("build_octree_locator",
-          [](const vtkSmartPointer<vtkPoints> &input_points) {
-              return build_octree_locator(input_points.Get());
-          },
-          R"(
+    m.def(
+            "build_octree_locator",
+            [](const vtkSmartPointer<vtkPoints> &input_points) {
+                return build_octree_locator(input_points.Get());
+            },
+            R"(
 Computes an efficient octree point locator from a set of points.
           )");
 
-    m.def("build_octree_locator",
-          [](const vtkSmartPointer<vtkPointLocator> &input_locator) {
-              return build_octree_locator(input_locator->GetPoints());
-          },
-          R"(
+    m.def(
+            "build_octree_locator",
+            [](const vtkSmartPointer<vtkPointLocator> &input_locator) {
+                return build_octree_locator(input_locator->GetPoints());
+            },
+            R"(
 Convenient method to compute the octree locator from a regular vtkPointLocator.
 
 In C++ the following is used:
@@ -166,11 +168,9 @@ id_map: dict(vtkIdType, [graph_descriptor])
             "graph_closest_n_points_locator",
             [](const PointType &query_point,
                vtkSmartPointer<vtkOctreePointLocator> &octree_ptr,
-               const std::unordered_map<vtkIdType,
-                                        std::vector<graph_descriptor>> &idMap,
                const int closest_n_points) {
                 return graph_closest_n_points_locator(
-                        query_point, octree_ptr.Get(), idMap, closest_n_points);
+                        query_point, octree_ptr.Get(), closest_n_points);
             },
             R"(
 Use the octree point locator and the idMap from a set of graphs to query a
@@ -180,11 +180,10 @@ Parameters:
 ----------
 query_point: PointType
 octree: vtkOctreePointLocator
-id_map: dict(vtkIdType, [graph_descriptor])
 closest_n_points: int
     number of closest points to return
             )",
-            py::arg("query_point"), py::arg("octree"), py::arg("id_map"),
+            py::arg("query_point"), py::arg("octree"),
             py::arg("number_of_points") = 5);
 
     /* *********************************************************************/
@@ -193,11 +192,9 @@ closest_n_points: int
             "graph_closest_points_by_radius_locator",
             [](const PointType &query_point,
                vtkSmartPointer<vtkOctreePointLocator> &octree_ptr,
-               const std::unordered_map<vtkIdType,
-                                        std::vector<graph_descriptor>> &idMap,
                double radius) {
                 return graph_closest_points_by_radius_locator(
-                        query_point, octree_ptr.Get(), idMap, radius);
+                        query_point, octree_ptr.Get(), radius);
             },
             R"(
 Use the octree point locator and the idMap from a set of graphs to query a
@@ -207,10 +204,8 @@ Parameters:
 ----------
 query_point: PointType
 octree: vtkOctreePointLocator
-id_map: dict(vtkIdType, [graph_descriptor])
 radius: float
     return all points within radius
             )",
-            py::arg("query_point"), py::arg("octree"), py::arg("id_map"),
-            py::arg("radius"));
+            py::arg("query_point"), py::arg("octree"), py::arg("radius"));
 }

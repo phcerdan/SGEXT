@@ -64,7 +64,6 @@ class TestGraphPointsLocator(unittest.TestCase):
         id_list = locate.graph_closest_points_by_radius_locator(
             query_point=query_point,
             octree=octree_locator,
-            id_map=id_map,
             radius=radius)
         self.assertEqual(id_list.get_number_of_ids(), 1)
         graph_id = id_list.get_id(0)
@@ -79,7 +78,6 @@ class TestGraphPointsLocator(unittest.TestCase):
         id_list = locate.graph_closest_n_points_locator(
             query_point=query_point,
             octree=octree_locator,
-            id_map=id_map,
             number_of_points=number_of_points)
         self.assertEqual(id_list.get_number_of_ids(), number_of_points)
         # Get the closest of the number_of_points (sorted)
