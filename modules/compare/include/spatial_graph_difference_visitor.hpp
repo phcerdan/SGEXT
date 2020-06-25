@@ -339,7 +339,7 @@ struct SpatialGraphDifferenceVisitor : public boost::default_dfs_visitor {
     std::vector<IdWithGraphDescriptor>
     get_closest_existing_descriptors(const SG::PointType &pos) {
         auto closeIdList = graph_closest_points_by_radius_locator(
-                pos, m_octree, m_point_id_graphs_map, m_radius);
+                pos, m_octree, m_radius);
         return closest_existing_descriptors_by_graph(closeIdList,
                                                      m_point_id_graphs_map);
     }

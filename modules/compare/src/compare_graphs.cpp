@@ -145,7 +145,7 @@ remove_edges_and_nodes_from_high_info_graph(const GraphType &g0,
             // vtkIdType id = octree->FindClosestPoint(g0[v].pos.data());
             auto closest_points_list_from_g0_vertex =
                     SG::graph_closest_points_by_radius_locator(
-                            g0[v].pos, octree, idMap, radius);
+                            g0[v].pos, octree, radius);
             auto closest_descriptors_from_g0_vertex =
                     closest_existing_descriptors_by_graph(
                             closest_points_list_from_g0_vertex, idMap);
@@ -172,13 +172,13 @@ remove_edges_and_nodes_from_high_info_graph(const GraphType &g0,
                 // octree->FindClosestPoint(g1[target_g1].pos.data());
                 auto closest_points_list_from_source_g1 =
                         SG::graph_closest_points_by_radius_locator(
-                                g1[source_g1].pos, octree, idMap, radius);
+                                g1[source_g1].pos, octree, radius);
                 auto closest_descriptors_from_source_g1 =
                         closest_existing_descriptors_by_graph(
                                 closest_points_list_from_source_g1, idMap);
                 auto closest_points_list_from_target_g1 =
                         SG::graph_closest_points_by_radius_locator(
-                                g1[target_g1].pos, octree, idMap, radius);
+                                g1[target_g1].pos, octree, radius);
                 auto closest_descriptors_from_target_g1 =
                         closest_existing_descriptors_by_graph(
                                 closest_points_list_from_target_g1, idMap);
