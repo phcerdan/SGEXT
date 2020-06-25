@@ -18,7 +18,7 @@ namespace SG {
 struct IntegratorMethod {
     explicit IntegratorMethod(System *sys) : m_sys(sys) {}
     IntegratorMethod(System *sys, double deltaT_input)
-            : m_sys(sys), deltaT(deltaT_input){};
+            : deltaT(deltaT_input), m_sys(sys){};
     virtual ~IntegratorMethod(){};
     double deltaT;
     virtual void integrate() = 0;
