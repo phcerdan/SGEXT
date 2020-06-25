@@ -27,7 +27,6 @@ TEST_F(FixtureMatchingGraphs, works) {
     graphs.push_back(std::cref(g1));
     auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs, &box);
     auto &mergePoints = merger_map_pair.first;
-    auto &idMap = merger_map_pair.second;
     auto octree = SG::build_octree_locator(mergePoints->GetPoints());
     // g0 and g1 should have 13 unique points when combined
     EXPECT_EQ(octree->GetDataSet()->GetNumberOfPoints(), 13);
@@ -81,7 +80,6 @@ TEST_F(FixtureCloseGraphs, works) {
     graphs.push_back(std::cref(moved_g1));
     auto merger_map_pair = SG::get_vtk_points_from_graphs(graphs, &box);
     auto &mergePoints = merger_map_pair.first;
-    auto &idMap = merger_map_pair.second;
     EXPECT_EQ(mergePoints->GetPoints()->GetNumberOfPoints(), 22);
     auto octree = SG::build_octree_locator(mergePoints->GetPoints());
     // g0 and moved_g1 should have 22 (9 + 13) unique points when combined

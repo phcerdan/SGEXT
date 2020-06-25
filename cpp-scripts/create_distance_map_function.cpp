@@ -35,7 +35,7 @@ namespace SG {
 
 typename FloatImageType::Pointer create_distance_map_function_with_itk(
         const typename BinaryImageType::Pointer & input_img,
-        const bool verbose)
+        const bool /*verbose*/)
 {
     using DistanceMapFilter =
             itk::ApproximateSignedDistanceMapImageFilter<BinaryImageType,
@@ -71,7 +71,6 @@ typename FloatImageType::Pointer create_distance_map_function_with_dgtal(
     // ITK
     using ItkImageType = SG::BinaryImageType;
     using PixelType = ItkImageType::PixelType;
-    constexpr auto Dim = ItkImageType::ImageDimension;
     // DGtal
     using Domain = DGtal::Z3i::Domain;
     using Image = DGtal::ImageContainerByITKImage<Domain, PixelType>;
@@ -151,7 +150,6 @@ typename FloatImageType::Pointer create_distance_map_function_io(
     // ITK Image
     using ItkImageType = SG::BinaryImageType;
     using PixelType = ItkImageType::PixelType;
-    constexpr auto Dim = ItkImageType::ImageDimension;
     // DGtal Image
     using Domain = DGtal::Z3i::Domain;
     using Image = DGtal::ImageContainerByITKImage<Domain, PixelType>;

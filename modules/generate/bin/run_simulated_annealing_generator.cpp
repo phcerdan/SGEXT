@@ -92,6 +92,7 @@ int main(int argc, char *const argv[]) {
 
     // Generator
     auto gen = SG::simulated_annealing_generator(input_filename);
+    if(verbose) gen.verbose = verbose;
     // gen.set_parameters_from_file(input_filename);
     // gen.init_graph_degree(gen.physical_scaling_params.num_vertices);
     // gen.init_graph_vertex_positions();

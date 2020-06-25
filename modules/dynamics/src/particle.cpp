@@ -17,7 +17,7 @@ void print(const ParticleMaterial &p, std::ostream &os) {
     os << "mass = " << p.mass << std::endl;
 };
 
-void dump_csv_header(const ParticleMaterial &p,
+void dump_csv_header(const ParticleMaterial &,
                      std::ostream &os,
                      bool add_end_of_line) {
     os << "radius, volume, mass";
@@ -48,7 +48,7 @@ void print(const ParticleDynamicProperties &p, std::ostream &os) {
     os << "acc = " << ArrayUtilities::to_string(p.acc) << std::endl;
     os << "net_force = " << ArrayUtilities::to_string(p.net_force) << std::endl;
 };
-void dump_csv_header(const ParticleDynamicProperties &p,
+void dump_csv_header(const ParticleDynamicProperties &,
                      std::ostream &os,
                      bool add_end_of_line) {
     os << "vel.x, vel.y, vel.z, acc.x, acc.y, acc.z, net_force.x, net_force.y, "

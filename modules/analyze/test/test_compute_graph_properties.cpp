@@ -119,7 +119,6 @@ struct OneEdge : public ::testing::Test {
     void SetUp() override {
         this->g = GraphType(2);
         SG::PointType n3{{0, 3, 0}};
-        SG::PointType s3{{0, -3, 0}};
         this->g[0].pos = n3;
         this->g[1].pos = n3;
         boost::add_edge(0, 1, this->g);
@@ -127,7 +126,6 @@ struct OneEdge : public ::testing::Test {
 };
 
 TEST_F(OneEdge, compute_angles_cosines) {
-    constexpr auto pi = 3.14159265358979323846;
     auto angles = SG::compute_angles(g);
     EXPECT_EQ(angles.empty(), true);
 }
@@ -138,7 +136,6 @@ struct TwoParallelEdgesFixture : public ::testing::Test {
     void SetUp() override {
         this->g = GraphType(2);
         SG::PointType n3{{0, 3, 0}};
-        SG::PointType s3{{0, -3, 0}};
         this->g[0].pos = n3;
         this->g[1].pos = n3;
         boost::add_edge(0, 1, this->g);
@@ -151,7 +148,6 @@ TEST_F(TwoParallelEdgesFixture, compute_angles_cosines) {
     std::cout << "Edges of two_paralell edges : " << edges << std::endl;
     EXPECT_EQ(edges, 2);
     bool no_ignore_parallel_edges = false;
-    constexpr auto pi = 3.14159265358979323846;
     auto angles = SG::compute_angles(g, 0, no_ignore_parallel_edges);
     std::sort(angles.begin(), angles.end());
     std::cout << "Angles" << std::endl;

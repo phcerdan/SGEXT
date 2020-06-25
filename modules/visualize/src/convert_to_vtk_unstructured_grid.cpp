@@ -45,7 +45,7 @@ void write_vertex_descriptors_to_vtk_unstructured_grid(const GraphType &sg,
     degree->SetNumberOfTuples(number_of_points);
 
     {
-        size_t counter = 0;
+        long long counter = 0;
         for (auto [vi, vi_end] = boost::vertices(sg); vi != vi_end; ++vi) {
             degree->SetTuple1(counter, *vi );
             counter++;
@@ -73,7 +73,7 @@ void write_degrees_to_vtk_unstructured_grid(const GraphType &sg,
     degree->SetNumberOfTuples(number_of_points);
 
     {
-        size_t counter = 0;
+        long long counter = 0;
         for (auto [vi, vi_end] = boost::vertices(sg); vi != vi_end; ++vi) {
             degree->SetTuple1(counter, boost::degree(*vi, sg) );
             counter++;
@@ -161,7 +161,6 @@ convert_to_vtk_unstructured_grid(const GraphType &sg) {
     for (; ei != ei_end; ++ei) {
         auto source = boost::source(*ei, sg);
         auto target = boost::target(*ei, sg);
-        auto &sg_edge = sg[*ei];
         // Add vtkLine
         {
             auto vtk_id_list = vtkIdList::New();

@@ -96,7 +96,6 @@ struct GraphPointLocatorCloseFixture : public GraphPointLocatorMatchingFixture {
         GraphPointLocatorMatchingFixture::SetUp();
         this->moved_g0 = this->g0;
         this->moved_g1 = this->g1;
-        auto nverts = boost::num_vertices(this->moved_g0);
         auto func_plus = [&](SG::PointType &pos) {
             pos = ArrayUtilities::plus(pos, this->disturbance);
         };

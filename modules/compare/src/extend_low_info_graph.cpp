@@ -53,7 +53,6 @@ GraphType extend_low_info_graph_via_dfs(
 
     vertex_iterator vi, vi_end;
     std::tie(vi, vi_end) = boost::vertices(input_sg);
-    auto vi_start = vi;
     auto start = *vi;
 
     for (; vi != vi_end; ++vi) {

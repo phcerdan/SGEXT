@@ -390,7 +390,6 @@ size_t merge_two_three_connected_nodes(GraphType &sg, bool inPlace) {
     using vertex_iterator = boost::graph_traits<GraphType>::vertex_iterator;
     using adjacency_iterator =
             boost::graph_traits<GraphType>::adjacency_iterator;
-    using VertexPair = std::pair<vertex_descriptor, vertex_descriptor>;
     using VertexTriple =
             std::tuple<vertex_descriptor, vertex_descriptor, vertex_descriptor>;
     // First vertex descriptor is the node to be deleted
