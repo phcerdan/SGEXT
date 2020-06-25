@@ -1,6 +1,7 @@
 # Python wrapping will be one single module with submodules
 set(enabled_libs_ SGCore)
 set(enabled_include_dirs_)
+set(enabled_include_system_dirs_)
 add_subdirectory(submodules/core)
 # MODULE_EXTRACT
 add_subdirectory(submodules/extract)
@@ -35,7 +36,7 @@ if(SG_BUILD_SCRIPTS)
   list(APPEND enabled_libs_ ${ITK_LIBRARIES})
   list(APPEND enabled_libs_ Boost::filesystem)
   list(APPEND enabled_include_dirs_ "${CMAKE_SOURCE_DIR}/cpp-scripts/")
-  list(APPEND enabled_include_dirs_ "${DGTAL_INCLUDE_DIRS}")
+  list(APPEND enabled_include_system_dirs_ "${DGTAL_INCLUDE_DIRS}")
   # Add itk wrapping of Image
   add_subdirectory(itk)
 endif()
@@ -49,6 +50,7 @@ target_link_libraries(_sgext PRIVATE ${enabled_libs_})
 target_include_directories(_sgext PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}) # For pybind11_common.h
 target_include_directories(_sgext PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/submodules) # For #include "locate/sglocate_common.h"
 target_include_directories(_sgext PRIVATE ${enabled_include_dirs_})
+target_include_directories(_sgext SYSTEM PRIVATE ${enabled_include_system_dirs_})
 if(SG_REQUIRES_VTK)
   target_compile_definitions(_sgext PRIVATE SG_USING_VTK)
 endif()
