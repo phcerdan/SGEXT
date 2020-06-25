@@ -13,6 +13,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_DEPENDS
     ${SG_MODULE_INTERNAL_DEPENDS}
     ${visualize_optional_depends}
     ${VTK_LIBRARIES}
+    ${DGTAL_LIBRARIES}
     )
 set(qt_sources "")
 if(SG_MODULE_VISUALIZE_WITH_QT)
@@ -43,12 +44,12 @@ target_include_directories(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   )
-target_include_directories(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} PUBLIC
+target_include_directories(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} SYSTEM PUBLIC
   ${VTK_INCLUDE_DIRS}
   ${DGTAL_INCLUDE_DIRS}
   )
 if(SG_REQUIRES_ITK)
-  target_include_directories(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} PUBLIC
+  target_include_directories(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} SYSTEM PUBLIC
     ${ITK_INCLUDE_DIRS}
     )
 endif()
