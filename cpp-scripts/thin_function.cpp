@@ -316,8 +316,6 @@ BinaryImageType::Pointer thin_function_io(const std::string &filename,
   const fs::path output_file_path = fs::path(output_file_string);
   using Domain = DGtal::Z3i::Domain;
   using Image = DGtal::ImageContainerByITKImage<Domain, unsigned char>;
-  auto Dim = BinaryImageDimension;
-  using PixelType = BinaryImagePixelType;
   using ItkImageType = BinaryImageType;
 
   // Read image
@@ -345,8 +343,6 @@ BinaryImageType::Pointer thin_function_io(const std::string &filename,
 
 
   using ItkFloatImageType = SG::FloatImageType;
-  using DGtalFloatImage = DGtal::ImageContainerByITKImage<Domain,
-        SG::FloatImageType::PixelType>;
   typename ItkFloatImageType::Pointer distance_map_itk_image = nullptr;
   if(!inputDistanceMapImageFilename.empty()) {
       using DistanceMapReaderType = itk::ImageFileReader<ItkFloatImageType>;

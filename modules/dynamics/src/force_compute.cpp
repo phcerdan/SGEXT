@@ -123,7 +123,7 @@ ParticleRandomForceCompute::ParticleRandomForceCompute(
         : ParticleForceCompute(sys), kT(kT), gamma(gamma), deltaT(deltaT), dimension(dimension), _modulo(sqrt(2 * dimension * kT * gamma / deltaT)) {
     const auto &modulo = _modulo;
     this->force_function =
-            [&modulo](const Particle &particle) -> ArrayUtilities::Array3D {
+            [&modulo](const Particle &) -> ArrayUtilities::Array3D {
                 return RNG::random_orientation(modulo);
     };
 }

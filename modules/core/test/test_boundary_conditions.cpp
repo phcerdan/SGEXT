@@ -53,7 +53,7 @@ TEST_F(PeriodicBCFixture, plus) {
                             DoubleNear(expected_sum[2], eps)));
     auto result = ArrayUtilities::plus_with_boundary_condition_periodic(
             a0, a1, box_size, box_size_inverse);
-    EXPECT_THAT(result_default_box,
+    EXPECT_THAT(result,
                 ElementsAre(DoubleNear(expected_sum[0], eps),
                             DoubleNear(expected_sum[1], eps),
                             DoubleNear(expected_sum[2], eps)));
@@ -70,7 +70,7 @@ TEST_F(PeriodicBCFixture, minus) {
                             DoubleNear(expected_diff_01[2], eps)));
     auto result = ArrayUtilities::minus_with_boundary_condition_periodic(
             a0, a1, box_size, box_size_inverse);
-    EXPECT_THAT(result_default_box,
+    EXPECT_THAT(result,
                 ElementsAre(DoubleNear(expected_diff_01[0], eps),
                             DoubleNear(expected_diff_01[1], eps),
                             DoubleNear(expected_diff_01[2], eps)));
@@ -84,7 +84,7 @@ TEST_F(PeriodicBCFixture, minus) {
                             DoubleNear(expected_diff_10[2], eps)));
     result = ArrayUtilities::minus_with_boundary_condition_periodic(
             a1, a0, box_size, box_size_inverse);
-    EXPECT_THAT(result_default_box,
+    EXPECT_THAT(result,
                 ElementsAre(DoubleNear(expected_diff_10[0], eps),
                             DoubleNear(expected_diff_10[1], eps),
                             DoubleNear(expected_diff_10[2], eps)));

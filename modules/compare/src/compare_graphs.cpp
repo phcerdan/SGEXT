@@ -68,7 +68,6 @@ remove_edges_and_nodes_from_high_info_graph(const GraphType &g0,
     //  - vertex in lowG ---> Means: branch is extended!
     //
     {
-        GraphType::vertex_descriptor v;
         BGL_FORALL_VERTICES(v, g1, GraphType) {
             // vtkIdType id = octree->FindClosestPoint(g1[v].pos.data());
             // const auto & gdescs = idMap[id];
@@ -77,7 +76,7 @@ remove_edges_and_nodes_from_high_info_graph(const GraphType &g0,
             // assert(gdesc1.exist && gdesc1.is_vertex);
             auto closest_points_list_from_g1_vertex =
                     SG::graph_closest_points_by_radius_locator(
-                            g1[v].pos, octree, idMap, radius);
+                            g1[v].pos, octree, radius);
             auto closest_descriptors_from_g1_vertex =
                     closest_existing_descriptors_by_graph(
                             closest_points_list_from_g1_vertex, idMap);
@@ -85,12 +84,12 @@ remove_edges_and_nodes_from_high_info_graph(const GraphType &g0,
             const auto &id1 = closest_descriptors_from_g1_vertex[1].id;
             const auto &gdesc0 =
                     closest_descriptors_from_g1_vertex[0].descriptor;
-            const auto &gdesc1 =
-                    closest_descriptors_from_g1_vertex[1].descriptor;
             // DEV: WARNING, cannot compare ids between graphs to
             // identify/register same vertex
             const bool vertex_has_same_id_in_both_graphs = (id0 == id1);
 #ifndef NDEBUG
+            const auto &gdesc1 =
+                    closest_descriptors_from_g1_vertex[1].descriptor;
             std::cout << "vertex: " << v << " ; pos = ";
             SG::print_pos(std::cout, g1[v].pos);
             std::cout << std::endl;
@@ -124,7 +123,6 @@ remove_edges_and_nodes_from_high_info_graph(const GraphType &g0,
                 // |  |
                 // |__|
                 // |  |
-                GraphType::vertex_descriptor v_adj;
                 BGL_FORALL_ADJ(v, v_adj, g1, GraphType) {
                     vtkIdType id_adj =
                             octree->FindClosestPoint(g1[v_adj].pos.data());
@@ -158,7 +156,6 @@ remove_edges_and_nodes_from_high_info_graph(const GraphType &g0,
     SG::EdgeDescriptorUnorderedSet growing_edges;
     // Iterate over all vertices of low info graph
     {
-        GraphType::vertex_descriptor v;
         BGL_FORALL_VERTICES(v, g0, GraphType) {
             // vtkIdType id = octree->FindClosestPoint(g0[v].pos.data());
             auto closest_points_list_from_g0_vertex =
@@ -169,11 +166,13 @@ remove_edges_and_nodes_from_high_info_graph(const GraphType &g0,
                             closest_points_list_from_g0_vertex, idMap);
 
             // const auto & gdescs = idMap[closest_descriptors_from_g0_vertex[];
+#ifndef NDEBUG
             const auto &gdesc0 =
                     closest_descriptors_from_g0_vertex[0].descriptor;
+            assert(gdesc0.exist && gdesc0.is_vertex);
+#endif
             const auto &gdesc1 =
                     closest_descriptors_from_g0_vertex[1].descriptor;
-            assert(gdesc0.exist && gdesc0.is_vertex);
             // |__|
             // |__|
             // |  |

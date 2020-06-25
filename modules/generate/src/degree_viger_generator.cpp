@@ -343,7 +343,7 @@ int *degree_viger_generator::fast_rpl(int *m, const int a, const int b) {
 
 bool degree_viger_generator::verify(int mode) {
 
-    static constexpr int VERIFY_NORMAL = 0;
+    // static constexpr int VERIFY_NORMAL = 0;
     static constexpr int VERIFY_NONEIGH = 1;
     static constexpr int VERIFY_NOARCS = 2;
     assert(neigh_[0] == links_);
@@ -677,7 +677,9 @@ inline bool degree_viger_generator::add_edge(int a,
                                              const std::vector<int> &realdeg) {
     using namespace generator;
     int deg_a = realdeg[a];
+#ifndef NDEBUG
     const auto size = arcs_;
+#endif
     if (deg_a == deg_[a])
         return false;
     // Check that edge was not already inserted

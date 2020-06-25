@@ -100,15 +100,11 @@ bool all_graph_descriptors_exist(
 vtkSmartPointer<vtkIdList> graph_closest_n_points_locator(
         const PointType &queryPoint,
         vtkOctreePointLocator *octree,
-        const std::unordered_map<vtkIdType, std::vector<graph_descriptor>>
-                &idMap,
         const int closest_n_points = 5);
 
 vtkSmartPointer<vtkIdList> graph_closest_points_by_radius_locator(
         const PointType &queryPoint,
         vtkOctreePointLocator *octree,
-        const std::unordered_map<vtkIdType, std::vector<graph_descriptor>>
-                &idMap,
         double radius);
 
 } // namespace SG

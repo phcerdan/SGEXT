@@ -70,9 +70,7 @@ template <typename GraphType> size_t num_edge_points(const GraphType &sg) {
     auto edges = boost::edges(sg);
     size_t num_points = 0;
     for (auto ei = edges.first; ei != edges.second; ++ei) {
-        for (auto &ep : sg[*ei].edge_points) {
-            ++num_points;
-        }
+        num_points += sg[*ei].edge_points.size();
     }
     return num_points;
 }
@@ -141,8 +139,6 @@ void print_spatial_edges(const GraphType &graph, std::ostream &os = std::cout) {
 template <typename GraphType>
 std::pair<std::set<PointType>, bool>
 check_unique_points_in_graph(const GraphType &sg) {
-    using vertex_descriptor =
-            typename boost::graph_traits<GraphType>::vertex_descriptor;
     using vertex_iterator =
             typename boost::graph_traits<GraphType>::vertex_iterator;
     using edge_iterator =

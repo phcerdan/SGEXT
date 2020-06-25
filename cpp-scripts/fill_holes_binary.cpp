@@ -44,10 +44,6 @@ int main(int argc, char* const argv[]) {
   opt_desc.add_options()("foreground,f",
                          po::value<std::string>()->default_value("white"),
                          "foreground color in binary image. [black|white]");
-  opt_desc.add_options()("thresholdMin,m", po::value<int>()->default_value(0),
-                         "threshold min (excluded) to define binary shape");
-  opt_desc.add_options()("thresholdMax,M", po::value<int>()->default_value(255),
-                         "threshold max (included) to define binary shape");
   opt_desc.add_options()(
       "majority", po::value<int>()->default_value(3),
       "Majority needed in the neighborhood to switch pixel to ON");
@@ -92,8 +88,6 @@ int main(int argc, char* const argv[]) {
   size_t iterations = vm["iterations"].as<size_t>();
   bool verbose = vm["verbose"].as<bool>();
   bool output_filename_simple = vm["output_filename_simple"].as<bool>();
-  int thresholdMin = vm["thresholdMin"].as<int>();
-  int thresholdMax = vm["thresholdMax"].as<int>();
   std::string foreground = vm["foreground"].as<std::string>();
   if(vm.count("foreground") &&
      (!(foreground == "white" || foreground == "black")))

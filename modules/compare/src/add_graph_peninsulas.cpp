@@ -58,7 +58,7 @@ AddGraphPeninsulasResult add_graph_peninsulas(
 
     // Compute the number of components
     std::unordered_map<GraphType::vertex_descriptor, int> components_map;
-    auto num_of_components = boost::connected_components(
+    size_t num_of_components = boost::connected_components(
             g_diff, boost::make_assoc_property_map(components_map));
 
     std::vector<size_t> touch_extended_graph_count(num_of_components);
@@ -69,7 +69,7 @@ AddGraphPeninsulasResult add_graph_peninsulas(
         const auto &component_index = comp.second;
         auto pos = g_diff[vertex_d].pos;
         auto closeIdList = graph_closest_points_by_radius_locator(
-                pos, octree, idMap, radius_touch);
+                pos, octree, radius_touch);
         auto closest_descriptors =
                 closest_existing_descriptors_by_graph(closeIdList, idMap);
         auto &extended_graph_id_with_graph_descriptor =

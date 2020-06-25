@@ -33,7 +33,7 @@ void print(const ParticleNeighbors &particle_neighbors, std::ostream &os) {
     os << " }" << std::endl;
 };
 
-void dump_csv_header(const ParticleNeighbors &particle_neighbors,
+void dump_csv_header(const ParticleNeighbors &,
                      std::ostream &os,
                      bool add_end_of_line,
                      bool with_particle_id) {

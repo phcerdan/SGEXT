@@ -433,9 +433,8 @@ struct ExtendLowInfoGraphVisitor : public boost::default_dfs_visitor {
         auto any_edge_exist = boost::edge(result_sg_nodes[0],
                                           result_sg_nodes[1], m_result_sg);
         if (!any_edge_exist.second) {
-            auto added_edge =
-                    boost::add_edge(result_sg_nodes[0], result_sg_nodes[1],
-                                    sg_edge, m_result_sg);
+          boost::add_edge(result_sg_nodes[0], result_sg_nodes[1],
+              sg_edge, m_result_sg);
         }
     }
 

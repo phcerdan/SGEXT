@@ -34,7 +34,7 @@ void Integrator::compute_net_forces(System *sys) const {
     }
 }
 
-void IntegratorTwoStep::update(unsigned int time_step) {
+void IntegratorTwoStep::update(unsigned int /* time_step */) {
     // sum all forces affecting every particles and
     // perform integration to get positions from forces.
     if (!integrator_method) {

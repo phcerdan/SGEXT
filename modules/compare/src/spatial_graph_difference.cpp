@@ -44,8 +44,6 @@ GraphType spatial_graph_difference(const GraphType &minuend_sg,
 
     vertex_iterator vi, vi_end;
     std::tie(vi, vi_end) = boost::vertices(minuend_sg);
-    auto vi_start = vi;
-    auto start = *vi;
 
     // Mark as unvisited (white) all the vertices
     {

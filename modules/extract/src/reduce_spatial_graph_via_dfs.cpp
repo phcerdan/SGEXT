@@ -97,9 +97,8 @@ GraphType reduce_spatial_graph_via_dfs(const GraphType &input_sg,
 
     {
         bool end_visit_flag = false;
-        auto finish_on_end_visit_flag = [&end_visit_flag,
-                                         &propColorMap](vertex_descriptor u,
-                                                        const GraphType &g) {
+        auto finish_on_end_visit_flag = [&end_visit_flag](vertex_descriptor,
+                                                        const GraphType &) {
             if (end_visit_flag)
                 return true;
             return false;

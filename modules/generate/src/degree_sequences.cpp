@@ -43,7 +43,7 @@ std::vector<int> generate_degree_sequence_geometric_distribution_bounded(
                 rand_degree = RNG::random_geometric(x) + min_degree_allowed;
             }
             iteration++;
-        } while (rand_degree > max_degree_allowed &&
+        } while (static_cast<size_t>(rand_degree) > max_degree_allowed &&
                  iteration < max_iterations);
         if (iteration >= max_iterations) {
             throw std::domain_error(

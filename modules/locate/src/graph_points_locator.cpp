@@ -110,8 +110,6 @@ bool all_graph_descriptors_exist(const std::vector<graph_descriptor> &gdescs) {
 vtkSmartPointer<vtkIdList> graph_closest_n_points_locator(
         const PointType &queryPoint,
         vtkOctreePointLocator *octree,
-        const std::unordered_map<vtkIdType, std::vector<graph_descriptor>>
-                &idMap,
         const int closest_n_points) {
     auto closeIdList = vtkSmartPointer<vtkIdList>::New();
     octree->FindClosestNPoints(closest_n_points, queryPoint.data(),
@@ -128,10 +126,7 @@ vtkSmartPointer<vtkIdList> graph_closest_n_points_locator(
 vtkSmartPointer<vtkIdList> graph_closest_points_by_radius_locator(
         const PointType &queryPoint,
         vtkOctreePointLocator *octree,
-        const std::unordered_map<vtkIdType, std::vector<graph_descriptor>>
-                &idMap,
         double radius) {
-    const size_t gdescs_size = idMap.cbegin()->second.size();
 
     auto closeIdList = vtkSmartPointer<vtkIdList>::New();
     octree->FindPointsWithinRadius(radius, queryPoint.data(), closeIdList);

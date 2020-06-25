@@ -32,7 +32,6 @@ SpatialEdge create_edge_from_path(
     // Add node for keeping a sensible order, it will be removed at the end.
     sg_edge_points.push_back(input_g[vertex_path[0]].pos);
     using vertex_descriptor = GraphType::vertex_descriptor;
-    using edge_descriptor = GraphType::edge_descriptor;
     // TODO: Check that vertex_path is connected
     for (size_t index = 1; index < vertex_path.size(); ++index) {
         vertex_descriptor target = vertex_path[index];
@@ -104,7 +103,6 @@ compute_shortest_path(GraphType::vertex_descriptor start_vertex,
                       bool verbose) {
     using vertex_descriptor = GraphType::vertex_descriptor;
     using edge_descriptor = GraphType::edge_descriptor;
-    using edge_iterator = GraphType::edge_iterator;
     size_t visited = 0;
     std::vector<boost::default_color_type> colors(boost::num_vertices(input_g),
                                                   boost::default_color_type{});

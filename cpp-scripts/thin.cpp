@@ -113,7 +113,6 @@ int main(int argc, char* const argv[]) {
      (!(foreground == "white" || foreground == "black")))
     throw po::validation_error(po::validation_error::invalid_option_value,
                                "foreground");
-  bool invert_image = (foreground == "black") ? true : false;
 
   std::string sk_string = vm["skel"].as<std::string>();
   if(vm.count("skel") && (!(sk_string == "ulti" || sk_string == "end" ||
