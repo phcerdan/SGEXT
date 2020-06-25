@@ -83,15 +83,15 @@ transform_graph_to_physical_space(SG::GraphAL &sg,
     // Loop over all nodes and transform pos.
     auto verts = boost::vertices(sg);
     for (auto &&vi = verts.first; vi != verts.second; ++vi) {
-        sg[*vi].pos = std::move(index_array_to_physical_space_array(
-                sg[*vi].pos, origin, spacing, direction));
+        sg[*vi].pos = index_array_to_physical_space_array(
+                sg[*vi].pos, origin, spacing, direction);
     }
     // Loop over all edges and transform edge_points
     auto edges = boost::edges(sg);
     for (auto ei = edges.first; ei != edges.second; ++ei) {
         for (auto &&ep : sg[*ei].edge_points) {
-            ep = std::move(index_array_to_physical_space_array(
-                    ep, origin, spacing, direction));
+            ep = index_array_to_physical_space_array(
+                    ep, origin, spacing, direction);
         }
     }
 };
@@ -160,14 +160,14 @@ void transform_graph_to_physical_space(SG::GraphAL &sg,
     // Loop over all nodes and transform pos.
     auto verts = boost::vertices(sg);
     for (auto &&vi = verts.first; vi != verts.second; ++vi) {
-        sg[*vi].pos = std::move(
-                index_array_to_physical_space_array(sg[*vi].pos, itk_image));
+        sg[*vi].pos =
+                index_array_to_physical_space_array(sg[*vi].pos, itk_image);
     }
     // Loop over all edges and transform edge_points
     auto edges = boost::edges(sg);
     for (auto ei = edges.first; ei != edges.second; ++ei) {
         for (auto &&ep : sg[*ei].edge_points) {
-            ep = std::move(index_array_to_physical_space_array(ep, itk_image));
+            ep = index_array_to_physical_space_array(ep, itk_image);
         }
     }
 };
@@ -177,14 +177,14 @@ void transform_graph_to_index_space(SG::GraphAL &sg, const TImage *itk_image) {
     // Loop over all nodes and transform pos.
     auto verts = boost::vertices(sg);
     for (auto &&vi = verts.first; vi != verts.second; ++vi) {
-        sg[*vi].pos = std::move(
-                physical_space_array_to_index_array(sg[*vi].pos, itk_image));
+        sg[*vi].pos =
+                physical_space_array_to_index_array(sg[*vi].pos, itk_image);
     }
     // Loop over all edges and transform edge_points
     auto edges = boost::edges(sg);
     for (auto ei = edges.first; ei != edges.second; ++ei) {
         for (auto &&ep : sg[*ei].edge_points) {
-            ep = std::move(physical_space_array_to_index_array(ep, itk_image));
+            ep = physical_space_array_to_index_array(ep, itk_image);
         }
     }
 };
