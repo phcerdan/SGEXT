@@ -99,7 +99,7 @@ bool check_edge_points_are_contiguous(
     const auto num_points = edge_points.size();
     const auto num_distances = num_points - 1;
     std::vector<double> distances_between_contigous_points(num_distances);
-    for (auto i = 0; i < num_distances; ++i) {
+    for (size_t i = 0; i < num_distances; ++i) {
         distances_between_contigous_points[i] =
                 ArrayUtilities::distance(edge_points[i], edge_points[i + 1]);
     }
@@ -108,8 +108,10 @@ bool check_edge_points_are_contiguous(
     const double expected_min_distance = 1.0;
     const double expected_max_distance = sqrt(3.0);
     // + 2.0 * std::numeric_limits<double>::epsilon();
+#if !defined(NDEBUG)
     const auto comma_separated_points = true;
-    for (auto i = 0; i < num_distances; ++i) {
+#endif
+    for (size_t i = 0; i < num_distances; ++i) {
         const auto &dist = distances_between_contigous_points[i];
         if (dist - expected_max_distance >
             2.0 * std::numeric_limits<double>::epsilon()) {

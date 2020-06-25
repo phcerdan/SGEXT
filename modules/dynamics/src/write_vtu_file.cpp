@@ -139,7 +139,7 @@ std::shared_ptr<System> read_vtu_file(const std::string &file_name) {
     reader->SetFileName(file_name.c_str());
     reader->Update();
     const auto ugrid = reader->GetOutput();
-    const auto npoints = ugrid->GetNumberOfPoints(); // particles
+    const auto npoints = static_cast<size_t>(ugrid->GetNumberOfPoints()); // particles
     const auto ncells = ugrid->GetNumberOfCells();   // bonds
 
     auto &particles = sys->all.particles;
@@ -156,7 +156,7 @@ std::shared_ptr<System> read_vtu_file(const std::string &file_name) {
     return sys;
 }
 void read_vtu_point_data(vtkUnstructuredGrid *ugrid, System *sys) {
-    const auto npoints = ugrid->GetNumberOfPoints(); // particles
+    const auto npoints = static_cast<size_t>(ugrid->GetNumberOfPoints()); // particles
     auto &particles = sys->all.particles;
     if (particles.size() != npoints) {
         particles.resize(npoints);
@@ -202,7 +202,7 @@ void read_vtu_point_data(vtkUnstructuredGrid *ugrid, System *sys) {
 }
 
 void read_vtu_bond_ids(vtkUnstructuredGrid *ugrid, System *sys) {
-    const auto ncells = ugrid->GetNumberOfCells(); // bonds
+    const auto ncells = static_cast<size_t>(ugrid->GetNumberOfCells()); // bonds
     auto &particles = sys->all.particles;
     auto &bonds = sys->bonds.bonds;
     // Populate bonds ids from Cell points
@@ -226,7 +226,7 @@ void read_vtu_bond_ids(vtkUnstructuredGrid *ugrid, System *sys) {
 }
 
 void read_vtu_bond_contour_length(vtkUnstructuredGrid *ugrid, System *sys) {
-    const auto ncells = ugrid->GetNumberOfCells(); // bonds
+    const auto ncells = static_cast<size_t>(ugrid->GetNumberOfCells()); // bonds
     auto &bonds = sys->bonds.bonds;
     // Get cell data
     auto cell_data = ugrid->GetCellData();

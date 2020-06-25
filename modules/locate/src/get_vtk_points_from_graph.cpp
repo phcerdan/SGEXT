@@ -18,7 +18,6 @@ void print_id_graph_descriptor_map(const IdGraphDescriptorMap &idMap) {
 }
 
 PointsIdMapPair get_vtk_points_from_graph(const GraphType &sg) {
-    using vertex_descriptor = boost::graph_traits<GraphType>::vertex_descriptor;
     using vertex_iterator = boost::graph_traits<GraphType>::vertex_iterator;
     using edge_iterator = boost::graph_traits<GraphType>::edge_iterator;
     auto points = vtkSmartPointer<vtkPoints>::New();

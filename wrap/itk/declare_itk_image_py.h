@@ -177,8 +177,8 @@ void declare_itk_image_ptr(pybind11::module &m, const std::string &typestr) {
                     py::arg("contig") = "F")
         // TODO: Create a view (non-copy) of the data
         // Problems will arise with the contig differences between numpy(fortran) and c.
-        .def("as_pyarray", [](const TImagePointer & img,
-                    const std::string & contiguous) {
+        .def("as_pyarray", [](const TImagePointer & /* img */,
+                    const std::string & /* contiguous */) {
                 throw std::runtime_error("not implemented, use to_pyarray");
                 },
                 py::arg("contig") = "F")

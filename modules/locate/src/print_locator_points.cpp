@@ -32,7 +32,7 @@ void print_points(vtkPoints *points) {
         std::cout << "points are EMPTY" << std::endl;
         return;
     }
-    for (auto pointIndex = 0; pointIndex < num_points; ++pointIndex) {
+    for (size_t pointIndex = 0; pointIndex < num_points; ++pointIndex) {
         auto a_point = points->GetPoint(pointIndex);
         std::cout << pointIndex << ": ";
         std::cout << "(" << a_point[0] << ", " << a_point[1] << ", "

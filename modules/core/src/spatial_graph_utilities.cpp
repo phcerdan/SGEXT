@@ -11,7 +11,6 @@ namespace SG {
 std::pair<std::vector<SpatialNode::PointType>, std::vector<graph_descriptor> >
 get_all_points(const GraphType &graph) {
 
-    using vertex_descriptor = boost::graph_traits<GraphType>::vertex_descriptor;
     using vertex_iterator = boost::graph_traits<GraphType>::vertex_iterator;
     using edge_iterator = boost::graph_traits<GraphType>::edge_iterator;
     size_t num_points = num_edge_points(graph) + boost::num_vertices(graph);

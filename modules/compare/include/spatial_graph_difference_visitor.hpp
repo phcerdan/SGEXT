@@ -146,8 +146,6 @@ struct SpatialGraphDifferenceVisitor : public boost::default_dfs_visitor {
         // - Both source/target exist in substraend, but the edge between them
         // does not.
         std::array<bool, 2> input_nodes_exist_in_result_graph = {false, false};
-        std::array<bool, 2> input_nodes_exist_in_substraend_graph = {false,
-                                                                     false};
         for (unsigned int source_target_index = 0;
              source_target_index < input_nodes_sorted.size();
              ++source_target_index) {
@@ -165,14 +163,14 @@ struct SpatialGraphDifferenceVisitor : public boost::default_dfs_visitor {
                 std::count(input_nodes_exist_in_result_graph.cbegin(),
                            input_nodes_exist_in_result_graph.cend(), true);
 
-        const bool source_or_target_are_in_result_graph =
-                (count_input_nodes_existing_in_result_graph > 0);
-
-        const bool source_or_target_are_not_in_result_graph =
-                (count_input_nodes_existing_in_result_graph < 2);
-
-        const bool source_and_target_are_in_result_graph =
-                (count_input_nodes_existing_in_result_graph == 2);
+        // const bool source_or_target_are_in_result_graph =
+        //         (count_input_nodes_existing_in_result_graph > 0);
+        //
+        // const bool source_or_target_are_not_in_result_graph =
+        //         (count_input_nodes_existing_in_result_graph < 2);
+        //
+        // const bool source_and_target_are_in_result_graph =
+        //         (count_input_nodes_existing_in_result_graph == 2);
 
         const bool only_one_source_or_target_is_in_result_graph =
                 (count_input_nodes_existing_in_result_graph == 1);
@@ -180,7 +178,7 @@ struct SpatialGraphDifferenceVisitor : public boost::default_dfs_visitor {
         const bool source_and_target_are_not_in_result_graph =
                 (count_input_nodes_existing_in_result_graph == 0);
 
-        const size_t minuend_index = 0;
+        // const size_t minuend_index = 0;
         const size_t substraend_index = 1;
         auto closest_desc_source = get_closest_existing_descriptors(
                 input_sg[input_nodes_sorted[0]].pos);
