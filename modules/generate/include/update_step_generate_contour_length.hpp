@@ -51,7 +51,8 @@ class update_step_generate_contour_length : public update_step {
         double &new_distance
         ) const;
     inline void perform() override {
-        this->perform();
+      throw std::runtime_error("Not implemented, "
+          "use the perform function requiring all the parameters.");
     }
     void undo(
             // in/out parameters
