@@ -15,8 +15,8 @@
  *  limitations under the License.
  *
  *=========================================================================*/
-#ifndef itkViewImage_hxx
-#define itkViewImage_hxx
+#ifndef sgext_itkViewImage_hxx
+#define sgext_itkViewImage_hxx
 #include <vtkSmartPointer.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
@@ -29,9 +29,7 @@
 #include "itkImageToVTKImageFilter.h"
 #include "itkStatisticsImageFilter.h"
 #include <itkFixedArray.h>
-namespace itk
-{
-namespace Testing
+namespace SG
 {
 template< typename T >
 void
@@ -243,6 +241,5 @@ ViewImages( const TLeft* leftImg,
   renderWindowInteractor->Initialize();
   renderWindowInteractor->Start();
 }
-}// namespace Testing
-}// namespace itk
+}// namespace SG
 #endif
