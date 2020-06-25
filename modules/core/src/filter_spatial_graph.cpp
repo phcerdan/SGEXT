@@ -93,13 +93,13 @@ std::vector<ComponentGraphType> filter_component_graphs(
                 [components_map, comp_index,
                  &inputGraph](GraphType::edge_descriptor e) {
                     return components_map.at(source(e, inputGraph)) ==
-                                   comp_index ||
+                                   static_cast<int>(comp_index) ||
                            components_map.at(target(e, inputGraph)) ==
-                                   comp_index;
+                                   static_cast<int>(comp_index);
                 },
                 // vertex_lambda
                 [components_map, comp_index](GraphType::vertex_descriptor v) {
-                    return components_map.at(v) == comp_index;
+                    return components_map.at(v) == static_cast<int>(comp_index);
                 });
 
     return component_graphs;
