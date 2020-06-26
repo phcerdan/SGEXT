@@ -10,6 +10,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
   reduce_spatial_graph_via_dfs.cpp
   remove_extra_edges.cpp
   split_loop.cpp
+  detect_clusters.cpp
   # trim_graph.cpp # Not implemented yet
   )
 list(TRANSFORM SG_MODULE_${SG_MODULE_NAME}_SOURCES PREPEND "src/")
