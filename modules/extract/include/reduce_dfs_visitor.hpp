@@ -105,8 +105,11 @@ struct ReduceGraphVisitor : public boost::default_dfs_visitor {
         m_is_not_loop = false;
     }
 
+    /** output graph the is constructed during the visit */
     SpatialGraph &m_sg;
+    /** color map used in the search to mark nodes as visited. */
     ColorMap &m_color_map;
+    /** vertex map between the input_spatial_graph and the output (m_sg) */
     VertexMap &m_vertex_map;
     bool &m_is_not_loop;
     bool &m_verbose;

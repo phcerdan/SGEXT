@@ -23,6 +23,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_TESTS
   test_merge_nodes.cpp
   test_spatial_graph_reduction.cpp
   test_split_loop.cpp
+  test_clusters.cpp
   )
 
 SG_add_gtests(
