@@ -21,6 +21,7 @@
 #include "detect_clusters.hpp"
 #include "detect_clusters_visitor.hpp"
 #include "spatial_graph.hpp"
+#include "spatial_graph_utilities.hpp"
 
 #include "gmock/gmock.h"
 
@@ -63,30 +64,33 @@ struct sg_clusters : public SpatialGraphBaseFixture, ::testing::Test {
 
 TEST_F(sg_clusters, detect_clusters_with_radius) {
     const double cluster_radius = 2.0;
+    const bool use_centroids = false;
     const bool verbose = true;
-    auto cluster_label_map =
-            SG::detect_clusters_with_radius(g, cluster_radius, verbose);
+    auto cluster_label_map = SG::detect_clusters_with_radius(
+            g, cluster_radius, use_centroids,
+            verbose);
 
     const auto number_of_nodes_belonging_to_any_cluster =
             cluster_label_map.size();
     EXPECT_EQ(number_of_nodes_belonging_to_any_cluster, 4);
     std::cout << "cluster_label_map:" << std::endl;
-    for (auto& t : cluster_label_map)
-        std::cout << "  " << t.first << " " << t.second  << "\n";
-    EXPECT_EQ(cluster_label_map[0], 1);
-    EXPECT_EQ(cluster_label_map[1], 1);
-    EXPECT_EQ(cluster_label_map[2], 0);
-    EXPECT_EQ(cluster_label_map[3], 0);
+    for (auto &t : cluster_label_map)
+        std::cout << "  " << t.first << " " << t.second << "\n";
+    EXPECT_EQ(cluster_label_map[0], 0);
+    EXPECT_EQ(cluster_label_map[1], 0);
+    EXPECT_EQ(cluster_label_map[2], 2);
+    EXPECT_EQ(cluster_label_map[3], 2);
 }
 
 TEST_F(sg_clusters, assign_cluster_label_to_spatial_node_id) {
     const double cluster_radius = 2.0;
-    const bool verbose = true;
-    auto cluster_label_map =
-            SG::detect_clusters_with_radius(g, cluster_radius, verbose);
+    const bool use_centroids = false;
+    auto cluster_label_map = SG::detect_clusters_with_radius(
+            g, cluster_radius, use_centroids);
     SG::assign_cluster_label_to_spatial_node_id(g, cluster_label_map);
-    EXPECT_EQ(g[0].id, 1);
-    EXPECT_EQ(g[1].id, 1);
-    EXPECT_EQ(g[2].id, 0);
-    EXPECT_EQ(g[3].id, 0);
+    EXPECT_EQ(g[0].id, 0);
+    EXPECT_EQ(g[1].id, 0);
+    EXPECT_EQ(g[2].id, 2);
+    EXPECT_EQ(g[3].id, 2);
+}
 }

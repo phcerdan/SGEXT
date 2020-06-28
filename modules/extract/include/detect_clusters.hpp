@@ -39,9 +39,10 @@ namespace SG {
  *
  * @return  cluster label map
  */
-std::unordered_map<GraphType::vertex_descriptor, size_t>
+std::unordered_map<GraphType::vertex_descriptor, GraphType::vertex_descriptor>
 detect_clusters_with_radius(const GraphType &input_sg,
                             const double &cluster_radius,
+                            bool use_cluster_centroid = true,
                             bool verbose = false);
 
 /**
@@ -56,7 +57,7 @@ detect_clusters_with_radius(const GraphType &input_sg,
  */
 void assign_cluster_label_to_spatial_node_id(
         GraphType &input_sg,
-        std::unordered_map<GraphType::vertex_descriptor, size_t>
+        std::unordered_map<GraphType::vertex_descriptor, GraphType::vertex_descriptor>
                 &cluster_label_map);
 } // end namespace SG
 #endif
