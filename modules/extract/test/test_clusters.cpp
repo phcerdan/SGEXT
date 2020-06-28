@@ -3,6 +3,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+#include "collapse_clusters.hpp"
+#include "collapse_clusters_visitor.hpp"
 #include "detect_clusters.hpp"
 #include "detect_clusters_visitor.hpp"
 #include "spatial_graph.hpp"
@@ -78,4 +80,20 @@ TEST_F(sg_clusters, assign_cluster_label_to_spatial_node_id) {
     EXPECT_EQ(g[2].id, 2);
     EXPECT_EQ(g[3].id, 2);
 }
+
+TEST_F(sg_clusters, collapse_clusters) {
+    const double cluster_radius = 2.0;
+    const bool use_centroids = true;
+    const bool verbose = true;
+    auto cluster_label_map = SG::detect_clusters_with_radius(
+            g, cluster_radius, use_centroids,
+            verbose);
+    auto collapsed_graph = SG::collapse_clusters(g, cluster_label_map, verbose);
+    EXPECT_EQ( boost::num_vertices(collapsed_graph), 3);
+    EXPECT_EQ( boost::num_edges(collapsed_graph), 2);
+    SG::print_degrees(collapsed_graph);
+    SG::print_edges(collapsed_graph);
+    EXPECT_EQ(collapsed_graph[0].pos, g[0].pos);
+    EXPECT_EQ(collapsed_graph[1].pos, g[2].pos);
+    EXPECT_EQ(collapsed_graph[2].pos, g[4].pos);
 }
