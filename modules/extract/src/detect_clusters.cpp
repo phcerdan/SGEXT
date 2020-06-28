@@ -13,12 +13,12 @@
 
 namespace SG {
 
-std::unordered_map<GraphType::vertex_descriptor, size_t>
+std::unordered_map<GraphType::vertex_descriptor, GraphType::vertex_descriptor>
 detect_clusters_with_radius(const GraphType &input_sg,
                             const double &cluster_radius,
+                            bool use_cluster_centroid,
                             bool verbose) {
 
-    GraphType sg;
     using vertex_descriptor = boost::graph_traits<GraphType>::vertex_descriptor;
     using edge_descriptor = boost::graph_traits<GraphType>::edge_descriptor;
 
@@ -29,10 +29,10 @@ detect_clusters_with_radius(const GraphType &input_sg,
         return DetectClustersGraphVisitorType::condition_edge_is_close(
                 e, input_sg, cluster_radius);
     };
-    typename DetectClustersGraphVisitorType::ClusterVertexMap
-            cluster_vertex_map;
+    typename DetectClustersGraphVisitorType::VertexToClusterMap
+            vertex_to_cluster_map;
 
-    DetectClustersGraphVisitorType vis(cluster_vertex_map,
+    DetectClustersGraphVisitorType vis(vertex_to_cluster_map,
                                        cluster_edge_condition, verbose);
 
     // For dfs/bfs
@@ -49,7 +49,13 @@ detect_clusters_with_radius(const GraphType &input_sg,
         std::tie(vi, vi_end) = boost::vertices(component_graph);
         boost::depth_first_visit(input_sg, *vi, vis, propColorMap);
     }
-    return vis.get_clean_cluster_label_map();
+    const auto single_label_maps = vis.get_single_label_cluster_maps();
+    if (use_cluster_centroid) {
+        const auto centroid_single_label_maps =
+                vis.single_label_maps_to_centroid(single_label_maps, input_sg);
+        return centroid_single_label_maps.vertex_to_single_label_cluster_map;
+    }
+    return single_label_maps.vertex_to_single_label_cluster_map;
 }
 
 void assign_cluster_label_to_spatial_node_id(
