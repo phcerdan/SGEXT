@@ -55,7 +55,7 @@ been added to the search tree and all of the adjacent vertices have been
 discovered (but before their out-edges have been examined).
 
  */
-template <typename SpatialGraph, typename VertexMap, typename ColorMap>
+template <typename SpatialGraph, typename VertexMap, typename EdgeAddedMap>
 struct CollapseClustersGraphVisitor : public boost::default_dfs_visitor {
     using SpatialGraphVertexBundle =
             typename boost::vertex_bundle_type<SpatialGraph>::type;
@@ -70,34 +70,36 @@ struct CollapseClustersGraphVisitor : public boost::default_dfs_visitor {
     using LabelType = vertex_descriptor;
     using ClusterSingleLabelMap =
             std::unordered_map<vertex_descriptor, LabelType>;
+    // using EdgeAddedMap = std::map<edge_descriptor, bool>;
 
     CollapseClustersGraphVisitor(SpatialGraph &sg_out,
-                                 ColorMap &color_map,
                                  VertexMap &vertex_map,
-                                 ClusterSingleLabelMap &cluster_label_map,
+                                 EdgeAddedMap &edge_added_map,
+                                 const ClusterSingleLabelMap &cluster_label_map,
                                  bool &verbose)
-            : m_sg_out(sg_out), m_color_map(color_map),
-              m_vertex_map(vertex_map), m_cluster_label_map(cluster_label_map),
-              m_verbose(verbose) {}
+            : m_sg_out(sg_out), m_vertex_map(vertex_map),
+              m_edge_added_map(edge_added_map),
+              m_cluster_label_map(cluster_label_map), m_verbose(verbose) {}
     /**
      * Copy Constructor.
      * DFS visit and search takes a copy of the visitor.
      * Set the boolean reference to false at copy (needed to stop function).
      */
     CollapseClustersGraphVisitor(const CollapseClustersGraphVisitor &other)
-            : m_sg_out(other.m_sg_out), m_color_map(other.m_color_map),
-              m_vertex_map(other.m_vertex_map),
+            : m_sg_out(other.m_sg_out), m_vertex_map(other.m_vertex_map),
+              m_edge_added_map(other.m_edge_added_map),
               m_cluster_label_map(other.m_cluster_label_map),
               m_verbose(other.m_verbose) {}
 
     /** output graph the is constructed during the visit */
     SpatialGraph &m_sg_out;
-    /** color map used in the search to mark nodes as visited. */
-    ColorMap &m_color_map;
     /** vertex map between the input_spatial_graph and the output (m_sg_out) */
     VertexMap &m_vertex_map;
+    /** Map to check if edge is already added. It allows to add parallel edges.
+     */
+    EdgeAddedMap &m_edge_added_map;
     /** vertex to cluster label map. Obtained from detect_clusters. */
-    ClusterSingleLabelMap &m_cluster_label_map;
+    const ClusterSingleLabelMap &m_cluster_label_map;
     bool &m_verbose;
 
     struct belongs_to_cluster_result {
@@ -108,9 +110,10 @@ struct CollapseClustersGraphVisitor : public boost::default_dfs_visitor {
 
     belongs_to_cluster_result belongs_to_cluster(vertex_descriptor u) const {
         // Check if current node is in a cluster
-        // Note that the cluster label can be the smallest vertex_descriptor of the
-        // cluster, or the vertex_descriptor corresponding to the centroid of the cluster
-        // or any other criteria (being an existing vertex_descriptor).
+        // Note that the cluster label can be the smallest vertex_descriptor of
+        // the cluster, or the vertex_descriptor corresponding to the centroid
+        // of the cluster or any other criteria (being an existing
+        // vertex_descriptor).
         LabelType cluster_label = std::numeric_limits<LabelType>::max();
         bool cluster_vertex = false;
         auto cluster_search = m_cluster_label_map.find(u);
@@ -152,6 +155,13 @@ struct CollapseClustersGraphVisitor : public boost::default_dfs_visitor {
         return std::make_pair(vertex_added, out_vertex_descriptor);
     }
 
+    bool edge_exists_in_output(edge_descriptor e) {
+        if (m_edge_added_map.find(e) == m_edge_added_map.end()) {
+            return false;
+        }
+        return true;
+    }
+
     /**
      * invoked when a vertex is encountered for the first time.
      *
@@ -162,6 +172,11 @@ struct CollapseClustersGraphVisitor : public boost::default_dfs_visitor {
         const auto belongs_to_cluster_result = belongs_to_cluster(u);
         const auto &input_vertex_descriptor =
                 belongs_to_cluster_result.input_vertex_descriptor;
+        if (m_verbose) {
+            std::cout << "collapse discover_vertex: " << u << " : "
+                      << ArrayUtilities::to_string(input_sg[u].pos)
+                      << std::endl;
+        }
         add_node_to_output_if_not_exist(input_vertex_descriptor, input_sg);
         // TODO: Move the spatial_node in the output graph to the center of mass
         // of the cluster or
@@ -182,16 +197,27 @@ struct CollapseClustersGraphVisitor : public boost::default_dfs_visitor {
      * @param e
      * @param input_sg
      */
-    void tree_edge(edge_descriptor e, const SpatialGraph &input_sg) {
+    void examine_edge(edge_descriptor e, const SpatialGraph &input_sg) {
         const auto source = boost::source(e, input_sg);
         const auto target = boost::target(e, input_sg);
         const auto source_belongs_to_cluster_result =
                 belongs_to_cluster(source);
         const auto target_belongs_to_cluster_result =
                 belongs_to_cluster(target);
+        if (m_verbose) {
+            std::cout << "collapse examine_edge: " << e
+                      << " , target: " << target << " : "
+                      << ArrayUtilities::to_string(input_sg[target].pos)
+                      << std::endl;
+        }
         // Internal cluster edge, do nothing.
-        if (source_belongs_to_cluster_result.cluster_label ==
-            target_belongs_to_cluster_result.cluster_label) {
+        if (source_belongs_to_cluster_result.belongs_to_a_cluster &&
+            source_belongs_to_cluster_result.cluster_label ==
+                    target_belongs_to_cluster_result.cluster_label) {
+            if (m_verbose) {
+                std::cout << " -- internal cluster edge, edge ignored. "
+                          << std::endl;
+            }
             return;
         }
         vertex_descriptor output_source_descriptor;
@@ -214,6 +240,10 @@ struct CollapseClustersGraphVisitor : public boost::default_dfs_visitor {
         // and add the points (voxels) to the spatial edge.
         // Or, follow the shortest path, and copy all the points involved.
         // The latest is implemented.
+        if (edge_exists_in_output(e)) {
+            return;
+        }
+
         auto spatial_edge = SpatialEdge();
         const bool edge_connecting_non_clusters =
                 !source_belongs_to_cluster_result.belongs_to_a_cluster &&
@@ -233,18 +263,13 @@ struct CollapseClustersGraphVisitor : public boost::default_dfs_visitor {
         }
         boost::add_edge(output_source_descriptor, output_target_descriptor,
                         spatial_edge, m_sg_out);
+        m_edge_added_map.emplace(e, true);
+        if (m_verbose) {
+            std::cout << " -- added spatial_edge with edge_points: ";
+            print_edge_points(spatial_edge.edge_points, std::cout);
+            std::cout << std::endl;
+        }
     }
-
-    /**
-     * Invoked on a vertex after all of its out edges have been added to the
-     * search tree and all of the adjacent vertices have been discovered
-     * (but before their out-edges have been examined).
-     *
-     * @param u
-     * @param input_sg
-     */
-    // void finish_vertex(vertex_descriptor u, const SpatialGraph &input_sg)
-    // {}
 };
 } // end namespace SG
 #endif
