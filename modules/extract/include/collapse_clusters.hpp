@@ -41,9 +41,54 @@ namespace SG {
  *
  * @return
  */
-GraphType collapse_clusters(const GraphType &input_sg,
-                            std::unordered_map<GraphType::vertex_descriptor,
-                                               GraphType::vertex_descriptor> &vertex_to_single_label_cluster_map,
-                            bool verbose);
+GraphType
+collapse_clusters(const GraphType &input_sg,
+                  const std::unordered_map<GraphType::vertex_descriptor,
+                                           GraphType::vertex_descriptor>
+                          &vertex_to_single_label_cluster_map,
+                  bool verbose);
+
+/**
+ * Returns a new vertex_single_label_cluster where only the vertex with labels
+ * in the input cluster_labels are kept.
+ *
+ * For a easy to use collapse using this function see: @ref
+ * collapse_specific_clusters
+ *
+ * @param cluster_labels vector of cluster labels to keep from the map
+ * @param vertex_to_single_label_cluster_map vertex label map obtained
+ * from detect_clusters functions
+ *
+ * @return a new vertex_single_label_cluster map containing only the input
+ * labels
+ */
+std::unordered_map<GraphType::vertex_descriptor, GraphType::vertex_descriptor>
+trim_vertex_to_single_label_map(
+        const std::vector<GraphType::vertex_descriptor> &cluster_labels,
+        const std::unordered_map<GraphType::vertex_descriptor,
+                                 GraphType::vertex_descriptor>
+                &vertex_to_single_label_cluster_map);
+
+/**
+ * Helper high-level function combining @ref trim_vertex_to_single_label_map and
+ * @ref collapse_clusters Returns a copy of the graph after collapsing only the
+ * clusters specified in cluster_labels.
+ *
+ * @param cluster_labels cluster labels to collapse
+ * @param input_sg input spatial graph
+ * @param vertex_to_single_label_cluster_map vertex label map obtained
+ * from detect_clusters functions
+ * @param verbose
+ *
+ * @return new spatial graph
+ */
+GraphType collapse_specific_clusters(
+        const std::vector<GraphType::vertex_descriptor> &cluster_labels,
+        const GraphType &input_sg,
+        const std::unordered_map<GraphType::vertex_descriptor,
+                                 GraphType::vertex_descriptor>
+                &vertex_to_single_label_cluster_map,
+        bool verbose);
+
 } // end namespace SG
 #endif
