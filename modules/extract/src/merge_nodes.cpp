@@ -19,6 +19,7 @@
  * *******************************************************************/
 
 #include "merge_nodes.hpp"
+#include "boost/graph/copy.hpp"
 #include "edge_points_utilities.hpp"
 #include "filter_spatial_graph.hpp"
 
@@ -174,11 +175,10 @@ size_t merge_three_connected_nodes(GraphType &sg, bool inPlace) {
 
 std::vector<std::pair<boost::graph_traits<GraphType>::edge_descriptor,
                       boost::graph_traits<GraphType>::edge_descriptor>>
-get_parallel_edges(const GraphType &sg) {
+get_parallel_edges(const GraphType &sg, const bool return_unique_pairs) {
     using edge_descriptor = boost::graph_traits<GraphType>::edge_descriptor;
     using EdgePair = std::pair<edge_descriptor, edge_descriptor>;
     std::vector<EdgePair> parallel_edges;
-
     const auto verts = boost::vertices(sg);
     // From
     // http://www.boost.org/doc/libs/1_66_0/libs/graph/doc/IncidenceGraph.html
@@ -203,6 +203,44 @@ get_parallel_edges(const GraphType &sg) {
             }
         }
     }
+
+    // Remove repeated pairs
+    // Note that pairs with switched source/target are added to parallel_edges
+    // pair1: [e1:{0,1}, e2:{0,1}]
+    // pair2: [e1:{1,0}, e2:{1,0}]
+    // If return_unique_pairs is true, the repeated pairs are removed
+    if (return_unique_pairs) {
+        std::vector<std::vector<EdgePair>::const_iterator>
+                parallel_edges_to_remove_iterators;
+        for (auto it1 = parallel_edges.cbegin(); it1 != parallel_edges.cend();
+             it1++) {
+            auto it2 = it1;
+            it2++;
+            for (; it2 != parallel_edges.cend(); it2++) {
+                const bool it2_equal_it1_same_order =
+                        (it2->first == it1->first &&
+                         it2->second == it1->second);
+                const bool it2_equal_it1_swapped = (it2->first == it1->second &&
+                                                    it2->second == it1->first);
+                if (it2_equal_it1_same_order || it2_equal_it1_swapped) {
+                    parallel_edges_to_remove_iterators.push_back(it2);
+                }
+            }
+        }
+        // perform a copy...
+        std::vector<EdgePair> unique_undirected_parallel_edges;
+        for (auto it1 = parallel_edges.cbegin(); it1 != parallel_edges.cend();
+             it1++) {
+            auto found =
+                    std::find(parallel_edges_to_remove_iterators.cbegin(),
+                              parallel_edges_to_remove_iterators.cend(), it1);
+            if (found == parallel_edges_to_remove_iterators.cend()) {
+                unique_undirected_parallel_edges.push_back(*it1);
+            }
+        }
+        return unique_undirected_parallel_edges;
+    }
+
     return parallel_edges;
 }
 
@@ -251,6 +289,46 @@ get_equal_parallel_edges(
     }
 
     return equal_parallel_edges;
+}
+
+GraphType remove_parallel_edges(const GraphType &sg,
+                                const bool keep_larger_spatial_edges) {
+    GraphType sg_no_parallel;
+    boost::copy_graph(sg, sg_no_parallel);
+
+    const bool unique_undirected_parallel_edges = true;
+    const auto parallel_edges = get_parallel_edges(
+            sg_no_parallel, unique_undirected_parallel_edges);
+    for (const auto &edge_pair : parallel_edges) {
+        const auto &points_first = sg[edge_pair.first].edge_points;
+        const auto &points_second = sg[edge_pair.second].edge_points;
+        // In case there are no points remove the second one.
+        // We remove the second edge, in case there are more than
+        // two parallel_edges
+        if (points_first.empty() && points_second.empty()) {
+            boost::remove_edge(edge_pair.second, sg_no_parallel);
+            continue;
+        }
+
+        const auto contour_length_first =
+                contour_length(edge_pair.first, sg_no_parallel);
+        const auto contour_length_second =
+                contour_length(edge_pair.second, sg_no_parallel);
+
+        bool remove_second_edge = false;
+        if (contour_length_first >= contour_length_second) {
+            if (keep_larger_spatial_edges) {
+                remove_second_edge = true;
+            }
+        }
+
+        if (remove_second_edge) {
+            boost::remove_edge(edge_pair.second, sg_no_parallel);
+        } else {
+            boost::remove_edge(edge_pair.first, sg_no_parallel);
+        }
+    }
+    return sg_no_parallel;
 }
 
 size_t merge_four_connected_nodes(GraphType &sg, bool inPlace) {

@@ -24,6 +24,7 @@
 #include "detect_clusters_visitor.hpp"
 #include "spatial_graph.hpp"
 #include "spatial_graph_utilities.hpp"
+#include "merge_nodes.hpp" // for remove_parallel_edges
 
 #include "gmock/gmock.h"
 
@@ -119,6 +120,33 @@ TEST_F(sg_clusters, collapse_clusters) {
     EXPECT_EQ(collapsed_graph[1].pos, g[2].pos);
     EXPECT_EQ(collapsed_graph[2].pos, g[4].pos);
 }
+
+TEST_F(sg_clusters, collapse_clusters_and_remove_shorter_parallel_edges) {
+    const double cluster_radius = 2.0;
+    const bool use_centroids = true;
+    const bool verbose = true;
+    auto cluster_label_map = SG::detect_clusters_with_radius(
+            g, cluster_radius, use_centroids,
+            verbose);
+    auto collapsed_graph = SG::collapse_clusters(g, cluster_label_map, verbose);
+    auto collapsed_graph_with_no_parallel_edges =
+        SG::remove_parallel_edges(collapsed_graph);
+    EXPECT_EQ( boost::num_vertices(collapsed_graph_with_no_parallel_edges), 3);
+    // There is one parallel edge between clusters:
+    //    o
+    //   /
+    //  o    cluster label: 1
+    //   \
+    //   /
+    //  o    cluster label: 0
+    EXPECT_EQ( boost::num_edges(collapsed_graph_with_no_parallel_edges), 2);
+    SG::print_degrees(collapsed_graph_with_no_parallel_edges);
+    SG::print_edges(collapsed_graph_with_no_parallel_edges);
+    // EXPECT_EQ(collapsed_graph_with_no_parallel_edges[0].pos, g[0].pos);
+    // EXPECT_EQ(collapsed_graph_with_no_parallel_edges[1].pos, g[2].pos);
+    // EXPECT_EQ(collapsed_graph_with_no_parallel_edges[2].pos, g[4].pos);
+}
+
 TEST_F(sg_clusters, collapse_specific_clusters) {
     const double cluster_radius = 2.0;
     const bool use_centroids = true;

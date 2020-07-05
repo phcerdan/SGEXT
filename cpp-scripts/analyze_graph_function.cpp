@@ -187,26 +187,26 @@ void merge_nodes_interface(
     }
 }
 
-void check_parallel_edges_interface(GraphType & reduced_g, bool verbose) {
+void check_parallel_edges_interface(GraphType &reduced_g, bool verbose) {
     if (verbose) {
         std::cout << "Checking parallel edges... " << std::endl;
     }
 
-    auto parallel_edges = SG::get_parallel_edges(reduced_g);
+    const bool unique_undirected_parallel_edges = true;
+    auto parallel_edges =
+            SG::get_parallel_edges(reduced_g, unique_undirected_parallel_edges);
     auto equal_parallel_edges =
-        SG::get_equal_parallel_edges(parallel_edges, reduced_g);
+            SG::get_equal_parallel_edges(parallel_edges, reduced_g);
     if (verbose) {
-        std::cout << "Found " << parallel_edges.size()
-            << " parallel edges. " << equal_parallel_edges.size()
-            << " are equal!." << std::endl;
+        std::cout << "Found " << parallel_edges.size() << " parallel edges. "
+                  << equal_parallel_edges.size() << " are equal!." << std::endl;
 
         if (!equal_parallel_edges.empty()) {
             std::cout << "Equal parallel edges between vertex:\n";
             for (const auto &edge_pair : equal_parallel_edges)
-                std::cout << boost::source(edge_pair.first, reduced_g)
-                    << "---"
-                    << boost::target(edge_pair.first, reduced_g)
-                    << std::endl;
+                std::cout << boost::source(edge_pair.first, reduced_g) << "---"
+                          << boost::target(edge_pair.first, reduced_g)
+                          << std::endl;
         }
     }
 }
