@@ -11,18 +11,20 @@
 namespace SG {
 
 /**
- * Collapse all the clusters of the spatial graph, generating a new graph
- * where each clusters is represented by one node.
+ * Collapse all the clusters specified in the vertex_to_single_label_cluster_map
+ * of the spatial graph, generating a new graph where each cluster is
+ * represented by one node.
  * The internal-cluster nodes and edges are removed, but the out-edges are kept.
  * Where they might be pointing to collapsed nodes, if they where connected to
  * other cluster.
  *
  * This function needs to first run detect_clusters to obtain the
- * cluster_label_map
+ * vertex_to_single_label_cluster_map
  *
  * @param input_sg input spatial graph
- * @param cluster_label_map obtained from @ref detect_clusters_with_radius or
- * equivalent.
+ * @param vertex_to_single_label_cluster_map obtained from
+ *  @ref detect_clusters_with_radius or equivalent.
+ * @param verbose extra info to cout
  *
  * @return
  */
@@ -31,7 +33,7 @@ collapse_clusters(const GraphType &input_sg,
                   const std::unordered_map<GraphType::vertex_descriptor,
                                            GraphType::vertex_descriptor>
                           &vertex_to_single_label_cluster_map,
-                  bool verbose);
+                  bool verbose = false);
 
 /**
  * Returns a new vertex_single_label_cluster where only the vertex with labels
@@ -73,7 +75,7 @@ GraphType collapse_specific_clusters(
         const std::unordered_map<GraphType::vertex_descriptor,
                                  GraphType::vertex_descriptor>
                 &vertex_to_single_label_cluster_map,
-        bool verbose);
+        bool verbose = false);
 
 } // end namespace SG
 #endif
