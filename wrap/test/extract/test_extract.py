@@ -5,6 +5,7 @@
 
 from sgext import core
 from sgext import extract
+import math
 import unittest
 
 class ThreeConnectedNodesGraphFixture:
@@ -86,3 +87,53 @@ class TestReduceSpatialGraph(unittest.TestCase):
         reduced_graph = extract.reduce_spatial_graph_via_dfs(self.graph, verbose)
         self.assertEqual(reduced_graph.num_vertices(), self.graph.num_vertices())
         self.assertEqual(reduced_graph.num_edges(), self.graph.num_edges())
+
+class TestDetectAndCollapseClusters(unittest.TestCase):
+    def setUp(self):
+        """
+        Modify fixture graph to collapse the centered 3 voxels.
+        This moves away the end-nodes further away from the center.
+        """
+        fixture = ThreeConnectedNodesGraphFixture()
+        self.graph = fixture.graph
+        v3 = self.graph.vertex(3)
+        v3.pos = [-4,0,0]
+        self.graph.set_vertex(3, v3)
+        v4 = self.graph.vertex(4);
+        v4.pos = [4,8,0]
+        self.graph.set_vertex(4, v4)
+        v5 = self.graph.vertex(5);
+        v5.pos = [4,0,8]
+        self.graph.set_vertex(5, v5)
+
+    def test_detect_clusters_with_radius(self):
+        verbose = True
+        radius = math.sqrt(3.0)
+        use_cluster_centroid = True
+        vertex_to_cluster_label_map = extract.detect_clusters_with_radius(
+            graph=self.graph,
+            radius=radius,
+            use_cluster_centroid=use_cluster_centroid,
+            verbose=verbose)
+        print("radius: ", radius)
+        print("vertex_to_cluster_label_map: ", vertex_to_cluster_label_map)
+        self.assertEqual(vertex_to_cluster_label_map[0], 0)
+        self.assertEqual(vertex_to_cluster_label_map[1], 0)
+        self.assertEqual(vertex_to_cluster_label_map[2], 0)
+
+    def test_collapse_clusters(self):
+        verbose = False
+        radius = math.sqrt(3.0)
+        use_cluster_centroid = True
+        vertex_to_cluster_label_map = extract.detect_clusters_with_radius(
+            graph=self.graph,
+            radius=radius,
+            use_cluster_centroid=use_cluster_centroid,
+            verbose=verbose)
+        collapsed_graph = extract.collapse_clusters(
+            graph=self.graph,
+            vertex_to_cluster_label_map=vertex_to_cluster_label_map,
+            verbose=verbose)
+        print("collapsed_graph: ", collapsed_graph)
+        self.assertEqual(collapsed_graph.num_vertices(), 4)
+        self.assertEqual(collapsed_graph.num_edges(), 3)
