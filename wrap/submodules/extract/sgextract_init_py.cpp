@@ -25,6 +25,8 @@ void init_split_loop(py::module &);
 void init_merge_nodes(py::module &);
 void init_remove_extra_edges(py::module &);
 void init_reduce_spatial_graph(py::module &);
+void init_detect_clusters(py::module &);
+void init_collapse_clusters(py::module &);
 
 void init_sgextract(py::module & mparent) {
     auto m = mparent.def_submodule("extract");
@@ -33,4 +35,6 @@ void init_sgextract(py::module & mparent) {
     init_merge_nodes(m);
     init_remove_extra_edges(m);
     init_reduce_spatial_graph(m);
+    init_detect_clusters(m);
+    init_collapse_clusters(m);
 }

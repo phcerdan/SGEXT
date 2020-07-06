@@ -4,6 +4,8 @@ set(current_sources_
   reduce_spatial_graph_py.cpp
   remove_extra_edges_py.cpp
   split_loop_py.cpp
+  detect_clusters_py.cpp
+  collapse_clusters_py.cpp
   )
 set(module_name_ ${CMAKE_CURRENT_SOURCE_DIR})
 list(TRANSFORM current_sources_ PREPEND "${module_name_}/")

@@ -19,28 +19,36 @@
  * *******************************************************************/
 
 #include "pybind11_common.h"
-// #include "sgextract_common_py.hpp"
-#include "merge_nodes.hpp"
+#include "detect_clusters.hpp"
 
 namespace py = pybind11;
 using namespace SG;
 
-void init_merge_nodes(py::module &m) {
-    m.def("merge_three_connected_nodes", &merge_three_connected_nodes);
-    m.def("merge_four_connected_nodes", &merge_four_connected_nodes);
-    m.def("merge_two_three_connected_nodes", &merge_two_three_connected_nodes);
-    m.def("remove_parallel_edges", &remove_parallel_edges,
+void init_detect_clusters(py::module &m) {
+    m.def("detect_clusters_with_radius", &detect_clusters_with_radius,
           R"(
-Use @ref get_parallel_edges to remove the edges of the input graph.
-Returns a new copy of the graph.
+Obtain a vertex to cluster label map, mapping each vertex that belongs to
+a cluster to a label.
+
+Returns a vertex_to_cluster_label_map, that can be used to collapse_clusters.
 
 Parameters:
 ----------
 graph: GraphType
  input spatial graph
-keep_larger_spatial_edge: Bool [false by default]
- keep the parallel edge with largest contour length,
- if false, keep shorter parallel edges.
+radius: Float
+ cluster radius, all nodes close to other nodes (at a distance = radius)
+ form a cluster
+use_cluster_centroid: Bool
+ the node representing the whole cluster is the one closer to the
+ cluster centroid.
+ If False, the node is the one with the smalled vertex_descriptor.
+verbose: Bool
+ Print extra info to console.
+
 )",
-          py::arg("graph"), py::arg("keep_larger_spatial_edge") = false);
+          py::arg("graph"),
+          py::arg("radius"),
+          py::arg("use_cluster_centroid") = true,
+          py::arg("verbose") = false);
 }
