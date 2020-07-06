@@ -11,15 +11,17 @@
 namespace SG {
 
 /**
- * Use detect_clusters_visitor to obtain a cluster label map, mappings
+ * Use detect_clusters_visitor to obtain a cluster label map, mapping
  * each vertex that belongs to a cluster to a label.
  *
- * For assigning that cluster label to spatial_node_id use @ref
- * assign_cluster_label_to_spatial_node_id
- *
+ * For assigning that cluster label to spatial_node_id (useful for visualization
+ * purposes) use @ref assign_cluster_label_to_spatial_node_id
  *
  * @param input_sg graph from where detect clusters
  * @param cluster_radius the cluster condition
+ * @param use_cluster_centroid the node representing the whole cluster
+ *  is the one closer to the cluster centroid.  If false, the node is the one
+ *  with the smalled vertex_descriptor.
  * @param verbose
  *
  * @return  cluster label map

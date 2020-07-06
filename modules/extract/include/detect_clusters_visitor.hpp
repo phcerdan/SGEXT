@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <boost/graph/adjacency_iterator.hpp>
 #include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/depth_first_search.hpp>
+#include <boost/graph/breadth_first_search.hpp>
 #include <boost/graph/graph_traits.hpp>
 #include <iostream>
 #include <tuple>
@@ -53,7 +53,7 @@ inline SG::GraphType::vertex_descriptor get_vertex_closer_to_centroid(
 }
 
 /**
- * Use DFS (Depth first search/visitor) to detect clusters in input graph. A
+ * Use BFS (Breadth first search/visitor) to detect clusters in input graph. A
  * custom function to detect clusters can be provided, but the default uses the
  * geometrical information of the spatial graphand an input radius to consider a
  * cluster based on proximity with its neighbors.
@@ -69,39 +69,34 @@ inline SG::GraphType::vertex_descriptor get_vertex_closer_to_centroid(
  * @ref get_clean_cluster_label_map
  *
  * Extra from:
-http://www.boost.org/doc/libs/1_65_1/libs/graph/doc/depth_first_search.html
+https://www.boost.org/doc/libs/1_65_1/libs/graph/doc/breadth_first_search.html
 
-vis.initialize_vertex(s, g) is invoked on every vertex of the graph before the
-start of the graph search.
+- vis.initialize_vertex(v, g) is invoked on every vertex before the start of the
+search.
+- vis.examine_vertex(u, g)r is invoked in each vertex as it is removed from the
+queue.
+- vis.examine_edge(e, g) is invoked on every out-edge of each vertex immediately
+after the vertex is removed from the queue.
+- vis.tree_edge(e, g) is invoked (in addition to examine_edge()) if the edge is
+a tree edge. The target vertex of edge e is discovered at this time.
 
-vis.start_vertex(s, g) is invoked on the source vertex once before the start of
-the search.
+- vis.discover_vertex(u, g) is invoked the first time the algorithm encounters
+vertex u. All vertices closer to the source vertex have been discovered, and
+vertices further from the source have not yet been discovered.
 
-vis.discover_vertex(u, g) is invoked when a vertex is encountered for the first
-time.
-
-vis.examine_edge(e, g) is invoked on every out-edge of each vertex after it is
-discovered.
-
-vis.tree_edge(e, g) is invoked on each edge as it becomes a member of the edges
-that form the search tree. If you wish to record predecessors, do so at this
-event point.
-
-vis.back_edge(e, g) is invoked on the back edges in the graph.
-
-vis.forward_or_cross_edge(e, g) is invoked on forward or cross edges in the
-graph. In an undirected graph this method is never called.
-
-vis.finish_edge(e, g) is invoked on the non-tree edges in the graph as well as
-on each tree edge after its target vertex is finished.
-
-vis.finish_vertex(u, g) is invoked on a vertex after all of its out edges have
-been added to the search tree and all of the adjacent vertices have been
-discovered (but before their out-edges have been examined).
-
+- vis.non_tree_edge(e, g) is invoked (in addition to examine_edge()) if the edge
+is not a tree edge.
+- vis.gray_target(e, g) is invoked (in addition to non_tree_edge()) if the
+target vertex is colored gray at the time of examination. The color gray
+indicates that the vertex is currently in the queue.
+- vis.black_target(e, g) is invoked (in addition to non_tree_edge()) if the
+target vertex is colored black at the time of examination. The color black
+indicates that the vertex is no longer in the queue.
+- vis.finish_vertex(u, g) is invoked after all of the out edges of u have been
+examined and all of the adjacent vertices have been discovered.
  */
 template <typename SpatialGraph>
-struct DetectClustersGraphVisitor : public boost::default_dfs_visitor {
+struct DetectClustersGraphVisitor : public boost::default_bfs_visitor {
     using SpatialGraphVertexBundle =
             typename boost::vertex_bundle_type<SpatialGraph>::type;
     using SpatialVertex = SpatialGraphVertexBundle;
@@ -216,7 +211,7 @@ struct DetectClustersGraphVisitor : public boost::default_dfs_visitor {
      */
     void discover_vertex(vertex_descriptor u, const SpatialGraph &input_sg) {
         if (m_verbose) {
-            std::cout << "discover_vertex: " << u << " : "
+            std::cout << "detect_clusters discover_vertex: " << u << " : "
                       << ArrayUtilities::to_string(input_sg[u].pos)
                       << std::endl;
         }
@@ -231,12 +226,12 @@ struct DetectClustersGraphVisitor : public boost::default_dfs_visitor {
      * @param e
      * @param input_sg
      */
-    void tree_edge(edge_descriptor e, const SpatialGraph &input_sg) {
+    void examine_edge(edge_descriptor e, const SpatialGraph &input_sg) {
         const auto target = boost::target(e, input_sg);
         const bool are_both_vertices_in_the_same_cluster =
                 m_cluster_edge_condition(e, input_sg);
         if (m_verbose) {
-            std::cout << "tree_edge: " << e << " , target: " << target << " : "
+            std::cout << "detect_clusters examine_edge: " << e << " , target: " << target << " : "
                       << ArrayUtilities::to_string(input_sg[target].pos)
                       << " | edge_condition_true? "
                       << (are_both_vertices_in_the_same_cluster ? "yes" : "no")
@@ -346,7 +341,6 @@ struct DetectClustersGraphVisitor : public boost::default_dfs_visitor {
         }
         return output;
     }
-
 };
 
 } // end namespace SG
