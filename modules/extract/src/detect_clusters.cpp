@@ -62,7 +62,18 @@ detect_clusters_with_radius(const GraphType &input_sg,
                 boost::graph_traits<ComponentGraphType>::vertex_iterator;
         comp_vertex_iterator vi, vi_end;
         std::tie(vi, vi_end) = boost::vertices(component_graph);
-        boost::depth_first_visit(input_sg, *vi, vis, propColorMap);
+        boost::queue< vertex_descriptor > Q;  // buffer for bfs
+        boost::breadth_first_visit(input_sg, *vi, Q, vis, propColorMap);
+    }
+    if(verbose) {
+        std::cout << "vertex_to_cluster_map: " << std::endl;
+        for(const auto & vertex_to_cluster_set : vis.m_vertex_to_cluster_map) {
+            std::cout << vertex_to_cluster_set.first << " : [ ";
+            for(const auto & vertex : vertex_to_cluster_set.second) {
+                std::cout << vertex << ", ";
+            }
+            std::cout << " ]" << std::endl;
+        }
     }
     const auto single_label_maps = vis.get_single_label_cluster_maps();
     if (use_cluster_centroid) {
