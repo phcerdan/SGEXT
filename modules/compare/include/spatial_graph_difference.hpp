@@ -48,6 +48,6 @@ namespace SG {
 GraphType spatial_graph_difference(const GraphType &minuend_sg,
                                    const GraphType &substraend_sg,
                                    double radius_touch,
-                                   bool verbose);
+                                   bool verbose = false);
 } // end namespace SG
 #endif
