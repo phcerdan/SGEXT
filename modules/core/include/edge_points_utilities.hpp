@@ -80,9 +80,8 @@ double contour_length(const GraphType::edge_descriptor &edge_desc,
  * The input container is a list of points ordered by connectvity, consecutive
  * points in the container are connected.
  *
- * This computes the distance of the new_point with all the existing
- * edge_points.
- * TODO, an optimization would be to only compute it against first and last.
+ * This computes the distance of the new_point with the first and last point
+ * of edge_points.
  *
  * PRECONDITION: edge_points are already ordered.
  *

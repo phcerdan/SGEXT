@@ -163,7 +163,8 @@ void insert_unique_edge_point_with_distance_order(
         const SpatialEdge::PointType &new_point) {
     // std::cout << "-- point to add: "; print_pos(std::cout, new_point);
     // std::cout << std::endl;
-    if (edge_points.empty()) {
+    const auto edge_points_size = edge_points.size();
+    if (edge_points_size == 0) {
         edge_points.push_back(new_point);
         // std::cout << "--- After insertion: "; print_edge_points(edge_points,
         // std::cout); std::cout << std::endl;
@@ -171,8 +172,13 @@ void insert_unique_edge_point_with_distance_order(
     }
     // Insert it between closer points.
     // Compute distance between in-point and all the points.
-    std::vector<double> distances_to_in_point(edge_points.size());
-    std::transform(std::begin(edge_points), std::end(edge_points),
+    SpatialEdge::PointContainer start_and_end_edge_points;
+    start_and_end_edge_points.push_back(edge_points[0]);
+    if(edge_points_size > 1) {
+        start_and_end_edge_points.push_back(edge_points.back());
+    }
+    std::vector<double> distances_to_in_point(start_and_end_edge_points.size());
+    std::transform(std::begin(start_and_end_edge_points), std::end(start_and_end_edge_points),
                    std::begin(distances_to_in_point),
                    [&new_point](const SpatialEdge::PointType &edge_point) {
                        return ArrayUtilities::distance(edge_point, new_point);
@@ -185,7 +191,7 @@ void insert_unique_edge_point_with_distance_order(
     auto min_it = std::min_element(std::begin(distances_to_in_point),
                                    std::end(distances_to_in_point));
     // Check they are connected for sanity.
-    // TODO we might check this only in debug mode.
+    // Note:
     // This check is only valid if the spacing is 1.0 (object/indices space)
     // {
     //   auto min_dist = *min_it;
@@ -221,7 +227,7 @@ void insert_unique_edge_point_with_distance_order(
         edge_points.push_back(new_point);
         // std::cout << "--- After insertion: "; print_edge_points(edge_points,
         // std::cout); std::cout << std::endl;
-    } else { // illogical error
+    } else { // impossible error
         std::cerr << "Current edge_points: ";
         print_edge_points(edge_points, std::cerr);
         std::cerr << std::endl;

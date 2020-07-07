@@ -133,15 +133,6 @@ TEST(insert_edge_point, with_distance_order) {
     SG::SpatialEdge::PointContainer expected_edge_points2 = {
             {new_point1, p0, p1, new_point2}};
     EXPECT_EQ(edge_points, expected_edge_points2);
-
-    // This check is disabled because it requires the graph in index space
-    // (where spacing is 1.0) SG::SpatialEdge::PointType new_point3 = {{10, 10,
-    // 10}}; EXPECT_ANY_THROW(SG::insert_unique_edge_point_with_distance_order(
-    //     edge_points, new_point3));
-
-    SG::SpatialEdge::PointType new_point4 = {{1, 1, 0}};
-    EXPECT_ANY_THROW(SG::insert_unique_edge_point_with_distance_order(
-            edge_points, new_point4));
 }
 
 TEST(check_edge_points_are_contiguous, when_they_are_not) {
