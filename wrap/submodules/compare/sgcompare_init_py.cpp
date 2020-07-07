@@ -8,10 +8,12 @@
 namespace py = pybind11;
 void init_extend_low_info_graph(py::module &);
 void init_add_graph_peninsula(py::module &);
+void init_spatial_graph_difference(py::module &);
 
 void init_sgcompare(py::module & mparent) {
     auto m = mparent.def_submodule("compare");
     m.doc() = "Compare submodule "; // optional module docstring
     init_extend_low_info_graph(m);
     init_add_graph_peninsula(m);
+    init_spatial_graph_difference(m);
 }
