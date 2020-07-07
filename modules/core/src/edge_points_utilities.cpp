@@ -207,7 +207,11 @@ void insert_unique_edge_point_with_distance_order(
         // std::cout << "--- After insertion: "; print_edge_points(edge_points,
         // std::cout); std::cout << std::endl;
     } else { // illogical error
+        std::cerr << "Current edge_points: ";
         print_edge_points(edge_points, std::cerr);
+        std::cerr << std::endl;
+        std::cerr << "Failed when inserting new_point: ";
+        print_pos(std::cerr, new_point);
         std::cerr << std::endl;
         throw std::runtime_error("The impossible, new point in "
                                  "insert_unique_edge_point_with_distance "
