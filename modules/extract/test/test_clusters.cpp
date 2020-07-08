@@ -106,7 +106,7 @@ TEST_F(sg_clusters, collapse_clusters) {
     EXPECT_EQ(collapsed_graph[2].pos, g[4].pos);
 }
 
-TEST_F(sg_clusters, collapse_clusters_and_remove_shorter_parallel_edges) {
+TEST_F(sg_clusters, collapse_clusters_and_remove_larger_parallel_edges) {
     const double cluster_radius = 2.0;
     const bool use_centroids = true;
     const bool verbose = true;
