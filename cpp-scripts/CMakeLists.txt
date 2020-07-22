@@ -134,6 +134,20 @@ if(SG_MODULE_VISUALIZE_WITH_QT)
     list(APPEND _scripts_targets ${_scripts_targets_visualize_using_qt})
 endif()
 
+# Install
+# At least install the headers
+set(_scripts_headers
+    analyze_graph_function.hpp
+    create_distance_map_function.hpp
+    fill_holes_function.hpp
+    mask_image_function.hpp
+    scripts_types.hpp
+    thin_function.hpp
+    view_image_function.hpp
+    )
+
+install(FILES ${_scripts_headers}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sgext)
 
 # Even if you install the targets, the dependencies are not bundled/packaged
 # The user would have to set LD_LIBRARY_PATH poiting to the dependency libraries
