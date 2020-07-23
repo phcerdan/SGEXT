@@ -153,6 +153,6 @@ export( TARGETS ${SG_MODULE_${SG_MODULE_NAME}_LIBRARY}
   NAMESPACE SGEXT::
   APPEND FILE ${sgext_export_file})
 
-if(SG_BUILD_SCRIPTS)
+if(SG_BUILD_CLI)
   add_subdirectory(bin)
 endif()
