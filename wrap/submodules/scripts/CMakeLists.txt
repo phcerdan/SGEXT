@@ -8,9 +8,6 @@ set(current_sources_
 
 if(SG_MODULE_ANALYZE)
   list(APPEND current_sources_ analyze_graph_py.cpp)
-  set(extra_sources_
-    ${CMAKE_SOURCE_DIR}/cpp-scripts/analyze_graph_function.cpp
-    )
 endif()
 if(SG_MODULE_VISUALIZE AND SG_MODULE_LOCATE)
   list(APPEND current_sources_ visualize_spatial_graph_py.cpp)
@@ -21,9 +18,5 @@ list(TRANSFORM current_sources_ PREPEND "${module_name_}/")
 set(all_modules_python_sources
   ${all_modules_python_sources}
   ${current_sources_}
-  ${CMAKE_SOURCE_DIR}/cpp-scripts/thin_function.cpp
-  ${CMAKE_SOURCE_DIR}/cpp-scripts/create_distance_map_function.cpp
-  ${CMAKE_SOURCE_DIR}/cpp-scripts/fill_holes_function.cpp
-  ${extra_sources_}
   PARENT_SCOPE)
 
