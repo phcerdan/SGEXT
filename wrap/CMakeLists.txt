@@ -101,7 +101,7 @@ install(DIRECTORY fixtures
   COMPONENT runtime
   )
 # Copy and install tables (package_data)
-set(table_folder "${CMAKE_SOURCE_DIR}/deploy/sgext/tables")
+set(table_folder "${PROJECT_SOURCE_DIR}/deploy/sgext/tables")
 file(COPY ${table_folder} DESTINATION ${CMAKE_BUILD_PYTHONLIBDIR})
 install(DIRECTORY ${table_folder}
   DESTINATION ${CMAKE_INSTALL_PYTHONLIBDIR}
