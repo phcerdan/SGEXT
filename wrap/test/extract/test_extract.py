@@ -134,6 +134,13 @@ class TestDetectAndCollapseClusters(unittest.TestCase):
         self.assertEqual(vertex_to_cluster_label_map[1], 0)
         self.assertEqual(vertex_to_cluster_label_map[2], 0)
 
+        # Test: assign_label_to_spatial_node_id
+        vertex_to_cluster_label_map[2] = 13;
+        extract.assign_label_to_spatial_node_id(
+            graph=self.graph,
+            vertex_to_label_map=vertex_to_cluster_label_map)
+        self.assertEqual(self.graph.vertex(2).id, 13)
+
     def test_collapse_clusters(self):
         verbose = False
         radius = math.sqrt(3.0)

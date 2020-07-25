@@ -85,12 +85,12 @@ TEST_F(sg_clusters, detect_clusters_with_radius) {
     EXPECT_EQ(cluster_label_map[3], 2);
 }
 
-TEST_F(sg_clusters, assign_cluster_label_to_spatial_node_id) {
+TEST_F(sg_clusters, assign_label_to_spatial_node_id) {
     const double cluster_radius = 2.0;
     const bool use_centroids = false;
     auto cluster_label_map = SG::detect_clusters_with_radius(
             g, cluster_radius, use_centroids);
-    SG::assign_cluster_label_to_spatial_node_id(g, cluster_label_map);
+    SG::assign_label_to_spatial_node_id(g, cluster_label_map);
     EXPECT_EQ(g[0].id, 0);
     EXPECT_EQ(g[1].id, 0);
     EXPECT_EQ(g[2].id, 2);

@@ -51,4 +51,26 @@ verbose: Bool
           py::arg("radius"),
           py::arg("use_cluster_centroid") = true,
           py::arg("verbose") = false);
+
+/* *********************************************************************/
+
+    m.def("assign_label_to_spatial_node_id", &assign_label_to_spatial_node_id,
+            R"(
+Assign to spatial_node::id of each node of input_sg with the associated label
+from vertex_to_label_map. Only modifies those spatial_node::id that exist in
+the input vertex_to_label_map.
+
+Useful for visualization.
+
+Parameters:
+----------
+
+graph: GraphType
+  input spatial graph
+vertex_to_label_map: dict[int->int]
+  vertex to label map. Obtained from sgext.detect_clusters_with_radius
+  or similar methods that generation vertex to label maps.
+)",
+          py::arg("graph"),
+          py::arg("vertex_to_label_map"));
 }
