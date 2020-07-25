@@ -69,14 +69,14 @@ detect_clusters_with_radius(const GraphType &input_sg,
     return single_label_maps.vertex_to_single_label_cluster_map;
 }
 
-void assign_cluster_label_to_spatial_node_id(
+void assign_label_to_spatial_node_id(
         GraphType &input_sg,
         std::unordered_map<GraphType::vertex_descriptor, size_t>
-                &cluster_label_map) {
-    for (const auto vertex_cluster_id_pair : cluster_label_map) {
-        const auto &vertex_descriptor = vertex_cluster_id_pair.first;
-        const auto &cluster_id = vertex_cluster_id_pair.second;
-        input_sg[vertex_descriptor].id = cluster_id;
+                &vertex_to_label_map) {
+    for (const auto vertex_label_pair : vertex_to_label_map) {
+        const auto &vertex_descriptor = vertex_label_pair.first;
+        const auto &label = vertex_label_pair.second;
+        input_sg[vertex_descriptor].id = label;
     }
 }
 

@@ -15,7 +15,7 @@ namespace SG {
  * each vertex that belongs to a cluster to a label.
  *
  * For assigning that cluster label to spatial_node_id (useful for visualization
- * purposes) use @ref assign_cluster_label_to_spatial_node_id
+ * purposes) use @ref assign_label_to_spatial_node_id
  *
  * @param input_sg graph from where detect clusters
  * @param cluster_radius the cluster condition
@@ -33,18 +33,19 @@ detect_clusters_with_radius(const GraphType &input_sg,
                             bool verbose = false);
 
 /**
- * Modify spatial_node::id of input_sg with the cluster label.
- * Only modifies spatial_node::id that belong to a cluster.
+ * Assign to spatial_node::id of each node of input_sg with the associated label
+ * from vertex_to_label_map. Only modifies those spatial_node::id that exist in
+ * the input vertex_to_label_map.
  *
  * Useful for visualization.
  *
  * @param input_sg  input spatial graph
- * @param cluster_label_map obtained from @ref detect_clusters_with_radius or
+ * @param vertex_to_label_map obtained from @ref detect_clusters_with_radius or
  * similar.
  */
-void assign_cluster_label_to_spatial_node_id(
+void assign_label_to_spatial_node_id(
         GraphType &input_sg,
-        std::unordered_map<GraphType::vertex_descriptor, GraphType::vertex_descriptor>
-                &cluster_label_map);
+        std::unordered_map<GraphType::vertex_descriptor,
+                           GraphType::vertex_descriptor> &vertex_to_label_map);
 } // end namespace SG
 #endif
