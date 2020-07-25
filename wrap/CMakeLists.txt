@@ -38,7 +38,10 @@ if(SG_MODULE_SCRIPTS)
 endif()
 
 # Add the pybind module
+# Use SHARED instead of the deault MODULE to allow external plugins to link to it.
+# This would require the same CI/CD to build and link these external plugins.
 pybind11_add_module(_sgext
+  SHARED
   sgext_init_py.cpp # Where module is added
   ${all_modules_python_sources} # all the collected sources in submodules
   )
