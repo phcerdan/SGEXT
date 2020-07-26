@@ -7,6 +7,7 @@
 #define ANALYZE_GRAPH_FUNCTION_HPP
 
 #include "spatial_graph.hpp"
+#include "scripts_types.hpp" // For SG::BinaryImageType
 #include <itkImage.h>
 #include <itkImageFileReader.h>
 #include "transform_to_physical_point.hpp"
@@ -23,13 +24,15 @@ typename ItkImageType::Pointer itk_image_from_file( const std::string & filename
     return reader->GetOutput();
 }
 /**
- * Read graph from a binary image file using ITK and DGtal
+ * Read graph from a binary itk image or file using ITK and DGtal
  *
  * @param filename
  *
  * @return SpatialGraph
  */
-GraphType spatial_graph_from_file(const std::string & filename);
+GraphType raw_graph_from_image(
+        const SG::BinaryImageType::Pointer & thin_image);
+GraphType raw_graph_from_image(const std::string & filename);
 
 /**
  * Merge nodes optionally using all merge nodes methods
@@ -136,6 +139,29 @@ void export_graph_data_interface(const GraphType & reduced_g,
  * GraphType.
  */
 GraphType analyze_graph_function(
+        const SG::BinaryImageType::Pointer & thin_image,
+        const std::string & output_base_name,
+        bool removeExtraEdges = true,
+        bool mergeThreeConnectedNodes = true,
+        bool mergeFourConnectedNodes = true,
+        bool mergeTwoThreeConnectedNodes = true,
+        bool checkParallelEdges = false,
+        bool avoid_transformToPhysicalPoints = true,
+        const std::string & spacing = "",
+        bool output_filename_simple = false,
+        const std::string & exportReducedGraph_foldername = "",
+        bool exportSerialized = true,
+        bool exportVtu = false,
+        bool exportVtuWithEdgePoints = false,
+        bool exportGraphviz = false,
+        const std::string &exportData_foldername = "",
+        bool ignoreAngleBetweenParallelEdges = false,
+        bool ignoreEdgesToEndNodes = false,
+        size_t ignoreEdgesShorterThan = 0,
+        bool verbose = false,
+        bool visualize = false);
+
+GraphType analyze_graph_function_io(
         const std::string & filename_thin_image,
         bool removeExtraEdges = true,
         bool mergeThreeConnectedNodes = true,

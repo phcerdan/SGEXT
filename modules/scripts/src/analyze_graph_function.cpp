@@ -58,20 +58,15 @@ namespace fs = boost::filesystem;
 
 namespace SG {
 
-GraphType spatial_graph_from_file(
-        const std::string & filename,
-        bool visualize = false) {
-    // Get filename without extension (and without folders).
-    const unsigned int Dim = 3;
-    using PixelType = unsigned char;
-    using ItkImageType = itk::Image<PixelType, Dim>;
+GraphType raw_graph_from_image(
+        const SG::BinaryImageType::Pointer & thin_image) {
 
+    using PixelType = SG::BinaryImagePixelType; //uchar
     using Domain = DGtal::Z3i::Domain;
     using Image = DGtal::ImageContainerByITKImage<Domain, PixelType>;
-    auto itk_image = SG::itk_image_from_file<ItkImageType>(filename);
 
     // Convert to DGtal Container
-    Image image(itk_image);
+    Image image(thin_image);
 
     using DigitalTopology = DGtal::Z3i::DT26_6;
     using DigitalSet = DGtal::DigitalSetByAssociativeContainer<
@@ -90,33 +85,16 @@ GraphType spatial_graph_from_file(
                          DGtal::DigitalTopologyProperties::JORDAN_DT);
     Object obj(topo, image_set);
 
-
-#ifdef SG_MODULE_VISUALIZE_ENABLED_WITH_QT
-    if (visualize) {
-        int argc(1);
-        char **argv(nullptr);
-        QApplication app(argc, argv);
-        DGtal::Viewer3D<> viewer(ks);
-        viewer.show();
-
-        viewer.setFillColor(DGtal::Color(255, 255, 255, 255));
-        viewer << image_set;
-
-        // All kspace voxels
-        // viewer.setFillColor(DGtal::Color(40, 200, 55, 10));
-        // viewer << all_set;
-
-        viewer << DGtal::Viewer3D<>::updateDisplay;
-
-        app.exec();
-    }
-#endif
-
     const GraphType sg =
         SG::spatial_graph_from_object<Object, GraphType>(obj);
     return sg;
-
 }
+
+GraphType raw_graph_from_image(const std::string & filename) {
+    // Get filename without extension (and without folders).
+    return SG::raw_graph_from_image(SG::itk_image_from_file<SG::BinaryImageType>(filename));
+}
+
 void merge_nodes_interface(
         GraphType &reduced_g,
         bool mergeThreeConnectedNodes,
@@ -406,13 +384,9 @@ void export_graph_data_interface(const GraphType & reduced_g,
     }
 }
 
-// TODO replace filename for GraphType, and generate other interfaces with filename
-// filename was used in script mode, but with python wrapping in mind, we can provide:
-// a) numpy interface (compatible with ITK python wrap) + origin, spacing, cosines
-// b) itk image in c++
-// c) actual filename
 GraphType analyze_graph_function(
-        const std::string & filename,
+        const SG::BinaryImageType::Pointer & thin_image,
+        const std::string & output_base_name,
         bool removeExtraEdges,
         bool mergeThreeConnectedNodes,
         bool mergeFourConnectedNodes,
@@ -432,7 +406,7 @@ GraphType analyze_graph_function(
         size_t ignoreEdgesShorterThan,
         bool verbose,
         bool visualize) {
-    GraphType sg = spatial_graph_from_file(filename, visualize);
+    GraphType sg = raw_graph_from_image(thin_image);
 
     // Remove extra edges where connectivity in DGtal generates too many edges
     // in intersections
@@ -467,12 +441,8 @@ GraphType analyze_graph_function(
     }
 
     if (!avoid_transformToPhysicalPoints) {
-        const unsigned int Dim = 3;
-        using PixelType = unsigned char;
-        using ItkImageType = itk::Image<PixelType, Dim>;
-        auto itk_image = SG::itk_image_from_file<ItkImageType>(filename);
-        SG::transform_to_physical_point_interface<ItkImageType>(reduced_g, itk_image,
-                spacing, verbose);
+        SG::transform_to_physical_point_interface<SG::BinaryImageType>(
+                reduced_g, thin_image, spacing, verbose);
     }
     // Check unique points of graph
     if (verbose) {
@@ -490,16 +460,13 @@ GraphType analyze_graph_function(
 #ifdef VISUALIZE_USING_QT
     if (visualize) {
         SG::visualize_spatial_graph(reduced_g);
-        // itk::Testing::ViewImage(reader->GetOutput());
-        auto itk_image = SG::itk_image_from_file<ItkImageType>(filename);
-        SG::visualize_spatial_graph_with_image(reduced_g, itk_image);
+        SG::visualize_spatial_graph_with_image(reduced_g, thin_image);
     }
 #endif
     // Export data to files
     // Generate the base filename of the output
-    const fs::path input_stem = fs::path(filename).stem();
     const fs::path output_file_path =
-            fs::path(input_stem.string() + "_REDUCED");
+            fs::path(output_base_name + "_REDUCED");
     // full file name without suffix (.txt, .vtu, etc)
     std::string output_full_string = output_file_path.string();
     if (!output_filename_simple) {
@@ -543,6 +510,54 @@ GraphType analyze_graph_function(
     }
 
     return reduced_g;
+};
+
+GraphType analyze_graph_function_io(
+        const std::string & filename,
+        bool removeExtraEdges,
+        bool mergeThreeConnectedNodes,
+        bool mergeFourConnectedNodes,
+        bool mergeTwoThreeConnectedNodes,
+        bool checkParallelEdges,
+        bool avoid_transformToPhysicalPoints,
+        const std::string & spacing,
+        bool output_filename_simple,
+        const std::string & exportReducedGraph_foldername,
+        bool exportSerialized,
+        bool exportVtu,
+        bool exportVtuWithEdgePoints,
+        bool exportGraphviz,
+        const std::string &exportData_foldername,
+        bool ignoreAngleBetweenParallelEdges,
+        bool ignoreEdgesToEndNodes,
+        size_t ignoreEdgesShorterThan,
+        bool verbose,
+        bool visualize) {
+    const auto itk_image =
+        SG::itk_image_from_file<SG::BinaryImageType>(filename);
+    const std::string output_base_name = fs::path(filename).stem().string();
+    return analyze_graph_function(
+            itk_image,
+            output_base_name,
+            removeExtraEdges,
+            mergeThreeConnectedNodes,
+            mergeFourConnectedNodes,
+            mergeTwoThreeConnectedNodes,
+            checkParallelEdges,
+            avoid_transformToPhysicalPoints,
+            spacing,
+            output_filename_simple,
+            exportReducedGraph_foldername,
+            exportSerialized,
+            exportVtu,
+            exportVtuWithEdgePoints,
+            exportGraphviz,
+            exportData_foldername,
+            ignoreAngleBetweenParallelEdges,
+            ignoreEdgesToEndNodes,
+            ignoreEdgesShorterThan,
+            verbose,
+            visualize);
 
 };
 } // end namespace SG
