@@ -392,7 +392,7 @@ GraphType analyze_graph_function(
         bool mergeFourConnectedNodes,
         bool mergeTwoThreeConnectedNodes,
         bool checkParallelEdges,
-        bool avoid_transformToPhysicalPoints,
+        bool transformToPhysicalPoints,
         const std::string & spacing,
         bool output_filename_simple,
         const std::string & exportReducedGraph_foldername,
@@ -440,7 +440,7 @@ GraphType analyze_graph_function(
         SG::check_parallel_edges_interface(reduced_g, verbose);
     }
 
-    if (!avoid_transformToPhysicalPoints) {
+    if (transformToPhysicalPoints) {
         SG::transform_to_physical_point_interface<SG::BinaryImageType>(
                 reduced_g, thin_image, spacing, verbose);
     }
@@ -519,7 +519,7 @@ GraphType analyze_graph_function_io(
         bool mergeFourConnectedNodes,
         bool mergeTwoThreeConnectedNodes,
         bool checkParallelEdges,
-        bool avoid_transformToPhysicalPoints,
+        bool transformToPhysicalPoints,
         const std::string & spacing,
         bool output_filename_simple,
         const std::string & exportReducedGraph_foldername,
@@ -544,7 +544,7 @@ GraphType analyze_graph_function_io(
             mergeFourConnectedNodes,
             mergeTwoThreeConnectedNodes,
             checkParallelEdges,
-            avoid_transformToPhysicalPoints,
+            transformToPhysicalPoints,
             spacing,
             output_filename_simple,
             exportReducedGraph_foldername,
