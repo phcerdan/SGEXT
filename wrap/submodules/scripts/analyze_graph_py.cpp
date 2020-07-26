@@ -25,15 +25,18 @@
 namespace py = pybind11;
 using namespace SG;
 void init_analyze_graph(py::module &m) {
-    m.def("analyze_graph", &analyze_graph_function,
-            R"delimiter(
+    const std::string analyze_graph_docs = R"delimiter(
 Returns a spatial graph from a binary image.
 
 Parameters:
 ----------
-input: str
-    input filename holding an skeletonized binary image.
+input: str or SG::BinaryImageType
+    Input thin image or input filename holding an skeletonized binary image.
     Use sgext.scripts.thin to generate it.
+
+output_base_name: str
+  When using as input an image, the base name for the outputs. Defaults to
+  extracted_graph.
 
 removeExtraEdges: bool
     default: True
@@ -126,8 +129,36 @@ verbose: bool
 visualize: bool
     default: False
     visualize outputs during the run
-    )delimiter",
+)delimiter";
+
+    m.def("extract_graph_io", &analyze_graph_function_io,
+            analyze_graph_docs.c_str(),
         py::arg("input"),
+        py::arg("removeExtraEdges") = true,
+        py::arg("mergeThreeConnectedNodes") = true,
+        py::arg("mergeFourConnectedNodes") = true,
+        py::arg("mergeTwoThreeConnectedNodes") = true,
+        py::arg("checkParallelEdges") = true,
+        py::arg("transformToPhysicalPoints") = false,
+        py::arg("spacing") = "",
+        py::arg("output_filename_simple") = false,
+        py::arg("exportReducedGraph_foldername") = "",
+        py::arg("exportSerialized") = false,
+        py::arg("exportVtu") = false,
+        py::arg("exportVtuWithEdgePoints") = false,
+        py::arg("exportGraphviz") = false,
+        py::arg("exportData_foldername") = "",
+        py::arg("ignoreAngleBetweenParallelEdges") = false,
+        py::arg("ignoreEdgesToEndNodes") = false,
+        py::arg("ignoreEdgesShorterThan") = 0,
+        py::arg("verbose") = false,
+        py::arg("visualize") = false
+            );
+
+    m.def("extract_graph", &analyze_graph_function,
+            analyze_graph_docs.c_str(),
+        py::arg("input"),
+        py::arg("output_base_name") = "extracted_graph",
         py::arg("removeExtraEdges") = true,
         py::arg("mergeThreeConnectedNodes") = true,
         py::arg("mergeFourConnectedNodes") = true,

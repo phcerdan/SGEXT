@@ -167,7 +167,7 @@ int main(int argc, char *const argv[]) {
     bool visualize = false;
 #endif
 
-    SG::analyze_graph_function(
+    SG::analyze_graph_function_io(
         filename,
         removeExtraEdges,
         mergeThreeConnectedNodes,
