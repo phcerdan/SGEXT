@@ -56,7 +56,7 @@ int main(int argc, char *const argv[]) {
             "Ignore distance and angles between edges to/from end "
             "nodes (degree = 1).");
     opt_desc.add_options()(
-            "avoid_transformToPhysicalPoints,p",
+            "transformToPhysicalPoints,p",
             po::bool_switch()->default_value(false),
             "Positions in Spatial Graph takes into account metadata of the "
             "(origin,spacing,direction) itk image.");
@@ -116,8 +116,8 @@ int main(int argc, char *const argv[]) {
     if (verbose)
         std::cout << "Filename: " << filename << std::endl;
     bool output_filename_simple = vm["output_filename_simple"].as<bool>();
-    bool avoid_transformToPhysicalPoints =
-            vm["avoid_transformToPhysicalPoints"].as<bool>();
+    bool transformToPhysicalPoints =
+            vm["transformToPhysicalPoints"].as<bool>();
     std::string spacing = vm["spacing"].as<std::string>();
     bool removeExtraEdges = vm["removeExtraEdges"].as<bool>();
     bool mergeThreeConnectedNodes = vm["mergeThreeConnectedNodes"].as<bool>();
@@ -159,7 +159,7 @@ int main(int argc, char *const argv[]) {
         mergeFourConnectedNodes,
         mergeTwoThreeConnectedNodes,
         checkParallelEdges,
-        avoid_transformToPhysicalPoints,
+        transformToPhysicalPoints,
         spacing,
         output_filename_simple,
         exportReducedGraph_foldername,

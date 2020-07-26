@@ -7,8 +7,8 @@ if [[ -z "${IN_PHYSICAL_SPACE}" ]]; then
 fi
 echo "IN_PHYSICAL_SPACE=${IN_PHYSICAL_SPACE}"
 export _analyze_extra_args=''
-if [[ ${IN_PHYSICAL_SPACE}==0 ]]; then
-   _analyze_extra_args='--avoid_transformToPhysicalPoints'
+if [[ ${IN_PHYSICAL_SPACE}==1 ]]; then
+   _analyze_extra_args='--transformToPhysicalPoints'
 fi
 # DATA_FOLDER=~/Data
 # INPUT_LABEL=file_name_without_extension
