@@ -39,25 +39,25 @@ void write_vertex_descriptors_to_vtk_unstructured_grid(const GraphType &sg,
     auto point_data = ugrid->GetPointData();
     const auto number_of_points = ugrid->GetNumberOfPoints();
 
-    auto degree = vtkIntArray::New();
-    degree->SetName("vertex_id");
-    degree->SetNumberOfComponents(1);
-    degree->SetNumberOfTuples(number_of_points);
+    auto vertex_descriptors = vtkIntArray::New();
+    vertex_descriptors->SetName("vertex_descriptor");
+    vertex_descriptors->SetNumberOfComponents(1);
+    vertex_descriptors->SetNumberOfTuples(number_of_points);
 
     {
         long long counter = 0;
         for (auto [vi, vi_end] = boost::vertices(sg); vi != vi_end; ++vi) {
-            degree->SetTuple1(counter, *vi );
+            vertex_descriptors->SetTuple1(counter, *vi );
             counter++;
         }
         // Assume that if there are more points than vertices is because
         // the rest of the points are edge_points (assign id = -1)
         while(counter < number_of_points) {
-            degree->SetTuple1(counter, -1);
+            vertex_descriptors->SetTuple1(counter, -1);
             counter++;
         }
     }
-    point_data->AddArray(degree);
+    point_data->AddArray(vertex_descriptors);
     point_data->Update();
 
 }
@@ -87,6 +87,35 @@ void write_degrees_to_vtk_unstructured_grid(const GraphType &sg,
     }
     point_data->AddArray(degree);
     point_data->Update();
+}
+
+void write_spatial_node_ids_to_vtk_unstructured_grid(
+        const GraphType &sg,
+        vtkUnstructuredGrid *ugrid) {
+    auto point_data = ugrid->GetPointData();
+    const auto number_of_points = ugrid->GetNumberOfPoints();
+
+    auto spatial_node_ids = vtkIntArray::New();
+    spatial_node_ids->SetName("spatial_node_id");
+    spatial_node_ids->SetNumberOfComponents(1);
+    spatial_node_ids->SetNumberOfTuples(number_of_points);
+
+    {
+        long long counter = 0;
+        for (auto [vi, vi_end] = boost::vertices(sg); vi != vi_end; ++vi) {
+            spatial_node_ids->SetTuple1(counter, sg[*vi].id);
+            counter++;
+        }
+        // Assume that if there are more points than vertices is because
+        // the rest of the points are edge_points (assign id = -1)
+        while(counter < number_of_points) {
+            spatial_node_ids->SetTuple1(counter, -1);
+            counter++;
+        }
+    }
+    point_data->AddArray(spatial_node_ids);
+    point_data->Update();
+
 }
 
 void write_ete_distances_to_vtk_unstructured_grid(const GraphType &sg,
@@ -174,6 +203,7 @@ convert_to_vtk_unstructured_grid(const GraphType &sg) {
     // Append to PointData
     write_vertex_descriptors_to_vtk_unstructured_grid(sg, ugrid);
     write_degrees_to_vtk_unstructured_grid(sg, ugrid);
+    write_spatial_node_ids_to_vtk_unstructured_grid(sg, ugrid);
 
     // Append to CellData
     write_ete_distances_to_vtk_unstructured_grid(sg, ugrid);
@@ -234,6 +264,7 @@ convert_to_vtk_unstructured_grid_with_edge_points(const GraphType &sg) {
     // Append to PointData
     write_vertex_descriptors_to_vtk_unstructured_grid(sg, ugrid);
     write_degrees_to_vtk_unstructured_grid(sg, ugrid);
+    write_spatial_node_ids_to_vtk_unstructured_grid(sg, ugrid);
 
     // Append to CellData
     write_ete_distances_to_vtk_unstructured_grid(sg, ugrid);
