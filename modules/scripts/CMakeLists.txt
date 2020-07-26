@@ -75,6 +75,10 @@ if(SG_MODULE_VISUALIZE)
     endif()
 endif()
 
+if(SG_BUILD_TESTING)
+  add_subdirectory(test)
+endif()
+
 install(TARGETS ${SG_MODULE_${SG_MODULE_NAME}_LIBRARY}
         EXPORT SGEXTTargets
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime
