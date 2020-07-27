@@ -92,7 +92,7 @@ output_file: string
             write_common_docs.c_str(),
             py::arg("input_image"),
             py::arg("output_file"),
-            py::arg("compression") = true
+            py::arg("compression") = false
          );
     m.def("write",
             [](SG::IF3P input_image, const std::string & out_file,
@@ -107,6 +107,6 @@ output_file: string
             write_common_docs.c_str(),
             py::arg("input_image"),
             py::arg("output_file"),
-            py::arg("compression") = true
+            py::arg("compression") = false
          );
 }
