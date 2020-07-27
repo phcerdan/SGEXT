@@ -421,6 +421,7 @@ GraphType analyze_graph_function(
         size_t ignoreEdgesShorterThan,
         bool verbose,
         bool visualize) {
+    (void)visualize; // hack to remove visualize warning
     GraphType sg = raw_graph_from_image(thin_image);
 
     // Remove extra edges where connectivity in DGtal generates too many edges
