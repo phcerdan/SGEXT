@@ -12,13 +12,13 @@ class ThreeConnectedNodesGraphFixture:
     def __init__(self):
         self.graph = core.spatial_graph(6)
         # Set vertex positions
-        v0 = self.graph.vertex(0);
+        v0 = self.graph.spatial_node(0);
         v0.pos = [0,0,0]
         self.graph.set_vertex(0, v0)
-        v1 = self.graph.vertex(1);
+        v1 = self.graph.spatial_node(1);
         v1.pos = [1,1,0]
         self.graph.set_vertex(1, v1)
-        v2 = self.graph.vertex(2);
+        v2 = self.graph.spatial_node(2);
         v2.pos = [1,0,1]
         self.graph.set_vertex(2, v2)
         # Set edges between three nodes
@@ -26,13 +26,13 @@ class ThreeConnectedNodesGraphFixture:
         core.graph.add_edge(0, 2, core.spatial_edge(), self.graph)
         core.graph.add_edge(1, 2, core.spatial_edge(), self.graph)
         # Add end-points (degree 1)
-        v3 = self.graph.vertex(3);
+        v3 = self.graph.spatial_node(3);
         v3.pos = [-1,0,0]
         self.graph.set_vertex(3, v3)
-        v4 = self.graph.vertex(4);
+        v4 = self.graph.spatial_node(4);
         v4.pos = [1,2,0]
         self.graph.set_vertex(4, v4)
-        v5 = self.graph.vertex(5);
+        v5 = self.graph.spatial_node(5);
         v5.pos = [1,0,2]
         self.graph.set_vertex(5, v5)
         # Connect end-points
@@ -96,13 +96,13 @@ class TestDetectAndCollapseClusters(unittest.TestCase):
         """
         fixture = ThreeConnectedNodesGraphFixture()
         self.graph = fixture.graph
-        v3 = self.graph.vertex(3)
+        v3 = self.graph.spatial_node(3)
         v3.pos = [-4,0,0]
         self.graph.set_vertex(3, v3)
-        v4 = self.graph.vertex(4);
+        v4 = self.graph.spatial_node(4);
         v4.pos = [4,8,0]
         self.graph.set_vertex(4, v4)
-        v5 = self.graph.vertex(5);
+        v5 = self.graph.spatial_node(5);
         v5.pos = [4,0,8]
         self.graph.set_vertex(5, v5)
 
@@ -126,7 +126,7 @@ class TestDetectAndCollapseClusters(unittest.TestCase):
         extract.assign_label_to_spatial_node_id(
             graph=self.graph,
             vertex_to_label_map=vertex_to_cluster_label_map)
-        self.assertEqual(self.graph.vertex(2).id, 13)
+        self.assertEqual(self.graph.spatial_node(2).id, 13)
 
     def test_collapse_clusters(self):
         verbose = False
