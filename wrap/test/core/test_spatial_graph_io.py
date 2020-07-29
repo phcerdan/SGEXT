@@ -38,7 +38,7 @@ class TestSpatialGraphIo(unittest.TestCase):
     def test_b_read_graphviz_sg(self):
         graph = core.io.read_graphviz_sg(self.graphviz_file)
         self.assertEqual(graph.num_vertices(), 2)
-        self.assertAlmostEqual(graph.vertex(1).pos[0], 1.0)
+        self.assertAlmostEqual(graph.spatial_node(1).pos[0], 1.0)
 
     def test_a_write_serialized_sg(self):
         graph = core.spatial_graph(2);
@@ -50,7 +50,7 @@ class TestSpatialGraphIo(unittest.TestCase):
     def test_b_read_serialized_sg(self):
         graph = core.io.read_serialized_sg(self.serialized_file)
         self.assertEqual(graph.num_vertices(), 2)
-        self.assertAlmostEqual(graph.vertex(1).pos[0], 1.0)
+        self.assertAlmostEqual(graph.spatial_node(1).pos[0], 1.0)
 
 if __name__ == '__main__':
     unittest.main()
