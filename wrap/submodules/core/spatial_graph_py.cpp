@@ -20,12 +20,11 @@ void init_spatial_graph(py::module &m) {
     // TODO probably missing something wrappable in vertex_descriptor
     py::class_<GraphType::edge_descriptor>(mgraph, "edge_descriptor")
             .def(py::init())
-            // The following constructor is wrong. Get it right or don't use it.
-            // .def(py::init([](GraphType::vertex_descriptor s,
-            //                  GraphType::vertex_descriptor t) {
-            //     auto p = GraphType::edge_property_type();
-            //     return new GraphType::edge_descriptor(s, t, &p);
-            // }))
+            .def(py::init([](GraphType::vertex_descriptor s,
+                             GraphType::vertex_descriptor t) {
+                return std::unique_ptr<GraphType::edge_descriptor>(
+                        new GraphType::edge_descriptor(s, t, 0));
+            }))
             // No access to pointer m_property from python for now
             // The pointer in the constructor is confusing,
             // use a lambda and ignore SpatialEdge for descriptors...
@@ -75,14 +74,21 @@ void init_spatial_graph(py::module &m) {
                      print_spatial_edges(graph, os);
                      return "spatial_graph:\n" + os.str();
                  })
-            .def("vertex",
+            .def("spatial_node",
                  [](const GraphType &graph, const size_t &n) -> SpatialNode {
                      return graph[n];
                  })
-            .def("edge",
+            .def("spatial_edge",
                  [](const GraphType &graph,
                     const GraphType::edge_descriptor &ed) -> SpatialEdge {
                      return graph[ed];
+                 })
+            .def("edge",
+                 [](const GraphType &graph,
+                    const GraphType::vertex_descriptor s,
+                    const GraphType::vertex_descriptor t) ->
+                 std::pair<GraphType::edge_descriptor, bool> {
+                     return boost::edge(s, t, graph);
                  })
             .def("set_vertex",
                  [](GraphType &graph, const size_t &n,

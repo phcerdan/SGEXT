@@ -45,11 +45,10 @@ class TestGraph(unittest.TestCase):
         ed0.source = 2
         self.assertEqual(ed0.source, 2)
 
-        # v0 = core.graph.vertex_descriptor()
-        # ed2 = core.graph.edge_descriptor(2, 3)
-        # self.assertEqual(ed0.source, 2)
-        # self.assertEqual(ed0.target, 3)
-
+        # se = core.spatial_edge();
+        # se.edge_points = [[1,1,1]]
+        ed2 = core.graph.edge_descriptor(10, 12)
+        self.assertEqual(ed2.target, 12)
         print("end test_edge_descriptor")
 
     def test_spatial_graph(self):
@@ -128,41 +127,47 @@ class TestGraph(unittest.TestCase):
         se2.edge_points = [arr0, arr1];
         [ed, added] = core.graph.add_edge(0,1, se2, graph)
 
-        v0 = graph.vertex(0)
+        # Test getting edge descriptor from vertex_descriptors
+        [ed_, exists_] = graph.edge(0,1)
+        self.assertEqual(ed_, ed)
+        self.assertEqual(exists_, added)
+        self.assertEqual(len(graph.spatial_edge(ed_).edge_points), 2)
+
+        v0 = graph.spatial_node(0)
         print(v0)
         self.assertAlmostEqual(v0.pos[0], arr0[0])
-        e0 = graph.edge(ed)
+        e0 = graph.spatial_edge(ed)
         print(e0)
         self.assertEqual(e0.edge_points, se2.edge_points)
 
         # mutable test vertex
-        graph.vertex(0).pos = arr1
-        self.assertNotAlmostEqual(graph.vertex(0).pos[0], arr1[0])
-        v0 = graph.vertex(0)
+        graph.spatial_node(0).pos = arr1
+        self.assertNotAlmostEqual(graph.spatial_node(0).pos[0], arr1[0])
+        v0 = graph.spatial_node(0)
         v0.pos = arr1
         graph.set_vertex(0, v0)
-        self.assertAlmostEqual(graph.vertex(0).pos[0], arr1[0])
+        self.assertAlmostEqual(graph.spatial_node(0).pos[0], arr1[0])
 
         # mutable test edge
-        ref = graph.edge(ed)
+        ref = graph.spatial_edge(ed)
         self.assertEqual(len(ref.edge_points), 2)
         ref.edge_points = []
         self.assertEqual(len(ref.edge_points), 0)
         # edge_points of the graph is unmodified. To modify use the set_edge function
-        self.assertEqual(len(graph.edge(ed).edge_points), 2)
+        self.assertEqual(len(graph.spatial_edge(ed).edge_points), 2)
         graph.set_edge(ed, ref)
-        self.assertEqual(len(graph.edge(ed).edge_points), 0)
+        self.assertEqual(len(graph.spatial_edge(ed).edge_points), 0)
         print("end test_spatial_graph_vertex_edge")
 
     def test_get_all_points(self):
         print("test_get_all_points")
         graph = core.spatial_graph(2)
         arr0 = [0,0,0]
-        v0 = graph.vertex(0)
+        v0 = graph.spatial_node(0)
         v0.pos = arr0
         graph.set_vertex(0, v0)
         arr3 = [3,3,3]
-        v1 = graph.vertex(1)
+        v1 = graph.spatial_node(1)
         v1.pos = arr3
         graph.set_vertex(1, v1)
         arr1 = [1,1,1]
