@@ -106,6 +106,26 @@ class TestITKImagePointer(unittest.TestCase):
         image.set_pixel(index, 23)
         self.assertEqual(image.get_pixel(index), 23)
 
+    def test_physical_point_to_index(self):
+        image = self.img
+        physical_point = [1, 1, 1]
+        index, is_inside = image.transform_physical_point_to_index(physical_point)
+        self.assertTrue(is_inside)
+        np.testing.assert_array_equal(index, [3,3,1])
+
+    def test_physical_point_to_continuous_index(self):
+        image = self.img
+        physical_point = [1, 1, 1]
+        continuous_index, is_inside = image.transform_physical_point_to_continuous_index(physical_point)
+        self.assertTrue(is_inside)
+        np.testing.assert_array_almost_equal(continuous_index, [2.835, 2.835, 1.])
+
+    def test_index_to_physical_point(self):
+        image = self.img
+        index = [3,3,1]
+        physical_point = image.transform_index_to_physical_point(index)
+        np.testing.assert_array_almost_equal(physical_point, [1.05820104, 1.05820104, 1.])
+
     def test_to_pyarray(self):
         img = self.img
         self.assertEqual(img.dimension(), 3)
