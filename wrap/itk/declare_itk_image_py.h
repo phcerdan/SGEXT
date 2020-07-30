@@ -182,6 +182,19 @@ void declare_itk_image_ptr(pybind11::module &m, const std::string &typestr) {
                 }
                 return img->SetPixel(itk_index, value);
                 })
+        .def("is_inside", [](TImagePointer & img,
+                py::array_t<int, py::array::c_style | py::array::forcecast> index) {
+
+                using IndexType = typename TImagePointer::ObjectType::IndexType;
+                IndexType itk_index;
+                const auto *data_index = static_cast<int*>(
+                        np_array_ptr_after_check_dim_and_shape<int>(index));
+                for(size_t i = 0; i < TImagePointer::ObjectType::ImageDimension; i++) {
+                    itk_index[i] = data_index[i];
+                }
+                return img->GetLargestPossibleRegion().IsInside(itk_index);
+                })
+
         .def("transform_physical_point_to_index", [](TImagePointer & img,
                 py::array_t<double, py::array::c_style | py::array::forcecast> physical_point) {
                 auto *data =
@@ -193,11 +206,9 @@ void declare_itk_image_ptr(pybind11::module &m, const std::string &typestr) {
                     itk_point[i] = data[i];
                 }
                 auto itk_index = img->TransformPhysicalPointToIndex(itk_point);
-                const bool is_inside = img->GetLargestPossibleRegion().IsInside(itk_index);
-                return std::make_pair(
-                        py::array(TImagePointer::ObjectType::ImageDimension, itk_index.data()),
-                        is_inside);
+                return py::array(TImagePointer::ObjectType::ImageDimension, itk_index.data());
                 })
+
         .def("transform_physical_point_to_continuous_index", [](TImagePointer & img,
                 py::array_t<double, py::array::c_style | py::array::forcecast> physical_point) {
                 auto *data =
@@ -209,11 +220,9 @@ void declare_itk_image_ptr(pybind11::module &m, const std::string &typestr) {
                     itk_point[i] = data[i];
                 }
                 auto itk_index = img->template TransformPhysicalPointToContinuousIndex<double>(itk_point);
-                const bool is_inside = img->GetLargestPossibleRegion().IsInside(itk_index);
-                return std::make_pair(
-                        py::array(TImagePointer::ObjectType::ImageDimension, itk_index.GetDataPointer()),
-                        is_inside);
+                return py::array(TImagePointer::ObjectType::ImageDimension, itk_index.GetDataPointer());
                 })
+
         .def("transform_index_to_physical_point", [](TImagePointer & img,
                 py::array_t<int, py::array::c_style | py::array::forcecast> index) {
                 using IndexType = typename TImagePointer::ObjectType::IndexType;
