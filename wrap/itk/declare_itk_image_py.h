@@ -161,27 +161,73 @@ void declare_itk_image_ptr(pybind11::module &m, const std::string &typestr) {
                 })
         .def("get_pixel", [](TImagePointer & img,
                 py::array_t<int, py::array::c_style | py::array::forcecast> index) {
-                using IndexType = typename TImagePointer::ObjectType::RegionType::IndexType;
+                using IndexType = typename TImagePointer::ObjectType::IndexType;
                 IndexType itk_index;
                 const auto *data_index = static_cast<int*>(
                         np_array_ptr_after_check_dim_and_shape<int>(index));
-                itk_index[0] = data_index[0];
-                itk_index[1] = data_index[1];
-                itk_index[2] = data_index[2];
+                for(size_t i = 0; i < TImagePointer::ObjectType::ImageDimension; i++) {
+                    itk_index[i] = data_index[i];
+                }
                 return img->GetPixel(itk_index);
                 })
         .def("set_pixel", [](TImagePointer & img,
                 py::array_t<int, py::array::c_style | py::array::forcecast> index,
                 const typename TImagePointer::ObjectType::PixelType & value) {
-                using IndexType = typename TImagePointer::ObjectType::RegionType::IndexType;
+                using IndexType = typename TImagePointer::ObjectType::IndexType;
                 IndexType itk_index;
                 const auto *data_index = static_cast<int*>(
                         np_array_ptr_after_check_dim_and_shape<int>(index));
-                itk_index[0] = data_index[0];
-                itk_index[1] = data_index[1];
-                itk_index[2] = data_index[2];
+                for(size_t i = 0; i < TImagePointer::ObjectType::ImageDimension; i++) {
+                    itk_index[i] = data_index[i];
+                }
                 return img->SetPixel(itk_index, value);
                 })
+        .def("transform_physical_point_to_index", [](TImagePointer & img,
+                py::array_t<double, py::array::c_style | py::array::forcecast> physical_point) {
+                auto *data =
+                    static_cast<double*>(
+                            np_array_ptr_after_check_dim_and_shape<double>(physical_point));
+                using PointType = typename TImagePointer::ObjectType::PointType;
+                PointType itk_point;
+                for(size_t i = 0; i < TImagePointer::ObjectType::ImageDimension; i++) {
+                    itk_point[i] = data[i];
+                }
+                auto itk_index = img->TransformPhysicalPointToIndex(itk_point);
+                const bool is_inside = img->GetLargestPossibleRegion().IsInside(itk_index);
+                return std::make_pair(
+                        py::array(TImagePointer::ObjectType::ImageDimension, itk_index.data()),
+                        is_inside);
+                })
+        .def("transform_physical_point_to_continuous_index", [](TImagePointer & img,
+                py::array_t<double, py::array::c_style | py::array::forcecast> physical_point) {
+                auto *data =
+                    static_cast<double*>(
+                            np_array_ptr_after_check_dim_and_shape<double>(physical_point));
+                using PointType = typename TImagePointer::ObjectType::PointType;
+                PointType itk_point;
+                for(size_t i = 0; i < TImagePointer::ObjectType::ImageDimension; i++) {
+                    itk_point[i] = data[i];
+                }
+                auto itk_index = img->template TransformPhysicalPointToContinuousIndex<double>(itk_point);
+                const bool is_inside = img->GetLargestPossibleRegion().IsInside(itk_index);
+                return std::make_pair(
+                        py::array(TImagePointer::ObjectType::ImageDimension, itk_index.GetDataPointer()),
+                        is_inside);
+                })
+        .def("transform_index_to_physical_point", [](TImagePointer & img,
+                py::array_t<int, py::array::c_style | py::array::forcecast> index) {
+                using IndexType = typename TImagePointer::ObjectType::IndexType;
+                IndexType itk_index;
+                const auto *data_index = static_cast<int*>(
+                        np_array_ptr_after_check_dim_and_shape<int>(index));
+                for(size_t i = 0; i < TImagePointer::ObjectType::ImageDimension; i++) {
+                    itk_index[i] = data_index[i];
+                }
+                using PointTypeValue = typename TImagePointer::ObjectType::PointType::ValueType;
+                auto itk_point = img->template TransformIndexToPhysicalPoint<PointTypeValue>(itk_index);
+                return py::array(TImagePointer::ObjectType::ImageDimension, itk_point.GetDataPointer());
+                })
+
         // Follow numpy: CONTIG can be 'C' or 'F'
         // numpy default is F <- this is a pain coming from C data.
         // python ecosystem assume a F layout, so we return it as the default.
