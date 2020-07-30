@@ -44,7 +44,7 @@ inline auto np_array_ptr_after_check_dim_and_shape(
                 "Input array must be 1D. "
                 "But has dimension: " + std::to_string(buf.ndim));
     }
-    if (buf.shape[0] != img_dimension) {
+    if (static_cast<size_t>(buf.shape[0]) != img_dimension) {
         throw std::runtime_error(
                 "Shape should be equal to ImageDimension but shape = " +
                 std::to_string(buf.shape[0]) + " ].");
@@ -173,6 +173,29 @@ void declare_itk_image_ptr(pybind11::module &m, const std::string &typestr) {
                 vnl_matrix.copy_in(direction.data());
                 typename TImagePointer::ObjectType::DirectionType itk_direction(vnl_matrix);
                 img->SetDirection(itk_direction);
+                })
+        .def("get_pixel", [](TImagePointer & img,
+                py::array_t<int, py::array::c_style | py::array::forcecast> index) {
+                using IndexType = typename TImagePointer::ObjectType::RegionType::IndexType;
+                IndexType itk_index;
+                const auto *data_index = static_cast<int*>(
+                        np_array_ptr_after_check_dim_and_shape<int>(index));
+                itk_index[0] = data_index[0];
+                itk_index[1] = data_index[1];
+                itk_index[2] = data_index[2];
+                return img->GetPixel(itk_index);
+                })
+        .def("set_pixel", [](TImagePointer & img,
+                py::array_t<int, py::array::c_style | py::array::forcecast> index,
+                const typename TImagePointer::ObjectType::PixelType & value) {
+                using IndexType = typename TImagePointer::ObjectType::RegionType::IndexType;
+                IndexType itk_index;
+                const auto *data_index = static_cast<int*>(
+                        np_array_ptr_after_check_dim_and_shape<int>(index));
+                itk_index[0] = data_index[0];
+                itk_index[1] = data_index[1];
+                itk_index[2] = data_index[2];
+                return img->SetPixel(itk_index, value);
                 })
         // Follow numpy: CONTIG can be 'C' or 'F'
         // numpy default is F <- this is a pain coming from C data.

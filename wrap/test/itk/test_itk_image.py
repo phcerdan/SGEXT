@@ -90,6 +90,22 @@ class TestITKImagePointer(unittest.TestCase):
         negative_size = np.array([-5, 6, 7])
         self.assertRaises(RuntimeError, image.set_size, negative_size)
 
+    def test_get_pixel(self):
+        image = self.img
+        np_index = np.array([1, 1, 1])
+        value_array = image.get_pixel([1,1,1])
+        value_np = image.get_pixel(np_index)
+        self.assertEqual(value_array, 0)
+        self.assertEqual(value_array, value_np)
+
+    def test_set_pixel(self):
+        image = self.img
+        index = [1,1,1]
+        value_array = image.get_pixel(index)
+        self.assertEqual(value_array, 0)
+        image.set_pixel(index, 23)
+        self.assertEqual(image.get_pixel(index), 23)
+
     def test_to_pyarray(self):
         img = self.img
         self.assertEqual(img.dimension(), 3)
