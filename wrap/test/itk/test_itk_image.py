@@ -109,14 +109,16 @@ class TestITKImagePointer(unittest.TestCase):
     def test_physical_point_to_index(self):
         image = self.img
         physical_point = [1, 1, 1]
-        index, is_inside = image.transform_physical_point_to_index(physical_point)
+        index = image.transform_physical_point_to_index(physical_point)
+        is_inside = image.is_inside(index)
         self.assertTrue(is_inside)
         np.testing.assert_array_equal(index, [3,3,1])
 
     def test_physical_point_to_continuous_index(self):
         image = self.img
         physical_point = [1, 1, 1]
-        continuous_index, is_inside = image.transform_physical_point_to_continuous_index(physical_point)
+        continuous_index = image.transform_physical_point_to_continuous_index(physical_point)
+        is_inside = image.is_inside(continuous_index)
         self.assertTrue(is_inside)
         np.testing.assert_array_almost_equal(continuous_index, [2.835, 2.835, 1.])
 
