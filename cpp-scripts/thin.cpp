@@ -54,9 +54,6 @@ int main(int argc, char* const argv[]) {
   opt_desc.add_options()(
       "visualize,t", po::bool_switch()->default_value(false),
       "Visualize thin result. Requires VISUALIZE option at build");
-  opt_desc.add_options()(
-      "output_filename_simple,z", po::bool_switch()->default_value(false),
-      "Filename does not contain the parameters used for this filter.");
   opt_desc.add_options()("exportSDP,e", po::value<std::string>()->default_value(""),
                          "Folder to export the resulting set of points in a "
                          "simple (sequence of discrete point (sdp)).");
@@ -87,7 +84,6 @@ int main(int argc, char* const argv[]) {
   // Parse options
   std::string filename = vm["input"].as<std::string>();
   bool verbose = vm["verbose"].as<bool>();
-  bool output_filename_simple = vm["output_filename_simple"].as<bool>();
   bool profile = vm["profile"].as<bool>();
   int persistence = vm["persistence"].as<int>();
   if(vm.count("persistence") && persistence < 0)
