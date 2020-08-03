@@ -7,6 +7,7 @@
 #define THIN_FUNCTION_HPP
 
 #include <string>
+#include <limits>
 #include "scripts_types.hpp"
 #include "spatial_graph.hpp"
 
@@ -79,6 +80,39 @@ inline SkelSelectType skel_select_string_to_enum(const std::string & select_stri
     if(select_string == "random") return SkelSelectType::random;
     if(select_string == "dmax") return SkelSelectType::dmax;
     throw std::runtime_error("select_string is not valid: " + select_string);
+}
+
+template < typename TImage, typename TComplex >
+std::pair<typename TComplex::Cell, typename TComplex::Data>
+select_max_value_of_clique(
+    const TImage * dist_map,
+    const typename TComplex::Clique & clique)
+{
+  double max_value{std::numeric_limits<double>::lowest()};
+  double value{std::numeric_limits<double>::lowest()};
+  using ComplexConstIterator = typename TComplex::CellMapConstIterator;
+  ComplexConstIterator selected_pair;
+  using IndexType = typename TImage::IndexType;
+
+  for(ComplexConstIterator it = clique.begin(3), itE = clique.end(3);
+      it != itE ; ++it){
+    const auto & dgtal_point = clique.space().uCoords(it->first);
+    IndexType itk_index;
+    for(size_t i=0; i < TImage::ImageDimension; ++i) {
+        itk_index[i] = dgtal_point[i];
+    }
+    value = static_cast<double>(dist_map->GetPixel(itk_index));
+    if(value > max_value){
+      max_value = value;
+      selected_pair = it;
+      continue;
+    }
+    if(value == max_value){
+      continue; // TODO choose one wisely when they have same DM value.
+    }
+  }
+
+  return *selected_pair;
 }
 
 /**
