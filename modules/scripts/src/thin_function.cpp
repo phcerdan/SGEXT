@@ -193,13 +193,6 @@ BinaryImageType::Pointer thin_function(
 
   // profile
   auto start = std::chrono::system_clock::now();
-  // Crate a dummy distance map for the posibility of loading
-  // the optional distance map image.
-  using DistanceMapPixelType = float;
-  using DistanceMapImage =
-      DGtal::ImageContainerByITKImage<Domain, DistanceMapPixelType>;
-  DGtal::Z3i::Domain dummyDomain(Point(0, 0, 0), Point(1, 1, 1));
-  DistanceMapImage distanceMapImage(dummyDomain);
 
   auto &sel = skel_select_type;
   if(sel == SkelSelectType::random)
@@ -207,12 +200,9 @@ BinaryImageType::Pointer thin_function(
   else if(sel == SkelSelectType::first)
     Select = DGtal::functions::selectFirst<Complex>;
   else if(sel == SkelSelectType::dmax) {
-    if(verbose) DGtal::trace.beginBlock("Import Distance Map");
-    distanceMapImage = DistanceMapImage(distance_map_image);
-    if(verbose) DGtal::trace.endBlock();
-    Select = [&distanceMapImage](const Complex::Clique& clique) {
-      return DGtal::functions::selectMaxValue<DistanceMapImage, Complex>(distanceMapImage,
-                                                       clique);
+    Select = [&distance_map_image](const Complex::Clique& clique) {
+      return SG::select_max_value_of_clique<FloatImageType, Complex>(
+          distance_map_image, clique);
     };
   } else
     throw std::runtime_error("Invalid skel select type");
