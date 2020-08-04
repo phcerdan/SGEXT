@@ -40,6 +40,8 @@ typename FloatImageType::Pointer create_distance_map_function_with_itk(
  * @param input_img_file
  * @param outputFolder folder where output will be written
  * @param foreground the voxels representing the object are "white|black"
+ * @param use_itk_approximate use a fast approximation for distance map.
+ * Also ITK computes the distance map taking into account spacing of the image.
  * @param verbose verbosity
  */
 typename FloatImageType::Pointer create_distance_map_function_io(
