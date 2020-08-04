@@ -38,7 +38,7 @@
 #include <itkChangeInformationImageFilter.h>
 #include <itkInvertIntensityImageFilter.h>
 // Compute DMap using ITK instead of DGtal
-#include <itkApproximateSignedDistanceMapImageFilter.h>
+#include <itkSignedMaurerDistanceMapImageFilter.h>
 #include <itkThresholdImageFilter.h>
 #include <itkAbsImageFilter.h>
 
@@ -53,28 +53,25 @@ typename FloatImageType::Pointer create_distance_map_function_with_itk(
         const bool /*verbose*/)
 {
     using DistanceMapFilter =
-            itk::ApproximateSignedDistanceMapImageFilter<BinaryImageType,
-                                                         FloatImageType>;
+            itk::SignedMaurerDistanceMapImageFilter<BinaryImageType,
+        FloatImageType>;
     auto dmap_filter = DistanceMapFilter::New();
-    dmap_filter->SetOutsideValue(0);
-    dmap_filter->SetInsideValue(255);
+    dmap_filter->InsideIsPositiveOn();
+    dmap_filter->UseImageSpacingOn();
+    dmap_filter->SetBackgroundValue(0);
+    dmap_filter->SquaredDistanceOff();
     dmap_filter->SetInput(input_img);
 
-    // Theshold and abs filters to be analogous of the DGtal results of DMap.
+    // Theshold filters to be analogous of the DGtal results of DMap.
     // Not interested in dmap values outside of the object.
     using ThresholdFilterType = itk::ThresholdImageFilter<FloatImageType>;
     auto threshold_filter = ThresholdFilterType::New();
     threshold_filter->SetInput(dmap_filter->GetOutput());
     threshold_filter->SetOutsideValue(0);
-    threshold_filter->ThresholdAbove(0);
+    threshold_filter->ThresholdBelow(0);
+    threshold_filter->Update();
 
-    // The dmap values inside the object are negative
-    using AbsFilterType = itk::AbsImageFilter<FloatImageType, FloatImageType>;
-    auto abs_filter = AbsFilterType::New();
-    abs_filter->SetInput(threshold_filter->GetOutput());
-    abs_filter->InPlaceOn();
-    abs_filter->Update();
-    return abs_filter->GetOutput();
+    return threshold_filter->GetOutput();
 }
 
 typename FloatImageType::Pointer create_distance_map_function_with_dgtal(
