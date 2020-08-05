@@ -280,7 +280,7 @@ struct DetectClustersGraphVisitor : public boost::default_bfs_visitor {
         // cluster
         for (const auto &key_value : m_vertex_to_cluster_map) {
             const auto &cluster_vertices = key_value.second;
-            const auto cluster_vertices_size = std::size(cluster_vertices);
+            const auto cluster_vertices_size = cluster_vertices.size();
             // if (m_verbose) {
             //     std::cout << "cluster_size: " << cluster_vertices_size
             //               << std::endl;
