@@ -64,6 +64,28 @@ ReconstructOutput reconstruct_from_distance_map(
         const bool apply_color_to_edges = true);
 
 
+namespace defaults {
+const std::string polydata_win_title = "SGEXT PolyData";
+const size_t polydata_win_width = 600;
+const size_t polydata_win_height = 600;
+} // end namespace defaults
+/**
+ * Visualize polydata using optionally a lookup table with colors of integer
+ * type.
+ *
+ * @param poly_data input data
+ * @param lut lookup table
+ * @param winTitle title of VTK window
+ * @param winWidth width of VTK window
+ * @param winHeight height of VTK window
+ */
+void visualize_poly_data(
+        vtkPolyData *poly_data,
+        vtkLookupTable *lut = nullptr,
+        const std::string &winTitle = defaults::polydata_win_title,
+        const size_t &winWidth = defaults::polydata_win_width,
+        const size_t &winHeight = defaults::polydata_win_width);
+
 /*****************************************************************************/
 
 namespace detail {
