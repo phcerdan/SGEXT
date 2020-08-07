@@ -48,6 +48,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
   create_distance_map_function.cpp
   fill_holes_function.cpp
   thin_function.cpp
+  reconstruct_from_distance_map.cpp
   )
 
 list(TRANSFORM SG_MODULE_${SG_MODULE_NAME}_SOURCES PREPEND "src/")

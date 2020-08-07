@@ -13,6 +13,7 @@ void init_mask_image(py::module &);
 void init_fill_holes(py::module &);
 #ifdef SG_MODULE_VISUALIZE_ENABLED
 void init_visualize_spatial_graph(py::module &);
+void init_reconstruct_from_distance_map(py::module &);
 #endif
 
 void init_sgscripts(py::module & mparent) {
@@ -25,5 +26,6 @@ void init_sgscripts(py::module & mparent) {
     init_fill_holes(m);
 #ifdef SG_MODULE_VISUALIZE_ENABLED
     init_visualize_spatial_graph(m);
+    init_reconstruct_from_distance_map(m);
 #endif
 }

@@ -4,6 +4,7 @@ set(current_sources_
   create_distance_map_py.cpp
   mask_image_py.cpp
   fill_holes_py.cpp
+  reconstruct_from_distance_map_py.cpp
   )
 
 if(SG_MODULE_ANALYZE)

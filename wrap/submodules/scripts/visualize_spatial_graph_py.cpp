@@ -9,7 +9,6 @@
 #include "scripts_types.hpp" // For BinaryImageType
 #include "visualize_spatial_graph.hpp"
 #include "visualize_spatial_graph_with_image.hpp"
-#include "locate/sglocate_common.h" // define holder for vtkSmartPointer
 
 namespace py = pybind11;
 using namespace SG;
@@ -120,19 +119,6 @@ win_x,y: int
             py::arg("win_x") = 600, py::arg("win_y") = 600);
 
     /* ************************************************** */
-
-    py::class_<vtkPolyData, vtkSmartPointer<vtkPolyData>>(m, "vtkPolyData")
-            .def("__str__", [](vtkPolyData &p) {
-                std::stringstream os;
-                p.Print(os);
-                return os.str();
-            });
-    py::class_<vtkLookupTable, vtkSmartPointer<vtkLookupTable>>(m, "vtkLookupTable")
-            .def("__str__", [](vtkLookupTable &p) {
-                std::stringstream os;
-                p.Print(os);
-                return os.str();
-            });
 
     m.def(
             "view_poly_data",
