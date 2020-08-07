@@ -1,0 +1,78 @@
+/* Copyright (C) 2020 Pablo Hernandez-Cerdan
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+#include "pybind11_common.h"
+
+#include "reconstruct_from_distance_map.hpp"
+#include "locate/sglocate_common.h" // define holder for vtkSmartPointer
+
+namespace py = pybind11;
+using namespace SG;
+
+void init_reconstruct_from_distance_map(py::module &m) {
+
+    py::class_<vtkPolyData, vtkSmartPointer<vtkPolyData>>(m, "vtkPolyData")
+            .def("__str__", [](vtkPolyData &p) {
+                std::stringstream os;
+                p.Print(os);
+                return os.str();
+            });
+    py::class_<vtkLookupTable, vtkSmartPointer<vtkLookupTable>>(m, "vtkLookupTable")
+            .def("__str__", [](vtkLookupTable &p) {
+                std::stringstream os;
+                p.Print(os);
+                return os.str();
+            });
+
+    py::class_<ReconstructOutput>(m, "ReconstructOutput")
+        .def_readwrite("poly_data", &ReconstructOutput::poly_data)
+        .def_readwrite("lut", &ReconstructOutput::lut);
+
+
+
+    m.def(
+            "reconstruct_from_distance_map",
+            [](const GraphType &input_sg,
+               FloatImageType::Pointer &distance_map_image,
+               const bool spatial_nodes_position_are_in_physical_space,
+               const bool distance_map_image_use_image_spacing,
+               const std::unordered_map<GraphType::vertex_descriptor, size_t>
+                       &vertex_to_label_map,
+               const bool apply_color_to_edges) {
+                return reconstruct_from_distance_map(
+                        input_sg, distance_map_image.GetPointer(),
+                        spatial_nodes_position_are_in_physical_space,
+                        distance_map_image_use_image_spacing,
+                        vertex_to_label_map, apply_color_to_edges);
+            },
+            R"(
+Create a mesh using all the points (including edge_points) from input graph
+and the distance_map_image. The distance map can be in Voxels (DGtal), or
+taking into account the image spacing using ITK (less precise) see
+@ref create_distance_map.
+
+Parameters:
+---------
+graph: GraphType
+  input spatial graph to get the vertices/nodes
+distance_map_image: FloatImageType
+  distance map image
+spatial_nodes_position_are_in_physical_space: Bool [False]
+  node positions are in physical space (instead of default index space)
+distance_map_image_use_image_spacing: Bool [False]
+ the distance map values takes into account image spacing (false for DGtal,
+ maybe true if computed via ITK) @ref create_distance_map
+vertex_to_label_map map: Dict[int,int] [Empty]
+ to assign different colors to the poly data, empty by default.
+apply_color_to_edges: Bool [True]
+ Edge points have a label associated to max(source_label,target_label) of that edge. Useful for generation analysis.
+)",
+            py::arg("graph"), py::arg("distance_map_image"),
+            py::arg("spatial_nodes_position_are_in_physical_space") = false,
+            py::arg("distance_map_image_use_image_spacing") = false,
+            py::arg("vertex_to_label_map") =
+                    std::unordered_map<GraphType::vertex_descriptor, size_t>(),
+            py::arg("apply_color_to_edges") = true);
+}

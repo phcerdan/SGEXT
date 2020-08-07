@@ -5,7 +5,10 @@ set(SG_MODULE_${SG_MODULE_NAME}_TEST_DEPENDS
 set(SG_MODULE_${SG_MODULE_NAME}_TESTS
   )
 if(SG_REQUIRES_ITK)
-  list(APPEND SG_MODULE_${SG_MODULE_NAME}_TESTS test_read_a_fixture_image.cpp)
+  list(APPEND SG_MODULE_${SG_MODULE_NAME}_TESTS
+    test_read_a_fixture_image.cpp
+    test_reconstruct_from_distance_map.cpp
+    )
 endif()
 # Fixture defined in test/fixtures
 list(APPEND SG_MODULE_${SG_MODULE_NAME}_TEST_DEPENDS FixtureImagesFolder)
