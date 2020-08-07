@@ -7,11 +7,14 @@
 #define VISUALIZE_SPATIAL_GRAPH_HPP
 #include "spatial_graph.hpp"
 #include <vtkGraphLayoutView.h>
+#include <vtkLookupTable.h>
 #include <vtkPoints.h>
+#include <vtkPolyData.h>
 
 namespace SG {
 namespace defaults {
 const std::string graph_layout_win_title = "SGEXT Graph";
+const std::string polydata_win_title = "SGEXT PolyData";
 const size_t graph_layout_win_width = 600;
 const size_t graph_layout_win_height = 600;
 } // namespace defaults
@@ -69,6 +72,23 @@ void visualize_spatial_graph_with_points(
         const double pointsOpacity = 0.8,
         const std::array<double, 3> cube_length = {{1.0, 1.0, 1.0}},
         const std::string &winTitle = defaults::graph_layout_win_title,
+        const size_t &winWidth = defaults::graph_layout_win_width,
+        const size_t &winHeight = defaults::graph_layout_win_width);
+
+/**
+ * Visualize polydata using optionally a lookup table with colors of integer
+ * type.
+ *
+ * @param poly_data input data
+ * @param lut lookup table
+ * @param winTitle title of VTK window
+ * @param winWidth width of VTK window
+ * @param winHeight height of VTK window
+ */
+void visualize_poly_data(
+        vtkPolyData *poly_data,
+        vtkLookupTable *lut = nullptr,
+        const std::string &winTitle = defaults::polydata_win_title,
         const size_t &winWidth = defaults::graph_layout_win_width,
         const size_t &winHeight = defaults::graph_layout_win_width);
 } // namespace SG
