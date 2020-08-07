@@ -19,6 +19,7 @@
  * *******************************************************************/
 
 #include "reconstruct_from_distance_map.hpp"
+#include "visualize_common.hpp"
 
 #include <tuple>
 
@@ -30,6 +31,12 @@
 #include <vtkSmartPointer.h>
 #include <vtkSphereSource.h>
 #include <vtkUnsignedLongArray.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkRenderer.h>
+#include <vtkInteractorStyleTrackballCamera.h>
+
 
 namespace SG {
 
@@ -132,6 +139,48 @@ ReconstructOutput reconstruct_from_distance_map(
     }
 
     return output;
+}
+
+void visualize_poly_data(vtkPolyData *poly_data,
+                         vtkLookupTable *lut,
+                         const std::string &winTitle,
+                         const size_t &winWidth,
+                         const size_t &winHeight) {
+    // Create a mapper
+    auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+    mapper->SetInputData(poly_data);
+    if (lut) {
+        mapper->SetColorModeToMapScalars();
+        mapper->SetLookupTable(lut);
+    }
+    auto actor = vtkSmartPointer<vtkActor>::New();
+    actor->SetMapper(mapper);
+
+    // Setup renderer
+    vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
+    renderer->AddActor(actor);
+    vtkSmartPointer<vtkRenderWindow> renderWindow =
+            vtkSmartPointer<vtkRenderWindow>::New();
+    renderWindow->SetWindowName(winTitle.c_str());
+    renderWindow->SetSize(winWidth, winHeight);
+    renderWindow->AddRenderer(renderer);
+
+    // Setup render window interactor
+    vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor =
+            vtkSmartPointer<vtkRenderWindowInteractor>::New();
+    auto style = vtkSmartPointer<
+            vtkInteractorStyleTrackballCamera>::New(); // like paraview
+    renderWindowInteractor->SetInteractorStyle(style);
+
+    // Render and start interaction
+    renderWindowInteractor->SetRenderWindow(renderWindow);
+    // Flip camera because VTK-ITK different corner for origin.
+    vtkCamera *cam = renderer->GetActiveCamera();
+    flip_camera(cam);
+
+    renderer->ResetCamera();
+    renderWindowInteractor->Initialize();
+    renderWindowInteractor->Start();
 }
 
 namespace detail {

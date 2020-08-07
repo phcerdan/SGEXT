@@ -132,36 +132,4 @@ win_x,y: int
             py::arg("cube_length") = std::array<double, 3>({{1.0, 1.0, 1.0}}),
             py::arg("win_title") = "sgext: SpatialGraph and Image",
             py::arg("win_x") = 600, py::arg("win_y") = 600);
-
-    /* ************************************************** */
-
-    m.def(
-            "view_poly_data",
-            [](vtkSmartPointer<vtkPolyData> &poly_data,
-               vtkSmartPointer<vtkLookupTable> &lut,
-               const std::string &win_title, size_t &win_x, size_t &win_y) {
-                return visualize_poly_data(poly_data, lut, win_title, win_x,
-                                           win_y);
-            },
-            R"delimiter(
-Visualize the spatial graph along a binary image. The binary image can be the original
-binary image before the thinning.
-
-Parameters:
-----------
-poly_data: vtkPolyData
-    PolyData to visualize, obtained from reconstruct methods
-
-lut: vtkLookupTable
-     lookup table for colors
-
-win_title: str
-    title of the vtk window
-
-win_x,y: int
-    length of the side (x, y) of the window.
-)delimiter",
-            py::arg("poly_data"), py::arg("lut") = nullptr,
-            py::arg("win_title") = "sgext: view_poly_data ",
-            py::arg("win_x") = 600, py::arg("win_y") = 600);
 }
