@@ -216,11 +216,13 @@ void declare_itk_image_ptr(pybind11::module &m, const std::string &typestr) {
                     static_cast<double*>(
                             np_array_ptr_after_check_dim_and_shape<double>(physical_point));
                 using PointType = typename TImagePointer::ObjectType::PointType;
+                using IndexType = typename TImagePointer::ObjectType::IndexType;
                 PointType itk_point;
                 for(size_t i = 0; i < TImagePointer::ObjectType::ImageDimension; i++) {
                     itk_point[i] = data[i];
                 }
-                auto itk_index = img->TransformPhysicalPointToIndex(itk_point);
+                IndexType itk_index;
+                img->TransformPhysicalPointToIndex(itk_point, itk_index);
                 return py::array(TImagePointer::ObjectType::ImageDimension, itk_index.data());
                 })
 
@@ -234,21 +236,24 @@ void declare_itk_image_ptr(pybind11::module &m, const std::string &typestr) {
                 for(size_t i = 0; i < TImagePointer::ObjectType::ImageDimension; i++) {
                     itk_point[i] = data[i];
                 }
-                auto itk_index = img->template TransformPhysicalPointToContinuousIndex<double>(itk_point);
-                return py::array(TImagePointer::ObjectType::ImageDimension, itk_index.GetDataPointer());
+                using ContinuousIndexType = itk::ContinuousIndex<double, TImagePointer::ObjectType::ImageDimension>;
+                ContinuousIndexType itk_cindex;
+                img->TransformPhysicalPointToContinuousIndex(itk_point, itk_cindex);
+                return py::array(TImagePointer::ObjectType::ImageDimension, itk_cindex.GetDataPointer());
                 })
 
         .def("transform_index_to_physical_point", [](TImagePointer & img,
                 py::array_t<int, py::array::c_style | py::array::forcecast> index) {
                 using IndexType = typename TImagePointer::ObjectType::IndexType;
+                using PointType = typename TImagePointer::ObjectType::PointType;
                 IndexType itk_index;
                 const auto *data_index = static_cast<int*>(
                         np_array_ptr_after_check_dim_and_shape<int>(index));
                 for(size_t i = 0; i < TImagePointer::ObjectType::ImageDimension; i++) {
                     itk_index[i] = data_index[i];
                 }
-                using PointTypeValue = typename TImagePointer::ObjectType::PointType::ValueType;
-                auto itk_point = img->template TransformIndexToPhysicalPoint<PointTypeValue>(itk_index);
+                PointType itk_point;
+                img->TransformIndexToPhysicalPoint(itk_index, itk_point);
                 return py::array(TImagePointer::ObjectType::ImageDimension, itk_point.GetDataPointer());
                 })
 
