@@ -34,7 +34,8 @@ RUN cmake \
         ${SGEXT_SRC_DIR} && \
     ninja && \
     find . -name "*.o" -delete && \
-    find ../SGEXT* -depth -name .git -exec rm -rf '{}' \;
+    find ../SGEXT* -depth -name .git -exec rm -rf '{}' \; \
+    || exit 1;
 ENV PATH="${SGEXT_BUILD_DIR}/cpp-scripts:${PATH}"
 
 # Build-time metadata as defined at http://label-schema.org

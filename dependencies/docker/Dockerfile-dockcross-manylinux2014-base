@@ -33,8 +33,8 @@ RUN git clone --single-branch https://gitlab.kitware.com/vtk/vtk.git ${VTK_SRC_F
     find ../VTK* -depth -name .git -exec rm -rf '{}' \;
 
 ############# ITK ##############
-# Install ITKv5 from git
-ENV ITK_GIT_TAG 25b37f9f720693fd328dc38cbd7ec46d54b8501a
+# Install ITKv5 release from git
+ENV ITK_GIT_TAG f4fbfed6f676c4ae8c0d77bda052a9699a39b76e
 ENV ITK_BUILD_DIR ${BUILD_PATH}/ITK-build
 ENV ITK_SRC_FOLDER_NAME ITK-src
 ENV ITK_SRC_DIR ${BUILD_PATH}/${ITK_SRC_FOLDER_NAME}
@@ -57,7 +57,7 @@ RUN git clone --single-branch https://github.com/InsightSoftwareConsortium/ITK.g
 
 ############# BOOST ##############
 ENV BOOST_VERSION_MAJOR=1
-ENV BOOST_VERSION_MINOR=68
+ENV BOOST_VERSION_MINOR=72
 ENV BOOST_VERSION_PATCH=0
 ENV BOOST_VERSION ${BOOST_VERSION_MAJOR}_${BOOST_VERSION_MINOR}_${BOOST_VERSION_PATCH}
 ENV BOOST_VERSION_DOTS ${BOOST_VERSION_MAJOR}.${BOOST_VERSION_MINOR}.${BOOST_VERSION_PATCH}
@@ -81,7 +81,7 @@ RUN wget ${BOOST_URL} -O boost_${BOOST_VERSION}.tar.gz && \
 
 ############# DGtal #############
 # Install DGtal from git
-ENV DGtal_GIT_TAG 71140534477a3dd41ff8311b9176c76a52ec0b97
+ENV DGtal_GIT_TAG 92ab4d0d62f0e5490f1890efdf904547d17515b9
 ENV DGtal_BUILD_DIR ${BUILD_PATH}/DGtal-build
 ENV DGtal_SRC_FOLDER_NAME DGtal-src
 ENV DGtal_SRC_DIR ${BUILD_PATH}/${DGtal_SRC_FOLDER_NAME}
@@ -107,7 +107,8 @@ RUN git clone --single-branch https://github.com/DGtal-team/DGtal.git ${DGtal_SR
         ${DGtal_SRC_DIR} && \
     ninja && \
     find . -name "*.o" -delete && \
-    find ../DGtal* -depth -name .git -exec rm -rf '{}' \;
+    find ../DGtal* -depth -name .git -exec rm -rf '{}' \; \
+    || exit 1;
 
 
 # Build-time metadata as defined at http://label-schema.org
