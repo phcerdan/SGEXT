@@ -107,4 +107,29 @@ win_x,y: int
             py::arg("poly_data"), py::arg("lut") = nullptr,
             py::arg("win_title") = "sgext: view_poly_data ",
             py::arg("win_x") = 600, py::arg("win_y") = 600);
+
+    /* ************************************************** */
+
+    m.def(
+            "write_poly_data",
+            [](vtkSmartPointer<vtkPolyData> poly_data,
+               const std::string & filename, const bool is_binary) {
+                return write_poly_data(poly_data, filename, is_binary);
+            },
+            R"delimiter(
+Write the polydata using XMLPolyDataWriter, filename needs to have suffix vtk, or vtu.
+
+Parameters:
+----------
+poly_data: vtkPolyData
+    PolyData to write, obtained from reconstruct methods
+
+filename: str
+    filename of the output. It should have the prefix vtk or vtu.
+
+is_binary: Bool [False]
+    if true: SetDataModeToBinary is applied
+)delimiter",
+            py::arg("poly_data"), py::arg("filename"),
+            py::arg("is_binary") = true);
 }

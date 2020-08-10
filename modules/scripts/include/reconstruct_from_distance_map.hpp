@@ -63,7 +63,6 @@ ReconstructOutput reconstruct_from_distance_map(
                 std::unordered_map<GraphType::vertex_descriptor, size_t>(),
         const bool apply_color_to_edges = true);
 
-
 namespace defaults {
 const std::string polydata_win_title = "SGEXT PolyData";
 const size_t polydata_win_width = 600;
@@ -85,6 +84,18 @@ void visualize_poly_data(
         const std::string &winTitle = defaults::polydata_win_title,
         const size_t &winWidth = defaults::polydata_win_width,
         const size_t &winHeight = defaults::polydata_win_width);
+
+/**
+ * Write the polydata using XMLPolyDataWriter, filename needs to have suffix
+ * vtk, or vtu.
+ *
+ * @param poly_data PolyData to write, obtained from reconstruct methods
+ * @param filename filename of the output. It should have the prefix vtk or vtu.
+ * @param binary_type if true: SetDataModeToBinary is applied
+ */
+void write_poly_data(vtkPolyData *poly_data,
+                     const std::string filename,
+                     const bool binary_type = false);
 
 /*****************************************************************************/
 

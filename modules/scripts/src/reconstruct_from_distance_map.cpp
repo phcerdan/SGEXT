@@ -8,20 +8,24 @@
 
 #include <tuple>
 
+#include "itksys/SystemTools.hxx"
+
 #include <vtkAppendPolyData.h>
 #include <vtkCellData.h>
 #include <vtkCleanPolyData.h>
 #include <vtkColorSeries.h>
 #include <vtkLookupTable.h>
+#include <vtkPolyDataMapper.h>
 #include <vtkSmartPointer.h>
 #include <vtkSphereSource.h>
 #include <vtkUnsignedLongArray.h>
-#include <vtkPolyDataMapper.h>
+// viualize
+#include <vtkInteractorStyleTrackballCamera.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderer.h>
-#include <vtkInteractorStyleTrackballCamera.h>
-
+// writer
+#include <vtkXMLPolyDataWriter.h>
 
 namespace SG {
 
@@ -166,6 +170,34 @@ void visualize_poly_data(vtkPolyData *poly_data,
     renderer->ResetCamera();
     renderWindowInteractor->Initialize();
     renderWindowInteractor->Start();
+}
+
+void write_poly_data(vtkPolyData *poly_data,
+                     const std::string filename,
+                     const bool is_binary) {
+    const std::string file_ext =
+            itksys::SystemTools::GetFilenameLastExtension(filename);
+
+    if (file_ext == ".vtk" || file_ext == ".vtu") {
+        vtkNew<vtkXMLPolyDataWriter> vtkMeshWriter;
+        vtkMeshWriter->SetInputData(poly_data);
+        vtkMeshWriter->SetFileName(filename.c_str());
+        if (is_binary)
+            vtkMeshWriter->SetDataModeToBinary();
+        vtkMeshWriter->Update();
+    }
+    // else if ( file_ext==".stl" )
+    //   {
+    //   vtkNew< vtkSTLWriter > stlWriter;
+    //   stlWriter->SetInputData( poly_data );
+    //   stlWriter->SetFileName( filename.c_str() );
+    //   if(is_binary) stlWriter->SetFileTypeToBinary();
+    //   stlWriter->Write();
+    //   }
+    else {
+        throw std::runtime_error("Unrecognized output file extension: " +
+                                 file_ext + ". Use .vtk or .vtu.");
+    }
 }
 
 namespace detail {
