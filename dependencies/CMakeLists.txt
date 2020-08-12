@@ -142,6 +142,8 @@ set(BOOST_GIT_TAG "boost-${BOOST_VERSION_DOTS}")
 set(BOOST_URL "https://sourceforge.net/projects/boost/files/boost/${BOOST_VERSION_DOTS}/boost_${BOOST_VERSION}.tar.gz/download")
 set(BOOST_URL_HASH SHA256=c66e88d5786f2ca4dbebb14e06b566fb642a1a6947ad8cc9091f9f445134143f)
 
+string(TOLOWER ${CMAKE_BUILD_TYPE} _boost_variant)
+
 if( UNIX )
   set(_boost_bootstrap_command ./bootstrap.sh)
   set(_boost_b2_command ./b2)
@@ -189,7 +191,7 @@ ExternalProject_Add(ep_boost
      --without-stacktrace
      --threading=multi
      link=static
-     variant=release
+     variant=${_boost_variant}
      ${_boost_extra_args}
      -j${NUM_CORES}
   INSTALL_COMMAND "" # Already installed in BOOST_BUILD_DIR
