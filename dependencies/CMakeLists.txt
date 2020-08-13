@@ -231,7 +231,7 @@ if(_compiler_is_msvc)
       ep_zlib zlib_remove_dll
       COMMENT "Remove zlib.lib and zlib.dll, leaves only zlibstatic.lib"
       DEPENDEES install
-      COMMAND ${CMAKE_COMMAND} -E remove -f ${ZLIB_INSTALL_DIR}/lib/zlib.lib ${ZLIB_INSTALL_DIR}/bin/zlib.dll
+      COMMAND ${CMAKE_COMMAND} -E remove -f ${ZLIB_INSTALL_DIR}/lib/zlib.lib ${ZLIB_INSTALL_DIR}/bin/zlib.dll ${ZLIB_INSTALL_DIR}/lib/zlibd.lib ${ZLIB_INSTALL_DIR}/bin/zlibd.dll
       )
   endif()
 
