@@ -7,10 +7,19 @@ include(ExternalProject)
 set(OUTPUT_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE PATH
   "Base folder where builds and source folder will be installed: i.e. OUTPUT_BUILD_DIR/boost-build")
 
+# This will handle also the case for MultiConfig generators
+# Issue to propagate config to ExternalProject_Add: https://gitlab.kitware.com/cmake/cmake/-/issues/17645
 if(NOT CMAKE_BUILD_TYPE)
   set(SGEXT_CMAKE_BUILD_TYPE "Release")
 else()
   set(SGEXT_CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE})
+endif()
+
+get_property(isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if (isMultiConfig)
+  set(_propagate_build_type "--config ${SGEXT_CMAKE_BUILD_TYPE}")
+else()
+  set(_propagate_build_type "-DCMAKE_BUILD_TYPE=${SGEXT_CMAKE_BUILD_TYPE}")
 endif()
 
 option(WITH_VTK "Build VTK, ITK will use it too, if WITH_ITK is enabled" ON)
@@ -78,11 +87,11 @@ ExternalProject_Add(ep_vtk
   CMAKE_ARGS
   -DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}
   -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
-  -DCMAKE_BUILD_TYPE:STRING=${SGEXT_CMAKE_BUILD_TYPE}
   -DBUILD_SHARED_LIBS:BOOL=OFF
   -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
   -DBUILD_TESTING:BOOL=OFF
   -DBUILD_EXAMPLES:BOOL=OFF
+  ${_propagate_build_type}
   ${_extra_qt5_options}
   ${_cmake_os_flags}
   INSTALL_COMMAND ""
@@ -118,9 +127,9 @@ if(WITH_ITK)
     CMAKE_ARGS
     -DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}
     -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
-    -DCMAKE_BUILD_TYPE:STRING=${SGEXT_CMAKE_BUILD_TYPE}
     -DBUILD_SHARED_LIBS:BOOL=OFF
     -DBUILD_TESTING:BOOL=OFF
+    ${_propagate_build_type}
     ${_ITK_optional_cmake_args}
     ${_cmake_os_flags}
     INSTALL_COMMAND ""
@@ -142,7 +151,8 @@ set(BOOST_GIT_TAG "boost-${BOOST_VERSION_DOTS}")
 set(BOOST_URL "https://sourceforge.net/projects/boost/files/boost/${BOOST_VERSION_DOTS}/boost_${BOOST_VERSION}.tar.gz/download")
 set(BOOST_URL_HASH SHA256=c66e88d5786f2ca4dbebb14e06b566fb642a1a6947ad8cc9091f9f445134143f)
 
-string(TOLOWER ${CMAKE_BUILD_TYPE} _boost_variant)
+# SGEXT_CMAKE_BUILD_TYPE always exists (even in MultiConfig)
+string(TOLOWER ${SGEXT_CMAKE_BUILD_TYPE} _boost_variant)
 
 if( UNIX )
   set(_boost_bootstrap_command ./bootstrap.sh)
@@ -221,9 +231,9 @@ if(_compiler_is_msvc)
     CMAKE_ARGS
         -DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}
         -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
-        -DCMAKE_BUILD_TYPE:STRING=${SGEXT_CMAKE_BUILD_TYPE}
         -DBUILD_SHARED_LIBS:BOOL=OFF
         -DCMAKE_INSTALL_PREFIX=${ZLIB_INSTALL_DIR}
+        ${_propagate_build_type}
         ${_cmake_os_flags}
     )
   if(ZLIB_FORCE_STATIC)
@@ -290,12 +300,12 @@ ExternalProject_Add(ep_dgtal
   CMAKE_ARGS
       -DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}
       -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
-      -DCMAKE_BUILD_TYPE:STRING=${SGEXT_CMAKE_BUILD_TYPE}
       -DBUILD_SHARED_LIBS:BOOL=OFF
       -DBUILD_TESTING:BOOL=OFF
       -DBUILD_EXAMPLES:BOOL=OFF
       -DCMAKE_FIND_PACKAGE_PREFER_CONFIG:BOOL=ON
       -DBoost_DIR=${BOOST_BUILD_DIR}/lib/cmake/Boost-${BOOST_VERSION_DOTS}
+      ${_propagate_build_type}
       ${_DGtal_optional_cmake_args}
       ${_cmake_os_flags}
   INSTALL_COMMAND ""
