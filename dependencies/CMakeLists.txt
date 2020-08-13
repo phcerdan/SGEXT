@@ -153,6 +153,9 @@ set(BOOST_URL_HASH SHA256=c66e88d5786f2ca4dbebb14e06b566fb642a1a6947ad8cc9091f9f
 
 # SGEXT_CMAKE_BUILD_TYPE always exists (even in MultiConfig)
 string(TOLOWER ${SGEXT_CMAKE_BUILD_TYPE} _boost_variant)
+if(${_boost_variant} STREQUAL "relwithdebinfo")
+  set(_boost_variant "release")
+endif()
 
 if( UNIX )
   set(_boost_bootstrap_command ./bootstrap.sh)
