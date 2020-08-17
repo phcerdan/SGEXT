@@ -112,6 +112,13 @@ void write_poly_data(vtkPolyData *poly_data,
                      const std::string filename,
                      const bool binary_type = false);
 
+void visualize_poly_data_and_graph(vtkPolyData *poly_data,
+        const GraphType & graph,
+        vtkLookupTable *lut = nullptr,
+        const std::string &winTitle = defaults::polydata_win_title,
+        const size_t &winWidth = defaults::polydata_win_width,
+        const size_t &winHeight = defaults::polydata_win_width);
+
 /*****************************************************************************/
 
 namespace detail {

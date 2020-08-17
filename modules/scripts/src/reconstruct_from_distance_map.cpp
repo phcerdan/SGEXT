@@ -20,6 +20,18 @@
 
 #include "reconstruct_from_distance_map.hpp"
 #include "visualize_common.hpp"
+// for visualize_poly_data_and_graph
+#include "convert_to_vtk_unstructured_grid.hpp"
+#include <vtkActor2D.h>
+#include <vtkButtonWidget.h>
+#include <vtkCaptionActor2D.h>
+#include <vtkDataSetMapper.h>
+#include <vtkImageData.h>
+#include <vtkLabeledDataMapper.h>
+#include <vtkProperty.h>
+#include <vtkTextActor.h>
+#include <vtkTextProperty.h>
+#include <vtkTexturedButtonRepresentation2D.h>
 
 #include <tuple>
 
@@ -31,6 +43,7 @@
 #include <vtkColorSeries.h>
 #include <vtkLookupTable.h>
 #include <vtkPolyDataMapper.h>
+#include <vtkPolyDataNormals.h>
 #include <vtkSmartPointer.h>
 #include <vtkSphereSource.h>
 #include <vtkUnsignedLongArray.h>
@@ -117,6 +130,10 @@ ReconstructOutput reconstruct_from_distance_map(
     cleanFilter->SetInputConnection(appendFilter->GetOutputPort());
     cleanFilter->Update();
 
+    auto recomputeNormals = vtkSmartPointer<vtkPolyDataNormals>::New();
+    recomputeNormals->SetInputConnection(cleanFilter->GetOutputPort());
+    recomputeNormals->Update();
+
     // // Smooth
     // vtkNew< vtkSmoothPolyDataFilter > smoothFilter;
     // smoothFilter->SetInputConnection( cleanFilter->GetOutputPort() );
@@ -126,7 +143,7 @@ ReconstructOutput reconstruct_from_distance_map(
     // smoothFilter->Update();
 
     // Populate the output.poly_data
-    output.poly_data = cleanFilter->GetOutput();
+    output.poly_data = recomputeNormals->GetOutput();
 
     // Populate ouput.lut in casse the map is provided
     if (vertex_to_label_map_provided) {
@@ -159,6 +176,7 @@ void visualize_poly_data(vtkPolyData *poly_data,
     }
     auto actor = vtkSmartPointer<vtkActor>::New();
     actor->SetMapper(mapper);
+    actor->GetProperty()->SetOpacity(0.5);
 
     // Setup renderer
     vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
@@ -182,7 +200,221 @@ void visualize_poly_data(vtkPolyData *poly_data,
     vtkCamera *cam = renderer->GetActiveCamera();
     flip_camera(cam);
 
+    // Use DepthPeeling: https://vtk.org/Wiki/VTK/Depth_Peeling
+    renderWindow->SetAlphaBitPlanes(1);
+    renderWindow->SetMultiSamples(0);
+    renderer->SetUseDepthPeeling(1);
+    renderer->SetOcclusionRatio(0.1);
+    renderer->SetMaximumNumberOfPeels(100);
+
     renderer->ResetCamera();
+    renderWindowInteractor->Initialize();
+    renderWindowInteractor->Start();
+}
+
+struct HideActorButtonCallbackCommand : public vtkCommand {
+    static HideActorButtonCallbackCommand *New() {
+        return new HideActorButtonCallbackCommand;
+    }
+
+    HideActorButtonCallbackCommand()
+            : label_actor(nullptr), caption_actor(nullptr) {}
+
+    void SetLabelActor(vtkActor2D *input_label_actor) {
+        label_actor = input_label_actor;
+    }
+    void SetCaptionActor(vtkCaptionActor2D *input_caption_actor) {
+        caption_actor = input_caption_actor;
+    }
+    void SetUnstructuredGridActor(vtkActor *input_ugrid_actor) {
+        ugrid_actor = input_ugrid_actor;
+    }
+    virtual void Execute(vtkObject *caller, unsigned long, void *) override {
+        vtkButtonWidget *buttonWidget =
+                reinterpret_cast<vtkButtonWidget *>(caller);
+        vtkTexturedButtonRepresentation2D *rep =
+                reinterpret_cast<vtkTexturedButtonRepresentation2D *>(
+                        buttonWidget->GetRepresentation());
+        auto state = rep->GetState();
+        if (state) {
+            label_actor->SetVisibility(true);
+            caption_actor->SetCaption("Show Id's: ON");
+            ugrid_actor->SetVisibility(true);
+
+        } else {
+            label_actor->SetVisibility(false);
+            caption_actor->SetCaption("Show Id's: OFF");
+            ugrid_actor->SetVisibility(false);
+        }
+    }
+    vtkActor2D *label_actor;
+    vtkCaptionActor2D *caption_actor;
+    vtkActor *ugrid_actor;
+};
+
+void CreateImageForButton(vtkSmartPointer<vtkImageData> image,
+                          double *color,
+                          double *background_color) {
+    // Specify the size of the image data
+    int dimension[2];
+    dimension[0] = 60;
+    dimension[1] = 60;
+    image->SetDimensions(dimension[0], dimension[1], 1);
+    int radius[2];
+    radius[0] = dimension[0] / 2;
+    radius[1] = dimension[1] / 2;
+
+    image->AllocateScalars(VTK_UNSIGNED_CHAR, 3);
+
+    int *dims = image->GetDimensions();
+
+    // Fill the image with
+    for (int y = 0; y < dims[1]; y++) {
+        for (int x = 0; x < dims[0]; x++) {
+            unsigned char *pixel = static_cast<unsigned char *>(
+                    image->GetScalarPointer(x, y, 0));
+            if ((x - radius[0]) * (x - radius[0]) +
+                        (y - radius[1]) * (y - radius[1]) <
+                radius[0] * radius[0]) {
+                pixel[0] = color[0];
+                pixel[1] = color[1];
+                pixel[2] = color[2];
+            } else {
+                pixel[0] = background_color[0];
+                pixel[1] = background_color[1];
+                pixel[2] = background_color[2];
+            }
+        }
+    }
+}
+
+void visualize_poly_data_and_graph(vtkPolyData *poly_data,
+                                   const GraphType &graph,
+                                   vtkLookupTable *lut,
+                                   const std::string &winTitle,
+                                   const size_t &winWidth,
+                                   const size_t &winHeight) {
+    // Create a mapper for poly_data
+    auto pd_mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+    pd_mapper->SetInputData(poly_data);
+    if (lut) {
+        pd_mapper->SetColorModeToMapScalars();
+        pd_mapper->SetLookupTable(lut);
+    }
+    auto pd_actor = vtkSmartPointer<vtkActor>::New();
+    pd_actor->SetMapper(pd_mapper);
+    pd_actor->GetProperty()->SetOpacity(0.5);
+
+    // Add an actor with ugrid
+    auto ugrid = convert_to_vtk_unstructured_grid(graph);
+    auto ugrid_mapper = vtkSmartPointer<vtkDataSetMapper>::New();
+    ugrid_mapper->SetInputData(ugrid);
+    ugrid_mapper->Update();
+    auto ugrid_actor = vtkSmartPointer<vtkActor>::New();
+    ugrid_actor->SetMapper(ugrid_mapper);
+    ugrid_actor->SetVisibility(false);
+
+    // Add vertex_descriptor labels
+    // auto ugrid_point_data = ugrid->GetPointData();
+    // auto descriptors_array = ugrid_point_data->GetArray("vertex_descriptor");
+    auto label_mapper_vertex = vtkSmartPointer<vtkLabeledDataMapper>::New();
+    label_mapper_vertex->SetInputData(ugrid);
+    // default FontSize is 12
+    // label_mapper_vertex->GetLabelTextProperty()->SetFontSize(14);
+    label_mapper_vertex->Update();
+    auto label_vertex_actor = vtkSmartPointer<vtkActor2D>::New();
+    label_vertex_actor->SetMapper(label_mapper_vertex);
+    label_vertex_actor->SetVisibility(false); // use button to toggle
+
+    // Setup renderer
+    vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
+    renderer->AddActor(pd_actor);
+    renderer->AddActor(ugrid_actor);
+    renderer->AddActor(label_vertex_actor);
+    vtkSmartPointer<vtkRenderWindow> renderWindow =
+            vtkSmartPointer<vtkRenderWindow>::New();
+    renderWindow->SetWindowName(winTitle.c_str());
+    renderWindow->SetSize(winWidth, winHeight);
+    renderWindow->AddRenderer(renderer);
+    // Use DepthPeeling: https://vtk.org/Wiki/VTK/Depth_Peeling
+    renderWindow->SetAlphaBitPlanes(1);
+    renderWindow->SetMultiSamples(0);
+    renderer->SetUseDepthPeeling(1);
+    renderer->SetOcclusionRatio(0.1);
+    renderer->SetMaximumNumberOfPeels(100);
+
+    // Setup render window interactor
+    vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor =
+            vtkSmartPointer<vtkRenderWindowInteractor>::New();
+    auto style = vtkSmartPointer<
+            vtkInteractorStyleTrackballCamera>::New(); // like paraview
+    renderWindowInteractor->SetInteractorStyle(style);
+
+    // Render and start interaction
+    renderWindowInteractor->SetRenderWindow(renderWindow);
+    // Flip camera because VTK-ITK different corner for origin.
+    vtkCamera *cam = renderer->GetActiveCamera();
+    flip_camera(cam);
+    renderer->ResetCamera();
+
+    // Add button to hide/show vertex_descriptors
+    auto button_callback =
+            vtkSmartPointer<HideActorButtonCallbackCommand>::New();
+    button_callback->SetLabelActor(label_vertex_actor);
+    button_callback->SetUnstructuredGridActor(ugrid_actor);
+    auto button_rep = vtkSmartPointer<vtkTexturedButtonRepresentation2D>::New();
+    button_rep->SetNumberOfStates(2);
+    auto button_image1 = vtkSmartPointer<vtkImageData>::New();
+    auto button_image2 = vtkSmartPointer<vtkImageData>::New();
+    double yellow[3] = {227, 207, 87};
+    double red[3] = {255, 99, 71};
+    auto background_color = renderer->GetBackground();
+    CreateImageForButton(button_image1, red, background_color);
+    CreateImageForButton(button_image2, yellow, background_color);
+    button_rep->SetButtonTexture(0, button_image1);
+    button_rep->SetButtonTexture(1, button_image2);
+    double bounds[6];
+    double button_size = 30.0;
+    bounds[0] = 1.0 - button_size;
+    bounds[1] = bounds[0] + button_size;
+    bounds[2] = 1.0 - button_size;
+    bounds[3] = bounds[2] + button_size;
+    bounds[4] = bounds[5] = 0.0;
+    button_rep->SetPlaceFactor(1);
+    button_rep->PlaceWidget(bounds);
+
+    // Create an actor for the text
+    auto caption_actor = vtkSmartPointer<vtkCaptionActor2D>::New();
+    caption_actor->SetCaption("Show Id's: OFF");
+    double pos1[3];
+    double pad = 3;
+    pos1[0] = bounds[0] + button_size + pad;
+    pos1[1] = bounds[2] + button_size;
+    pos1[2] = bounds[4];
+    caption_actor->SetPosition(pos1);
+    caption_actor->SetDisplayPosition(bounds[1] + button_size, bounds[3] + pad);
+    caption_actor->SetAttachmentPoint(pos1);
+    auto *attach_point = caption_actor->GetAttachmentPointCoordinate();
+    attach_point->SetCoordinateSystemToDisplay();
+    caption_actor->BorderOff();
+    caption_actor->LeaderOff();
+    caption_actor->ThreeDimensionalLeaderOff();
+    // caption_actor->GetCaptionTextProperty()->SetFontSize(5);
+    caption_actor->GetCaptionTextProperty()->BoldOff();
+    caption_actor->GetCaptionTextProperty()->ItalicOff();
+    caption_actor->GetCaptionTextProperty()->ShadowOn();
+    caption_actor->GetTextActor()->SetTextScaleModeToNone();
+    renderer->AddViewProp(caption_actor);
+
+    button_callback->SetCaptionActor(caption_actor);
+
+    auto button_widget = vtkSmartPointer<vtkButtonWidget>::New();
+    button_widget->SetInteractor(renderWindowInteractor);
+    button_widget->SetRepresentation(button_rep);
+    button_widget->AddObserver(vtkCommand::StateChangedEvent, button_callback);
+    button_widget->On();
+
+    renderWindow->Render();
     renderWindowInteractor->Initialize();
     renderWindowInteractor->Start();
 }
