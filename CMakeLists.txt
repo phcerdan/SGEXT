@@ -144,6 +144,8 @@ if(SG_REQUIRES_VTK)
     vtkChartsCore
     vtkCommonCore
     vtkCommonDataModel
+    # For vtkPolyDataToImageStencil
+    vtkImagingStencil
     # avoid AUTOINIT_redefined at build time,
     vtkViewsInfovis
     vtkRenderingCore

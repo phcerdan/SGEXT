@@ -6,6 +6,7 @@
 #include "scripts_types.hpp" // for FloatImageType
 #include "spatial_graph.hpp"
 
+#include <vtkImageData.h>
 #include <vtkLookupTable.h>
 #include <vtkPolyData.h>
 #include <vtkSmartPointer.h>
@@ -68,6 +69,30 @@ const std::string polydata_win_title = "SGEXT PolyData";
 const size_t polydata_win_width = 600;
 const size_t polydata_win_height = 600;
 } // end namespace defaults
+
+/**
+ * Use vtkPolyDataToImageStencil to create an (ITK) image from input poly data.
+ * It needs a reference_image to gather dimensions and metadata.
+ *
+ * TODO WARNING: This functions is in development. The surface using
+ * vtkAppendPolyData with spheres in reconstruct_from_distance_map produces
+ * internal holes in the output image.
+ *
+ * @param poly_data input poly data, for example from @ref
+ * reconstruct_from_distance_map
+ * @param lut
+ * @param reference_image Binary or FloatImageType, used as a reference for
+ * dimensions and metadata (origin, spacing, direction)
+ *
+ * @return binary image
+ */
+BinaryImageType::Pointer
+poly_data_to_binary_image(vtkPolyData *poly_data,
+                          const BinaryImageType::Pointer &reference_image);
+BinaryImageType::Pointer
+poly_data_to_binary_image(vtkPolyData *poly_data,
+                          const FloatImageType::Pointer &reference_image);
+
 /**
  * Visualize polydata using optionally a lookup table with colors of integer
  * type.
@@ -97,8 +122,9 @@ void write_poly_data(vtkPolyData *poly_data,
                      const std::string filename,
                      const bool binary_type = false);
 
-void visualize_poly_data_and_graph(vtkPolyData *poly_data,
-        const GraphType & graph,
+void visualize_poly_data_and_graph(
+        vtkPolyData *poly_data,
+        const GraphType &graph,
         vtkLookupTable *lut = nullptr,
         const std::string &winTitle = defaults::polydata_win_title,
         const size_t &winWidth = defaults::polydata_win_width,
