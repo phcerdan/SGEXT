@@ -20,8 +20,8 @@
 
 #include "pybind11_common.h"
 
-#include "reconstruct_from_distance_map.hpp"
 #include "locate/sglocate_common.h" // define holder for vtkSmartPointer
+#include "reconstruct_from_distance_map.hpp"
 
 namespace py = pybind11;
 using namespace SG;
@@ -34,7 +34,8 @@ void init_reconstruct_from_distance_map(py::module &m) {
                 p.Print(os);
                 return os.str();
             });
-    py::class_<vtkLookupTable, vtkSmartPointer<vtkLookupTable>>(m, "vtkLookupTable")
+    py::class_<vtkLookupTable, vtkSmartPointer<vtkLookupTable>>(
+            m, "vtkLookupTable")
             .def("__str__", [](vtkLookupTable &p) {
                 std::stringstream os;
                 p.Print(os);
@@ -42,10 +43,8 @@ void init_reconstruct_from_distance_map(py::module &m) {
             });
 
     py::class_<ReconstructOutput>(m, "ReconstructOutput")
-        .def_readwrite("poly_data", &ReconstructOutput::poly_data)
-        .def_readwrite("lut", &ReconstructOutput::lut);
-
-
+            .def_readwrite("poly_data", &ReconstructOutput::poly_data)
+            .def_readwrite("lut", &ReconstructOutput::lut);
 
     m.def(
             "reconstruct_from_distance_map",
@@ -128,7 +127,7 @@ win_x,y: int
     m.def(
             "write_poly_data",
             [](vtkSmartPointer<vtkPolyData> poly_data,
-               const std::string & filename, const bool is_binary) {
+               const std::string &filename, const bool is_binary) {
                 return write_poly_data(poly_data, filename, is_binary);
             },
             R"delimiter(
@@ -147,4 +146,41 @@ is_binary: Bool [False]
 )delimiter",
             py::arg("poly_data"), py::arg("filename"),
             py::arg("is_binary") = true);
+
+    /* ************************************************** */
+
+    const std::string poly_data_to_binary_image_docs =
+            R"delimiter(
+Use vtkPolyDataToImageStencil to create an (ITK) binary image from input poly data.
+It needs a reference_image to gather dimensions and metadata.
+
+TODO WARNING: This functions is in development. The surface using vtkAppendPolyData
+with spheres in reconstruct_from_distance_map produces internal holes
+in the output image.
+
+Parameters:
+----------
+poly_data: vtkPolyData
+    PolyData, obtained from reconstruct methods
+
+reference_image: BinaryImageType or FloatImageType
+     reference image to get dimensions and metadata (spacing, origin, direction).
+)delimiter";
+
+    m.def(
+            "poly_data_to_binary_image",
+            [](vtkSmartPointer<vtkPolyData> poly_data,
+               const BinaryImageType::Pointer &reference_image) {
+                return poly_data_to_binary_image(poly_data, reference_image);
+            },
+            poly_data_to_binary_image_docs.c_str(), py::arg("poly_data"),
+            py::arg("reference_image"));
+    m.def(
+            "poly_data_to_binary_image",
+            [](vtkSmartPointer<vtkPolyData> poly_data,
+               const FloatImageType::Pointer &reference_image) {
+                return poly_data_to_binary_image(poly_data, reference_image);
+            },
+            poly_data_to_binary_image_docs.c_str(), py::arg("poly_data"),
+            py::arg("reference_image"));
 }

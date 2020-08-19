@@ -22,12 +22,17 @@
 #include "visualize_common.hpp"
 // for visualize_poly_data_and_graph
 #include "convert_to_vtk_unstructured_grid.hpp"
+#include <itkCastImageFilter.h>
+#include <itkVTKImageToImageFilter.h>
 #include <vtkActor2D.h>
 #include <vtkButtonWidget.h>
 #include <vtkCaptionActor2D.h>
 #include <vtkDataSetMapper.h>
 #include <vtkImageData.h>
+#include <vtkImageStencil.h>
 #include <vtkLabeledDataMapper.h>
+#include <vtkPointData.h>
+#include <vtkPolyDataToImageStencil.h>
 #include <vtkProperty.h>
 #include <vtkTextActor.h>
 #include <vtkTextProperty.h>
@@ -160,6 +165,71 @@ ReconstructOutput reconstruct_from_distance_map(
     }
 
     return output;
+}
+BinaryImageType::Pointer
+poly_data_to_binary_image(vtkPolyData *poly_data,
+                          const FloatImageType::Pointer &reference_image) {
+    // The content of the image is irrelevant
+    auto cast_to_binary_filter =
+            itk::CastImageFilter<FloatImageType, BinaryImageType>::New();
+    cast_to_binary_filter->SetInput(reference_image);
+    cast_to_binary_filter->Update();
+    return poly_data_to_binary_image(poly_data,
+                                     cast_to_binary_filter->GetOutput());
+}
+
+BinaryImageType::Pointer
+poly_data_to_binary_image(vtkPolyData *poly_data,
+                          const BinaryImageType::Pointer &reference_image) {
+    const auto &ref_size =
+            reference_image->GetLargestPossibleRegion().GetSize();
+    const auto &ref_origin = reference_image->GetOrigin();
+    const auto &ref_spacing = reference_image->GetSpacing();
+    const auto &ref_direction = reference_image->GetDirection();
+
+    // Create a raw pointer, its memory will be owned (deleted when needed)
+    // by itkImageContainer of the output_itk_image
+    vtkImageData *output_vtk_image = vtkImageData::New();
+    output_vtk_image->SetDimensions(ref_size[0], ref_size[1], ref_size[2]);
+    output_vtk_image->SetOrigin(ref_origin[0], ref_origin[1], ref_origin[2]);
+    output_vtk_image->SetSpacing(ref_spacing[0], ref_spacing[1],
+                                 ref_spacing[2]);
+    output_vtk_image->AllocateScalars(VTK_UNSIGNED_CHAR, 1);
+    // DirectionMatrix only since VTK9
+    // output_vtk_image->SetDirectionMatrix(
+    //     ref_direction[0], ref_direction[1], ref_direction[2],
+    //     ref_direction[3], ref_direction[4], ref_direction[5],
+    //     ref_direction[6], ref_direction[7], ref_direction[8]
+    //     );
+
+    vtkSmartPointer<vtkPolyDataToImageStencil> data_to_stencil =
+            vtkSmartPointer<vtkPolyDataToImageStencil>::New();
+    data_to_stencil->SetInputData(poly_data);
+    data_to_stencil->SetInformationInput(output_vtk_image);
+    data_to_stencil->Update();
+
+    vtkSmartPointer<vtkImageStencil> stencil_to_vtk_image =
+            vtkSmartPointer<vtkImageStencil>::New();
+    stencil_to_vtk_image->SetInputData(output_vtk_image);
+    stencil_to_vtk_image->SetStencilConnection(
+            data_to_stencil->GetOutputPort());
+    stencil_to_vtk_image->ReverseStencilOn(); // foreground will be 255
+    stencil_to_vtk_image->SetBackgroundValue(255);
+    stencil_to_vtk_image->Update();
+    // DeepCopy to avoid dangling pointers outside this scope.
+    output_vtk_image->DeepCopy(stencil_to_vtk_image->GetOutput());
+
+    itk::VTKImageToImageFilter<BinaryImageType>::Pointer vtk_to_itk_filter =
+            itk::VTKImageToImageFilter<BinaryImageType>::New();
+    vtk_to_itk_filter->SetInput(output_vtk_image);
+    vtk_to_itk_filter->Update();
+    auto output_itk_image = vtk_to_itk_filter->GetOutput();
+    output_itk_image->SetDirection(reference_image->GetDirection());
+    // We let the itk container to own (manage the deletion) of the vtkImageData
+    // managed by a raw pointer. If ImageData is managed by a vtkSmartPointer
+    // we will have a dangling pointer outside of this function.
+    output_itk_image->GetPixelContainer()->ContainerManageMemoryOn();
+    return output_itk_image;
 }
 
 void visualize_poly_data(vtkPolyData *poly_data,
