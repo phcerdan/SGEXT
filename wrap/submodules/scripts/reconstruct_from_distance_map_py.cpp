@@ -101,8 +101,7 @@ apply_color_to_edges: Bool [True]
                                            win_y);
             },
             R"delimiter(
-Visualize the spatial graph along a binary image. The binary image can be the original
-binary image before the thinning.
+Visualize polydata using optionally a lookup table with colors of integer type.
 
 Parameters:
 ----------
@@ -110,7 +109,7 @@ poly_data: vtkPolyData
     PolyData to visualize, obtained from reconstruct methods
 
 lut: vtkLookupTable
-     lookup table for colors
+    lookup table for colors
 
 win_title: str
     title of the vtk window
@@ -120,6 +119,43 @@ win_x,y: int
 )delimiter",
             py::arg("poly_data"), py::arg("lut") = nullptr,
             py::arg("win_title") = "sgext: view_poly_data ",
+            py::arg("win_x") = 600, py::arg("win_y") = 600);
+
+    /* ************************************************** */
+
+    m.def(
+            "view_poly_data_and_graph",
+            [](vtkSmartPointer<vtkPolyData> poly_data,
+               const GraphType & graph,
+               vtkSmartPointer<vtkLookupTable> lut,
+               const std::string &win_title, size_t &win_x, size_t &win_y) {
+                return visualize_poly_data_and_graph(poly_data, graph, lut,
+                    win_title, win_x, win_y);
+            },
+            R"delimiter(
+
+Visualize polydata using optionally a lookup table with colors of integer
+type and the associated graph.
+
+Parameters:
+----------
+poly_data: vtkPolyData
+    PolyData to visualize, obtained from reconstruct methods
+
+graph: GraphType
+    Associated graph with the poly_data.
+
+lut: vtkLookupTable
+    lookup table for colors
+
+win_title: str
+    title of the vtk window
+
+win_x,y: int
+    length of the side (x, y) of the window.
+)delimiter",
+            py::arg("poly_data"), py::arg("graph"), py::arg("lut") = nullptr,
+            py::arg("win_title") = "sgext: view_poly_data_and_graph",
             py::arg("win_x") = 600, py::arg("win_y") = 600);
 
     /* ************************************************** */
