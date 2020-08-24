@@ -122,6 +122,17 @@ void write_poly_data(vtkPolyData *poly_data,
                      const std::string filename,
                      const bool binary_type = false);
 
+/**
+ * Visualize polydata using optionally a lookup table with colors of integer
+ * type and the associated graph.
+ *
+ * @param poly_data input data
+ * @param graph associated spatial graph
+ * @param lut lookup table
+ * @param winTitle title of VTK window
+ * @param winWidth width of VTK window
+ * @param winHeight height of VTK window
+ */
 void visualize_poly_data_and_graph(
         vtkPolyData *poly_data,
         const GraphType &graph,
