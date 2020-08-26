@@ -3,7 +3,7 @@
 include(CMakeFindDependencyMacro)
 
 #### Required dependencies  ####
-find_dependency(Boost REQUIRED COMPONENTS program_options filesystem graph)
+find_dependency(Boost REQUIRED COMPONENTS program_options filesystem graph serialization)
 find_dependency(DGtal REQUIRED 1.0)
 
 #### Optional dependencies based on SGEXT options ####
