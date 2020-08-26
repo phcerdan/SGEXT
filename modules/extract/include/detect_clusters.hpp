@@ -60,7 +60,7 @@ detect_clusters_with_radius(const GraphType &input_sg,
  */
 void assign_label_to_spatial_node_id(
         GraphType &input_sg,
-        std::unordered_map<GraphType::vertex_descriptor,
+        const std::unordered_map<GraphType::vertex_descriptor,
                            GraphType::vertex_descriptor> &vertex_to_label_map);
 } // end namespace SG
 #endif
