@@ -177,6 +177,7 @@ install(DIRECTORY ${HISTO_INCLUDE_DIR}/ DESTINATION ${HISTO_INSTALL_INCLUDE_DIR}
 
 # for convenience setup a target
 add_library(histo INTERFACE)
+add_library(SGEXT::histo ALIAS histo)
 target_include_directories(histo INTERFACE
     $<BUILD_INTERFACE:${HISTO_INCLUDE_DIR}>
     $<INSTALL_INTERFACE:${HISTO_INSTALL_INCLUDE_DIR}>)
