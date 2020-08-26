@@ -18,9 +18,14 @@
  *
  * *******************************************************************/
 
+#ifndef SGEXT_FIXTURE_IMAGES_HPP
+#define SGEXT_FIXTURE_IMAGES_HPP
+
 #include <string>
 
 namespace SG {
   // path to the images folder in the source tree of sgext
   const std::string sgext_fixture_images_path="@_SGEXT_FIXTURE_IMAGES_FOLDER@";
 } // end namespace SG
+
+#endif
