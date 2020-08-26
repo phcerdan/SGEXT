@@ -71,7 +71,7 @@ detect_clusters_with_radius(const GraphType &input_sg,
 
 void assign_label_to_spatial_node_id(
         GraphType &input_sg,
-        std::unordered_map<GraphType::vertex_descriptor, size_t>
+        const std::unordered_map<GraphType::vertex_descriptor, size_t>
                 &vertex_to_label_map) {
     for (const auto vertex_label_pair : vertex_to_label_map) {
         const auto &vertex_descriptor = vertex_label_pair.first;
