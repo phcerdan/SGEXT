@@ -25,7 +25,7 @@ else()
 endif()
 # Fetch perm-montecarlo
 include(FetchContent)
-set(PERM_WRAP_PYTHON ${SG_WRAP_PYTHON})
+set(PERM_WRAP_PYTHON 0)
 FetchContent_Declare(
   perm-montecarlo
   GIT_REPOSITORY https://github.com/phcerdan/perm-montecarlo
@@ -37,6 +37,20 @@ if(NOT perm-montecarlo_POPULATED)
   FetchContent_Populate(perm-montecarlo)
   add_subdirectory(${perm-montecarlo_SOURCE_DIR} ${perm-montecarlo_BINARY_DIR})
 endif()
+
+# need to export target as well
+# this exports library: PERMCore
+install(TARGETS PERMCore
+  EXPORT SGEXTTargets
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT runtime
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT development
+  )
+
+# export to the build tree
+export(TARGETS PERMCore
+  NAMESPACE SGEXT::
+  APPEND FILE ${sgext_export_file})
 
 # # Use FLANN for collision detector (kd-tree)
 # option(FLANN_BUILD_C_BINDINGS "Build C bindings" OFF)
