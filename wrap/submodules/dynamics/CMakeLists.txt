@@ -1,3 +1,5 @@
+set(module_name_ dynamics)
+set(module_path_ ${CMAKE_CURRENT_SOURCE_DIR})
 set(files_using_vtk "")
 if(SG_REQUIRES_VTK)
   list(APPEND files_using_vtk
@@ -20,8 +22,10 @@ set(current_sources_
   dynamics_graph_glue_py.cpp
   ${files_using_vtk}
   )
-set(module_name_ ${CMAKE_CURRENT_SOURCE_DIR})
-list(TRANSFORM current_sources_ PREPEND "${module_name_}/")
+set(wrap_header_${module_name_}
+  sgdynamics_common_py.hpp
+  )
+list(TRANSFORM current_sources_ PREPEND "${module_path_}/")
 
 set(all_modules_python_sources
   ${all_modules_python_sources}
