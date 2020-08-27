@@ -18,16 +18,16 @@
  *
  * *******************************************************************/
 
-#include <iostream>
-#include "spatial_graph.hpp"
-#include "compute_graph_properties.hpp"
+#include "pybind11_common.h"
+namespace py = pybind11;
 
-#ifdef SGEXT_WITH_WRAP
-#include "locate/sglocate_common.h"
-#endif
-
-int main() {
-  SG::GraphType g(2);
-  SG::compute_degrees(g);
-  std::cout << "Finished!" << std::endl;
+void init_sgmock(py::module &);
+PYBIND11_MODULE(_mock, m) {
+    m.doc() = "Mock external module for SGEXT";
+    init_sgmock(m);
 }
+
+void init_sgmock(py::module &m) {
+    m.def("say_mock", [](){std::cout <<"Mock!" << std::endl;});
+}
+
