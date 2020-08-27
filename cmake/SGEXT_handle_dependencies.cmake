@@ -24,7 +24,7 @@ if(EXISTS ${_dependencies_boost_build} AND NOT Boost_DIR)
   # Get the Boost-${BOOST_VERSION} folder (version is unknown to this project)
   file(GLOB _boost_cmake_folder
     ${_dependencies_boost_build}/lib/cmake/Boost-*)
-  # set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON CACHE BOOL "CMake prefers to use CONFIG files. Set by handle_dependencies, used for boost-config.cmake.")
+  # set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON CACHE BOOL "CMake prefers to use CONFIG files. Set by SGEXT_handle_dependencies, used for boost-config.cmake.")
   set(Boost_DIR ${_boost_cmake_folder} CACHE PATH "Folder to find Boost-config.cmake")
   if(Boost_NO_BOOST_CMAKE)
     set(BOOST_ROOT ${_dependencies_boost_build} CACHE PATH "Folder to find include and lib folders of boost. Deprecated, modern boost would use Boost_DIR.")

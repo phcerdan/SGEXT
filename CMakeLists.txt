@@ -42,7 +42,7 @@ option(SG_WRAP_PYTHON "Use pybind11 to create bindings to python." OFF)
 
 set(DEPENDENCIES_BUILD_DIR "" CACHE PATH "Base folder generated from building the sub-project ./dependencies. It contains boost-build, DGtal-build, etc.")
 # The following script will set ITK_DIR, VTK_DIR DGtal_DIR, etc. Based on DEPENDENCIES_BUILD_DIR.
-include(handle_dependencies)
+include(SGEXT_handle_dependencies)
 
 if(VISUALIZE OR SG_MODULE_VISUALIZE OR SG_MODULE_LOCATE OR SG_MODULE_COMPARE)
   set(SG_REQUIRES_VTK TRUE)
@@ -239,7 +239,7 @@ if(SG_WRAP_PYTHON)
 endif()
 
 set(SG_LIBRARIES)
-include(SGModuleMacros) # module macros
+include(SGEXT_SGModuleMacros) # module macros
 add_subdirectory(modules/core)
 if(SG_MODULE_VISUALIZE)
   add_subdirectory(modules/visualize)
