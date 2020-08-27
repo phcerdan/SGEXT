@@ -31,3 +31,7 @@ set(all_modules_python_sources
   ${all_modules_python_sources}
   ${current_sources_}
   PARENT_SCOPE)
+
+install(FILES ${wrap_header_${module_name_}}
+  DESTINATION ${CMAKE_INSTALL_PYTHONINCLUDEDIR}/${module_name_}/
+  COMPONENT development)
