@@ -18,6 +18,7 @@ RUN cmake \
         -G Ninja \
         -DCMAKE_BUILD_TYPE:STRING=Release \
         -DSG_BUILD_TESTING:BOOL=OFF \
+        -DSG_BUILD_CLI:BOOL=ON \
         -DSG_MODULE_ANALYZE:BOOL=ON \
         -DSG_MODULE_COMPARE:BOOL=ON \
         -DSG_MODULE_LOCATE:BOOL=ON \
