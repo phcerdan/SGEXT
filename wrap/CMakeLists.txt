@@ -1,4 +1,6 @@
 # Python wrapping will be one single module with submodules
+set(CMAKE_INSTALL_PYTHONINCLUDEDIR
+  ${CMAKE_INSTALL_PYTHONLIBDIR}/include)
 set(enabled_libs_ SGCore)
 set(enabled_include_dirs_)
 set(enabled_include_system_dirs_)
@@ -37,6 +39,9 @@ if(SG_MODULE_SCRIPTS)
   add_subdirectory(itk)
 endif()
 
+set(wrap_header_common
+  pybind11_common.h)
+
 # Add the pybind module
 # Use SHARED instead of the deault MODULE to allow external plugins to link to it.
 # This would require the same CI/CD to build and link these external plugins.
@@ -47,8 +52,13 @@ pybind11_add_module(_sgext
   )
 add_library(SGEXT::_sgext ALIAS _sgext)
 target_link_libraries(_sgext PRIVATE ${enabled_libs_})
-target_include_directories(_sgext PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}) # For pybind11_common.h
-target_include_directories(_sgext PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/submodules) # For #include "locate/sglocate_common.h"
+target_include_directories(_sgext PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_PYTHONINCLUDEDIR}>
+  ) # For pybind11_common.h
+target_include_directories(_sgext PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/submodules>
+  ) # For #include "locate/sglocate_common.h"
 target_include_directories(_sgext PRIVATE ${enabled_include_dirs_})
 target_include_directories(_sgext SYSTEM PRIVATE ${enabled_include_system_dirs_})
 if(SG_REQUIRES_VTK)
@@ -79,10 +89,10 @@ if(SG_MODULE_SCRIPTS)
   target_compile_definitions(_sgext PRIVATE SG_MODULE_SCRIPTS_ENABLED)
 endif()
 
-install(TARGETS _sgext
-  DESTINATION ${CMAKE_INSTALL_PYTHONLIBDIR}
-  COMPONENT runtime
-  )
+install(FILES ${wrap_header_common}
+  DESTINATION ${CMAKE_INSTALL_PYTHONINCLUDEDIR}
+  COMPONENT development)
+
 install(FILES __init__.py
   DESTINATION ${CMAKE_INSTALL_PYTHONLIBDIR}
   COMPONENT runtime
@@ -111,6 +121,18 @@ install(DIRECTORY ${table_folder}
   DESTINATION ${CMAKE_INSTALL_PYTHONLIBDIR}
   COMPONENT runtime
   )
+
+# Export _sgext to let external plugins link to SGEXT::_sgext
+# export to install tree: (always to CMAKE_INSTALL_PYTHONLIBDIR)
+install(TARGETS _sgext
+  EXPORT SGEXTTargets
+  RUNTIME DESTINATION ${CMAKE_INSTALL_PYTHONLIBDIR} COMPONENT runtime
+  LIBRARY DESTINATION ${CMAKE_INSTALL_PYTHONLIBDIR} COMPONENT runtime
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_PYTHONLIBDIR} COMPONENT development)
+# export _sgext to the build tree
+export(TARGETS _sgext
+  NAMESPACE SGEXT::
+  APPEND FILE ${sgext_export_file})
 
 if(SG_BUILD_TESTING)
   add_subdirectory(test)
