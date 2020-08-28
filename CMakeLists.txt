@@ -236,6 +236,15 @@ if(SG_WRAP_PYTHON)
     FetchContent_Populate(pybind11)
     add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR})
   endif()
+  # Export pybind to the build tree to facilitate external modules to reuse it
+  # But not to the install tree.
+  # External modules can link to SGEXT::pybind11 or SGEXT::module (only from the build tree)
+  # And then:
+  # include(${SGEXT_DIR}/_deps/pybind11-src/tools/pybind11Tools.cmake)
+  # to access the same pybind11_add_module CMake function.
+  export(TARGETS pybind11 module
+    NAMESPACE SGEXT::
+    APPEND FILE ${sgext_export_file})
 endif()
 
 set(SG_LIBRARIES)
@@ -324,3 +333,13 @@ if(SG_WRAP_PYTHON)
   add_dependencies(sgext-install-runtime _sgext)
 endif()
 
+# Copy to the build tree the cmake modules (to allow reuse from SGEXT_DIR after a find_package)
+file(COPY
+  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/SGEXT_SGModuleMacros.cmake
+  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/SGEXT_handle_dependencies.cmake
+ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/cmake)
+
+install(FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/SGEXT_SGModuleMacros.cmake
+  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/SGEXT_handle_dependencies.cmake
+  DESTINATION ${install_cmake_dir} )

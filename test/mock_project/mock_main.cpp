@@ -7,6 +7,10 @@
 #include "spatial_graph.hpp"
 #include "compute_graph_properties.hpp"
 
+#ifdef SGEXT_WITH_WRAP
+#include "locate/sglocate_common.h"
+#endif
+
 int main() {
   SG::GraphType g(2);
   SG::compute_degrees(g);
