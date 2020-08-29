@@ -18,31 +18,32 @@
  *
  * *******************************************************************/
 
-#include "pybind11_common.h"
+#ifndef SG_RESAMPLE_IMAGE_FUNCTION_HPP
+#define SG_RESAMPLE_IMAGE_FUNCTION_HPP
 
-namespace py = pybind11;
-void init_analyze_graph(py::module &);
-void init_thin(py::module &);
-void init_create_distance_map(py::module &);
-void init_mask_image(py::module &);
-void init_fill_holes(py::module &);
-void init_resample_image(py::module &);
-#ifdef SG_MODULE_VISUALIZE_ENABLED
-void init_visualize_spatial_graph(py::module &);
-void init_reconstruct_from_distance_map(py::module &);
-#endif
+#include "scripts_types.hpp"
 
-void init_sgscripts(py::module & mparent) {
-    auto m = mparent.def_submodule("scripts");
-    m.doc() = "Scripts submodule "; // optional module docstring
-    init_analyze_graph(m);
-    init_thin(m);
-    init_create_distance_map(m);
-    init_mask_image(m);
-    init_fill_holes(m);
-    init_resample_image(m);
-#ifdef SG_MODULE_VISUALIZE_ENABLED
-    init_visualize_spatial_graph(m);
-    init_reconstruct_from_distance_map(m);
+namespace SG {
+/**
+ * Resample binary image.
+ *
+ * If shrink_factor is greater than 1, it downsamples the image.
+ * If shrink_factor is between (0, 1), it upsamples the image.
+ *
+ * Output image has the same origin, and the right spacing and size based on
+ * shrink factor.
+ *
+ * @param input binary image
+ * @param shrink_factor value greater than 0 to downsample or upsample the
+ * image.
+ * @param verbose extra info to std::cout
+ *
+ * @return resampled image
+ */
+BinaryImageType::Pointer
+resample_image_function(const BinaryImageType::Pointer &input,
+                         const double &shrink_factor,
+                         bool verbose);
+} // namespace SG
+
 #endif
-}

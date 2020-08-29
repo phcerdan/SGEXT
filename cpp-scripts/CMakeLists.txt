@@ -6,6 +6,7 @@ set(_scripts_targets
     mask_distance_map_with_thin_image
     merge_low_high_info_graphs
     fill_holes_binary
+    resample_image
     graph_to_vtp
     )
 
@@ -34,6 +35,9 @@ target_link_libraries(fill_holes_binary ${_scripts_libs})
 if(SG_MODULE_VISUALIZE_WITH_QT)
     target_compile_definitions(fill_holes_binary PUBLIC VISUALIZE)
 endif()
+
+add_executable(resample_image resample_image.cpp)
+target_link_libraries(resample_image ${_scripts_libs})
 
 add_executable(thin thin.cpp)
 target_link_libraries(thin ${_scripts_libs})
