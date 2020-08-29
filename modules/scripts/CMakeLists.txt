@@ -47,6 +47,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
   analyze_graph_function.cpp
   create_distance_map_function.cpp
   fill_holes_function.cpp
+  resample_image_function.cpp
   thin_function.cpp
   reconstruct_from_distance_map.cpp
   )
