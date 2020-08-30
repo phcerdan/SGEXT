@@ -24,6 +24,7 @@
 
 #include "spatial_graph.hpp"
 #include "spatial_graph_utilities.hpp"
+#include "hash_edge_descriptor.hpp"
 
 namespace py = pybind11;
 using namespace SG;
@@ -57,7 +58,12 @@ void init_spatial_graph(py::module &m) {
                 return "<edge_descriptor: source: " +
                        std::to_string(ed.m_source) +
                        "; target: " + std::to_string(ed.m_target) + " >";
-            });
+            })
+            // Allow using my own edge_hash for dictionaries
+            .def("__hash__", [](const GraphType::edge_descriptor &self) {
+                    return edge_hash<GraphType>()(self);
+                    })
+            ;
 
     py::class_<graph_descriptor>(mgraph, "graph_descriptor")
             .def_readwrite("exist", &graph_descriptor::exist)
