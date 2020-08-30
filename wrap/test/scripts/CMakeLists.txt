@@ -2,6 +2,7 @@ set(python_tests_
   test_thin.py
   test_create_distance_map.py
   test_resample.py
+  test_voxelize_graph.py
   )
 
 get_filename_component(module_name_ ${CMAKE_CURRENT_SOURCE_DIR} NAME)
