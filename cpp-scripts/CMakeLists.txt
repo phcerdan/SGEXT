@@ -8,6 +8,7 @@ set(_scripts_targets
     fill_holes_binary
     resample_image
     graph_to_vtp
+    voxelize_graph
     )
 
 set(_scripts_targets_visualize # Using VTK
@@ -38,6 +39,9 @@ endif()
 
 add_executable(resample_image resample_image.cpp)
 target_link_libraries(resample_image ${_scripts_libs})
+
+add_executable(voxelize_graph voxelize_graph.cpp)
+target_link_libraries(voxelize_graph ${_scripts_libs})
 
 add_executable(thin thin.cpp)
 target_link_libraries(thin ${_scripts_libs})
