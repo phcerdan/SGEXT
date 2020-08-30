@@ -91,7 +91,7 @@ ReconstructOutput reconstruct_from_distance_map(
             appendFilter->AddInputData(sphereSource->GetOutput());
         }
         // Add all edge points
-        auto edge_points = input_sg[*ei].edge_points;
+        const auto &edge_points = input_sg[*ei].edge_points;
         for (const auto &ep : edge_points) {
             // Label associated to the edge points is the one corresponding
             // to the smallest label from source and target nodes.
@@ -170,7 +170,6 @@ poly_data_to_binary_image(vtkPolyData *poly_data,
             reference_image->GetLargestPossibleRegion().GetSize();
     const auto &ref_origin = reference_image->GetOrigin();
     const auto &ref_spacing = reference_image->GetSpacing();
-    const auto &ref_direction = reference_image->GetDirection();
 
     // Create a raw pointer, its memory will be owned (deleted when needed)
     // by itkImageContainer of the output_itk_image
@@ -181,6 +180,7 @@ poly_data_to_binary_image(vtkPolyData *poly_data,
                                  ref_spacing[2]);
     output_vtk_image->AllocateScalars(VTK_UNSIGNED_CHAR, 1);
     // DirectionMatrix only since VTK9
+    // const auto &ref_direction = reference_image->GetDirection();
     // output_vtk_image->SetDirectionMatrix(
     //     ref_direction[0], ref_direction[1], ref_direction[2],
     //     ref_direction[3], ref_direction[4], ref_direction[5],
