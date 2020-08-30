@@ -8,6 +8,7 @@ set(current_sources_
   fill_holes_py.cpp
   resample_image_py.cpp
   reconstruct_from_distance_map_py.cpp
+  voxelize_graph_py.cpp
   )
 
 if(SG_MODULE_ANALYZE)

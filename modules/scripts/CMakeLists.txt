@@ -50,6 +50,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
   resample_image_function.cpp
   thin_function.cpp
   reconstruct_from_distance_map.cpp
+  voxelize_graph.cpp
   )
 
 list(TRANSFORM SG_MODULE_${SG_MODULE_NAME}_SOURCES PREPEND "src/")
