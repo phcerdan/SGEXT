@@ -9,6 +9,7 @@ set(current_sources_
   resample_image_py.cpp
   reconstruct_from_distance_map_py.cpp
   voxelize_graph_py.cpp
+  morphological_watershed_py.cpp
   )
 
 if(SG_MODULE_ANALYZE)

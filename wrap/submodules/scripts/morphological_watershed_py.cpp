@@ -20,33 +20,29 @@
 
 #include "pybind11_common.h"
 
-namespace py = pybind11;
-void init_analyze_graph(py::module &);
-void init_thin(py::module &);
-void init_create_distance_map(py::module &);
-void init_mask_image(py::module &);
-void init_fill_holes(py::module &);
-void init_resample_image(py::module &);
-void init_voxelize_graph(py::module &);
-void init_morphological_watershed(py::module &);
-#ifdef SG_MODULE_VISUALIZE_ENABLED
-void init_visualize_spatial_graph(py::module &);
-void init_reconstruct_from_distance_map(py::module &);
-#endif
+#include "morphological_watershed.hpp"
 
-void init_sgscripts(py::module & mparent) {
-    auto m = mparent.def_submodule("scripts");
-    m.doc() = "Scripts submodule "; // optional module docstring
-    init_analyze_graph(m);
-    init_thin(m);
-    init_create_distance_map(m);
-    init_mask_image(m);
-    init_fill_holes(m);
-    init_resample_image(m);
-    init_voxelize_graph(m);
-    init_morphological_watershed(m);
-#ifdef SG_MODULE_VISUALIZE_ENABLED
-    init_visualize_spatial_graph(m);
-    init_reconstruct_from_distance_map(m);
-#endif
+namespace py = pybind11;
+using namespace SG;
+
+void init_morphological_watershed(py::module &m) {
+    m.def("morphological_watershed", &morphological_watershed,
+            R"(Performs a morphological watershed from markers to "refill" the original
+binary image from a marker image that can have different labels,
+marker_image is usually set to the output image of sgext.scripts.voxelize_graph.
+
+Parameters:
+----------
+
+original_binary_image: BinaryImageType
+  input original image that will set the boundaries to refill from markers
+
+label_marker_image: BinaryImageType
+  image with markers from for example sgext.scripts.voxelize_graph
+
+Returns: BinaryImageType
+  original_binary_image but with labels propagated from the marker image.)",
+            py::arg("original_binary_image"),
+            py::arg("label_marker_image")
+            );
 }
