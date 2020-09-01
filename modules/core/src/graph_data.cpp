@@ -20,6 +20,7 @@
 
 #include "graph_data.hpp"
 #include <algorithm>
+#include <fstream>
 #include <iterator>
 #include <sstream>
 
@@ -33,8 +34,8 @@ void print_graph_data(const std::string &name,
     std::copy(std::begin(graph_data), std::end(graph_data), out_iter);
 }
 
-std::pair<std::string, std::vector<double> > read_graph_data(std::istream &is) {
-    using header_data_pair = std::pair<std::string, std::vector<double> >;
+std::pair<std::string, std::vector<double>> read_graph_data(std::istream &is) {
+    using header_data_pair = std::pair<std::string, std::vector<double>>;
     header_data_pair output;
     std::string line;
     std::getline(is, line);
@@ -52,6 +53,26 @@ std::pair<std::string, std::vector<double> > read_graph_data(std::istream &is) {
         output.second.push_back(num);
     }
     return output;
+}
+
+std::vector<std::pair<std::string, std::vector<double>>>
+read_graph_data(const std::string &filename) {
+    // output
+    std::vector<std::pair<std::string, std::vector<double>>> graph_datas;
+    // Open file
+    std::ifstream inFile(filename.c_str());
+    // Count the number of headers
+    size_t nlines = std::count(std::istreambuf_iterator<char>(inFile),
+                               std::istreambuf_iterator<char>(), '\n');
+    // Reset the file
+    inFile.clear();
+    inFile.seekg(0, std::ios::beg);
+    size_t num_headers = nlines / 2;
+    // Parse
+    for (size_t index = 0; index < num_headers; ++index) {
+        graph_datas.emplace_back(SG::read_graph_data(inFile));
+    }
+    return graph_datas;
 }
 
 } // namespace SG

@@ -46,8 +46,26 @@ void print_graph_data(const std::string &name,
  *
  * @param is input file stream
  *
- * @return vector of pair [string, vector<double>]
+ * @return pair [string, vector<double>]
  */
-std::pair<std::string, std::vector<double> > read_graph_data(std::istream &is);
-} // namespace SG
+std::pair<std::string, std::vector<double>> read_graph_data(std::istream &is);
+
+/**
+ * Read data from a data filename of format:
+ *
+ * # header
+ * value value value ...
+ * # other header
+ * value value value ...
+ * ...
+ *
+ * @param filename input filename
+ *
+ * @return vector[pair [header, vector<double>]]
+ */
+std::vector<std::pair<std::string, std::vector<double>>>
+read_graph_data(const std::string &filename);
+
+} // end namespace SG
+
 #endif

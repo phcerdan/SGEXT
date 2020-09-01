@@ -20,31 +20,34 @@
 
 #include "pybind11_common.h"
 
-namespace py = pybind11;
-void init_array3d(py::module &);
-void init_boundary_conditions(py::module &);
-void init_spatial_node(py::module &);
-void init_spatial_edge(py::module &);
-void init_spatial_graph(py::module &);
-void init_edge_points_utilities(py::module &);
-void init_spatial_graph_io(py::module &);
-void init_bounding_box(py::module &);
-void init_filter_spatial_graph(py::module &);
-void init_transform_to_physical_point_without_itk(py::module &);
-void init_graph_data(py::module &);
+#include "graph_data.hpp"
 
-void init_sgcore(py::module & mparent) {
-    auto m = mparent.def_submodule("core");
-    m.doc() = "Core submodule "; // optional module docstring
-    init_array3d(m);
-    init_boundary_conditions(m);
-    init_edge_points_utilities(m);
-    init_spatial_node(m);
-    init_spatial_edge(m);
-    init_spatial_graph(m);
-    init_spatial_graph_io(m);
-    init_bounding_box(m);
-    init_filter_spatial_graph(m);
-    init_transform_to_physical_point_without_itk(m);
-    init_graph_data(m);
+namespace py = pybind11;
+using namespace SG;
+
+void init_graph_data(py::module &mparent) {
+    auto m = mparent.def_submodule("io");
+    m.def(
+            "read_graph_data",
+            [](const std::string &filename) {
+                return read_graph_data(filename);
+            },
+            R"(
+Read data from a data filename of format:
+
+# header
+value value value ...
+# other header
+value value value ...
+...
+
+Returns vector[pair [header, vector<double>]]
+
+Parameters:
+----------
+filename: String
+input filename
+
+)",
+            py::arg("filename"));
 }

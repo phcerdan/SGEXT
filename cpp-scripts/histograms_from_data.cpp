@@ -105,18 +105,10 @@ int main(int argc, char* const argv[]) {
   // Get filename without extension (and without folders).
   const fs::path input_stem = fs::path(filename).stem();
   const fs::path output_file_path = fs::path(input_stem.string());
+
   // Parse graph_data
-  std::ifstream inFile(filename.c_str());
-  size_t nlines = std::count(std::istreambuf_iterator<char>(inFile),
-                             std::istreambuf_iterator<char>(), '\n');
-  // Reset the file
-  inFile.clear();
-  inFile.seekg(0, std::ios::beg);
-  size_t num_datas = nlines / 2;
-  std::cout << num_datas << " datas in " << filename << std::endl;
-  // Format:
-  // # name
-  // value value value ...
+  std::vector<std::pair<std::string, std::vector<double> > > graph_datas =
+    SG::read_graph_data(filename);
 
   // Parse
   string exportHistograms_filename = vm["exportHistograms"].as<string>();
@@ -135,10 +127,6 @@ int main(int argc, char* const argv[]) {
                std::to_string(widthHistoContourLengths) + ".histo");
   std::ofstream histo_out;
   histo_out.open(histo_output_full_path.string().c_str());
-  std::vector<std::pair<std::string, std::vector<double> > > graph_datas;
-  for(size_t index = 0; index < num_datas; ++index) {
-    graph_datas.emplace_back(SG::read_graph_data(inFile));
-  }
   // Create a map, from strings to DataType
   std::unordered_map<std::string, DataType> dict_types;
   dict_types["degrees"] = DataType::degrees;
