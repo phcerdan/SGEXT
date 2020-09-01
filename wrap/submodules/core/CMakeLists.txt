@@ -12,6 +12,7 @@ set(current_sources_
   bounding_box_py.cpp
   filter_spatial_graph_py.cpp
   transform_to_physical_point_py.cpp
+  graph_data_py.cpp
   )
 list(TRANSFORM current_sources_ PREPEND "${module_path_}/")
 
