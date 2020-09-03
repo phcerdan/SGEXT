@@ -50,6 +50,18 @@ thin_filename ="/path/to/thin_image.nrrd"
 sgext.itk.write(thin_image, thin_filename)
 ```
 
+### Get autocompletion for members with `rlcompleter`
+IPython can autocomplete modules and function wrapped with pybind11 but not members. See [issue](https://github.com/pybind/pybind11/issues/945).
+We can use `rlcompleter` in Unix-like enviroments to help ipython with this:
+```python
+try:
+    # Get TAB autocompletion in Unix-like OS's.
+    import rlcompleter
+except ImportError:
+    pass
+```
+
+
 ## Build dependencies
 This project depends on Boost, DGtal, and optionally VTK and ITK. Also TBB is used for the parallelSTL if c++17 is available.
 
