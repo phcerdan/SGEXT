@@ -29,18 +29,25 @@ pip install sgext
 
 ```python
 import sgext
-
+# Read image from file into a sgext_image
 input_filename="/path/to/binary_image.nrrd" # or any format that ITK can read
-out_folder="/path/to/output_folder" # or any format that ITK can read
-
-sgext.scripts.thin(input=input_filename,
-        out_folder=out_folder,
-        foreground="black",
-        skel_type="end",
-        select_type="first",
-        persistence=2,
-        visualize=False,
-        verbose=True)
+sgext_image = sgext.itk.read_as_binary(input_filename)
+# Or from a numpy array:
+sgext_image = sgext.itk.IUC3P()
+sgext_image.from_pyarray(mask)
+# Or convert from an existing ITK image via the numpy bridge:
+sgext_image = sgext.itk.IUC3P()
+sgext_image.from_pyarray(itk.GetArrayFromImage(itk_image))
+thin_image = sgext.scripts.thin(input=sgext_image, 
+                   table_folder= sgext.tables_folder,
+                   skel_type="end",
+                   select_type="first",
+                   persistence=2,
+                   visualize=False,
+                   verbose=True
+                   )
+thin_filename ="/path/to/thin_image.nrrd"
+sgext.itk.write(thin_image, thin_filename)
 ```
 
 ## Build dependencies
