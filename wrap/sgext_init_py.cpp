@@ -33,8 +33,8 @@ void init_sgextract(py::module &);
 void init_sganalyze(py::module &);
 #endif
 #ifdef SG_MODULE_SCRIPTS_ENABLED
-void init_sgscripts(py::module &);
 void init_sgitk(py::module &);
+void init_sgscripts(py::module &);
 #endif
 #ifdef SG_MODULE_VISUALIZE_ENABLED
 void init_sgvisualize(py::module &);
@@ -62,8 +62,8 @@ PYBIND11_MODULE(_sgext, m) {
     init_sganalyze(m);
 #endif
 #ifdef SG_MODULE_SCRIPTS_ENABLED
-    init_sgscripts(m);
     init_sgitk(m);
+    init_sgscripts(m);
 #endif
 #ifdef SG_MODULE_VISUALIZE_ENABLED
     init_sgvisualize(m);

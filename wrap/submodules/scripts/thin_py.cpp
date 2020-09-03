@@ -79,7 +79,8 @@ visualize: bool
             py::arg("select_type"),
             py::arg("tables_folder"),
             py::arg("persistence") = 0,
-            py::arg("input_distance_map_image") = nullptr,
+            // FloatImageType::Pointer is initialized to nullptr by default
+            py::arg("input_distance_map_image") = FloatImageType::New(),
             py::arg("profile") = false,
             py::arg("verbose") = false,
             py::arg("visualize") = false

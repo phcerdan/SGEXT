@@ -32,11 +32,14 @@ if(SG_MODULE_COMPARE)
   add_subdirectory(submodules/compare)
   list(APPEND enabled_libs_ SGCompare)
 endif()
+
+
 if(SG_MODULE_SCRIPTS)
-  add_subdirectory(submodules/scripts)
-  list(APPEND enabled_libs_ SGScripts)
   # Add itk wrapping of Image
   add_subdirectory(itk)
+
+  add_subdirectory(submodules/scripts)
+  list(APPEND enabled_libs_ SGScripts)
 endif()
 
 set(wrap_header_common
