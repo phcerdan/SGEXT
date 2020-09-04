@@ -13,6 +13,7 @@ void init_mask_image(py::module &);
 void init_fill_holes(py::module &);
 void init_resample_image(py::module &);
 void init_voxelize_graph(py::module &);
+void init_morphological_watershed(py::module &);
 #ifdef SG_MODULE_VISUALIZE_ENABLED
 void init_visualize_spatial_graph(py::module &);
 void init_reconstruct_from_distance_map(py::module &);
@@ -28,6 +29,7 @@ void init_sgscripts(py::module & mparent) {
     init_fill_holes(m);
     init_resample_image(m);
     init_voxelize_graph(m);
+    init_morphological_watershed(m);
 #ifdef SG_MODULE_VISUALIZE_ENABLED
     init_visualize_spatial_graph(m);
     init_reconstruct_from_distance_map(m);

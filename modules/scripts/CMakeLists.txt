@@ -51,6 +51,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
   thin_function.cpp
   reconstruct_from_distance_map.cpp
   voxelize_graph.cpp
+  morphological_watershed.cpp
   )
 
 list(TRANSFORM SG_MODULE_${SG_MODULE_NAME}_SOURCES PREPEND "src/")
