@@ -99,5 +99,14 @@ std::vector<ComponentGraphType> filter_component_graphs(
  * @return largest component graph
  */
 GraphType copy_largest_connected_component(const GraphType &inputGraph);
+
+
+/**
+ * Append g_to_add to g_mod in place (g_mod will be modified).
+ *
+ * @param g_mod
+ * @param g_to_add
+ */
+void append_graph_in_place(GraphType & g_mod, const GraphType & g_to_add);
 } // namespace SG
 #endif

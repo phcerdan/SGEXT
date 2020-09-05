@@ -138,4 +138,29 @@ GraphType copy_largest_connected_component(const GraphType &inputGraph) {
                       largest_component_graph);
     return largest_component_graph;
 }
+
+void append_graph_in_place(GraphType &g_out, const GraphType &g_added) {
+    // Merge g_added into g_out to have two components there.
+    using vertex_descriptor = boost::graph_traits<GraphType>::vertex_descriptor;
+    using vertex_iterator = boost::graph_traits<GraphType>::vertex_iterator;
+    using edge_iterator = boost::graph_traits<GraphType>::edge_iterator;
+    vertex_iterator g_added_vit, g_added_vit_end;
+    edge_iterator g_added_eit, g_added_eit_end;
+    std::tie(g_added_vit, g_added_vit_end) = boost::vertices(g_added);
+    std::tie(g_added_eit, g_added_eit_end) = boost::edges(g_added);
+    std::unordered_map<vertex_descriptor, vertex_descriptor>
+            g_added_to_g_out_map;
+    for (; g_added_vit != g_added_vit_end; ++g_added_vit) {
+        auto added_vertex = boost::add_vertex(g_added[*g_added_vit], g_out);
+        g_added_to_g_out_map.emplace(*g_added_vit, added_vertex);
+    }
+    for (; g_added_eit != g_added_eit_end; ++g_added_eit) {
+        const auto source = boost::source(*g_added_eit, g_added);
+        const auto target = boost::target(*g_added_eit, g_added);
+        boost::add_edge(g_added_to_g_out_map[source],
+                        g_added_to_g_out_map[target], g_added[*g_added_eit],
+                        g_out);
+    }
+}
+
 } // namespace SG
