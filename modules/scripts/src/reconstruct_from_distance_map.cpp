@@ -88,7 +88,11 @@ ReconstructOutput reconstruct_from_distance_map(
                     spatial_nodes_position_are_in_physical_space,
                     distance_map_image_use_image_spacing);
             if (vertex_to_label_map_provided) {
-                const size_t color_label = vertex_to_label_map.at(source);
+                const auto found = vertex_to_label_map.find(source);
+                size_t color_label = std::numeric_limits<int>::max();
+                if (found != vertex_to_label_map.end()) {
+                    color_label = found->second;
+                }
                 detail::applyColorToSphere(sphereSource, color_label);
             }
             appendFilter->AddInputData(sphereSource->GetOutput());
@@ -100,7 +104,11 @@ ReconstructOutput reconstruct_from_distance_map(
                     spatial_nodes_position_are_in_physical_space,
                     distance_map_image_use_image_spacing);
             if (vertex_to_label_map_provided) {
-                const size_t color_label = vertex_to_label_map.at(target);
+                const auto found = vertex_to_label_map.find(target);
+                size_t color_label = std::numeric_limits<int>::max();
+                if (found != vertex_to_label_map.end()) {
+                    color_label = found->second;
+                }
                 detail::applyColorToSphere(sphereSource, color_label);
             }
             appendFilter->AddInputData(sphereSource->GetOutput());
@@ -116,13 +124,19 @@ ReconstructOutput reconstruct_from_distance_map(
                     spatial_nodes_position_are_in_physical_space,
                     distance_map_image_use_image_spacing);
             if (vertex_to_label_map_provided) {
-                // Dev: max of size_t is not mapping to NaN, use int instead
-                // : std::numeric_limits<size_t>::max();
-                const size_t color_label =
+                const auto found_source = vertex_to_label_map.find(source);
+                const auto found_target = vertex_to_label_map.find(target);
+                size_t color_label = std::numeric_limits<int>::max();
+                if (found_source != vertex_to_label_map.end() &&
+                    found_target != vertex_to_label_map.end()) {
+                    // Dev: max of size_t is not mapping to NaN, use int instead
+                    // : std::numeric_limits<size_t>::max();
+                    color_label =
                         apply_color_to_edges
-                                ? std::max(vertex_to_label_map.at(source),
-                                           vertex_to_label_map.at(target))
-                                : std::numeric_limits<int>::max();
+                        ? std::max(found_source->second,
+                                found_target->second)
+                        : std::numeric_limits<int>::max();
+                }
                 detail::applyColorToSphere(sphereSource, color_label);
             }
             appendFilter->AddInputData(sphereSource->GetOutput());
