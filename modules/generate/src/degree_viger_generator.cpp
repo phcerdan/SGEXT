@@ -49,7 +49,8 @@ create_graph_from_degree_sequence(const std::vector<int> &degree_sequence) {
 #endif
     auto &gh = generator;
     gh.shuffle(gh.arcs_, 2 * gh.arcs_,
-               degree_viger_generator::ShuffleType::OPTIMAL_HEURISTICS,
+               // degree_viger_generator::ShuffleType::OPTIMAL_HEURISTICS,
+               degree_viger_generator::ShuffleType::BRUTE_FORCE_HEURISTICS,
                verbose);
 
     const GraphType graph = convert_degree_viger_generator_to_graph_type(gh);
