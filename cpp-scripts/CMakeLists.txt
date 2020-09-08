@@ -92,6 +92,11 @@ if(${_modern_VTK_available})
     if(SG_MODULE_VISUALIZE)
         add_executable(visualize_graph_and_image visualize_graph_and_image.cpp)
         target_link_libraries(visualize_graph_and_image ${_scripts_libs})
+        if(_modern_VTK_available)
+            vtk_module_autoinit(
+                TARGETS visualize_graph_and_image
+                MODULES ${VTK_LIBRARIES})
+        endif()
     endif()
 endif()
 

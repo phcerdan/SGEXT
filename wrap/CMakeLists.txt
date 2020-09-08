@@ -92,6 +92,12 @@ if(SG_MODULE_SCRIPTS)
   target_compile_definitions(_sgext PRIVATE SG_MODULE_SCRIPTS_ENABLED)
 endif()
 
+if(_modern_VTK_available)
+  vtk_module_autoinit(
+    TARGETS _sgext
+    MODULES ${VTK_LIBRARIES})
+endif()
+
 install(FILES ${wrap_header_common}
   DESTINATION ${CMAKE_INSTALL_PYTHONINCLUDEDIR}
   COMPONENT development)

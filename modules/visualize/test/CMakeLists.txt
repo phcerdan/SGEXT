@@ -18,3 +18,19 @@ set(SG_MODULE_${SG_MODULE_NAME}_TESTS
   )
 
 SG_add_gtests()
+
+# TODO vtk_module_autoinit is not working here, manually added to test file.
+if(FALSE)
+if(_modern_VTK_available)
+  set(test_names)
+  foreach(test_file ${SG_MODULE_${SG_MODULE_NAME}_TESTS})
+    string(REGEX REPLACE "\\.[^.]*$" "" test_name "${test_file}")
+    list(APPEND test_names ${test_name})
+  endforeach()
+  message(WARNING "test_names: ${test_names}")
+  message(WARNING "VTK_LIBRARIES : ${VTK_LIBRARIES}")
+  vtk_module_autoinit(
+    TARGETS ${test_names}
+    MODULES ${VTK_LIBRARIES})
+endif()
+endif()
