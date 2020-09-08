@@ -23,6 +23,10 @@ else()
 endif()
 
 option(WITH_VTK "Build VTK, ITK will use it too, if WITH_ITK is enabled" ON)
+option(WITH_MODERN_VTK "Build VTK9, ITK will use it too, if WITH_ITK is enabled" OFF)
+if(WITH_MODERN_VTK AND WITH_VTK)
+  message(FATAL_ERROR "WITH_MODERN_VTK and WITH_VTK are both ON. Choose only one.")
+endif()
 option(WITH_ITK "Build ITK, DGtal will use it too." ON)
 option(WITH_OPENMP "Build DGtal with OPENMP support." OFF)
 option(WITH_TBB "Build TBB. Only for Linux (gcc). Needed for gcc for include <execution> (stl_parallel)." ON)
@@ -34,6 +38,7 @@ mark_as_advanced(ZLIB_FORCE_STATIC)
 message(STATUS "OUTPUT_BUILD_DIR: ${OUTPUT_BUILD_DIR}")
 message(STATUS "NUM_CORES: ${NUM_CORES}")
 message(STATUS "WITH_VTK: ${WITH_VTK}")
+message(STATUS "WITH_MODERN_VTK: ${WITH_MODERN_VTK}")
 message(STATUS "WITH_ITK: ${WITH_ITK}")
 message(STATUS "WITH_OPENMP: ${WITH_OPENMP}")
 message(STATUS "WITH_TBB: ${WITH_TBB}")
@@ -98,17 +103,51 @@ ExternalProject_Add(ep_vtk
   )
 endif()
 
+if(WITH_MODERN_VTK)
+  set(VTK_GIT_TAG e70226e3080a310b39aac4f23ad8d3391bf9ca1a) # 08 Sept 2020
+  message(STATUS "VTK_VERSION: ${VTK_GIT_TAG}")
+  set(VTK_BUILD_DIR ${OUTPUT_BUILD_DIR}/VTK-build)
+  set(VTK_SRC_FOLDER_NAME VTK-src)
+  set(VTK_SRC_DIR ${OUTPUT_BUILD_DIR}/${VTK_SRC_FOLDER_NAME})
+  set(VTK_GIT_REPOSITORY "https://github.com/Kitware/VTK.git")
+  if(WITH_QT5)
+    set(_extra_qt5_options
+      -DModule_vtkGUISupportQt=ON
+      )
+  endif()
+ExternalProject_Add(ep_vtk
+  GIT_REPOSITORY ${VTK_GIT_REPOSITORY}
+  GIT_TAG ${VTK_GIT_TAG}
+  GIT_PROGRESS TRUE
+  CMAKE_GENERATOR ${CMAKE_GENERATOR}
+  SOURCE_DIR ${VTK_SRC_DIR}
+  BINARY_DIR ${VTK_BUILD_DIR}
+  CMAKE_ARGS
+  -DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}
+  -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
+  -DBUILD_SHARED_LIBS:BOOL=OFF
+  -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
+  -DBUILD_TESTING:BOOL=OFF
+  -DBUILD_EXAMPLES:BOOL=OFF
+  -DVTK_MODULE_ENABLE_VTK_RenderingContextOpenGL2:STRING=WANT
+  ${_propagate_build_type}
+  ${_extra_qt5_options}
+  ${_cmake_os_flags}
+  INSTALL_COMMAND ""
+  )
+endif()
+
 #################################################
 ################### ITK #######################
 #################################################
 if(WITH_ITK)
-  set(ITK_GIT_TAG f4fbfed6f676c4ae8c0d77bda052a9699a39b76e) # Release 25 April 2020
+  set(ITK_GIT_TAG v5.1.1) # Release 10 Aug 2020
   message(STATUS "ITK_VERSION: ${ITK_GIT_TAG}")
   set(ITK_BUILD_DIR ${OUTPUT_BUILD_DIR}/ITK-build)
   set(ITK_SRC_FOLDER_NAME ITK-src)
   set(ITK_SRC_DIR ${OUTPUT_BUILD_DIR}/${ITK_SRC_FOLDER_NAME})
   set(ITK_GIT_REPOSITORY "https://github.com/InsightSoftwareConsortium/ITK.git")
-  if(WITH_VTK)
+  if(WITH_VTK OR WITH_MODERN_VTK)
     set(_ITK_depends ep_vtk)
     set(_ITK_optional_cmake_args
       -DModule_ITKVtkGlue:BOOL=ON

@@ -112,6 +112,17 @@ if(SG_REQUIRES_ITK)
 endif() #ITK
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+if(SG_REQUIRES_VTK)
+  set(_modern_VTK_available FALSE)
+  set(_vtk_prefix "vtk")
+  find_package(VTK REQUIRED)
+  if(VTK_VERSION VERSION_GREATER_EQUAL 8.90.0)
+    set(_modern_VTK_available TRUE)
+    set(_vtk_prefix "")
+  endif()
+endif()
+
 if(SG_MODULE_VISUALIZE_WITH_QT)
   if(UNIX)
     set(extra_qt_components X11Extras)
@@ -125,35 +136,36 @@ if(SG_MODULE_VISUALIZE_WITH_QT)
   message(STATUS "Qt5 version: ${Qt5_VERSION}")
 
   set(vtk_qt_components
-    vtkGUISupportQt # QVTKWidget.h
-    )
-endif()
-if(SG_MODULE_VISUALIZE)
-  set(vtk_components_visualize
-    vtkInteractionStyle
-    vtkRenderingContextOpenGL2 # avoid vtkContextDevice2D not found at run time
-    vtkRenderingVolumeOpenGL2 # For volume rendering SmartVolumeMapper
-    vtkViewsContext2D
-    vtkInteractionWidgets
+    ${_vtk_prefix}GUISupportQt # QVTKWidget.h
     )
 endif()
 
-set(_modern_VTK_available 0)
+if(SG_MODULE_VISUALIZE)
+  set(vtk_components_visualize
+    ${_vtk_prefix}InteractionStyle
+    ${_vtk_prefix}RenderingContextOpenGL2 # avoid vtkContextDevice2D not found at run time
+    ${_vtk_prefix}RenderingVolumeOpenGL2 # For volume rendering SmartVolumeMapper
+    ${_vtk_prefix}ViewsContext2D
+    ${_vtk_prefix}InteractionWidgets
+    )
+endif()
+
 if(SG_REQUIRES_VTK)
   set(vtk_components
-    vtkChartsCore
-    vtkCommonCore
-    vtkCommonDataModel
-    # For vtkPolyDataToImageStencil
-    vtkImagingStencil
-    # avoid AUTOINIT_redefined at build time,
-    vtkViewsInfovis
-    vtkRenderingCore
-    vtkRenderingOpenGL2 #  vtkRenderer, vtkRenderWindow not found at run time
+    ${_vtk_prefix}ChartsCore
+    ${_vtk_prefix}CommonCore
+    ${_vtk_prefix}CommonDataModel
+    ${_vtk_prefix}ImagingStencil # For vtkPolyDataToImageStencil
+    ${_vtk_prefix}ViewsInfovis
+    ${_vtk_prefix}RenderingCore
+    ${_vtk_prefix}RenderingOpenGL2 # vtkRenderer, vtkRenderWindow not found at run time
+    ${_vtk_prefix}RenderingAnnotation
+    ${_vtk_prefix}RenderingLabel
+    ${_vtk_prefix}CommonColor
+    ${_vtk_prefix}IOXML
     ${vtk_components_visualize}
     ${vtk_qt_components}
     )
-  # VTK components to handle external dependency histo-header
   find_package(VTK REQUIRED COMPONENTS
     ${vtk_components}
     CONFIG
@@ -162,9 +174,8 @@ if(SG_REQUIRES_VTK)
   message(STATUS "VTK_DIR: ${VTK_DIR}")
   # USE_FILE is deprecated? Keep it. This is the cause of AUTOINIT warnings
   # https://gitlab.kitware.com/vtk/vtk/issues/15895
-  include(${VTK_USE_FILE})
-  if("${VTK_VERSION}" VERSION_GREATER "8.1") # Requires OpenGL2
-    set(_modern_VTK_available 1)
+  if(NOT _modern_VTK_available)
+    include(${VTK_USE_FILE})
   endif()
 endif()
 

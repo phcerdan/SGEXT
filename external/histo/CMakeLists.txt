@@ -20,18 +20,30 @@ target_include_directories(histo INTERFACE
 file(COPY ${HISTO_HEADERS} DESTINATION include)
 install(FILES ${HISTO_HEADERS} DESTINATION include)
 
-option(WITH_VTK "Use vtk to visualize histogram" OFF)
-if(WITH_VTK)
+option(HISTO_WITH_VTK "Use vtk to visualize histogram" OFF)
+if(HISTO_WITH_VTK)
+    set(_modern_VTK_available FALSE)
+    set(_vtk_prefix "vtk")
+    find_package(VTK REQUIRED)
+    if(VTK_VERSION VERSION_GREATER_EQUAL 8.90.0)
+        set(_modern_VTK_available TRUE)
+        set(_vtk_prefix "")
+    endif()
+    set(vtk_components
+        ${_vtk_prefix}ChartsCore
+        ${_vtk_prefix}CommonCore
+        ${_vtk_prefix}CommonDataModel
+        ${_vtk_prefix}InteractionStyle
+        ${_vtk_prefix}RenderingOpenGL2 # avoid vtkRenderer, vtkRenderWindow not found at run time
+        ${_vtk_prefix}RenderingContextOpenGL2 # avoid vtkContextDevice2D not found at run time
+        ${_vtk_prefix}ViewsContext2D
+         )
     find_package(VTK REQUIRED COMPONENTS
-        vtkChartsCore
-        vtkCommonCore
-        vtkCommonDataModel
-        vtkInteractionStyle
-        vtkRenderingOpenGL2 # avoid vtkRenderer, vtkRenderWindow not found at run time
-        vtkRenderingContextOpenGL2 # avoid vtkContextDevice2D not found at run time
-        vtkViewsContext2D
+        ${vtk_components}
         CONFIG)
-    include(${VTK_USE_FILE})
+    if(NOT _modern_VTK_available)
+        include(${VTK_USE_FILE})
+    endif()
     target_link_libraries(histo INTERFACE ${VTK_LIBRARIES})
 endif()
 
