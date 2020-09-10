@@ -38,8 +38,8 @@ sgext_image.from_pyarray(mask)
 # Or convert from an existing ITK image via the numpy bridge:
 sgext_image = sgext.itk.IUC3P()
 sgext_image.from_pyarray(itk.GetArrayFromImage(itk_image))
-thin_image = sgext.scripts.thin(input=sgext_image, 
-                   table_folder= sgext.tables_folder,
+thin_image = sgext.scripts.thin(input=sgext_image,
+                   tables_folder= sgext.tables_folder,
                    skel_type="end",
                    select_type="first",
                    persistence=2,
