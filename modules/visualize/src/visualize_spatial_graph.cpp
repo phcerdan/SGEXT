@@ -25,8 +25,8 @@ create_graph_layout_view_from_spatial_graph(const GraphType &sg,
                                             const std::string &winTitle,
                                             const size_t &winWidth,
                                             const size_t &winHeight) {
-    vtkSmartPointer<vtkMutableUndirectedGraph> vtk_graph =
-            convert_to_vtk_graph(sg);
+    GraphVTK convert = convert_to_vtk_graph(sg);
+    auto & vtk_graph = convert.vtk_graph;
 
     // Render:
     auto graphLayoutView = vtkSmartPointer<vtkGraphLayoutView>::New();
