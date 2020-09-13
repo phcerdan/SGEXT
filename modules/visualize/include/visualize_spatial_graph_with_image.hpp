@@ -48,7 +48,6 @@
 #include "visualize_common.hpp"
 #include "visualize_spatial_graph.hpp"
 
-#include "convert_to_vtk_graph.hpp"
 #include "transform_to_physical_point.hpp"
 #include "get_vtk_points_from_graph.hpp"
 

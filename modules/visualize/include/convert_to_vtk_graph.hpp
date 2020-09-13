@@ -26,6 +26,13 @@
 
 namespace SG {
 
+struct GraphVTK {
+  using VertexMap = std::unordered_map<GraphType::vertex_descriptor, vtkIdType>;
+  VertexMap vertex_map;
+  vtkSmartPointer<vtkMutableUndirectedGraph> vtk_graph =
+            vtkSmartPointer<vtkMutableUndirectedGraph>::New();
+};
+
 /**
  * Convert spatial graph to a vtk graph. Used for visualization.
  *
@@ -33,7 +40,7 @@ namespace SG {
  *
  * @return vtkGraph
  */
-vtkSmartPointer<vtkMutableUndirectedGraph>
+GraphVTK
 convert_to_vtk_graph(const GraphType &sg);
 } // namespace SG
 #endif
