@@ -25,7 +25,8 @@ create_graph_layout_view_from_spatial_graph(const GraphType &sg,
                                             const std::string &winTitle,
                                             const size_t &winWidth,
                                             const size_t &winHeight) {
-    GraphVTK convert = convert_to_vtk_graph(sg);
+    const bool with_edge_points = true;
+    GraphVTK convert = convert_to_vtk_graph(sg, with_edge_points);
     auto & vtk_graph = convert.vtk_graph;
 
     // Render:
