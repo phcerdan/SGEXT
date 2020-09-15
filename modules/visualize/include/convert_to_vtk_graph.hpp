@@ -41,6 +41,6 @@ struct GraphVTK {
  * @return vtkGraph
  */
 GraphVTK
-convert_to_vtk_graph(const GraphType &sg);
+convert_to_vtk_graph(const GraphType &sg, const bool & with_edge_points = false);
 } // namespace SG
 #endif
