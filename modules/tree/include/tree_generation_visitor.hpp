@@ -985,7 +985,7 @@ struct TreeGenerationVisitor : public boost::default_bfs_visitor {
         bool small_angle_between_input_edge_and_root_edge = false;
         if (angle_between_input_edge_and_root_edge.has_value()) {
             small_angle_between_input_edge_and_root_edge =
-                    (std::abs(angle_between_input_edge_and_root_edge.value()) <
+                    (std::abs(*angle_between_input_edge_and_root_edge) <
                      m_keep_generation_if_angle_less_than)
                             ? true
                             : false;
@@ -1063,17 +1063,17 @@ struct TreeGenerationVisitor : public boost::default_bfs_visitor {
                       << std::endl;
             if (small_angle_between_input_edge_and_root_edge) {
                 std::cout << " - generation reduced because small angle: "
-                          << angle_between_input_edge_and_root_edge.value()
+                          << *angle_between_input_edge_and_root_edge
                           << std::endl;
             }
             if (vertices_increased_based_on_angle.has_value()) {
                 std::cout
                         << "  - generation increased at the end for targets: ";
                 for (const auto &vertex_increased :
-                     vertices_increased_based_on_angle.value()) {
+                     *vertices_increased_based_on_angle) {
                     std::cout << vertex_increased << ", ";
                 }
-                if (vertices_increased_based_on_angle.value().empty()) {
+                if ((*vertices_increased_based_on_angle).empty()) {
                     std::cout << "EMPTY (angles too small or already increased)"
                               << std::endl;
                 }
