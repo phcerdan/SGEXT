@@ -7,7 +7,7 @@
 #define ANALYZE_GRAPH_FUNCTION_HPP
 
 #include "spatial_graph.hpp"
-#include "scripts_types.hpp" // For SG::BinaryImageType
+#include "image_types.hpp" // For SG::BinaryImageType
 #include <itkImage.h>
 #include <itkImageFileReader.h>
 #include "transform_to_physical_point.hpp"

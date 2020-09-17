@@ -6,7 +6,7 @@
 #ifndef SG_MORPHOLOGICAL_WATERSHED_HPP
 #define SG_MORPHOLOGICAL_WATERSHED_HPP
 
-#include "scripts_types.hpp"
+#include "image_types.hpp"
 
 namespace SG {
 

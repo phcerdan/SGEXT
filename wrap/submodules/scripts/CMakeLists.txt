@@ -4,12 +4,7 @@ set(current_sources_
   sgscripts_init_py.cpp
   thin_py.cpp
   create_distance_map_py.cpp
-  mask_image_py.cpp
-  fill_holes_py.cpp
-  resample_image_py.cpp
   reconstruct_from_distance_map_py.cpp
-  voxelize_graph_py.cpp
-  morphological_watershed_py.cpp
   )
 
 if(SG_MODULE_ANALYZE)

@@ -4,6 +4,11 @@ set(current_sources_
   itk_image_io_py.cpp
   itk_view_image_py.cpp
   transform_to_physical_point_with_itk_py.cpp
+  mask_image_py.cpp
+  fill_holes_py.cpp
+  resample_image_py.cpp
+  voxelize_graph_py.cpp
+  morphological_watershed_py.cpp
   )
 set(module_name_ ${CMAKE_CURRENT_SOURCE_DIR})
 list(TRANSFORM current_sources_ PREPEND "${module_name_}/")

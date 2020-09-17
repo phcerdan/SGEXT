@@ -6,7 +6,7 @@
 #ifndef SG_VOXELIZE_GRAPH_HPP
 #define SG_VOXELIZE_GRAPH_HPP
 
-#include "scripts_types.hpp"
+#include "image_types.hpp"
 #include "spatial_graph.hpp"
 #include "spatial_graph_io.hpp" // for vertex_to_label_map_t
 #include <functional>

@@ -5,7 +5,7 @@
 
 #include "sgext_fixture_images.hpp"
 #include "view_image_function.hpp"
-#include "scripts_types.hpp"
+#include "image_types.hpp"
 
 #include "gmock/gmock.h"
 
