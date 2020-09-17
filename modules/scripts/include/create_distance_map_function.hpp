@@ -21,7 +21,7 @@
 #ifndef CREATE_DISTANCE_MAP_FUNCTION_HPP
 #define CREATE_DISTANCE_MAP_FUNCTION_HPP
 
-#include "scripts_types.hpp"
+#include "image_types.hpp"
 #include <string>
 
 namespace SG {

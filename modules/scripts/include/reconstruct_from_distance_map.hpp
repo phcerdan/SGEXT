@@ -18,7 +18,7 @@
  *
  * *******************************************************************/
 
-#include "scripts_types.hpp" // for FloatImageType
+#include "image_types.hpp" // for FloatImageType
 #include "spatial_graph.hpp"
 
 #include <vtkImageData.h>

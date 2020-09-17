@@ -21,7 +21,7 @@
 #ifndef FILL_HOLES_FUNCTION_HPP
 #define FILL_HOLES_FUNCTION_HPP
 
-#include "scripts_types.hpp"
+#include "image_types.hpp"
 
 namespace SG {
 

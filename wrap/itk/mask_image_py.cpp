@@ -19,7 +19,7 @@
  * *******************************************************************/
 
 #include "pybind11_common.h"
-#include "scripts_types.hpp"
+#include "image_types.hpp"
 
 #include "mask_image_function.hpp"
 #include <string>

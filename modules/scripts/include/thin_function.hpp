@@ -23,7 +23,7 @@
 
 #include <string>
 #include <limits>
-#include "scripts_types.hpp"
+#include "image_types.hpp"
 #include "spatial_graph.hpp"
 
 namespace SG {

@@ -21,7 +21,7 @@
 #ifndef SG_RESAMPLE_IMAGE_FUNCTION_HPP
 #define SG_RESAMPLE_IMAGE_FUNCTION_HPP
 
-#include "scripts_types.hpp"
+#include "image_types.hpp"
 
 namespace SG {
 /**
