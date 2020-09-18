@@ -26,25 +26,9 @@ stages:
   variables:
     DEPENDENCIES_BUILD_DIR: $(Agent.BuildDirectory)/build_deps
   jobs:
-  - job: build_dependencies_macos
-    displayName: 'BuildDependencies'
-    timeoutInMinutes: 0
-    steps:
-    - script: |
-        mkdir $DEPENDENCIES_BUILD_DIR
-        echo $DEPENDENCIES_BUILD_DIR
-      displayName: "mkdir DEPENDENCIES_BUILD_DIR"
-    - task: Bash@3
-      inputs:
-        filePath: '$(Build.SourcesDirectory)/deploy/deploy_dependencies.sh'
-        workingDirectory: '$(Build.SourcesDirectory)'
-      displayName: 'Build dependencies'
-    - publish: $(DEPENDENCIES_BUILD_DIR)
-      artifact: DEPENDENCIES_BUILD_DIR_MACOS
   - job: build_macos
     displayName: 'Build project and deploy'
     timeoutInMinutes: 0
-    dependsOn: build_dependencies_macos
     strategy:
       matrix:
         Python35:
@@ -58,7 +42,10 @@ stages:
     steps:
     - task: DownloadPipelineArtifact@2
       inputs:
-        source: current
+        source: 'specific'
+        project: 'SGEXT'
+        pipeline: 4
+        runVersion: 'latest'
         artifact: DEPENDENCIES_BUILD_DIR_MACOS
         path: $(DEPENDENCIES_BUILD_DIR)
     - task: UsePythonVersion@0
@@ -82,32 +69,8 @@ stages:
   variables:
     DEPENDENCIES_BUILD_DIR: $(Agent.BuildDirectory)/build_deps
   jobs:
-  - job: build_dependencies_win
-    displayName: 'BuildDependencies'
-    timeoutInMinutes: 0
-    steps:
-    - task: Bash@3
-      inputs:
-        targetType: 'inline'
-        script: |
-          mkdir $DEPENDENCIES_BUILD_DIR
-          echo $DEPENDENCIES_BUILD_DIR
-      displayName: "mkdir DEPENDENCIES_BUILD_DIR"
-    - script: |
-        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-        cd $(DEPENDENCIES_BUILD_DIR)
-        cmake $(Build.SourcesDirectory)\dependencies -G Ninja -DCMAKE_C_COMPILER:FILEPATH="cl.exe" -DCMAKE_CXX_COMPILER:FILEPATH="cl.exe" -DCMAKE_BUILD_TYPE=Release -DWITH_TBB:BOOL=OFF -DWITH_VTK:BOOL=ON -DWITH_ITK:BOOL=ON -DBoost_USE_STATIC_LIBS:BOOL=ON
-        cmake --build .
-        cmake --build . --target clean_artifacts
-      workingDirectory: $(Agent.BuildDirectory)
-      displayName: 'Build dependencies'
-
-    - publish: $(DEPENDENCIES_BUILD_DIR)
-      artifact: DEPENDENCIES_BUILD_DIR_WIN
-
   - job: build_win
     displayName: 'Build project and deploy'
-    dependsOn: build_dependencies_win
     timeoutInMinutes: 0
     strategy:
       matrix:
@@ -122,7 +85,10 @@ stages:
     steps:
     - task: DownloadPipelineArtifact@2
       inputs:
-        source: current
+        source: 'specific'
+        project: 'SGEXT'
+        pipeline: 4
+        runVersion: 'latest'
         artifact: DEPENDENCIES_BUILD_DIR_WIN
         path: $(DEPENDENCIES_BUILD_DIR)
     - task: UsePythonVersion@0
