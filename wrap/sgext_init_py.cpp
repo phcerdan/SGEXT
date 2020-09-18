@@ -30,6 +30,9 @@ void init_sglocate(py::module &);
 #ifdef SG_MODULE_COMPARE_ENABLED
 void init_sgcompare(py::module &);
 #endif
+#ifdef SG_MODULE_TREE_ENABLED
+void init_sgtree(py::module &);
+#endif
 
 PYBIND11_MODULE(_sgext, m) {
     m.doc() = "SGEXT, Spatial Graph Extraction, Analysis and Generation";
@@ -58,5 +61,8 @@ PYBIND11_MODULE(_sgext, m) {
 #endif
 #ifdef SG_MODULE_COMPARE_ENABLED
     init_sgcompare(m);
+#endif
+#ifdef SG_MODULE_TREE_ENABLED
+    init_sgtree(m);
 #endif
 }
