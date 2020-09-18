@@ -23,6 +23,7 @@ set(CMAKE_BUILD_PYTHONLIBDIR ${PROJECT_BINARY_DIR}/sgext) # copy python libs at 
 include(CMakeDependentOption)
 option(SG_BUILD_CLI "Build cpp-scripts with CLI executables." ON)
 option(SG_BUILD_TESTING "Enable Tests" OFF)
+option(SG_BUILD_TESTING_INTERACTIVE "If SG_BUILD_TESTING=ON, enables tests with interactive windows. Turn it OFF for CI." ON)
 option(SG_BUILD_ENABLE_VALGRIND "Enable Valgrind as a memchecker for tests (require debug symbols)" OFF)
 mark_as_advanced(SG_BUILD_ENABLE_VALGRIND)
 option(SG_BUILD_ENABLE_CLANGTIDY "Enable clangtidy for tests. Populates CMAKE_CXX_CLANG_TIDY." OFF)
@@ -274,6 +275,8 @@ if(SG_BUILD_TESTING)
 
   set(CMAKE_POLICY_DEFAULT_CMP0048 NEW) # google test raises warning about it
   FetchContent_GetProperties(googletest)
+  set(gtest_force_shared_crt ON)
+  set(INSTALL_GTEST OFF)
   if(NOT googletest_POPULATED)
     FetchContent_Populate(googletest)
     add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR} EXCLUDE_FROM_ALL)
