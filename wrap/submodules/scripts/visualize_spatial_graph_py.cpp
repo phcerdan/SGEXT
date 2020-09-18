@@ -6,7 +6,7 @@
 #include "pybind11_common.h"
 
 #include "get_vtk_points_from_graph.hpp"
-#include "scripts_types.hpp" // For BinaryImageType
+#include "image_types.hpp" // For BinaryImageType
 #include "visualize_spatial_graph.hpp"
 #include "visualize_spatial_graph_with_image.hpp"
 

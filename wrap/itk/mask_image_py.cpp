@@ -4,7 +4,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "pybind11_common.h"
-#include "scripts_types.hpp"
+#include "image_types.hpp"
 
 #include "mask_image_function.hpp"
 #include <string>
