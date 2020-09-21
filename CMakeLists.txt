@@ -7,6 +7,11 @@ endif()
 if(POLICY CMP0074)
   cmake_policy(SET CMP0074 NEW)
 endif()
+# option() is ignored if a normal variable with the same name is set
+# used for setting option in gtest
+if(POLICY CMP0077)
+  cmake_policy(SET CMP0077 NEW)
+endif()
 
 project(SGEXT
   VERSION 0.9.14
@@ -274,9 +279,16 @@ if(SG_BUILD_TESTING)
   )
 
   set(CMAKE_POLICY_DEFAULT_CMP0048 NEW) # google test raises warning about it
-  FetchContent_GetProperties(googletest)
-  set(gtest_force_shared_crt ON)
+  set(CMAKE_POLICY_DEFAULT_CMP0077 NEW) # to enable override INSTALL_GTEST and gtest_force_shared_crt
   set(INSTALL_GTEST OFF)
+  # Fix problems in windows with RuntimeLibrary
+  # https://github.com/google/googletest/pull/1288/files
+  # Needs cmake_policy CMP0077 NEW to have an effect.
+  if (MSVC)
+    set(gtest_force_shared_crt ON)
+  endif()
+
+  FetchContent_GetProperties(googletest)
   if(NOT googletest_POPULATED)
     FetchContent_Populate(googletest)
     add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR} EXCLUDE_FROM_ALL)

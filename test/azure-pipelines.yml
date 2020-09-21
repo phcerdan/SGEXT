@@ -27,6 +27,8 @@ stages:
     - task: UsePythonVersion@0
       inputs:
         versionSpec: '$(python.version)'
+    - script: sudo apt-get -y install libxt-dev libgl1-mesa-dev
+      displayName: "install libXt and opengl dependencies"
     - script: |
         python -m pip install cmake
         python -m pip install ninja
