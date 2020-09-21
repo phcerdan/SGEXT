@@ -45,8 +45,12 @@ set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
   analyze_graph_function.cpp
   create_distance_map_function.cpp
   thin_function.cpp
-  reconstruct_from_distance_map.cpp
   )
+if(SG_MODULE_VISUALIZE)
+  list(APPEND SG_MODULE_${SG_MODULE_NAME}_SOURCES
+    reconstruct_from_distance_map.cpp
+    )
+endif()
 
 list(TRANSFORM SG_MODULE_${SG_MODULE_NAME}_SOURCES PREPEND "src/")
 add_library(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} ${SG_MODULE_${SG_MODULE_NAME}_SOURCES})

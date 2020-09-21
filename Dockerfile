@@ -21,15 +21,17 @@ RUN cmake \
         -DSG_MODULE_LOCATE:BOOL=ON \
         -DSG_MODULE_GENERATE:BOOL=ON \
         -DSG_MODULE_DYNAMICS:BOOL=ON \
-        -DSG_MODULE_VISUALIZE:BOOL=OFF \
+        -DSG_MODULE_VISUALIZE:BOOL=ON \
         -DSG_MODULE_VISUALIZE_WITH_QT:BOOL=OFF \
+        -DSG_MODULE_TREE:BOOL=ON \
         -DITK_DIR:STRING=${ITK_BUILD_DIR} \
         -DDGtal_DIR:STRING=${DGtal_BUILD_DIR} \
+        -DVTK_DIR:STRING=${VTK_BUILD_DIR} \
         ${SGEXT_SRC_DIR} && \
     ninja && \
     find . -name "*.o" -delete && \
     find ../SGEXT* -depth -name .git -exec rm -rf '{}' \;
-ENV PATH="${SGEXT_BUILD_DIR}/cpp-scripts:${PATH}"
+ENV PATH="${SGEXT_BUILD_DIR}/cpp-scripts:${SGEXT_BUILD_DIR}/modules/tree/cli:${SGEXT_BUILD_DIR}/modules/generate/bin:${PATH}"
 
 # Build-time metadata as defined at http://label-schema.org
 ARG BUILD_DATE
