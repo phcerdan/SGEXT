@@ -7,6 +7,7 @@ find_package(Boost COMPONENTS
 
 set(_cli_libs
     SGEXT::SGTree
+    SGEXT::SGVisualize
     SGEXT::SGScripts
     Boost::program_options
     )
