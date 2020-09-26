@@ -303,7 +303,7 @@ struct object_graph : public ::testing::Test {
     using vertex_iterator =
             typename boost::graph_traits<Object>::vertex_iterator;
     using edge_iterator = typename boost::graph_traits<Object>::edge_iterator;
-    void print_degrees() {
+    void print_degrees() const {
         std::cout << "Print degrees obj:" << std::endl;
         std::cout << "Num Vertices: " << boost::num_vertices(obj) << std::endl;
         vertex_iterator vi, vi_end;
@@ -313,7 +313,7 @@ struct object_graph : public ::testing::Test {
                       << std::endl;
         }
     }
-    void print_edges() {
+    void print_edges() const {
         std::cout << "Print edges obj:" << std::endl;
         std::cout << "Num Edges: " << boost::num_edges(obj) << std::endl;
         edge_iterator ei, ei_end;
@@ -472,7 +472,7 @@ SG::PointContainer
 all_edge_points(const SpatialGraphBaseFixture::GraphType &lhs_g) {
     SG::PointContainer lhs_edge_points;
     for (auto ep = boost::edges(lhs_g); ep.first != ep.second; ++ep.first) {
-        auto &se = lhs_g[*ep.first];
+        const auto &se = lhs_g[*ep.first];
         lhs_edge_points.insert(lhs_edge_points.end(), se.edge_points.begin(),
                                se.edge_points.end());
     }
@@ -668,12 +668,15 @@ TEST_F(three_connected_nodes, remove_extra_edges) {
     size_t count3degrees = 0;
     for (; vi != vi_end; ++vi) {
         auto degree = boost::out_degree(*vi, sg);
-        if (degree == 1)
+        if (degree == 1) {
             count1degrees++;
-        if (degree == 2)
+        }
+        if (degree == 2) {
             count2degrees++;
-        if (degree == 3)
+        }
+        if (degree == 3) {
             count3degrees++;
+        }
     }
     EXPECT_EQ(num_vertices(sg), 6);
     EXPECT_EQ(num_edges(sg), 6);
@@ -767,12 +770,15 @@ TEST_F(three_connected_nodes_with_self_loop, remove_extra_edges) {
     size_t count3degrees = 0;
     for (; vi != vi_end; ++vi) {
         auto degree = boost::out_degree(*vi, reduced_g);
-        if (degree == 1)
+        if (degree == 1) {
             count1degrees++;
-        if (degree == 2)
+        }
+        if (degree == 2) {
             count2degrees++;
-        if (degree == 3)
+        }
+        if (degree == 3) {
             count3degrees++;
+        }
     }
     EXPECT_EQ(count3degrees, 3);
     EXPECT_EQ(count2degrees, 0);
@@ -857,12 +863,15 @@ TEST_F(debug_one, remove_extra_edges) {
     size_t count3degrees = 0;
     for (; vi != vi_end; ++vi) {
         auto degree = boost::out_degree(*vi, sg);
-        if (degree == 1)
+        if (degree == 1) {
             count1degrees++;
-        if (degree == 2)
+        }
+        if (degree == 2) {
             count2degrees++;
-        if (degree == 3)
+        }
+        if (degree == 3) {
             count3degrees++;
+        }
     }
     EXPECT_EQ(num_vertices(sg), 5);
     EXPECT_EQ(num_edges(sg), 5);
@@ -935,12 +944,15 @@ TEST_F(rare_trio, remove_extra_edges) {
     size_t count3degrees = 0;
     for (; vi != vi_end; ++vi) {
         auto degree = boost::out_degree(*vi, sg);
-        if (degree == 1)
+        if (degree == 1) {
             count1degrees++;
-        if (degree == 2)
+        }
+        if (degree == 2) {
             count2degrees++;
-        if (degree == 3)
+        }
+        if (degree == 3) {
             count3degrees++;
+        }
     }
     EXPECT_EQ(num_vertices(sg), 6);
     EXPECT_EQ(num_edges(sg), 6);
@@ -1071,12 +1083,15 @@ TEST_F(buggy_structure, remove_extra_edges) {
     size_t count3degrees = 0;
     for (; vi != vi_end; ++vi) {
         auto degree = boost::out_degree(*vi, sg);
-        if (degree == 1)
+        if (degree == 1) {
             count1degrees++;
-        if (degree == 2)
+        }
+        if (degree == 2) {
             count2degrees++;
-        if (degree == 3)
+        }
+        if (degree == 3) {
             count3degrees++;
+        }
     }
     EXPECT_EQ(num_vertices(sg), 11);
     EXPECT_EQ(num_edges(sg), 12);

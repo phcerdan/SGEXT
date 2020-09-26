@@ -129,8 +129,9 @@ void append_new_graph_points(
         // Point will be inserted only if unique
         // lastPtId is modified to the id of the point (recently inserted or
         // already present)
-        int is_new_point_inserted = mergePoints->InsertUniquePoint(
-                new_graph_points->GetPoint(point_index), lastPtId);
+        bool is_new_point_inserted = static_cast<bool>(
+                mergePoints->InsertUniquePoint(
+                new_graph_points->GetPoint(point_index), lastPtId));
         // If the point already exists push_back the graph_descriptor for the
         // new graph. If it is new, first push the graph descriptors of previous
         // graphs.
@@ -155,7 +156,7 @@ void append_new_graph_points(
         // This will happen when the first graph has different points than the
         // appended graph We append an empty descriptor
         if (graph_descriptors.size() == number_of_previous_graphs) {
-            graph_descriptors.push_back(graph_descriptor());
+            graph_descriptors.emplace_back(graph_descriptor());
         }
         assert(graph_descriptors.size() == number_of_previous_graphs + 1);
     }
@@ -164,7 +165,7 @@ void append_new_graph_points(
 MergePointsIdMapPair get_vtk_points_from_graphs(
         const std::vector<std::reference_wrapper<const GraphType>> &graphs,
         const BoundingBox *box) {
-    assert(graphs.size() > 0);
+    assert(!graphs.empty());
     auto unique_points = vtkSmartPointer<vtkPoints>::New();
     std::unordered_map<vtkIdType, std::vector<graph_descriptor>> unique_id_map;
     // check vtkMergePoints with InsertUniquePoint
@@ -177,18 +178,19 @@ MergePointsIdMapPair get_vtk_points_from_graphs(
     vtkIdType lastPtId;
     std::vector<PointsIdMapPair> graphs_point_map;
     std::vector<double *> bounds_vector;
-    for (size_t graph_index = 0; graph_index < graphs.size(); ++graph_index) {
+    for (const auto & graph: graphs) {
         graphs_point_map.emplace_back(
-                get_vtk_points_from_graph(graphs[graph_index]));
+                get_vtk_points_from_graph(graph));
         const auto &points_per_graph = graphs_point_map.back().first;
         bounds_vector.emplace_back(points_per_graph->GetBounds());
     }
 
     BoundingBox enclosing_box;
-    if (!box)
+    if (box == nullptr) {
         enclosing_box = BoundingBox::BuildEnclosingBox(bounds_vector);
-    else
+    } else {
         enclosing_box = *box;
+    }
 
     // Init the merger with points from the first graph
     {

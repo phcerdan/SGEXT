@@ -77,11 +77,13 @@ bool degree_viger_generator::havel_hakimi() {
     int *nb = new int[degree_max];
     int *sorted = new int[num_vertices_];
     // init basket
-    for (int i = 0; i < degree_max; i++)
+    for (int i = 0; i < degree_max; i++) {
         nb[i] = 0;
+    }
     // count basket
-    for (int i = 0; i < num_vertices_; i++)
+    for (int i = 0; i < num_vertices_; i++) {
         nb[deg_[i]]++;
+    }
     // cumul
     int c = 0;
     for (int i = degree_max - 1; i >= 0; i--) {
@@ -89,21 +91,22 @@ bool degree_viger_generator::havel_hakimi() {
         nb[i] = -nb[i] + c;
     }
     // sort
-    for (int i = 0; i < num_vertices_; i++)
+    for (int i = 0; i < num_vertices_; i++) {
         sorted[nb[deg_[i]]++] = i;
+    }
 
     // Binding process starts
     int first = 0;          // vertex with biggest residual degree
     int d = degree_max - 1; // maximum residual degree available
 
-    c = 0;
     for (c = arcs_ / 2; c > 0;) {
         // pick a vertex. we could pick any, but here we pick the one with
         // biggest degree
         int v = sorted[first];
         // look for current degree of v
-        while (nb[d] <= first)
+        while (nb[d] <= first) {
             d--;
+        }
         // store it in dv
         int dv = d;
         // bind it !
@@ -213,7 +216,7 @@ bool degree_viger_generator::make_connected() {
     bool enough_edges = false;
 
     // start main loop
-    for (int v0 = 0; v0 < num_vertices_; v0++)
+    for (int v0 = 0; v0 < num_vertices_; v0++) {
         if (dist[v0] == NOT_VISITED) {
             // is v0 an isolated vertex?
             if (deg_[v0] == 0) {
@@ -245,9 +248,10 @@ bool degree_viger_generator::make_connected() {
                         // we didn't visit *w yet
                         dist[w] = next_dist;
                         *(to_visit++) = w;
-                        if (to_visit > min_ffub)
+                        if (to_visit > min_ffub) {
                             min_ffub += 2; // update limit of ffub's storage
                                            // assert(verify());
+                        }
                     } else if (dist[w] == next_dist ||
                                (w >= v && dist[w] == current_dist)) {
                         // we found a removable edge
@@ -274,9 +278,9 @@ bool degree_viger_generator::make_connected() {
                             }
                         } else if (!enough_edges) {
                             // Store the removable edge for future use
-                            if (edges <= (edge *)min_ffub + 1)
+                            if (edges <= (edge *)min_ffub + 1) {
                                 enough_edges = true;
-                            else {
+                            } else {
                                 edges--;
                                 edges->from = v;
                                 edges->to = w;
@@ -286,8 +290,9 @@ bool degree_viger_generator::make_connected() {
                 }
             }
             // Mark component
-            while (to_visit != buff)
+            while (to_visit != buff) {
                 dist[*(--to_visit)] = FORBIDDEN;
+            }
             // Check if it is a tree
             if (is_a_tree) {
                 assert(deg_[v0] != 0);
@@ -295,8 +300,9 @@ bool degree_viger_generator::make_connected() {
                     // let's bind the tree we found with a removable edge in
                     // stock
                     assert(trees == ffub);
-                    if (edges < (edge *)min_ffub)
+                    if (edges < (edge *)min_ffub) {
                         edges = (edge *)min_ffub;
+                    }
                     swap_edges(v0, neigh_[v0][0], edges->from, edges->to);
                     edges++;
                     // assert(verify());
@@ -317,6 +323,7 @@ bool degree_viger_generator::make_connected() {
                 }
             }
         }
+    }
     delete[] buff;
     delete[] dist;
     // Should ALWAYS return true : either we have no tree left, or we are a
@@ -336,8 +343,9 @@ void degree_viger_generator::swap_edges(int from1,
 }
 
 int *degree_viger_generator::fast_rpl(int *m, const int a, const int b) {
-    while (*m != a)
+    while (*m != a) {
         m++;
+    }
     *m = b;
     return m;
 }
@@ -351,36 +359,43 @@ bool degree_viger_generator::verify(int mode) {
     // verify edges count
     if ((mode & VERIFY_NOARCS) == 0) {
         int sum = 0;
-        for (int i = 0; i < num_vertices_; i++)
+        for (int i = 0; i < num_vertices_; i++) {
             sum += deg_[i];
+        }
         assert(sum == arcs_);
     }
     // verify neigh_[] and deg_[] compatibility
-    if ((mode & VERIFY_NONEIGH) == 0)
-        for (int i = 0; i < num_vertices_ - 1; i++)
+    if ((mode & VERIFY_NONEIGH) == 0) {
+        for (int i = 0; i < num_vertices_ - 1; i++) {
             assert(neigh_[i] + deg_[i] == neigh_[i + 1]);
+        }
+    }
     // verify vertex range
-    for (int i = 0; i < arcs_; i++)
+    for (int i = 0; i < arcs_; i++) {
         assert(links_[i] >= 0 && links_[i] < num_vertices_);
+    }
     // verify simplicity
     //  for(i=0; i<num_vertices_; i++) for(j=0; j<deg_[i]; j++) for(k=j+1;
     //  k<deg_[i]; k++)
     //    assert(neigh_[i][j]!=neigh_[i][k]);
     // verify symmetry
-    for (int i = 0; i < num_vertices_; i++)
+    for (int i = 0; i < num_vertices_; i++) {
         for (int j = 0; j < deg_[i]; j++) {
             int v = neigh_[i][j];
             int nb = 0;
-            for (int k = 0; k < deg_[v]; k++)
-                if (neigh_[v][k] == i)
+            for (int k = 0; k < deg_[v]; k++) {
+                if (neigh_[v][k] == i) {
                     nb++;
+                }
+            }
             assert(nb > 0);
         }
+    }
     return true;
 }
 
 unsigned long degree_viger_generator::shuffle(unsigned long times,
-                                              unsigned long maxtimes,
+                                              unsigned long max_times,
                                               ShuffleType type,
                                               const bool verbose) {
     if (verbose) {
@@ -392,17 +407,20 @@ unsigned long degree_viger_generator::shuffle(unsigned long times,
     unsigned long all_swaps = 0;
     unsigned long cost = 0;
     // window
-    double T = double(std::min((unsigned long)(arcs_), times) / 10);
-    if (type == ShuffleType::OPTIMAL_HEURISTICS)
+    double T = double(std::min((unsigned long)(arcs_), times) / 10.0);
+    if (type == ShuffleType::OPTIMAL_HEURISTICS) {
         T = double(optimal_window());
-    if (type == ShuffleType::BRUTE_FORCE_HEURISTICS)
+    }
+    if (type == ShuffleType::BRUTE_FORCE_HEURISTICS) {
         T = double(times * 2);
+    }
     // isolation test parameter, and buffers
     double K = 2.4;
     int *Kbuff = new int[int(K) + 1];
     bool *visited = new bool[num_vertices_];
-    for (int i = 0; i < num_vertices_; i++)
+    for (int i = 0; i < num_vertices_; i++) {
         visited[i] = false;
+    }
     // Used for monitoring , active only if VERBOSE()
     int failures = 0;
     int successes = 0;
@@ -412,22 +430,25 @@ unsigned long degree_viger_generator::shuffle(unsigned long times,
     next = 0;
 
     // Shuffle: while #edge swap attempts validated by connectivity < times ...
-    while (times > nb_swaps && maxtimes > all_swaps) {
+    while (times > nb_swaps && max_times > all_swaps) {
         // Backup graph
         int *save = backup();
         // Prepare counters, K, T
         unsigned long swaps = 0;
         int K_int = 0;
         if (type == ShuffleType::FINAL_HEURISTICS ||
-            type == ShuffleType::BRUTE_FORCE_HEURISTICS)
+            type == ShuffleType::BRUTE_FORCE_HEURISTICS) {
             K_int = int(K);
+        }
         unsigned long T_int = (unsigned long)(floor(T));
-        if (T_int < 1)
+        if (T_int < 1) {
             T_int = 1;
+        }
         // compute cost
         cost += T_int;
-        if (K_int > 2)
+        if (K_int > 2) {
             cost += (unsigned long)(K_int) * (unsigned long)(T_int);
+        }
         // Perform T edge swap attempts
         for (int i = T_int; i > 0; i--) {
             // try one swap
@@ -451,15 +472,16 @@ unsigned long degree_viger_generator::shuffle(unsigned long times,
         {
             avg_T += double(T_int);
             avg_K += double(K_int);
-            if (ok)
+            if (ok) {
                 successes++;
-            else
+            } else {
                 failures++;
+            }
         }
         // restore graph if needed, and count validated swaps
-        if (ok)
+        if (ok) {
             nb_swaps += swaps;
-        else {
+        } else {
             restore(save);
             next = nb_swaps;
         }
@@ -468,29 +490,35 @@ unsigned long degree_viger_generator::shuffle(unsigned long times,
         switch (type) {
             int steps;
         case ShuffleType::GKAN_HEURISTICS:
-            if (ok)
+            if (ok) {
                 T += 1.0;
-            else
+            } else {
                 T *= 0.5;
+            }
             break;
         case ShuffleType::FAB_HEURISTICS:
             steps = 50 / (8 + failures + successes);
-            if (steps < 1)
+            if (steps < 1) {
                 steps = 1;
-            while (steps--)
-                if (ok)
+            }
+            while (steps--) {
+                if (ok) {
                     T *= 1.17182818;
-                else
+                } else {
                     T *= 0.9;
-            if (T > double(5 * arcs_))
+                }
+            }
+            if (T > double(5 * arcs_)) {
                 T = double(5 * arcs_);
+            }
             break;
         case ShuffleType::FINAL_HEURISTICS:
             if (ok) {
-                if ((K + 10.0) * T > 5.0 * double(arcs_))
+                if ((K + 10.0) * T > 5.0 * double(arcs_)) {
                     K /= 1.03;
-                else
+                } else {
                     T *= 2;
+                }
             } else {
                 K *= 1.35;
                 delete[] Kbuff;
@@ -498,8 +526,9 @@ unsigned long degree_viger_generator::shuffle(unsigned long times,
             }
             break;
         case ShuffleType::OPTIMAL_HEURISTICS:
-            if (ok)
+            if (ok) {
                 T = double(optimal_window());
+            }
             break;
         case ShuffleType::BRUTE_FORCE_HEURISTICS:
             K *= 2;
@@ -517,7 +546,7 @@ unsigned long degree_viger_generator::shuffle(unsigned long times,
     delete[] Kbuff;
     delete[] visited;
 
-    if (maxtimes <= all_swaps) {
+    if (max_times <= all_swaps) {
         std::cerr << "WARNING: Cannot shuffle graph, maybe there is only a "
                      "single one?"
                   << std::endl;
@@ -551,10 +580,12 @@ int degree_viger_generator::optimal_window(const bool verbose) {
     int been_greater = 0;
     for (Tmax = 1; Tmax <= 5 * arcs_; Tmax *= 2) {
         double c = average_cost(Tmax, back, min_cost);
-        if (c > 1.5 * min_cost)
+        if (c > 1.5 * min_cost) {
             break;
-        if (c > 1.2 * min_cost && ++been_greater >= 3)
+        }
+        if (c > 1.2 * min_cost && ++been_greater >= 3) {
             break;
+        }
         if (c < min_cost) {
             min_cost = c;
             optimal_T = Tmax;
@@ -583,8 +614,9 @@ int degree_viger_generator::optimal_window(const bool verbose) {
         double c_low = average_cost(T_low, back, min_cost);
         double c_high = average_cost(T_high, back, min_cost);
         if (c_low < min_cost && c_high < min_cost) {
-            if (try_again--)
+            if (try_again--) {
                 continue;
+            }
             if (verbose) {
                 std::cout << "Warning: when looking for optimal T,"
                           << std::endl;
@@ -612,8 +644,9 @@ int degree_viger_generator::optimal_window(const bool verbose) {
 
 bool bernoulli_param_is_lower(int success, int trials, double param) {
     constexpr double _TRUST_BERNOULLI_LOWER = 0.01;
-    if (double(success) >= double(trials) * param)
+    if (double(success) >= double(trials) * param) {
         return false;
+    }
     double comb = 1.0;
     double fact = 1.0;
     for (int i = 0; i < success; i++) {
@@ -639,33 +672,37 @@ bool bernoulli_param_is_lower(int success, int trials, double param) {
 double
 degree_viger_generator::average_cost(int T, int *backup, double min_cost) {
     constexpr int _MIN_SUCCESS_FOR_BERNOULLI_TRUST = 100;
-    if (T < 1)
+    if (T < 1) {
         return 1e+99;
+    }
     int successes = 0;
     int trials = 0;
     while (successes < _MIN_SUCCESS_FOR_BERNOULLI_TRUST &&
            !bernoulli_param_is_lower(successes, trials, 1.0 / min_cost)) {
-        if (try_shuffle(T, 0, backup))
+        if (try_shuffle(T, 0, backup)) {
             successes++;
+        }
         trials++;
     }
-    if (successes >= _MIN_SUCCESS_FOR_BERNOULLI_TRUST)
+    if (successes >= _MIN_SUCCESS_FOR_BERNOULLI_TRUST) {
         return double(trials) / double(successes) *
                (1.0 + double(arcs_ / 2) / double(T));
-    else
+    } else {
         return 2.0 * min_cost;
+    }
 }
 
 void degree_viger_generator::restore(int *b) {
     using namespace generator;
     // init();
-    for (int i = 0; i < arcs_; i++)
+    for (int i = 0; i < arcs_; i++) {
         links_[i] = HASH_NONE;
-    int i;
+    }
     auto dd = deg_;
-    for (i = 0; i < num_vertices_; i++)
+    for (int i = 0; i < num_vertices_; i++) {
         deg_[i] = 0;
-    for (i = 0; i < num_vertices_ - 1; i++) {
+    }
+    for (int i = 0; i < num_vertices_ - 1; i++) {
         while (deg_[i] < dd[i]) {
             add_edge(i, *b, dd);
             b++;
@@ -681,67 +718,72 @@ inline bool degree_viger_generator::add_edge(int a,
 #ifndef NDEBUG
     const auto size = arcs_;
 #endif
-    if (deg_a == deg_[a])
+    if (deg_a == deg_[a]) {
         return false;
+    }
     // Check that edge was not already inserted
     assert(fast_search(neigh_[a],
                        int((a == num_vertices_ - 1 ? links_ + size : neigh_[a + 1]) -
                            neigh_[a]),
-                       b) == NULL);
+                       b) == nullptr);
     assert(fast_search(neigh_[b],
                        int((b == num_vertices_ - 1 ? links_ + size : neigh_[b + 1]) -
                            neigh_[b]),
-                       a) == NULL);
+                       a) == nullptr);
     assert(deg_[a] < deg_a);
     int deg_b = realdeg[b];
-    if (IS_HASH(deg_a))
+    if (IS_HASH(deg_a)) {
         *H_add(neigh_[a], HASH_EXPAND(deg_a), b) = b;
-    else
+    } else {
         neigh_[a][deg_[a]] = b;
-    if (IS_HASH(deg_b))
+    }
+    if (IS_HASH(deg_b)) {
         *H_add(neigh_[b], HASH_EXPAND(deg_b), a) = a;
-    else
+    } else {
         neigh_[b][deg_[b]] = a;
+    }
     deg_[a]++;
     deg_[b]++;
     // Check that edge was actually inserted
     assert(fast_search(neigh_[a],
                        int((a == num_vertices_ - 1 ? links_ + size : neigh_[a + 1]) -
                            neigh_[a]),
-                       b) != NULL);
+                       b) != nullptr);
     assert(fast_search(neigh_[b],
                        int((b == num_vertices_ - 1 ? links_ + size : neigh_[b + 1]) -
                            neigh_[b]),
-                       a) != NULL);
+                       a) != nullptr);
     return true;
 }
 
 bool degree_viger_generator::try_shuffle(int T, int K, int *backup_graph) {
     // init all
-    int *Kbuff = NULL;
-    bool *visited = NULL;
+    int *Kbuff = nullptr;
+    bool *visited = nullptr;
     if (K > 2) {
         Kbuff = new int[K];
         visited = new bool[num_vertices_];
-        for (int i = 0; i < num_vertices_; i++)
+        for (int i = 0; i < num_vertices_; i++) {
             visited[i] = false;
+        }
     }
     int *back = backup_graph;
-    if (back == NULL)
+    if (back == nullptr) {
         back = backup();
+    }
     // perform T edge swap attempts
-    while (T--)
+    while (T--) {
         random_edge_swap(K, Kbuff, visited);
+    }
     // clean
-    if (visited != NULL)
-        delete[] visited;
-    if (Kbuff != NULL)
-        delete[] Kbuff;
+    delete[] visited;
+    delete[] Kbuff;
     // check & restore
     bool yo = is_connected();
     restore(back);
-    if (backup_graph == NULL)
+    if (backup_graph == nullptr) {
         delete[] back;
+    }
     return yo;
 }
 
@@ -750,10 +792,13 @@ int *degree_viger_generator::backup() {
     int *b = new int[arcs_ / 2];
     int *c = b;
     int *p = links_;
-    for (int i = 0; i < num_vertices_; i++)
-        for (int d = HASH_SIZE(deg_[i]); d--; p++)
-            if (*p != HASH_NONE && *p > i)
+    for (int i = 0; i < num_vertices_; i++) {
+        for (int d = HASH_SIZE(deg_[i]); d--; p++) {
+            if (*p != HASH_NONE && *p > i) {
                 *(c++) = *p;
+            }
+        }
+    }
     assert(c == b + (arcs_ / 2));
     return b;
 }
@@ -763,18 +808,21 @@ int degree_viger_generator::random_edge_swap(int K, int *Kbuff, bool *visited) {
     int f1 = pick_random_vertex();
     int f2 = pick_random_vertex();
     // Check that f1 != f2
-    if (f1 == f2)
+    if (f1 == f2) {
         return 0;
+    }
     // Get two random edges (f1,*f1t1) and (f2,*f2t2)
     int *f1t1 = random_neighbour(f1);
     int t1 = *f1t1;
     int *f2t2 = random_neighbour(f2);
     int t2 = *f2t2;
     // Check simplicity
-    if (t1 == t2 || f1 == t2 || f2 == t1)
+    if (t1 == t2 || f1 == t2 || f2 == t1) {
         return 0;
-    if (is_edge(f1, t2) || is_edge(f2, t1))
+    }
+    if (is_edge(f1, t2) || is_edge(f2, t1)) {
         return 0;
+    }
     // Swap
     using namespace generator;
     int *f1t2 = H_rpl(neigh_[f1], deg_[f1], f1t1, t2);
@@ -782,10 +830,12 @@ int degree_viger_generator::random_edge_swap(int K, int *Kbuff, bool *visited) {
     int *t1f2 = H_rpl(neigh_[t1], deg_[t1], f1, f2);
     int *t2f1 = H_rpl(neigh_[t2], deg_[t2], f2, f1);
     // isolation test
-    if (K <= 2)
+    if (K <= 2) {
         return 1;
-    if (!isolated(f1, K, Kbuff, visited) && !isolated(f2, K, Kbuff, visited))
+    }
+    if (!isolated(f1, K, Kbuff, visited) && !isolated(f2, K, Kbuff, visited)) {
         return 1;
+    }
     // undo swap
     H_rpl(neigh_[f1], deg_[f1], f1t2, t1);
     H_rpl(neigh_[f2], deg_[f2], f2t1, t2);
@@ -798,9 +848,9 @@ int degree_viger_generator::pick_random_vertex() const {
     using namespace generator;
     std::uniform_int_distribution<int> uid(0, arcs_ - 1);
     int v;
-    do
+    do {
         v = links_[uid(RNG::engine())];
-    while (v == HASH_NONE);
+    } while (v == HASH_NONE);
     return v;
 }
 int *degree_viger_generator::random_neighbour(const int v) const {
@@ -810,14 +860,15 @@ int *degree_viger_generator::random_neighbour(const int v) const {
 bool degree_viger_generator::is_edge(int a, int b) const {
     using namespace generator;
     assert(H_is(neigh_[a], deg_[a], b) ==
-           (fast_search(neigh_[a], HASH_SIZE(deg_[a]), b) != NULL));
+           (fast_search(neigh_[a], HASH_SIZE(deg_[a]), b) != nullptr));
     assert(H_is(neigh_[b], deg_[b], a) ==
-           (fast_search(neigh_[b], HASH_SIZE(deg_[b]), a) != NULL));
+           (fast_search(neigh_[b], HASH_SIZE(deg_[b]), a) != nullptr));
     assert(H_is(neigh_[a], deg_[a], b) == H_is(neigh_[b], deg_[b], a));
-    if (deg_[a] < deg_[b])
+    if (deg_[a] < deg_[b]) {
         return H_is(neigh_[a], deg_[a], b);
-    else
+    } else {
         return H_is(neigh_[b], deg_[b], a);
+    }
 }
 
 bool degree_viger_generator::is_connected() const {
@@ -833,8 +884,9 @@ int degree_viger_generator::depth_search(bool *visited,
                                          int *buff,
                                          int v0) const {
     using namespace generator;
-    for (int i = 0; i < num_vertices_; i++)
+    for (int i = 0; i < num_vertices_; i++) {
         visited[i] = false;
+    }
     int *to_visit = buff;
     int nb_visited = 1;
     visited[v0] = true;
@@ -859,8 +911,9 @@ bool degree_viger_generator::isolated(int v,
                                       int *Kbuff,
                                       bool *visited) const {
     using namespace generator;
-    if (K < 2)
+    if (K < 2) {
         return false;
+    }
     int *seen = Kbuff;
     int *known = Kbuff;
     int *max = Kbuff + K;
@@ -872,7 +925,7 @@ bool degree_viger_generator::isolated(int v,
         v = *(seen++);
         int *ww = neigh_[v];
         int w;
-        for (int d = HASH_SIZE(deg_[v]); d--; ww++)
+        for (int d = HASH_SIZE(deg_[v]); d--; ww++) {
             if ((w = *ww) != HASH_NONE && !visited[w]) {
                 if (known == max) {
                     is_isolated = false;
@@ -881,11 +934,13 @@ bool degree_viger_generator::isolated(int v,
                 visited[w] = true;
                 *(known++) = w;
             }
+        }
     }
 end_isolated:
     // Undo the changes to visited[]...
-    while (known != Kbuff)
+    while (known != Kbuff) {
         visited[*(--known)] = false;
+    }
     return is_isolated;
 }
 

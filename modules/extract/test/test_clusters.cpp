@@ -77,8 +77,9 @@ TEST_F(sg_clusters, detect_clusters_with_radius) {
             cluster_label_map.size();
     EXPECT_EQ(number_of_nodes_belonging_to_any_cluster, 4);
     std::cout << "cluster_label_map:" << std::endl;
-    for (auto &t : cluster_label_map)
+    for (const auto &t : cluster_label_map) {
         std::cout << "  " << t.first << " " << t.second << "\n";
+    }
     EXPECT_EQ(cluster_label_map[0], 0);
     EXPECT_EQ(cluster_label_map[1], 0);
     EXPECT_EQ(cluster_label_map[2], 2);
@@ -159,8 +160,9 @@ TEST_F(sg_clusters, collapse_specific_clusters) {
     const auto trimmed_cluster_label_map = SG::trim_vertex_to_single_label_map(
             cluster_labels, cluster_label_map);
     std::cout << "trimmed_cluster_label_map:" << std::endl;
-    for (auto &t : trimmed_cluster_label_map)
+    for (const auto &t : trimmed_cluster_label_map) {
         std::cout << "  " << t.first << " " << t.second << "\n";
+    }
     EXPECT_EQ(trimmed_cluster_label_map.at(0), 0);
     EXPECT_EQ(trimmed_cluster_label_map.at(1), 0);
 
@@ -175,3 +177,4 @@ TEST_F(sg_clusters, collapse_specific_clusters) {
     EXPECT_EQ( boost::degree(2, collapsed_graph), 2);
     EXPECT_EQ( boost::degree(3, collapsed_graph), 1);
 }
+

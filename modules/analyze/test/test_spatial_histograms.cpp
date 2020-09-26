@@ -107,7 +107,7 @@ TEST_F(SpatialGraphFixture, histogram_distances_with_width) {
     std::cout << "Distance Histogram with bins" << std::endl;
     EXPECT_EQ(histo_distances.name, "distances");
     double max_length = 3.0;
-    size_t expected_bins = static_cast<size_t>(max_length / width);
+    auto expected_bins = static_cast<size_t>(max_length / width);
     EXPECT_EQ(histo_distances.bins, expected_bins);
     histo_distances.PrintBreaksAndCounts(std::cout);
 }

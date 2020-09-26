@@ -32,7 +32,7 @@ void simulated_annealing_generator_config_tree::save(
 }
 
 void simulated_annealing_generator_config_tree::load_domain(pt::ptree &tree) {
-    std::string boundary_condition_str =
+    const auto boundary_condition_str =
             tree.get<std::string>("domain.boundary_condition");
     domain_params.boundary_condition =
             ArrayUtilities::string_to_boundary_condition(

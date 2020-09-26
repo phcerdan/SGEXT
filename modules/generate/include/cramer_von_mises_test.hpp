@@ -231,7 +231,7 @@ double cramer_von_mises_test(
     const auto total_counts =
             exclusive_cumulative_counts.back() + histo_counts.back();
     assert(std::accumulate(std::begin(histo_counts), std::end(histo_counts),
-                           0) == total_counts);
+                           0) == static_cast<int>(total_counts));
     const auto &F = target_cumulative_distro_at_histogram_bin_centers;
     assert(std::size(histo_counts) == std::size(F));
     return 1.0 / (12 * total_counts) +
@@ -259,7 +259,7 @@ double cramer_von_mises_test_optimized(const TVectorInt &histo_counts,
                                        const size_t &total_counts) {
     assert(std::size(histo_counts) == std::size(F_optimized));
     assert(std::accumulate(std::begin(histo_counts), std::end(histo_counts),
-                           0) == total_counts);
+                           0) == static_cast<int>(total_counts));
     return 1.0 / (12 * total_counts) +
            reduce_T(compute_T(compute_S_optimized(
                                       compute_cumulative_counts(histo_counts),

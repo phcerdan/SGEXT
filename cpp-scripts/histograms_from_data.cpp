@@ -80,7 +80,7 @@ int main(int argc, char* const argv[]) {
   po::variables_map vm;
   try {
     po::store(po::parse_command_line(argc, argv, opt_desc), vm);
-    if(vm.count("help") || argc <= 1) {
+    if(static_cast<bool>(vm.count("help")) || argc <= 1) {
       std::cout << "Basic usage:\n" << opt_desc << "\n";
       return EXIT_SUCCESS;
     }
@@ -137,27 +137,29 @@ int main(int argc, char* const argv[]) {
   // Parse the names
   for(const auto& graph_data : graph_datas) {
     auto found = dict_types.find(graph_data.first);
-    if(found == dict_types.end())
+    if(found == dict_types.end()) {
       throw std::runtime_error("Unexpected data type: " + graph_data.first);
-    if(found->second == DataType::degrees)
+    }
+    if(found->second == DataType::degrees) {
       SG::print_histogram(
           SG::histogram_degrees(graph_data.second, binsHistoDegrees),
           histo_out);
-    else if(found->second == DataType::ete_distances)
+    } else if(found->second == DataType::ete_distances) {
       SG::print_histogram(SG::histogram_ete_distances(graph_data.second,
                                                       widthHistoEteDistances),
                           histo_out);
-    else if(found->second == DataType::contour_lengths)
+    } else if(found->second == DataType::contour_lengths) {
       SG::print_histogram(SG::histogram_contour_lengths(
                               graph_data.second, widthHistoContourLengths),
                           histo_out);
-    else if(found->second == DataType::angles)
+    } else if(found->second == DataType::angles) {
       SG::print_histogram(
           SG::histogram_angles(graph_data.second, binsHistoAngles), histo_out);
-    else if(found->second == DataType::cosines)
+    } else if(found->second == DataType::cosines) {
       SG::print_histogram(
           SG::histogram_cosines(graph_data.second, binsHistoCosines),
           histo_out);
+    }
   }
   std::cout << "Output histograms to: " << histo_output_full_path.string()
             << std::endl;

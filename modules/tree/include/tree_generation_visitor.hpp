@@ -341,9 +341,6 @@ struct TreeGenerationVisitor : public boost::default_bfs_visitor {
         std::vector<size_t> indices_with_smallest_distance_from_root;
         const size_t min_distance_from_root = *std::min_element(
                 distances_from_root.cbegin(), distances_from_root.cend());
-        auto it_dist_from_root =
-                std::find(distances_from_root.cbegin(),
-                          distances_from_root.cend(), min_distance_from_root);
         auto iter = distances_from_root.cbegin();
         while ((iter = std::find_if(
                         iter, distances_from_root.cend(),
@@ -734,7 +731,6 @@ struct TreeGenerationVisitor : public boost::default_bfs_visitor {
             edge_descriptor input_edge, const SpatialGraph &input_sg) {
         // Interested in studying target of the edge_descriptor
         // Obtain the edges that share the source node with e.
-        const auto source = boost::source(input_edge, input_sg);
         const auto target = boost::target(input_edge, input_sg);
         const auto edges_with_same_source_than_input_edge =
                 get_edges_with_same_source_than_input_edge(input_edge,
@@ -780,8 +776,6 @@ struct TreeGenerationVisitor : public boost::default_bfs_visitor {
         // Compute the angle between the edge with the target closer to the
         // root, and the other edges.
         const auto &edge_coming_from_root = out_edges[index_closer_to_root];
-        const auto &target_of_edge_coming_from_root =
-                out_targets[index_closer_to_root];
         // Discard angle analysis is the input_edge is the one coming from root
         if (edge_coming_from_root == input_edge) {
             return {};
@@ -811,7 +805,6 @@ struct TreeGenerationVisitor : public boost::default_bfs_visitor {
 
         std::vector<double> angles;
         std::vector<double> out_targets_siblings_with_lowest_same_genration;
-        const auto source_pos = input_sg[source].pos;
         for (auto &edge : sibling_edges_with_multiple_lowest_generation) {
             const auto edge_target = boost::target(edge, input_sg);
             // if (edge_target == target_of_edge_coming_from_root) {
@@ -848,8 +841,6 @@ struct TreeGenerationVisitor : public boost::default_bfs_visitor {
     std::optional<double>
     angle_between_input_and_root_edges(edge_descriptor input_edge,
                                        const SpatialGraph &input_sg) {
-        const auto source = boost::source(input_edge, input_sg);
-        const auto target = boost::target(input_edge, input_sg);
         const auto edges_with_same_source_than_input_edge =
                 get_edges_with_same_source_than_input_edge(input_edge,
                                                            input_sg);
@@ -887,8 +878,6 @@ struct TreeGenerationVisitor : public boost::default_bfs_visitor {
         // Compute the angle between the edge with the target closer to the
         // root, and the other edges.
         const auto &edge_coming_from_root = out_edges[index_closer_to_root];
-        const auto &target_of_edge_coming_from_root =
-                out_targets[index_closer_to_root];
         // Discard angle analysis is the input_edge is the one coming from root
         if (edge_coming_from_root == input_edge) {
             return {};

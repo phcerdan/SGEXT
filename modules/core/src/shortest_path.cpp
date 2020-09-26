@@ -37,10 +37,11 @@ SpatialEdge create_edge_from_path(
         vertex_descriptor target = vertex_path[index];
         vertex_descriptor source = vertex_path[index - 1];
         const auto edge_between = boost::edge(source, target, input_g);
-        if (!edge_between.second)
+        if (!edge_between.second) {
             throw("create_edge_from_path: edge does not exist between "
                   "consecutive "
                   "vertices in the input path");
+        }
         const auto ed = edge_between.first;
         auto eps = input_g[ed].edge_points; // copied, might be modified
 
@@ -107,12 +108,12 @@ compute_shortest_path(GraphType::vertex_descriptor start_vertex,
     std::vector<boost::default_color_type> colors(boost::num_vertices(input_g),
                                                   boost::default_color_type{});
     std::vector<vertex_descriptor> _pred(boost::num_vertices(input_g),
-                                         input_g.null_vertex());
-    std::vector<size_t> _dist(boost::num_vertices(input_g), -1ull);
+                                         GraphType::null_vertex());
+    std::vector<size_t> _dist(boost::num_vertices(input_g), -1ULL);
 
-    auto colormap = colors.data();
-    auto predmap = _pred.data();
-    auto distmap = _dist.data();
+    auto *colormap = colors.data();
+    auto *predmap = _pred.data();
+    auto *distmap = _dist.data();
 
     // From sehe:
     // https://stackoverflow.com/questions/29348724/dijkstra-graph-with-a-table-of-weights-on-each-edge
@@ -132,9 +133,10 @@ compute_shortest_path(GraphType::vertex_descriptor start_vertex,
     shortest_path_visitor vis(end_vertex, visited);
 
     try {
-        if (verbose)
+        if (verbose) {
             std::cout << "Searching from #" << start_vertex << " to #"
                       << end_vertex << "...\n";
+        }
         boost::dijkstra_shortest_paths(input_g, start_vertex,
                                        boost::visitor(vis)
                                                .color_map(colormap)
@@ -143,22 +145,24 @@ compute_shortest_path(GraphType::vertex_descriptor start_vertex,
                                                .weight_map(weightmap));
         // .weight_map(boost::make_constant_property<edge_descriptor>(1ul)));
     } catch (shortest_path_visitor::done &) {
-        if (verbose)
+        if (verbose) {
             std::cout << "Completed. Percentage visited: "
                       << (100.0 * visited / boost::num_vertices(input_g))
                       << "%\n";
+        }
     }
 
     size_t dist = distmap[end_vertex];
-    if (verbose)
+    if (verbose) {
         std::cout << "Distance from #" << start_vertex << " to #" << end_vertex
                   << ": " << dist << "\n";
+    }
 
     std::vector<vertex_descriptor> path_out;
     if (dist != size_t(-1)) {
         std::deque<vertex_descriptor> path;
         for (vertex_descriptor current = end_vertex;
-             current != input_g.null_vertex() && predmap[current] != current &&
+             current != GraphType::null_vertex() && predmap[current] != current &&
              current != start_vertex;) {
             path.push_front(predmap[current]);
             current = predmap[current];

@@ -28,13 +28,14 @@ namespace SG {
 GraphType::vertex_descriptor select_random_node(const GraphType &graph) {
 
     const auto num_vertices = boost::num_vertices(graph);
-    return RNG::rand_range_int(0, num_vertices - 1);
+    assert(num_vertices > 0);
+    return RNG::rand_range_int(0, static_cast<int>(num_vertices - 1));
 }
 GraphType::edge_descriptor select_random_edge(const GraphType &graph) {
 
     const auto num_edges = boost::num_edges(graph);
-    assert(num_edges > 1);
-    const auto rand_edge_num = RNG::rand_range_int(0, num_edges - 1);
+    assert(num_edges > 0);
+    const auto rand_edge_num = RNG::rand_range_int(0, static_cast<int>(num_edges - 1));
     using edge_iterator = GraphType::edge_iterator;
 
     edge_iterator eit, eit_end; // eit_rand1, eit_rand2;
@@ -74,10 +75,10 @@ std::vector<double> cosine_directors_between_edges_and_target_edge(
         const std::vector<VectorType> &outgoing_edges,
         const VectorType &outgoing_target_edge) {
     std::vector<double> cosine_directors;
-    for (auto out_edge = outgoing_edges.begin();
-         out_edge != outgoing_edges.end(); ++out_edge) {
-        cosine_directors.push_back(
-                ArrayUtilities::cos_director(*out_edge, outgoing_target_edge));
+    cosine_directors.reserve(outgoing_edges.size());
+    for(const auto & out_edge : outgoing_edges) {
+        cosine_directors.emplace_back(
+                ArrayUtilities::cos_director(out_edge, outgoing_target_edge));
     }
     return cosine_directors;
 }

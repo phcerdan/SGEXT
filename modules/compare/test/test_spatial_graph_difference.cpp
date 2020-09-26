@@ -31,8 +31,9 @@
 TEST_F(FixtureSquareCrossGraph,
        spatial_graph_difference_SquareCrossMinusCross) {
     bool verbose = true;
-    if (verbose)
+    if (verbose) {
         std::cout << "Difference: SquareCross - Cross" << std::endl;
+    }
     double radius = 0.01;
     auto g_diff =
             spatial_graph_difference(g_square_cross, g_cross, radius, verbose);
@@ -50,8 +51,9 @@ TEST_F(FixtureSquareCrossGraph,
 TEST_F(FixtureSquareCrossGraph,
        spatial_graph_difference_SquareCrossMinusSquare) {
     bool verbose = true;
-    if (verbose)
+    if (verbose) {
         std::cout << "Difference: SquareCross - Square" << std::endl;
+    }
     double radius = 0.01;
     auto g_diff =
             spatial_graph_difference(g_square_cross, g_square, radius, verbose);

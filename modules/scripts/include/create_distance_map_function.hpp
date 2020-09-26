@@ -46,19 +46,19 @@ namespace SG {
  */
 typename FloatImageType::Pointer
 create_distance_map_function(const typename BinaryImageType::Pointer &input_img,
-                             const bool use_itk_approximate = false,
-                             const bool verbose = false);
+                             bool use_itk_approximate = false,
+                             bool verbose = false);
 typename FloatImageType::Pointer create_distance_map_function_with_dgtal(
         const typename BinaryImageType::Pointer &input_img,
-        const bool verbose = false);
+        bool verbose = false);
 typename FloatImageType::Pointer create_distance_map_function_with_itk(
         const typename BinaryImageType::Pointer &input_img,
-        const bool verbose = false);
+        bool verbose = false);
 
 /**
  * @create_distance_map_function but using filenames as inputs/outputs
  *
- * @param input_img_file
+ * @param input_filename filename storing the image
  * @param outputFolder folder where output will be written
  * @param foreground the voxels representing the object are "white|black"
  * @param use_itk_approximate use a fast approximation for distance map.
@@ -66,11 +66,11 @@ typename FloatImageType::Pointer create_distance_map_function_with_itk(
  * @param verbose verbosity
  */
 typename FloatImageType::Pointer
-create_distance_map_function_io(const std::string &input_img_file,
+create_distance_map_function_io(const std::string &input_filename,
                                 const std::string &outputFolder,
                                 const std::string &foreground = "white",
-                                const bool use_itk_approximate = false,
-                                const bool verbose = false);
+                                bool use_itk_approximate = false,
+                                bool verbose = false);
 
 } // namespace SG
 #endif

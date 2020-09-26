@@ -49,7 +49,7 @@ int main(int argc, char* const argv[]) {
   po::variables_map vm;
   try {
     po::store(po::parse_command_line(argc, argv, opt_desc), vm);
-    if(vm.count("help") || argc <= 1) {
+    if(static_cast<bool>(vm.count("help")) || argc <= 1) {
       std::cout << "Basic usage:\n" << opt_desc << "\n";
       return EXIT_SUCCESS;
     }
@@ -104,9 +104,10 @@ int main(int argc, char* const argv[]) {
     writer->SetFileName(output_full_path.string().c_str());
     writer->SetInput(masked_image);
     writer->Update();
-    if(verbose)
+    if(verbose) {
       std::cout << "Output written in: " << output_full_path.string()
                 << std::endl;
+    }
   } catch(itk::ExceptionObject&) {
     std::cerr << "Failure writing file: " << output_full_path.string()
               << std::endl;

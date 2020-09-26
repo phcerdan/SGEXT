@@ -31,9 +31,6 @@
 #include <boost/graph/filtered_graph.hpp>
 #include <boost/graph/graphviz.hpp>
 
-// Boost Filesystem
-#include <boost/filesystem.hpp>
-
 #include <itkImageFileReader.h>
 #include <itkImageRegionIteratorWithIndex.h>
 // Reduce graph via dfs:
@@ -47,7 +44,6 @@
 
 using namespace std;
 namespace po = boost::program_options;
-namespace fs = boost::filesystem;
 
 int main(int argc, char *const argv[]) {
     /*-------------- Parse command line -----------------------------*/
@@ -95,7 +91,7 @@ int main(int argc, char *const argv[]) {
     po::variables_map vm;
     try {
         po::store(po::parse_command_line(argc, argv, opt_desc), vm);
-        if (vm.count("help") || argc <= 1) {
+        if (static_cast<bool>(vm.count("help")) || argc <= 1) {
             std::cout << "Basic usage:\n" << opt_desc << "\n";
             return EXIT_SUCCESS;
         }
@@ -155,9 +151,10 @@ int main(int argc, char *const argv[]) {
 
     bool image_provided = false;
     bool image_is_thin = false;
-    if (filenameThinImage != "")
+    if (!filenameThinImage.empty()) {
         image_is_thin = true;
-    if (filenameImage != "" || image_is_thin) {
+    }
+    if (!filenameImage.empty() || image_is_thin) {
         image_provided = true;
     }
     if (!image_provided) {
@@ -172,7 +169,7 @@ int main(int argc, char *const argv[]) {
     if (image_is_thin) {
         reader->SetFileName(filenameThinImage);
         reader->Update();
-        auto image = reader->GetOutput();
+        auto * image = reader->GetOutput();
         // Get the points different than zero
         itk::ImageRegionIteratorWithIndex<ItkImageType> imageIterator(
                 image, image->GetLargestPossibleRegion());

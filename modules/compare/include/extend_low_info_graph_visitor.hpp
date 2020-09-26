@@ -526,10 +526,10 @@ struct ExtendLowInfoGraphVisitor : public boost::default_dfs_visitor {
 
     vertex_descriptor choose_between_source_and_target(
             edge_descriptor high_info_ed,
-            vertex_descriptor low_node_to_extend,
-            vertex_descriptor low_node_connected_to_node_to_extend,
+            vertex_descriptor /*low_node_to_extend*/,
+            vertex_descriptor /*low_node_connected_to_node_to_extend TODO Unused*/,
             const SpatialGraph &high_info_graph) {
-        const auto &low_graph = m_graphs[0].get();
+        // const auto &low_graph = m_graphs[0].get();
         auto high_source = boost::source(high_info_ed, high_info_graph);
         auto high_target = boost::target(high_info_ed, high_info_graph);
         if (m_verbose) {
@@ -543,13 +543,14 @@ struct ExtendLowInfoGraphVisitor : public boost::default_dfs_visitor {
         {} // Check for distances if both, source and target do not exist in low
            // info.
         {
-            auto u_pos = low_graph[low_node_to_extend].pos;
-            auto high_source_pos = m_graphs[1].get()[high_source].pos;
-            auto high_target_pos = m_graphs[1].get()[high_target].pos;
-            auto dist_high_source =
-                    ArrayUtilities::distance(high_source_pos, u_pos);
-            auto dist_high_target =
-                    ArrayUtilities::distance(high_target_pos, u_pos);
+            // TODO should use distances
+            // auto u_pos = low_graph[low_node_to_extend].pos;
+            // auto high_source_pos = m_graphs[1].get()[high_source].pos;
+            // auto high_target_pos = m_graphs[1].get()[high_target].pos;
+            // auto dist_high_source =
+            //         ArrayUtilities::distance(high_source_pos, u_pos);
+            // auto dist_high_target =
+            //         ArrayUtilities::distance(high_target_pos, u_pos);
         }
         // If both exist, choose the closest.
         {}

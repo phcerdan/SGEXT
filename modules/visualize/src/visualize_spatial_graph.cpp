@@ -60,7 +60,7 @@ create_graph_layout_view_from_spatial_graph(const GraphType &sg,
     // Flip camera because VTK-ITK different corner for origin.
     flip_camera(graphLayoutView->GetRenderer()->GetActiveCamera());
     // Set the window tittle and size.
-    auto renderWindow = graphLayoutView->GetRenderWindow();
+    auto *renderWindow = graphLayoutView->GetRenderWindow();
     renderWindow->SetWindowName(winTitle.c_str());
     renderWindow->SetSize(winWidth, winHeight);
 
@@ -106,9 +106,9 @@ void visualize_spatial_graph_with_points(
     auto graphLayoutView = create_graph_layout_view_from_spatial_graph(
             sg, winTitle, winWidth, winHeight);
     // graphLayoutView provides our window and interactor.
-    auto renderWindowInteractor = graphLayoutView->GetInteractor();
+    auto *renderWindowInteractor = graphLayoutView->GetInteractor();
     renderWindowInteractor->SetInteractorStyle(style);
-    auto renderWindow = graphLayoutView->GetRenderWindow();
+    auto *renderWindow = graphLayoutView->GetRenderWindow();
     renderWindow->SetNumberOfLayers(2);
     graphLayoutView->GetRenderer()->SetLayer(1);
     graphLayoutView->GetRenderer()->InteractiveOff();

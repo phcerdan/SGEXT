@@ -87,9 +87,7 @@ trim_vertex_to_single_label_map(
         const bool label_is_specified =
                 (std::find(std::cbegin(cluster_labels),
                            std::cend(cluster_labels),
-                           label) != std::cend(cluster_labels))
-                        ? true
-                        : false;
+                           label) != std::cend(cluster_labels));
         if (label_is_specified) {
             trimmed_vertex_to_single_label_cluster_map.emplace(vertex, label);
         }

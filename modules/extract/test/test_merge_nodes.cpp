@@ -106,12 +106,15 @@ TEST_F(ThreeConnectedNodesFixture, merge_nodes) {
     size_t count3degrees = 0;
     for (; vi != vi_end; ++vi) {
         auto degree = boost::out_degree(*vi, sg);
-        if (degree == 1)
+        if (degree == 1) {
             count1degrees++;
-        if (degree == 2)
+        }
+        if (degree == 2) {
             count2degrees++;
-        if (degree == 3)
+        }
+        if (degree == 3) {
             count3degrees++;
+        }
     }
     EXPECT_EQ(num_vertices(sg), 6);
     EXPECT_EQ(num_edges(sg), 6);
@@ -149,14 +152,18 @@ TEST_F(ThreeConnectedNodesFixture, merge_nodes) {
     std::tie(vi, vi_end) = boost::vertices(reduced_g);
     for (; vi != vi_end; ++vi) {
         auto degree = boost::out_degree(*vi, reduced_g);
-        if (degree == 0)
+        if (degree == 0) {
             count0degrees++;
-        if (degree == 1)
+        }
+        if (degree == 1) {
             count1degrees++;
-        if (degree == 2)
+        }
+        if (degree == 2) {
             count2degrees++;
-        if (degree == 3)
+        }
+        if (degree == 3) {
             count3degrees++;
+        }
     }
     EXPECT_EQ(count3degrees, 1);
     EXPECT_EQ(count2degrees, 0);
@@ -242,16 +249,21 @@ TEST_F(ContourLengthCornercase2Fixture, merge_nodes) {
     std::tie(vi, vi_end) = boost::vertices(reduced_g);
     for (; vi != vi_end; ++vi) {
         auto degree = boost::out_degree(*vi, reduced_g);
-        if (degree == 0)
+        if (degree == 0) {
             count0degrees++;
-        if (degree == 1)
+        }
+        if (degree == 1) {
             count1degrees++;
-        if (degree == 2)
+        }
+        if (degree == 2) {
             count2degrees++;
-        if (degree == 3)
+        }
+        if (degree == 3) {
             count3degrees++;
-        if (degree == 4)
+        }
+        if (degree == 4) {
             count4degrees++;
+        }
     }
     EXPECT_EQ(count4degrees, 1);
     EXPECT_EQ(count3degrees, 3);

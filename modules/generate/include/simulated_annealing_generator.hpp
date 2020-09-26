@@ -30,9 +30,9 @@ class simulated_annealing_generator {
     simulated_annealing_generator(const std::string &input_parameters_file);
     void init_parameters();
     void set_parameters_from_file(const std::string &input_file);
-    void save_parameters_to_file(const std::string &output_file);
+    void save_parameters_to_file(const std::string &output_file) const;
     simulated_annealing_generator_config_tree
-    save_parameters_to_configuration_tree();
+    save_parameters_to_configuration_tree() const;
     void set_parameters_from_configuration_tree(
             const simulated_annealing_generator_config_tree &tree);
 

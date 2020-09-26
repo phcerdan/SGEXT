@@ -51,10 +51,10 @@ void write_vertices_to_vtk_unstructured_grid(
 
 void write_vertex_descriptors_to_vtk_unstructured_grid(const GraphType &sg,
                                             vtkUnstructuredGrid *ugrid) {
-    auto point_data = ugrid->GetPointData();
+    auto *point_data = ugrid->GetPointData();
     const auto number_of_points = ugrid->GetNumberOfPoints();
 
-    auto vertex_descriptors = vtkIntArray::New();
+    vtkNew<vtkIntArray> vertex_descriptors;
     vertex_descriptors->SetName("vertex_descriptor");
     vertex_descriptors->SetNumberOfComponents(1);
     vertex_descriptors->SetNumberOfTuples(number_of_points);
@@ -79,10 +79,10 @@ void write_vertex_descriptors_to_vtk_unstructured_grid(const GraphType &sg,
 
 void write_degrees_to_vtk_unstructured_grid(const GraphType &sg,
                                             vtkUnstructuredGrid *ugrid) {
-    auto point_data = ugrid->GetPointData();
+    auto *point_data = ugrid->GetPointData();
     const auto number_of_points = ugrid->GetNumberOfPoints();
 
-    auto degree = vtkIntArray::New();
+    vtkNew<vtkIntArray> degree;
     degree->SetName("degree");
     degree->SetNumberOfComponents(1);
     degree->SetNumberOfTuples(number_of_points);
@@ -107,10 +107,10 @@ void write_degrees_to_vtk_unstructured_grid(const GraphType &sg,
 void write_spatial_node_ids_to_vtk_unstructured_grid(
         const GraphType &sg,
         vtkUnstructuredGrid *ugrid) {
-    auto point_data = ugrid->GetPointData();
+    auto *point_data = ugrid->GetPointData();
     const auto number_of_points = ugrid->GetNumberOfPoints();
 
-    auto spatial_node_ids = vtkIntArray::New();
+    vtkNew<vtkIntArray> spatial_node_ids;
     spatial_node_ids->SetName("spatial_node_id");
     spatial_node_ids->SetNumberOfComponents(1);
     spatial_node_ids->SetNumberOfTuples(number_of_points);
@@ -135,10 +135,10 @@ void write_spatial_node_ids_to_vtk_unstructured_grid(
 
 void write_ete_distances_to_vtk_unstructured_grid(const GraphType &sg,
                                                   vtkUnstructuredGrid *ugrid) {
-    auto cell_data = ugrid->GetCellData();
+    auto *cell_data = ugrid->GetCellData();
     const auto ncells = ugrid->GetNumberOfCells();
     const std::string array_name = "end_to_end_distance";
-    auto vtk_array = vtkDoubleArray::New();
+    vtkNew<vtkDoubleArray> vtk_array;
     vtk_array->SetName(array_name.c_str());
     vtk_array->SetNumberOfComponents(1);
     vtk_array->SetNumberOfTuples(ncells);
@@ -162,10 +162,10 @@ void write_ete_distances_to_vtk_unstructured_grid(const GraphType &sg,
 
 void write_contour_lengths_to_vtk_unstructured_grid(
         const GraphType &sg, vtkUnstructuredGrid *ugrid) {
-    auto cell_data = ugrid->GetCellData();
+    auto *cell_data = ugrid->GetCellData();
     const auto ncells = ugrid->GetNumberOfCells();
     const std::string array_name = "contour_length";
-    auto vtk_array = vtkDoubleArray::New();
+    vtkNew<vtkDoubleArray> vtk_array;
     vtk_array->SetName(array_name.c_str());
     vtk_array->SetNumberOfComponents(1);
     vtk_array->SetNumberOfTuples(ncells);
@@ -207,10 +207,10 @@ convert_to_vtk_unstructured_grid(const GraphType &sg) {
         auto target = boost::target(*ei, sg);
         // Add vtkLine
         {
-            auto vtk_id_list = vtkIdList::New();
+            auto *vtk_id_list = vtkIdList::New();
             vtk_id_list->InsertNextId(vertex_id_map.at(source));
             vtk_id_list->InsertNextId(vertex_id_map.at(target));
-            auto line = vtkLine::New();
+            auto *line = vtkLine::New();
             ugrid->InsertNextCell(line->GetCellType(), vtk_id_list);
         }
     }
@@ -241,9 +241,9 @@ convert_to_vtk_unstructured_grid_with_edge_points(const GraphType &sg) {
     for (; ei != ei_end; ++ei) {
         auto source = boost::source(*ei, sg);
         auto target = boost::target(*ei, sg);
-        auto &sg_edge = sg[*ei];
+        const auto &sg_edge = sg[*ei];
         // Add vtkPolyLine
-        auto &sg_edge_points = sg_edge.edge_points;
+        const auto &sg_edge_points = sg_edge.edge_points;
         // Check if the first point in edge_points, is closer to source, or to
         // target. Only do the check if there is at least one edge_point.
         const bool source_is_closer_to_begin =
@@ -254,7 +254,7 @@ convert_to_vtk_unstructured_grid_with_edge_points(const GraphType &sg) {
                                   ArrayUtilities::distance(sg[target].pos,
                                                            sg_edge_points[0]);
         {
-            auto vtk_id_list = vtkIdList::New();
+            auto *vtk_id_list = vtkIdList::New();
             if (source_is_closer_to_begin) {
                 vtk_id_list->InsertNextId(vertex_id_map.at(source));
             } else {
@@ -272,7 +272,7 @@ convert_to_vtk_unstructured_grid_with_edge_points(const GraphType &sg) {
                 vtk_id_list->InsertNextId(vertex_id_map.at(source));
             }
 
-            auto poly_line = vtkPolyLine::New();
+            auto *poly_line = vtkPolyLine::New();
             ugrid->InsertNextCell(poly_line->GetCellType(), vtk_id_list);
         }
     }
@@ -289,7 +289,7 @@ convert_to_vtk_unstructured_grid_with_edge_points(const GraphType &sg) {
 
 void write_vtk_unstructured_grid(vtkUnstructuredGrid *ugrid,
                                  const std::string &file_name) {
-    auto ugrid_writer = vtkXMLUnstructuredGridWriter::New();
+    vtkNew<vtkXMLUnstructuredGridWriter> ugrid_writer;
     ugrid_writer->SetFileName(file_name.c_str());
     ugrid_writer->SetInputData(ugrid);
     ugrid_writer->Update();

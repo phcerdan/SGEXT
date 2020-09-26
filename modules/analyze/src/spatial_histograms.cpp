@@ -76,14 +76,15 @@ histo::Histo<double> histogram_degrees(const std::vector<unsigned int> &degrees,
     // Generate breaks to get middle of the bins to be the integer
     // value of the degree
     histo::Histo<double> hist_degrees;
-    if (bins == 0)
+    if (bins == 0) {
         hist_degrees = histo::Histo<double>(
                 degrees, histo::GenerateBreaksFromRangeAndBins(
                                  -0.5, max_degree + 0.5, max_degree + 1));
-    else
+    } else {
         hist_degrees = histo::Histo<double>(
                 degrees, histo::GenerateBreaksFromRangeAndBins(
                                  -0.5, max_degree + 0.5, bins));
+    }
     hist_degrees.name = histo_name;
     return hist_degrees;
 }
@@ -95,14 +96,16 @@ histo::Histo<double> histogram_degrees(const std::vector<double> &degrees,
     // Generate breaks to get middle of the bins to be the integer
     // value of the degree
     histo::Histo<double> hist_degrees;
-    if (bins == 0)
+    if (bins == 0) {
         hist_degrees = histo::Histo<double>(
                 degrees, histo::GenerateBreaksFromRangeAndBins(
-                                 -0.5, max_degree + 0.5, max_degree + 1));
-    else
+                                 -0.5, max_degree + 0.5,
+                                 static_cast<size_t>(max_degree) + 1));
+    } else {
         hist_degrees = histo::Histo<double>(
                 degrees, histo::GenerateBreaksFromRangeAndBins(
                                  -0.5, max_degree + 0.5, bins));
+    }
     hist_degrees.name = histo_name;
     return hist_degrees;
 }
@@ -113,12 +116,13 @@ histo::Histo<double> histogram_distances(const std::vector<double> &distances,
     auto max_distance =
             *std::max_element(std::begin(distances), std::end(distances));
     histo::Histo<double> hist_distances;
-    if (width <= 0.0 + 10 * std::numeric_limits<double>::epsilon())
+    if (width <= 0.0 + 10 * std::numeric_limits<double>::epsilon()) {
         hist_distances = histo::Histo<double>(distances);
-    else
+    } else {
         hist_distances = histo::Histo<double>(
                 distances, histo::GenerateBreaksFromRangeAndWidth(
                                    0.0, max_distance, width));
+    }
     hist_distances.name = histo_name;
     return hist_distances;
 }
@@ -138,11 +142,12 @@ histo::Histo<double> histogram_angles(const std::vector<double> &angles,
                                       const std::string &histo_name) {
     constexpr auto pi = 3.14159265358979323846;
     histo::Histo<double> hist_angles;
-    if (bins == 0)
+    if (bins == 0) {
         hist_angles = histo::Histo<double>(angles, std::make_pair(0.0, pi));
-    else
+    } else {
         hist_angles = histo::Histo<double>(
                 angles, histo::GenerateBreaksFromRangeAndBins(0.0, pi, bins));
+    }
     hist_angles.name = histo_name;
     return hist_angles;
 }
@@ -151,12 +156,13 @@ histo::Histo<double> histogram_cosines(const std::vector<double> &cosines,
                                        size_t bins,
                                        const std::string &histo_name) {
     histo::Histo<double> hist_cosines;
-    if (bins == 0)
+    if (bins == 0) {
         hist_cosines = histo::Histo<double>(cosines, std::make_pair(-1.0, 1.0));
-    else
+    } else {
         hist_cosines = histo::Histo<double>(
                 cosines,
                 histo::GenerateBreaksFromRangeAndBins(-1.0, 1.0, bins));
+    }
     hist_cosines.name = histo_name;
     return hist_cosines;
 }

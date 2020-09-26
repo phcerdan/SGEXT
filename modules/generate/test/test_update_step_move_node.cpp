@@ -86,10 +86,11 @@ TEST_F(UpdateStepMoveNodeFixture, update_graph_works) {
     // Note that there is a non-zero chance (extremely low) for the
     // random movement to get zero modulus. The seed is fixed in the test
     // fixture to avoid failure.
-    if (step.selected_node_ == 0)
+    if (step.selected_node_ == 0) {
         EXPECT_NE(g[step.selected_node_].pos, p0);
-    if (step.selected_node_ == 1)
+    } else if (step.selected_node_ == 1) {
         EXPECT_NE(g[step.selected_node_].pos, p1);
-    if (step.selected_node_ == 2)
+    } else if (step.selected_node_ == 2) {
         EXPECT_NE(g[step.selected_node_].pos, p2);
+    }
 }

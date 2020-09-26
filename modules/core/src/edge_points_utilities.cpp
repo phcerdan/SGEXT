@@ -39,8 +39,9 @@ double edge_points_length(const SpatialEdge &se) {
     const auto &eps = se.edge_points;
     size_t npoints = eps.size();
     // if empty or only one point, return null distance
-    if (npoints < 2)
+    if (npoints < 2) {
         return 0.0;
+    }
     double length = 0.0;
     for (size_t i = 1; i != npoints; i++) {
         length += ArrayUtilities::distance(eps[i], eps[i - 1]);
@@ -54,8 +55,9 @@ double contour_length(const GraphType::edge_descriptor &edge_desc,
     const auto &eps = se.edge_points;
     auto source = boost::source(edge_desc, sg);
     auto target = boost::target(edge_desc, sg);
-    if (eps.empty())
+    if (eps.empty()) {
         return ArrayUtilities::distance(sg[target].pos, sg[source].pos);
+    }
     // Because the graph is unordered, source and target are not guaranteed
     // to be the closer to eps[0] or eps.back() respectively, so we compute
     // distance between source to eps[0] to be sure. If they are not connected,

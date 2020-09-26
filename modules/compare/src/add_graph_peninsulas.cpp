@@ -68,8 +68,8 @@ AddGraphPeninsulasResult add_graph_peninsulas(
         const auto &vertex_d = comp.first;
         const auto &component_index = comp.second;
         auto pos = g_diff[vertex_d].pos;
-        auto closeIdList = graph_closest_points_by_radius_locator(
-                pos, octree, radius_touch);
+        auto closeIdList = graph_closest_points_by_radius_locator(pos, octree,
+                                                                  radius_touch);
         auto closest_descriptors =
                 closest_existing_descriptors_by_graph(closeIdList, idMap);
         auto &extended_graph_id_with_graph_descriptor =
@@ -98,8 +98,9 @@ AddGraphPeninsulasResult add_graph_peninsulas(
     for (unsigned int comp_graph_index = 0;
          comp_graph_index < num_of_components; ++comp_graph_index) {
         // Only analyze isolated components and peninsulas
-        if (touch_extended_graph_count[comp_graph_index] > 1)
+        if (touch_extended_graph_count[comp_graph_index] > 1) {
             continue;
+        }
 
         // Locate the touching point
         GraphType::vertex_descriptor already_added_vertex;
@@ -128,8 +129,9 @@ AddGraphPeninsulasResult add_graph_peninsulas(
                         touching_extended_descriptor.edge_d, result_sg);
                 already_added_vertex = splitEdge.vertex_descriptor_added;
             } else {
-                std::runtime_error("Impossible, extended_graph descriptor has "
-                                   "to exist at the touch point");
+                throw std::runtime_error(
+                        "Impossible, extended_graph descriptor has "
+                        "to exist at the touch point");
             }
         }
 

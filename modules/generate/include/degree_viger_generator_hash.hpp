@@ -22,7 +22,6 @@
 
 #include "rng.hpp"
 #include <assert.h>
-#include <cstddef> // For NULL
 
 namespace SG {
 
@@ -39,7 +38,7 @@ inline int *fast_search(int *m, const int size, const int a) {
     while (m != p--)
         if (*p == a)
             return p;
-    return NULL;
+    return nullptr;
 }
 
 namespace generator {
@@ -97,7 +96,7 @@ inline void H_copy(int *mem, int *h, int size) {
             *(mem++) = *h;
 }
 
-// Look for the place to add an element. Return NULL if element is already here.
+// Look for the place to add an element. Return nullptr if element is already here.
 inline int *H_add(int *h, const int size, int a) {
     int k = HASH_KEY(a, size);
     if (h[k] == HASH_NONE)
@@ -107,7 +106,7 @@ inline int *H_add(int *h, const int size, int a) {
         if (h[k] == HASH_NONE)
             return h + k;
     }
-    return NULL;
+    return nullptr;
 }
 
 // would element be well placed in newk ?
@@ -138,19 +137,19 @@ inline void H_rm(int *h, const int size, int k) {
 
 // put a
 inline int *H_put(int *h, const int size, const int a) {
-    assert(H_add(h, size, a) != NULL);
+    assert(H_add(h, size, a) != nullptr);
     int k = HASH_KEY(a, size);
     while (h[k] != HASH_NONE) {
         k = HASH_REKEY(k, size);
     }
     h[k] = a;
-    assert(H_add(h, size, a) == NULL);
+    assert(H_add(h, size, a) == nullptr);
     return h + k;
 }
 
 // find A
 inline int H_find(int *h, int size, const int a) {
-    assert(H_add(h, size, a) == NULL);
+    assert(H_add(h, size, a) == nullptr);
     int k = HASH_KEY(a, size);
     while (h[k] != a) {
         k = HASH_REKEY(k, size);
@@ -158,7 +157,7 @@ inline int H_find(int *h, int size, const int a) {
     return k;
 }
 
-// Look for the place to add an element. Return NULL if element is already here.
+// Look for the place to add an element. Return nullptr if element is already here.
 inline bool H_pair_insert(int *h, const int size, int a, int b) {
     int k = HASH_PAIR_KEY(a, b, size);
     if (h[2 * k] == HASH_NONE) {
@@ -185,9 +184,9 @@ inline bool H_pair_insert(int *h, const int size, int a, int b) {
 // Look for an element
 inline bool H_is(int *mem, const int size, const int elem) {
     if (IS_HASH(size))
-        return (H_add(mem, HASH_EXPAND(size), elem) == NULL);
+        return (H_add(mem, HASH_EXPAND(size), elem) == nullptr);
     else
-        return fast_search(mem, size, elem) != NULL;
+        return fast_search(mem, size, elem) != nullptr;
 }
 
 // pick random location (containing an element)

@@ -68,15 +68,16 @@ GraphType extend_low_info_graph_via_dfs(
 
     vertex_iterator vi, vi_end;
     std::tie(vi, vi_end) = boost::vertices(input_sg);
-    auto start = *vi;
+    vertex_descriptor start;
 
     for (; vi != vi_end; ++vi) {
         auto degree = boost::out_degree(*vi, input_sg);
         start = *vi;
-        if (verbose)
+        if (verbose) {
             std::cout << "ExtendLowInfoGraphVisitor Visit: start: " << start
                       << " : " << ArrayUtilities::to_string(input_sg[start].pos)
                       << ". Degree: " << degree << std::endl;
+        }
         boost::depth_first_visit(input_sg, start, vis, propColorMap);
     }
 

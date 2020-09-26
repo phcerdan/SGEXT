@@ -132,7 +132,7 @@ void transform_to_physical_point_interface(
  */
 void export_graph_interface(GraphType & reduced_g,
         const std::string & exportReducedGraph_foldername,
-        std::string output_full_string,
+        const std::string & output_full_string,
         bool exportSerialized = true,
         bool exportVtu = false,
         bool exportVtuWithEdgePoints = false,
@@ -142,7 +142,7 @@ void export_graph_interface(GraphType & reduced_g,
 
 void export_graph_data_interface(const GraphType & reduced_g,
         const std::string & exportData_foldername,
-        std::string output_full_string,
+        const std::string & output_full_string,
         bool ignoreAngleBetweenParallelEdges = false,
         bool ignoreEdgesToEndNodes = false,
         size_t ignoreEdgesShorterThan = 0,

@@ -37,8 +37,9 @@ std::vector<IdWithGraphDescriptor> closest_existing_descriptors_by_graph(
         auto const &gdescs_at_close_index = idMap.at(idList);
         for (size_t gdescs_index = 0; gdescs_index < gdescs_size;
              ++gdescs_index) {
-            if (id_graph_descriptors[gdescs_index].exist)
+            if (id_graph_descriptors[gdescs_index].exist) {
                 continue;
+            }
             const auto &gdesc = gdescs_at_close_index[gdescs_index];
             if (gdesc.exist) {
                 id_graph_descriptors[gdescs_index].exist = true;
@@ -46,8 +47,9 @@ std::vector<IdWithGraphDescriptor> closest_existing_descriptors_by_graph(
                 id_graph_descriptors[gdescs_index].descriptor = gdesc;
             }
         }
-        if (all_graph_descriptors_exist(id_graph_descriptors))
+        if (all_graph_descriptors_exist(id_graph_descriptors)) {
             break;
+        }
     }
     return id_graph_descriptors;
 }
@@ -64,8 +66,9 @@ std::vector<IdWithGraphDescriptor> closest_existing_vertex_by_graph(
         auto const &gdescs_at_close_index = idMap.at(idList);
         for (size_t gdescs_index = 0; gdescs_index < gdescs_size;
              ++gdescs_index) {
-            if (id_graph_descriptors[gdescs_index].exist)
+            if (id_graph_descriptors[gdescs_index].exist) {
                 continue;
+            }
             const auto &gdesc = gdescs_at_close_index[gdescs_index];
             if (gdesc.exist && gdesc.is_vertex) {
                 id_graph_descriptors[gdescs_index].exist = true;
@@ -73,8 +76,9 @@ std::vector<IdWithGraphDescriptor> closest_existing_vertex_by_graph(
                 id_graph_descriptors[gdescs_index].descriptor = gdesc;
             }
         }
-        if (all_graph_descriptors_exist(id_graph_descriptors))
+        if (all_graph_descriptors_exist(id_graph_descriptors)) {
             break;
+        }
     }
     return id_graph_descriptors;
 }
@@ -93,16 +97,18 @@ build_octree_locator(vtkPoints *inputPoints) {
 bool all_graph_descriptors_exist(
         const std::vector<IdWithGraphDescriptor> &gdescs) {
     for (const auto &gdesc_with_id : gdescs) {
-        if (!gdesc_with_id.exist)
+        if (!gdesc_with_id.exist) {
             return false;
+        }
     }
     return true;
 }
 
 bool all_graph_descriptors_exist(const std::vector<graph_descriptor> &gdescs) {
     for (const auto &gdesc : gdescs) {
-        if (!gdesc.exist)
+        if (!gdesc.exist) {
             return false;
+        }
     }
     return true;
 }

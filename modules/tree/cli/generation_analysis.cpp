@@ -128,7 +128,7 @@ Warning: This is not an index, but a count.)");
     po::variables_map vm;
     try {
         po::store(po::parse_command_line(argc, argv, opt_desc), vm);
-        if (vm.count("help") || argc <= 1) {
+        if (static_cast<bool>(vm.count("help")) || argc <= 1) {
             std::cout << "Basic usage:\n" << opt_desc << "\n";
             return EXIT_SUCCESS;
         }

@@ -40,7 +40,7 @@ detect_clusters_with_radius(const GraphType &input_sg,
     using DetectClustersGraphVisitorType =
             DetectClustersGraphVisitor<GraphType>;
     auto cluster_edge_condition = [cluster_radius](edge_descriptor e,
-                                                   const GraphType input_sg) {
+                                                   const GraphType &input_sg) {
         return DetectClustersGraphVisitorType::condition_edge_is_close(
                 e, input_sg, cluster_radius);
     };

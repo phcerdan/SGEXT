@@ -116,7 +116,7 @@ int main(int argc, char *const argv[]) {
     po::variables_map vm;
     try {
         po::store(po::parse_command_line(argc, argv, opt_desc), vm);
-        if (vm.count("help") || argc <= 1) {
+        if (static_cast<bool>(vm.count("help")) || argc <= 1) {
             std::cout << "Basic usage:\n" << opt_desc << "\n";
             return EXIT_SUCCESS;
         }
@@ -128,8 +128,9 @@ int main(int argc, char *const argv[]) {
 
     std::string filename = vm["input"].as<std::string>();
     bool verbose = vm["verbose"].as<bool>();
-    if (verbose)
+    if (verbose) {
         std::cout << "Filename: " << filename << std::endl;
+    }
     bool output_filename_simple = vm["output_filename_simple"].as<bool>();
     bool transformToPhysicalPoints =
             vm["transformToPhysicalPoints"].as<bool>();
@@ -144,14 +145,14 @@ int main(int argc, char *const argv[]) {
     bool ignoreAngleBetweenParallelEdges =
             vm["ignoreAngleBetweenParallelEdges"].as<bool>();
     bool ignoreEdgesToEndNodes = vm["ignoreEdgesToEndNodes"].as<bool>();
-    bool exportReducedGraph = vm.count("exportReducedGraph_foldername");
-    std::string exportReducedGraph_foldername = "";
+    const bool exportReducedGraph = static_cast<bool>(vm.count("exportReducedGraph_foldername"));
+    std::string exportReducedGraph_foldername;
     if(exportReducedGraph) {
         exportReducedGraph_foldername =
             vm["exportReducedGraph_foldername"].as<std::string>();
     }
-    bool exportData = vm.count("exportData_foldername");
-    std::string exportData_foldername = "";
+    const bool exportData = static_cast<bool>(vm.count("exportData_foldername"));
+    std::string exportData_foldername;
     if(exportData) {
         exportData_foldername =
             vm["exportData_foldername"].as<std::string>();

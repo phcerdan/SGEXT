@@ -1,6 +1,5 @@
 #include "compute_graph_properties.hpp"
 #include "gmock/gmock.h"
-using ::testing::DoubleEq;
 
 /**
  * Spatial Graph.
@@ -67,8 +66,9 @@ TEST_F(SpatialGraphFixture, compute_angles_cosines) {
     std::vector<double> expected_cosines = {-1.0, 0.0, 0.0};
     std::sort(expected_cosines.begin(), expected_cosines.end());
     EXPECT_EQ(cosines.size(), 3);
-    for (size_t i = 0; i < cosines.size(); i++)
+    for (size_t i = 0; i < cosines.size(); i++) {
         EXPECT_NEAR(cosines[i], expected_cosines[i], 0.0000000000000001);
+    }
 }
 
 struct PlusSymbolFixture : public SpatialGraphFixture {
@@ -109,8 +109,9 @@ TEST_F(PlusSymbolFixture, compute_angles_cosines) {
     std::vector<double> expected_cosines = {-1.0, 0.0, 0.0, -1.0, 0.0, 0.0};
     std::sort(expected_cosines.begin(), expected_cosines.end());
     EXPECT_EQ(cosines.size(), 6);
-    for (size_t i = 0; i < cosines.size(); i++)
+    for (size_t i = 0; i < cosines.size(); i++) {
         EXPECT_NEAR(cosines[i], expected_cosines[i], 0.0000000000000001);
+    }
 }
 
 struct OneEdge : public ::testing::Test {
@@ -157,8 +158,9 @@ TEST_F(TwoParallelEdgesFixture, compute_angles_cosines) {
     std::vector<double> expected_angles = {0.0, 0.0};
     std::sort(expected_angles.begin(), expected_angles.end());
     EXPECT_EQ(angles.size(), 2);
-    for (size_t i = 0; i < angles.size(); i++)
+    for (size_t i = 0; i < angles.size(); i++) {
         EXPECT_NEAR(angles[i], expected_angles[i], 0.0000000000000001);
+    }
 
     std::cout << "Cosines" << std::endl;
     // compute cosines from angles, not from g
@@ -170,8 +172,9 @@ TEST_F(TwoParallelEdgesFixture, compute_angles_cosines) {
     std::vector<double> expected_cosines = {1.0, 1.0};
     std::sort(expected_cosines.begin(), expected_cosines.end());
     EXPECT_EQ(cosines.size(), 2);
-    for (size_t i = 0; i < cosines.size(); i++)
+    for (size_t i = 0; i < cosines.size(); i++) {
         EXPECT_NEAR(cosines[i], expected_cosines[i], 0.0000000000000001);
+    }
 }
 
 TEST_F(TwoParallelEdgesFixture, compute_ignoring_parallel_edges) {
@@ -207,12 +210,15 @@ TEST_F(SpatialGraphFixture, compute_filtered_distances) {
     for (auto ei = edges.first; ei != edges.second; ++ei) {
         const auto &ep = g[*ei].edge_points;
         size_t npoints = ep.size();
-        if (npoints == 0)
+        if (npoints == 0) {
             count0++;
-        if (npoints == 1)
+        }
+        if (npoints == 1) {
             count1++;
-        if (npoints == 2)
+        }
+        if (npoints == 2) {
             count2++;
+        }
     }
     EXPECT_EQ(count0, 0);
     EXPECT_EQ(count1, 1);
@@ -245,12 +251,15 @@ TEST_F(SpatialGraphFixture, compute_filtered_angles) {
     for (auto ei = edges.first; ei != edges.second; ++ei) {
         const auto &ep = g[*ei].edge_points;
         size_t npoints = ep.size();
-        if (npoints == 0)
+        if (npoints == 0) {
             count0++;
-        if (npoints == 1)
+        }
+        if (npoints == 1) {
             count1++;
-        if (npoints == 2)
+        }
+        if (npoints == 2) {
             count2++;
+        }
     }
     EXPECT_EQ(count0, 0);
     EXPECT_EQ(count1, 1);
@@ -285,12 +294,15 @@ TEST_F(SpatialGraphFixture, filtered_distances_ignoring_end_nodes) {
     for (auto ei = edges.first; ei != edges.second; ++ei) {
         const auto &ep = g[*ei].edge_points;
         size_t npoints = ep.size();
-        if (npoints == 0)
+        if (npoints == 0) {
             count0++;
-        if (npoints == 1)
+        }
+        if (npoints == 1) {
             count1++;
-        if (npoints == 2)
+        }
+        if (npoints == 2) {
             count2++;
+        }
     }
     EXPECT_EQ(count0, 0);
     EXPECT_EQ(count1, 1);
@@ -313,12 +325,15 @@ TEST_F(SpatialGraphFixture, filtered_angles_ignoring_end_nodes) {
     for (auto ei = edges.first; ei != edges.second; ++ei) {
         const auto &ep = g[*ei].edge_points;
         size_t npoints = ep.size();
-        if (npoints == 0)
+        if (npoints == 0) {
             count0++;
-        if (npoints == 1)
+        }
+        if (npoints == 1) {
             count1++;
-        if (npoints == 2)
+        }
+        if (npoints == 2) {
             count2++;
+        }
     }
     EXPECT_EQ(count0, 0);
     EXPECT_EQ(count1, 1);

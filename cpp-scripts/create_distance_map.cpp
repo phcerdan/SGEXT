@@ -51,7 +51,7 @@ int main(int argc, char *const argv[]) {
     po::variables_map vm;
     try {
         po::store(po::parse_command_line(argc, argv, opt_desc), vm);
-        if (vm.count("help") || argc <= 1) {
+        if (static_cast<bool>(vm.count("help")) || argc <= 1) {
             std::cout << "Basic usage:\n" << opt_desc << "\n";
             return EXIT_SUCCESS;
         }
@@ -67,10 +67,11 @@ int main(int argc, char *const argv[]) {
     bool verbose = vm["verbose"].as<bool>();
     bool use_itk_approximate = vm["use_itk_approximate"].as<bool>();
     std::string foreground = vm["foreground"].as<std::string>();
-    if (vm.count("foreground") &&
-        (!(foreground == "white" || foreground == "black")))
+    if (static_cast<bool>(vm.count("foreground")) &&
+        (!(foreground == "white" || foreground == "black"))) {
         throw po::validation_error(po::validation_error::invalid_option_value,
                                    "foreground");
+    }
 
     SG::create_distance_map_function_io(filename, outputFolder, foreground,
                                         use_itk_approximate, verbose);

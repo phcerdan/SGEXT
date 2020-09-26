@@ -107,8 +107,9 @@ read_vertex_to_label_map(const std::string &vertex_to_label_map_file) {
     // Create an input filestream
     std::ifstream my_file(vertex_to_label_map_file);
     // Make sure the file is open
-    if (!my_file.is_open())
+    if (!my_file.is_open()) {
         throw std::runtime_error("Could not open file.");
+    }
     // Helper vars
     std::string line;
     int val;
@@ -128,16 +129,18 @@ read_vertex_to_label_map(const std::string &vertex_to_label_map_file) {
         // Extract each integer
         while (ss >> val) {
             // At the time we find a #, skip this line
-            if (val == '#')
+            if (val == '#') {
                 break;
+            }
             if (colIdx == 0) {
                 vertex_ids.push_back(val);
             } else if (colIdx == 1) {
                 labels.push_back(val);
             }
             // If the next token is a comma, ignore it and move on
-            if (ss.peek() == ',')
+            if (ss.peek() == ',') {
                 ss.ignore();
+            }
 
             // Increment the column index
             colIdx++;
@@ -194,8 +197,9 @@ read_edge_to_label_map(const std::string &edge_to_label_map_file) {
     // Create an input filestream
     std::ifstream my_file(edge_to_label_map_file);
     // Make sure the file is open
-    if (!my_file.is_open())
+    if (!my_file.is_open()) {
         throw std::runtime_error("Could not open file.");
+    }
     // Helper vars
     std::string line;
     int val;
@@ -217,8 +221,9 @@ read_edge_to_label_map(const std::string &edge_to_label_map_file) {
         // Extract each integer
         while (ss >> val) {
             // At the time we find a #, skip this line
-            if (val == '#')
+            if (val == '#') {
                 break;
+            }
             if (colIdx == 0) {
                 edge_sources.push_back(val);
             } else if (colIdx == 1) {
@@ -231,8 +236,9 @@ read_edge_to_label_map(const std::string &edge_to_label_map_file) {
                 ss.ignore();
             }
             // If the next token is a comma, ignore it and move on
-            if (ss.peek() == ',')
+            if (ss.peek() == ',') {
                 ss.ignore();
+            }
 
             // Increment the column index
             colIdx++;

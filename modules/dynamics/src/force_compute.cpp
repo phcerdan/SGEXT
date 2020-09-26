@@ -25,8 +25,7 @@
 namespace SG {
 void PairBondForce::compute() {
     if (!force_function) {
-        throw std::runtime_error(
-                "force_function is not set in PairBondForce");
+        throw std::runtime_error("force_function is not set in PairBondForce");
     }
 
     reset_forces_to_zero();
@@ -43,10 +42,11 @@ void PairBondForce::compute() {
         bond_force.force = force_function(*p_a, *p_b, *bond_force.bond);
         // Translating a bond force using as a reference the force
         // from particle a to b, (i.e. F_{a,b}) to each particle.
-        // We divide the bond force by half, and apply each half to each particle,
-        // changing the sign.
-        // (the particles are always at the two ends of the bond).
-        const auto half_bond_force =  ArrayUtilities::product_scalar(bond_force.force, 0.5);
+        // We divide the bond force by half, and apply each half to each
+        // particle, changing the sign. (the particles are always at the two
+        // ends of the bond).
+        const auto half_bond_force =
+                ArrayUtilities::product_scalar(bond_force.force, 0.5);
         // Assign to the per particle forces
         auto &force_on_a = particle_forces[p_a_index].force;
         auto &force_on_b = particle_forces[p_b_index].force;
@@ -95,12 +95,13 @@ void FixedPairBondForce::negate_forces() {
 
 void ParticleForceCompute::compute() {
     if (!force_function) {
-        throw std::runtime_error("force_function is not set in ParticleForceCompute");
+        throw std::runtime_error(
+                "force_function is not set in ParticleForceCompute");
     }
     reset_forces_to_zero();
 
     size_t current_particle_index = 0;
-    for (auto &particle : m_sys->all.particles) {
+    for (const auto &particle : m_sys->all.particles) {
         auto &current_particle_force =
                 particle_forces[current_particle_index].force;
         assert(particle.id ==
@@ -120,11 +121,13 @@ ParticleRandomForceCompute::ParticleRandomForceCompute(
         const double &gamma /* drag */,
         const double &deltaT,
         const size_t &dimension)
-        : ParticleForceCompute(sys), kT(kT), gamma(gamma), deltaT(deltaT), dimension(dimension), _modulo(sqrt(2 * dimension * kT * gamma / deltaT)) {
+        : ParticleForceCompute(sys), kT(kT), gamma(gamma), deltaT(deltaT),
+          dimension(dimension),
+          _modulo(sqrt(2.0 * dimension * kT * gamma / deltaT)) {
     const auto &modulo = _modulo;
-    this->force_function =
-            [&modulo](const Particle &) -> ArrayUtilities::Array3D {
-                return RNG::random_orientation(modulo);
+    this->force_function = [&modulo](const Particle &
+                                     /*p*/) -> ArrayUtilities::Array3D {
+        return RNG::random_orientation(modulo);
     };
 }
 

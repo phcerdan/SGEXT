@@ -29,7 +29,7 @@ BoundingBox::BoundingBox(const PointType &input_ini, const PointType &input_end)
 
 BoundingBox::BoundingBox(const PointType &center,
                          const std::array<size_t, 3> &radius,
-                         const bool) {
+                         const bool /*unused*/) {
     for (unsigned int i = 0; i < 3; ++i) {
         ini[i] = center[i] - radius[i];
         end[i] = center[i] + radius[i];
@@ -156,7 +156,7 @@ bool BoundingBox::is_point_inside(const PointType &input_point) const {
            input_point[2] >= ini[2] && input_point[2] <= end[2];
 }
 
-bool BoundingBox::are_bounds_inside(double *external_bounds) const {
+bool BoundingBox::are_bounds_inside(const double *external_bounds) const {
     return external_bounds[0] >= ini[0] && external_bounds[0] <= end[0] &&
            external_bounds[1] >= ini[0] && external_bounds[1] <= end[0] &&
            external_bounds[2] >= ini[1] && external_bounds[2] <= end[1] &&

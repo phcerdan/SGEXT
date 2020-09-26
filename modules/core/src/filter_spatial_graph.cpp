@@ -29,8 +29,8 @@ namespace SG {
 FilteredGraphType filter_by_bounding_box_no_copy(const BoundingBox &box,
                                                  const GraphType &g) {
     auto edge_lambda = [&](GraphType::edge_descriptor ed) -> bool {
-        auto &edge_points = g[ed].edge_points;
-        for (auto &point : edge_points) {
+        const auto &edge_points = g[ed].edge_points;
+        for (const auto &point : edge_points) {
             if (is_inside(point, box)) {
                 return true;
             }
@@ -41,16 +41,15 @@ FilteredGraphType filter_by_bounding_box_no_copy(const BoundingBox &box,
         const auto &pos = g[vd].pos;
         if (is_inside(pos, box)) {
             return true;
-        } else { // iterate over the edges to check edge_points are inside or
-                 // not
-            const auto out_edges = boost::out_edges(vd, g);
-            for (auto ei = out_edges.first; ei != out_edges.second; ++ei) {
-                const auto &edge_points = g[*ei].edge_points;
-                for (const auto &point : edge_points) {
-                    if (is_inside(point, box)) {
-                        // nodes_outside_with_edges_inside.push_back(pos);
-                        return true;
-                    }
+        }
+        // iterate over the edges to check edge_points are inside or not
+        const auto out_edges = boost::out_edges(vd, g);
+        for (auto ei = out_edges.first; ei != out_edges.second; ++ei) {
+            const auto &edge_points = g[*ei].edge_points;
+            for (const auto &point : edge_points) {
+                if (is_inside(point, box)) {
+                    // nodes_outside_with_edges_inside.push_back(pos);
+                    return true;
                 }
             }
         }
@@ -101,7 +100,7 @@ std::vector<ComponentGraphType> filter_component_graphs(
         const std::unordered_map<GraphType::vertex_descriptor, int>
                 &components_map) {
     std::vector<ComponentGraphType> component_graphs;
-    for (size_t comp_index = 0; comp_index < num_of_components; comp_index++)
+    for (size_t comp_index = 0; comp_index < num_of_components; comp_index++) {
         component_graphs.emplace_back(
                 inputGraph,
                 // edge_lambda
@@ -116,6 +115,7 @@ std::vector<ComponentGraphType> filter_component_graphs(
                 [components_map, comp_index](GraphType::vertex_descriptor v) {
                     return components_map.at(v) == static_cast<int>(comp_index);
                 });
+    }
 
     return component_graphs;
 }
@@ -154,26 +154,26 @@ GraphType copy_largest_connected_component(const GraphType &inputGraph) {
     return largest_component_graph;
 }
 
-void append_graph_in_place(GraphType &g_out, const GraphType &g_added) {
-    // Merge g_added into g_out to have two components there.
+void append_graph_in_place(GraphType &g_out, const GraphType &g_to_add) {
+    // Merge g_to_add into g_out to have two components there.
     using vertex_descriptor = boost::graph_traits<GraphType>::vertex_descriptor;
     using vertex_iterator = boost::graph_traits<GraphType>::vertex_iterator;
     using edge_iterator = boost::graph_traits<GraphType>::edge_iterator;
-    vertex_iterator g_added_vit, g_added_vit_end;
-    edge_iterator g_added_eit, g_added_eit_end;
-    std::tie(g_added_vit, g_added_vit_end) = boost::vertices(g_added);
-    std::tie(g_added_eit, g_added_eit_end) = boost::edges(g_added);
+    vertex_iterator g_to_add_vit, g_to_add_vit_end;
+    edge_iterator g_to_add_eit, g_to_add_eit_end;
+    std::tie(g_to_add_vit, g_to_add_vit_end) = boost::vertices(g_to_add);
+    std::tie(g_to_add_eit, g_to_add_eit_end) = boost::edges(g_to_add);
     std::unordered_map<vertex_descriptor, vertex_descriptor>
-            g_added_to_g_out_map;
-    for (; g_added_vit != g_added_vit_end; ++g_added_vit) {
-        auto added_vertex = boost::add_vertex(g_added[*g_added_vit], g_out);
-        g_added_to_g_out_map.emplace(*g_added_vit, added_vertex);
+            g_to_add_to_g_out_map;
+    for (; g_to_add_vit != g_to_add_vit_end; ++g_to_add_vit) {
+        auto added_vertex = boost::add_vertex(g_to_add[*g_to_add_vit], g_out);
+        g_to_add_to_g_out_map.emplace(*g_to_add_vit, added_vertex);
     }
-    for (; g_added_eit != g_added_eit_end; ++g_added_eit) {
-        const auto source = boost::source(*g_added_eit, g_added);
-        const auto target = boost::target(*g_added_eit, g_added);
-        boost::add_edge(g_added_to_g_out_map[source],
-                        g_added_to_g_out_map[target], g_added[*g_added_eit],
+    for (; g_to_add_eit != g_to_add_eit_end; ++g_to_add_eit) {
+        const auto source = boost::source(*g_to_add_eit, g_to_add);
+        const auto target = boost::target(*g_to_add_eit, g_to_add);
+        boost::add_edge(g_to_add_to_g_out_map[source],
+                        g_to_add_to_g_out_map[target], g_to_add[*g_to_add_eit],
                         g_out);
     }
 }

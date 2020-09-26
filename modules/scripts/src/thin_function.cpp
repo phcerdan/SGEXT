@@ -128,7 +128,7 @@ BinaryImageType::Pointer thin_function(
   DigitalTopology::BackgroundAdjacency adjB;
   DigitalTopology topo(adjF, adjB, DGtal::DigitalTopologyProperties::JORDAN_DT);
 
-  if(verbose) DGtal::trace.beginBlock("construct with table");
+  if(verbose) { DGtal::trace.beginBlock("construct with table"); }
   Complex vc(ks);
   // Optimization, Construct in place to save memory. vc stores object.
   {
@@ -145,9 +145,9 @@ BinaryImageType::Pointer thin_function(
   const fs::path maybe_wrong_tableSimple26_6{DGtal::simplicity::tableSimple26_6};
   const fs::path tableSimple26_6 = tables_folder_path / maybe_wrong_tableSimple26_6.filename();
   vc.setSimplicityTable(DGtal::functions::loadTable(tableSimple26_6.string()));
-  if(verbose) DGtal::trace.endBlock();
+  if(verbose) { DGtal::trace.endBlock(); }
 
-  if(verbose) DGtal::trace.beginBlock("load isthmus table");
+  if(verbose) { DGtal::trace.beginBlock("load isthmus table"); }
   boost::dynamic_bitset<> isthmus_table;
   auto &sk = skel_type;
   if(sk == SkelType::isthmus) {
@@ -159,7 +159,7 @@ BinaryImageType::Pointer thin_function(
     const fs::path tableOneIsthmus = tables_folder_path / maybe_wrong_tableOneIsthmus.filename();
     isthmus_table = *DGtal::functions::loadTable(tableOneIsthmus.string());
   }
-  if(verbose) DGtal::trace.endBlock();
+  if(verbose) { DGtal::trace.endBlock(); }
 
 
   // SKEL FUNCTION:
@@ -167,24 +167,25 @@ BinaryImageType::Pointer thin_function(
   auto pointMap =
       *DGtal::functions::mapZeroPointNeighborhoodToConfigurationMask<Point>();
   std::function<bool(const Complex&, const Cell&)> Skel;
-  if(sk == SkelType::ultimate)
+  if(sk == SkelType::ultimate) {
     Skel = DGtal::functions::skelUltimate<Complex>;
-  else if(sk == SkelType::end)
+  } else if(sk == SkelType::end) {
     Skel = DGtal::functions::skelEnd<Complex>;
   // else if (sk == "1is") Skel = oneIsthmus<Complex>;
   // else if (sk == "is") Skel = skelIsthmus<Complex>;
-  else if(sk == SkelType::isthmus1)
+  } else if(sk == SkelType::isthmus1) {
     Skel = [&isthmus_table, &pointMap](const Complex& fc,
                                        const Complex::Cell& c) {
       return DGtal::functions::skelWithTable(isthmus_table, pointMap, fc, c);
     };
-  else if(sk == SkelType::isthmus)
+  } else if(sk == SkelType::isthmus) {
     Skel = [&isthmus_table, &pointMap](const Complex& fc,
                                        const Complex::Cell& c) {
       return DGtal::functions::skelWithTable(isthmus_table, pointMap, fc, c);
     };
-  else
+  } else {
     throw std::runtime_error("Invalid skel string");
+  }
 
   // SELECT FUNCTION
   std::function<std::pair<typename Complex::Cell, typename Complex::Data>(
@@ -195,30 +196,34 @@ BinaryImageType::Pointer thin_function(
   auto start = std::chrono::system_clock::now();
 
   auto &sel = skel_select_type;
-  if(sel == SkelSelectType::random)
+  if(sel == SkelSelectType::random) {
     Select = DGtal::functions::selectRandom<Complex>;
-  else if(sel == SkelSelectType::first)
+  } else if(sel == SkelSelectType::first) {
     Select = DGtal::functions::selectFirst<Complex>;
-  else if(sel == SkelSelectType::dmax) {
+  } else if(sel == SkelSelectType::dmax) {
     Select = [&distance_map_image](const Complex::Clique& clique) {
       return SG::select_max_value_of_clique<FloatImageType, Complex>(
           distance_map_image, clique);
     };
-  } else
+  } else {
     throw std::runtime_error("Invalid skel select type");
+  }
 
   // Perform the thin/skeletonization
   Complex vc_new(ks);
-  if(persistence == 0)
+  if(persistence == 0) {
     vc_new = DGtal::functions::asymetricThinningScheme<Complex>(vc, Select, Skel, verbose);
-  else
+  } else {
     vc_new = DGtal::functions::persistenceAsymetricThinningScheme<Complex>(vc, Select, Skel,
                                                          persistence, verbose);
+  }
 
   // profile
   auto end = std::chrono::system_clock::now();
   auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(end - start);
-  if(profile) std::cout << "Time elapsed: " << elapsed.count() << std::endl;
+  if(profile) {
+    std::cout << "Time elapsed: " << elapsed.count() << std::endl;
+  }
 
 
   // Convert back to ITK Image
@@ -313,12 +318,12 @@ BinaryImageType::Pointer thin_function_io(const std::string &filename,
   auto reader = ReaderType::New();
   reader->SetFileName(filename);
   reader->Update();
-  auto input_image = reader->GetOutput();
+  auto *input_image = reader->GetOutput();
 
 
   // Apply itk filters.
   // Dev: This might be refactored to be done outside this function
-  const bool invert_image = (foreground == "black") ? true : false;
+  const bool invert_image = (foreground == "black");
   using InverterType =
       itk::InvertIntensityImageFilter<ItkImageType, ItkImageType>;
   auto inverter = InverterType::New();

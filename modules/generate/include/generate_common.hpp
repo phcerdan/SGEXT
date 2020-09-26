@@ -86,19 +86,18 @@ std::vector<double> cosine_directors_between_edges_and_target_edge(
 
 /**
  * Returns the edge arrays (mathematical vectors)
- * of the adjacent edges of the edge defined from the inputs
- * source and target.
- * The edges are adjacent to the source, the first input
+ * of the adjacent edges of the adjacent edges of the input source node.
  *
  * @param source
- * @param target
+ * @param ignore_node
  * @param graph
+ * @param boundary_condition
  *
  * @return
  */
 std::vector<VectorType> get_adjacent_edges_from_source(
         const GraphType::vertex_descriptor source,
-        const GraphType::vertex_descriptor target,
+        const GraphType::vertex_descriptor ignore_node,
         const GraphType &graph,
         const ArrayUtilities::boundary_condition &boundary_condition);
 /**

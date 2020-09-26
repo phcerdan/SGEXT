@@ -50,7 +50,7 @@ namespace SG {
 
 typename FloatImageType::Pointer create_distance_map_function_with_itk(
         const typename BinaryImageType::Pointer & input_img,
-        const bool /*verbose*/)
+        bool /*verbose*/)
 {
     using DistanceMapFilter =
             itk::SignedMaurerDistanceMapImageFilter<BinaryImageType,
@@ -76,7 +76,7 @@ typename FloatImageType::Pointer create_distance_map_function_with_itk(
 
 typename FloatImageType::Pointer create_distance_map_function_with_dgtal(
         const typename BinaryImageType::Pointer & input_img,
-        const bool verbose
+        bool verbose
         )
 {
     // Image Typedefs
@@ -92,17 +92,19 @@ typename FloatImageType::Pointer create_distance_map_function_with_dgtal(
     Image image(input_img);
 
     auto start = std::chrono::system_clock::now();
-    if(verbose) DGtal::trace.beginBlock("Create Distance Map");
+    if(verbose){ DGtal::trace.beginBlock("Create Distance Map");}
     using Predicate = DGtal::functors::SimpleThresholdForegroundPredicate<Image>;
     Predicate aPredicate(image, 0);
     using L3Metric = DGtal::ExactPredicateLpSeparableMetric<Space, 3>;
     using DT = DGtal::DistanceTransformation<Space, Predicate, L3Metric>;
     L3Metric l3;
     DT dt(image.domain(), aPredicate, l3);
-    if(verbose) DGtal::trace.endBlock();
+    if(verbose){ DGtal::trace.endBlock(); }
     auto end = std::chrono::system_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(end - start);
-    if(verbose) std::cout << "Time elapsed: " << elapsed.count() << std::endl;
+    if(verbose){
+        std::cout << "Time elapsed: " << elapsed.count() << std::endl;
+    }
 
     using ItkFloatImageType = SG::FloatImageType;
     using FloatImage = DGtal::ImageContainerByITKImage<Domain, SG::FloatImageType::PixelType>;
@@ -126,21 +128,20 @@ typename FloatImageType::Pointer create_distance_map_function_with_dgtal(
 
 typename FloatImageType::Pointer
 create_distance_map_function(const typename BinaryImageType::Pointer &input_img,
-                             const bool use_itk_approximate,
-                             const bool verbose) {
+                             bool use_itk_approximate,
+                             bool verbose) {
     if (use_itk_approximate) {
         return create_distance_map_function_with_itk(input_img, verbose);
-    } else {
-        return create_distance_map_function_with_dgtal(input_img, verbose);
     }
+    return create_distance_map_function_with_dgtal(input_img, verbose);
 }
 
 typename FloatImageType::Pointer create_distance_map_function_io(
         const std::string & input_filename,
         const std::string & outputFolder,
         const std::string & foreground,
-        const bool use_itk_approximate,
-        const bool verbose
+        bool use_itk_approximate,
+        bool verbose
         )
 {
     if(!(foreground == "white" ||  foreground == "black")) {
@@ -173,7 +174,7 @@ typename FloatImageType::Pointer create_distance_map_function_io(
     reader->Update();
 
     // Invert Filter using ITK.
-    const bool invert_image = (foreground == "black") ? true : false;
+    const bool invert_image = (foreground == "black");
     using InverterType =
         itk::InvertIntensityImageFilter<ItkImageType, ItkImageType>;
     auto inverter = InverterType::New();

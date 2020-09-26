@@ -181,17 +181,18 @@ void check_parallel_edges_interface(GraphType &reduced_g, bool verbose) {
 
         if (!equal_parallel_edges.empty()) {
             std::cout << "Equal parallel edges between vertex:\n";
-            for (const auto &edge_pair : equal_parallel_edges)
+            for (const auto &edge_pair : equal_parallel_edges) {
                 std::cout << boost::source(edge_pair.first, reduced_g) << "---"
                           << boost::target(edge_pair.first, reduced_g)
                           << std::endl;
+            }
         }
     }
 }
 
 void export_graph_interface(GraphType & reduced_g,
         const std::string & exportReducedGraph_foldername,
-        std::string output_full_string,
+        const std::string & output_full_string,
         bool exportSerialized,
         bool exportVtu,
         bool exportVtuWithEdgePoints,
@@ -269,7 +270,7 @@ void export_graph_interface(GraphType & reduced_g,
 
 void export_graph_data_interface(const GraphType & reduced_g,
         const std::string & exportData_foldername,
-        std::string output_full_string,
+        const std::string &output_full_string,
         bool ignoreAngleBetweenParallelEdges,
         bool ignoreEdgesToEndNodes,
         size_t ignoreEdgesShorterThan,
@@ -427,19 +428,22 @@ GraphType analyze_graph_function(
     // Remove extra edges where connectivity in DGtal generates too many edges
     // in intersections
     if (removeExtraEdges) {
-        if (verbose)
+        if (verbose) {
             std::cout << "Removing extra edges" << std::endl;
+        }
         size_t iterations = 0;
         while (true) {
             bool any_edge_removed = SG::remove_extra_edges(sg);
-            if (any_edge_removed)
+            if (any_edge_removed) {
                 iterations++;
-            else
+            } else {
                 break;
+            }
         }
-        if (verbose)
+        if (verbose) {
             std::cout << "Removed extra edges iteratively " << iterations
                 << " times" << std::endl;
+        }
     }
     // Reduce graph, removing nodes with degree 2
     GraphType reduced_g = SG::reduce_spatial_graph_via_dfs(sg);
@@ -511,7 +515,7 @@ GraphType analyze_graph_function(
                 (mergeThreeConnectedNodes ? "_m" : "") +
                 (ignoreAngleBetweenParallelEdges ? "_iPA" : "") +
                 (ignoreEdgesToEndNodes ? "_x" : "") +
-                (ignoreEdgesShorterThan
+                (static_cast<bool>(ignoreEdgesShorterThan)
                  ? "_iShort" + std::to_string(
                      ignoreEdgesShorterThan)
                  : "");

@@ -131,11 +131,10 @@ ReconstructOutput reconstruct_from_distance_map(
                     found_target != vertex_to_label_map.end()) {
                     // Dev: max of size_t is not mapping to NaN, use int instead
                     // : std::numeric_limits<size_t>::max();
-                    color_label =
-                        apply_color_to_edges
-                        ? std::max(found_source->second,
-                                found_target->second)
-                        : std::numeric_limits<int>::max();
+                    color_label = apply_color_to_edges
+                                          ? std::max(found_source->second,
+                                                     found_target->second)
+                                          : std::numeric_limits<int>::max();
                 }
                 detail::applyColorToSphere(sphereSource, color_label);
             }
@@ -254,7 +253,7 @@ void visualize_poly_data(vtkPolyData *poly_data,
     // Create a mapper
     auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
     mapper->SetInputData(poly_data);
-    if (lut) {
+    if (lut != nullptr) {
         mapper->SetColorModeToMapScalars();
         mapper->SetLookupTable(lut);
     }
@@ -301,8 +300,7 @@ struct HideActorButtonCallbackCommand : public vtkCommand {
         return new HideActorButtonCallbackCommand;
     }
 
-    HideActorButtonCallbackCommand()
-            : label_actor(nullptr), caption_actor(nullptr) {}
+    HideActorButtonCallbackCommand() = default;
 
     void SetLabelActor(vtkActor2D *input_label_actor) {
         label_actor = input_label_actor;
@@ -313,32 +311,32 @@ struct HideActorButtonCallbackCommand : public vtkCommand {
     void SetUnstructuredGridActor(vtkActor *input_ugrid_actor) {
         ugrid_actor = input_ugrid_actor;
     }
-    virtual void Execute(vtkObject *caller, unsigned long, void *) override {
-        vtkButtonWidget *buttonWidget =
-                reinterpret_cast<vtkButtonWidget *>(caller);
-        vtkTexturedButtonRepresentation2D *rep =
-                reinterpret_cast<vtkTexturedButtonRepresentation2D *>(
-                        buttonWidget->GetRepresentation());
+    void Execute(vtkObject *caller,
+                 unsigned long /*eventId*/,
+                 void * /*callData*/) override {
+        auto *buttonWidget = reinterpret_cast<vtkButtonWidget *>(caller);
+        auto *rep = reinterpret_cast<vtkTexturedButtonRepresentation2D *>(
+                buttonWidget->GetRepresentation());
         auto state = rep->GetState();
-        if (state) {
-            label_actor->SetVisibility(true);
+        if (state != 0) {
+            label_actor->VisibilityOn();
             caption_actor->SetCaption("Show Id's: ON");
-            ugrid_actor->SetVisibility(true);
+            ugrid_actor->VisibilityOn();
 
         } else {
-            label_actor->SetVisibility(false);
+            label_actor->VisibilityOff();
             caption_actor->SetCaption("Show Id's: OFF");
-            ugrid_actor->SetVisibility(false);
+            ugrid_actor->VisibilityOff();
         }
     }
-    vtkActor2D *label_actor;
-    vtkCaptionActor2D *caption_actor;
-    vtkActor *ugrid_actor;
+    vtkActor2D *label_actor{nullptr};
+    vtkCaptionActor2D *caption_actor{nullptr};
+    vtkActor *ugrid_actor{nullptr};
 };
 
-void CreateImageForButton(vtkSmartPointer<vtkImageData> image,
-                          double *color,
-                          double *background_color) {
+void CreateImageForButton(vtkSmartPointer<vtkImageData> &image,
+                          const double *color,
+                          const double *background_color) {
     // Specify the size of the image data
     int dimension[2];
     dimension[0] = 60;
@@ -355,7 +353,7 @@ void CreateImageForButton(vtkSmartPointer<vtkImageData> image,
     // Fill the image with
     for (int y = 0; y < dims[1]; y++) {
         for (int x = 0; x < dims[0]; x++) {
-            unsigned char *pixel = static_cast<unsigned char *>(
+            auto *pixel = static_cast<unsigned char *>(
                     image->GetScalarPointer(x, y, 0));
             if ((x - radius[0]) * (x - radius[0]) +
                         (y - radius[1]) * (y - radius[1]) <
@@ -381,7 +379,7 @@ void visualize_poly_data_and_graph(vtkPolyData *poly_data,
     // Create a mapper for poly_data
     auto pd_mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
     pd_mapper->SetInputData(poly_data);
-    if (lut) {
+    if (lut != nullptr) {
         pd_mapper->SetColorModeToMapScalars();
         pd_mapper->SetLookupTable(lut);
     }
@@ -396,7 +394,7 @@ void visualize_poly_data_and_graph(vtkPolyData *poly_data,
     ugrid_mapper->Update();
     auto ugrid_actor = vtkSmartPointer<vtkActor>::New();
     ugrid_actor->SetMapper(ugrid_mapper);
-    ugrid_actor->SetVisibility(false);
+    ugrid_actor->VisibilityOff();
 
     // Add vertex_descriptor labels
     // auto ugrid_point_data = ugrid->GetPointData();
@@ -408,7 +406,7 @@ void visualize_poly_data_and_graph(vtkPolyData *poly_data,
     label_mapper_vertex->Update();
     auto label_vertex_actor = vtkSmartPointer<vtkActor2D>::New();
     label_vertex_actor->SetMapper(label_mapper_vertex);
-    label_vertex_actor->SetVisibility(false); // use button to toggle
+    label_vertex_actor->VisibilityOff(); // use button to toggle
 
     // Setup renderer
     vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
@@ -504,8 +502,8 @@ void visualize_poly_data_and_graph(vtkPolyData *poly_data,
 }
 
 void write_poly_data(vtkPolyData *poly_data,
-                     const std::string filename,
-                     const bool is_binary) {
+                     const std::string &filename,
+                     bool is_binary) {
     const std::string file_ext =
             itksys::SystemTools::GetFilenameLastExtension(filename);
 
@@ -513,8 +511,9 @@ void write_poly_data(vtkPolyData *poly_data,
         vtkNew<vtkXMLPolyDataWriter> vtkMeshWriter;
         vtkMeshWriter->SetInputData(poly_data);
         vtkMeshWriter->SetFileName(filename.c_str());
-        if (is_binary)
+        if (is_binary) {
             vtkMeshWriter->SetDataModeToBinary();
+        }
         vtkMeshWriter->Update();
     }
     // else if ( file_ext==".stl" )

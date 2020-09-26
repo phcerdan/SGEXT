@@ -33,15 +33,17 @@ void print(const ParticleNeighbors &particle_neighbors, std::ostream &os) {
     os << " }" << std::endl;
 };
 
-void dump_csv_header(const ParticleNeighbors &,
+void dump_csv_header(const ParticleNeighbors &/*particle_neighbors*/,
                      std::ostream &os,
                      bool add_end_of_line,
                      bool with_particle_id) {
-    if (with_particle_id)
+    if (with_particle_id) {
         os << "id, ";
+    }
     os << "neighbors";
-    if (add_end_of_line)
+    if (add_end_of_line) {
         os << std::endl;
+    }
 }
 void dump_csv_data(const ParticleNeighbors &particle_neighbors,
                    std::ostream &os,
@@ -56,8 +58,9 @@ void dump_csv_data(const ParticleNeighbors &particle_neighbors,
         os << neigh << ", ";
     }
     os << "]\"";
-    if (add_end_of_line)
+    if (add_end_of_line) {
         os << std::endl;
+    }
 }
 void dump_csv(const ParticleNeighbors &particle_neighbors, std::ostream &os) {
     dump_csv_header(particle_neighbors, os);
@@ -81,8 +84,9 @@ void dump_csv_header(const ParticleNeighborsCollection &all_particle_neighbors,
     const bool internal_add_end_of_line = true;
     dump_csv_header(all_particle_neighbors[0], os, with_particle_id,
                     internal_add_end_of_line);
-    if (add_end_of_line)
+    if (add_end_of_line) {
         os << std::endl;
+    }
 }
 void dump_csv_data(const ParticleNeighborsCollection &all_particle_neighbors,
                    std::ostream &os,
@@ -93,8 +97,9 @@ void dump_csv_data(const ParticleNeighborsCollection &all_particle_neighbors,
         dump_csv_data(particle_neighbors, os, internal_add_end_of_line,
                       with_particle_id);
     }
-    if (add_end_of_line)
+    if (add_end_of_line) {
         os << std::endl;
+    }
 }
 void dump_csv(const ParticleNeighborsCollection &all_particle_neighbors,
               std::ostream &os) {

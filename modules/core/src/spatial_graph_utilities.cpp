@@ -49,8 +49,8 @@ get_all_points(const GraphType &graph) {
     edge_iterator ei, ei_end;
     std::tie(ei, ei_end) = boost::edges(graph);
     for (; ei != ei_end; ++ei) {
-        auto &graph_edge = graph[*ei];
-        auto &graph_edge_points = graph_edge.edge_points;
+        const auto &graph_edge = graph[*ei];
+        const auto &graph_edge_points = graph_edge.edge_points;
         for (size_t index = 0; index < graph_edge_points.size(); ++index) {
             const auto &p = graph_edge_points[index];
             points.push_back({p[0], p[1], p[2]});
@@ -84,14 +84,18 @@ get_all_points(const GraphType &graph) {
 }
 
 void print_pos(std::ostream &out, const SG::SpatialNode::PointType &pos) {
-    out.precision(100);
+    std::ios_base::fmtflags cout_flags( out.flags() );
+    const size_t out_precision = 100;
+    out.precision(out_precision);
     out << "{";
-    for (auto &p : pos) {
-        if (p >= 0)
+    for (const auto &p : pos) {
+        if (p >= 0) {
             out << " ";
+        }
         out << p << ",";
     }
     out << "}";
+    out.flags(cout_flags);
 }
 
 AdjacentVerticesPositions

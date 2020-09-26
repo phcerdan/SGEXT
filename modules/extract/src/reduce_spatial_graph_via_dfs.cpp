@@ -52,17 +52,19 @@ GraphType reduce_spatial_graph_via_dfs(const GraphType &input_sg,
                                           const GraphType &g) {
         // Do not terminate at the start.
         // The self-loop case is handled by back_edge (using is_not_loop)
-        if (u == start)
+        if (u == start) {
             return false;
+        }
 
         if (boost::out_degree(u, g) != 2) {
-            if (verbose)
+            if (verbose) {
                 std::cout << "Exited due to finish_on_junctions" << std::endl;
+            }
             is_not_loop = true;
             put(propColorMap, u, Color::white());
             return true;
-        } else
-            return false; // Do not terminate
+        }
+        return false; // Do not terminate
     };
 
     vertex_iterator ui, ui_end;
@@ -74,10 +76,11 @@ GraphType reduce_spatial_graph_via_dfs(const GraphType &input_sg,
         auto degree = boost::out_degree(*vi, input_sg);
         if (degree == 1) {
             start = *vi;
-            if (verbose)
+            if (verbose) {
                 std::cout << "Visit: start: " << start << " : "
                           << ArrayUtilities::to_string(input_sg[start].pos)
                           << ". Degree: " << degree << std::endl;
+            }
             boost::depth_first_visit(input_sg, start, vis, propColorMap,
                                      finish_on_junctions);
         }
@@ -86,10 +89,11 @@ GraphType reduce_spatial_graph_via_dfs(const GraphType &input_sg,
         auto degree = boost::out_degree(*vi, input_sg);
         if (degree > 2) {
             start = *vi;
-            if (verbose)
+            if (verbose) {
                 std::cout << "Visit: start: " << start << " : "
                           << ArrayUtilities::to_string(input_sg[start].pos)
                           << ". Degree: " << degree << std::endl;
+            }
             boost::depth_first_visit(input_sg, start, vis, propColorMap,
                                      finish_on_junctions);
         }
@@ -97,11 +101,10 @@ GraphType reduce_spatial_graph_via_dfs(const GraphType &input_sg,
 
     {
         bool end_visit_flag = false;
-        auto finish_on_end_visit_flag = [&end_visit_flag](vertex_descriptor,
-                                                        const GraphType &) {
-            if (end_visit_flag)
-                return true;
-            return false;
+        auto finish_on_end_visit_flag = [&end_visit_flag](vertex_descriptor /*unused*/,
+                                                        const GraphType & /*unused*/) {
+            // finish if end_visit_flag is true
+            return end_visit_flag;
         };
         // Detect self-loops (no degree > 2 in any vertex)
         SelfLoopGraphVisitor<GraphType, VertexMap, ColorMap> vis_self_loop(
@@ -111,10 +114,11 @@ GraphType reduce_spatial_graph_via_dfs(const GraphType &input_sg,
                 boost::out_degree(*vi, input_sg) == 2) {
                 start = *vi;
                 end_visit_flag = false;
-                if (verbose)
+                if (verbose) {
                     std::cout << "Self-loops: Visit: start: " << start << " : "
                               << ArrayUtilities::to_string(input_sg[start].pos)
                               << std::endl;
+                }
                 boost::depth_first_visit(input_sg, start, vis_self_loop,
                                          propColorMap,
                                          finish_on_end_visit_flag);

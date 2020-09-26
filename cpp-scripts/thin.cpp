@@ -86,7 +86,7 @@ int main(int argc, char* const argv[]) {
   po::variables_map vm;
   try {
     po::store(po::parse_command_line(argc, argv, opt_desc), vm);
-    if(vm.count("help") || argc <= 1) {
+    if(static_cast<bool>(vm.count("help")) || argc <= 1) {
       std::cout << "Basic usage:\n" << opt_desc << "\n";
       return EXIT_SUCCESS;
     }
@@ -98,31 +98,35 @@ int main(int argc, char* const argv[]) {
 
   // Parse options
   std::string filename = vm["input"].as<std::string>();
-  bool verbose = vm["verbose"].as<bool>();
-  bool profile = vm["profile"].as<bool>();
+  const bool verbose = vm["verbose"].as<bool>();
+  const bool profile = vm["profile"].as<bool>();
   int persistence = vm["persistence"].as<int>();
-  if(vm.count("persistence") && persistence < 0)
+  if(static_cast<bool>(vm.count("persistence")) && persistence < 0) {
     throw po::validation_error(po::validation_error::invalid_option_value,
                                "persistence");
+  }
   std::string foreground = vm["foreground"].as<std::string>();
-  if(vm.count("foreground") &&
-     (!(foreground == "white" || foreground == "black")))
+  if(static_cast<bool>(vm.count("foreground")) &&
+     (!(foreground == "white" || foreground == "black"))) {
     throw po::validation_error(po::validation_error::invalid_option_value,
                                "foreground");
+  }
 
   std::string sk_string = vm["skel"].as<std::string>();
-  if(vm.count("skel") && (!(sk_string == "ulti" || sk_string == "end" ||
+  if(static_cast<bool>(vm.count("skel")) && (!(sk_string == "ulti" || sk_string == "end" ||
                             sk_string == "isthmus" || sk_string == "1isthmus" ||
                             sk_string == "isthmus1"
-                            )))
+                            ))) {
     throw po::validation_error(po::validation_error::invalid_option_value,
                                "skel");
+  }
   std::string select_string = vm["select"].as<std::string>();
-  if(vm.count("select") &&
+  if(static_cast<bool>(vm.count("select")) &&
      (!(select_string == "random" || select_string == "dmax" ||
-        select_string == "first")))
+        select_string == "first"))) {
     throw po::validation_error(po::validation_error::invalid_option_value,
                                "select");
+  }
 
   bool visualize = vm["visualize"].as<bool>();
 
@@ -146,7 +150,7 @@ int main(int argc, char* const argv[]) {
     }
   }
 
-  if(select_string == "dmax" && !vm.count("inputDistanceMapImageFilename")) {
+  if(select_string == "dmax" && !static_cast<bool>(vm.count("inputDistanceMapImageFilename"))) {
     std::cerr << "Please select an inputDistanceMapImageFilename.\n";
     std::cerr << "A distance map can be generated using the script:\n";
     std::cerr << "  create_distance_map -i inputImage -o outputFolder \n";
@@ -154,8 +158,8 @@ int main(int argc, char* const argv[]) {
                                "inputDistanceMapImageFilename");
   }
 
-  std::string inputDistanceMapImageFilename = "";
-  if(vm.count("inputDistanceMapImageFilename")) {
+  std::string inputDistanceMapImageFilename;
+  if(static_cast<bool>(vm.count("inputDistanceMapImageFilename"))) {
     const fs::path inputDistanceMapImageFilename_path{
         vm["inputDistanceMapImageFilename"].as<std::string>()};
     if(!fs::exists(inputDistanceMapImageFilename_path)) {

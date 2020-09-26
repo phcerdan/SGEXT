@@ -296,13 +296,12 @@ update_step_swap_edges::select_two_valid_edges(const GraphType &graph,
             edge1.m_source, edge1.m_target, edge2.m_source, edge2.m_target};
     std::sort(std::begin(edge_nodes), std::end(edge_nodes));
     auto pos = std::adjacent_find(std::begin(edge_nodes), std::end(edge_nodes));
-    bool duplicate_exist = (pos != std::end(edge_nodes)) ? true : false;
+    const bool duplicate_exist = (pos != std::end(edge_nodes));
     if (duplicate_exist) {
         // try again
         return select_two_valid_edges(graph, ++recursive_count);
-    } else {
-        return std::make_pair(edge1, edge2);
     }
+    return std::make_pair(edge1, edge2);
 }
 
 std::array<GraphType::vertex_descriptor, 4>

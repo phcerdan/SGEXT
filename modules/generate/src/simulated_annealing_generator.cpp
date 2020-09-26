@@ -68,13 +68,13 @@ void simulated_annealing_generator::set_parameters_from_file(
     this->set_parameters_from_configuration_tree(tree);
 }
 void simulated_annealing_generator::save_parameters_to_file(
-        const std::string &output_file) {
+        const std::string &output_file) const {
     auto tree = save_parameters_to_configuration_tree();
     tree.save(output_file);
 }
 
 simulated_annealing_generator_config_tree
-simulated_annealing_generator::save_parameters_to_configuration_tree() {
+simulated_annealing_generator::save_parameters_to_configuration_tree() const {
     simulated_annealing_generator_config_tree tree;
     tree.cosine_params = cosine_params;
     tree.degree_params = degree_params;
@@ -206,7 +206,7 @@ void simulated_annealing_generator::populate_histogram_ete_distances() {
     LUT.resize(histo_ete_distances_.bins);
     const auto total_counts =
             std::accumulate(std::begin(histo_ete_distances_.counts),
-                            std::end(histo_ete_distances_.counts), 0);
+                            std::end(histo_ete_distances_.counts), 0LU);
     std::transform(std::begin(target_cumulative_distro_histo_ete_distances_),
                    std::end(target_cumulative_distro_histo_ete_distances_),
                    std::begin(LUT),
@@ -225,7 +225,7 @@ void simulated_annealing_generator::populate_histogram_cosines() {
     LUT.resize(histo_cosines_.bins);
     const auto total_counts =
             std::accumulate(std::begin(histo_cosines_.counts),
-                            std::end(histo_cosines_.counts), 0);
+                            std::end(histo_cosines_.counts), 0LU);
     std::transform(std::begin(target_cumulative_distro_histo_cosines_),
                    std::end(target_cumulative_distro_histo_cosines_),
                    std::begin(LUT),
@@ -265,7 +265,7 @@ void simulated_annealing_generator::init_histograms(
 void simulated_annealing_generator::engine(const bool &reset_steps) {
     const auto t_start = std::chrono::high_resolution_clock::now();
     auto & steps = transition_params.steps_performed;
-    if(reset_steps) steps = 0;
+    if(reset_steps) { steps = 0; }
     /****** For reporting progress **********/
     const double log_size =
             std::log10(transition_params.MAX_ENGINE_ITERATIONS) - 2;
@@ -394,35 +394,36 @@ simulated_annealing_generator::check_transition() {
         transition_params.temp_current *= transition_params.temp_cooling_rate;
         transition_params.consecutive_failures = 0;
         return transition::ACCEPTED;
-    } else {
-        // energy_new-Eold_ is negative in this case.
-        // T is a decreasing function of accepted_transitions. T_parameter_
-        // should be tweaked to enhance convergence. if the expression is lesser
-        // than a random number[0,1), is accepted.
-
-        // double energy_dif = Eold_ - energy_new; //ALWAYS NEGATIVE IN THIS
-        // CASE. double prob_transition =exp(energy_dif/T_actual_) ; double
-        // total_test=exp( (Eold_ -
-        // energy_new)*exp(T_decay_rate_*accepted_transitions_) );
-        //      std::cout<<energy_dif<<" "<<prob_transition<<std::endl;
-
-        // energy_new>energy_
-        if (RNG::random_bool(
-                    exp(-energy_diff / transition_params.temp_current))) {
-            transition_params.energy = energy_new;
-            transition_params.accepted_transitions++;
-            transition_params.high_temp_transitions++;
-            transition_params.temp_current *=
-                    transition_params.temp_cooling_rate;
-            transition_params.consecutive_failures = 0;
-            return transition::ACCEPTED_HIGH_TEMP;
-        } else {
-            // Call undo? or call undo if compare()==0 in other function?
-            transition_params.consecutive_failures++;
-            transition_params.rejected_transitions++;
-            return transition::REJECTED;
-        }
     }
+    // case: Energy diff is positive, annealing or reject:
+    // Annealing
+    // energy_new-Eold_ is negative in this case.
+    // T is a decreasing function of accepted_transitions. T_parameter_
+    // should be tweaked to enhance convergence. if the expression is lesser
+    // than a random number[0,1), is accepted.
+
+    // double energy_dif = Eold_ - energy_new; //ALWAYS NEGATIVE IN THIS
+    // CASE. double prob_transition =exp(energy_dif/T_actual_) ; double
+    // total_test=exp( (Eold_ -
+    // energy_new)*exp(T_decay_rate_*accepted_transitions_) );
+    //      std::cout<<energy_dif<<" "<<prob_transition<<std::endl;
+
+    // energy_new>energy_
+    if (RNG::random_bool(
+                exp(-energy_diff / transition_params.temp_current))) {
+        transition_params.energy = energy_new;
+        transition_params.accepted_transitions++;
+        transition_params.high_temp_transitions++;
+        transition_params.temp_current *=
+            transition_params.temp_cooling_rate;
+        transition_params.consecutive_failures = 0;
+        return transition::ACCEPTED_HIGH_TEMP;
+    }
+    // Reject:
+    // Call undo? or call undo if compare()==0 in other function?
+    transition_params.consecutive_failures++;
+    transition_params.rejected_transitions++;
+    return transition::REJECTED;
 }
 
 void simulated_annealing_generator::print(std::ostream &os, int spaces) const {
@@ -491,10 +492,11 @@ void simulated_annealing_generator::print_histo_and_target_distribution(
         os << "[";
         os << std::setw(18) << histo.breaks[i] << "," << std::setw(18)
            << histo.breaks[i + 1];
-        if (i == histo.counts.size() - 1)
+        if (i == histo.counts.size() - 1) {
             os << "]";
-        else
+        } else {
             os << ")";
+        }
         os << " " << std::setw(18) << histo.counts[i] << "  " << distro[i]
            << std::endl;
     }

@@ -26,7 +26,7 @@
 namespace SG {
 
 BinaryImageType::Pointer
-voxelize_graph(const GraphType &input_sg,
+voxelize_graph(const GraphType &graph,
                const BinaryImageType::Pointer &reference_image,
                const vertex_to_label_map_t &vertex_to_label_map,
                const edge_to_label_map_t &edge_to_label_map,
@@ -45,7 +45,7 @@ voxelize_graph(const GraphType &input_sg,
     bool any_label_is_zero = false;
 
     GraphType::vertex_iterator vi, vi_end;
-    std::tie(vi, vi_end) = boost::vertices(input_sg);
+    std::tie(vi, vi_end) = boost::vertices(graph);
     for (; vi != vi_end; ++vi) {
         const auto vertex = *vi;
         // if found node in map, populate voxel with value
@@ -55,7 +55,7 @@ voxelize_graph(const GraphType &input_sg,
             if (label == 0) {
                 any_label_is_zero = true;
             }
-            const auto &position = input_sg[vertex].pos;
+            const auto &position = graph[vertex].pos;
             const auto itk_index =
                     graph_position_to_image_index<BinaryImageType>(
                             position, reference_image,
@@ -65,7 +65,7 @@ voxelize_graph(const GraphType &input_sg,
     }
 
     GraphType::edge_iterator ei, ei_end;
-    std::tie(ei, ei_end) = boost::edges(input_sg);
+    std::tie(ei, ei_end) = boost::edges(graph);
     for (; ei != ei_end; ++ei) {
         const auto edge = *ei;
         // if found edge in map, populate voxel with value
@@ -76,7 +76,7 @@ voxelize_graph(const GraphType &input_sg,
                 any_label_is_zero = true;
             }
             // Populate all edge points voxels with this label
-            const auto &edge_points = input_sg[edge].edge_points;
+            const auto &edge_points = graph[edge].edge_points;
             for (const auto &ep : edge_points) {
                 const auto itk_index =
                         graph_position_to_image_index<BinaryImageType>(
@@ -98,16 +98,16 @@ voxelize_graph(const GraphType &input_sg,
 }
 
 edge_to_label_map_t create_edge_to_label_map_from_vertex_to_label_map(
-        const GraphType &input_sg,
+        const GraphType &graph,
         const vertex_to_label_map_t &vertex_to_label_map,
         const edge_label_function_t &edge_label_func) {
     auto edge_to_label_map = edge_to_label_map_t();
     GraphType::edge_iterator ei, ei_end;
-    std::tie(ei, ei_end) = boost::edges(input_sg);
+    std::tie(ei, ei_end) = boost::edges(graph);
     for (; ei != ei_end; ++ei) {
         const auto edge = *ei;
-        const auto source = boost::source(edge, input_sg);
-        const auto target = boost::target(edge, input_sg);
+        const auto source = boost::source(edge, graph);
+        const auto target = boost::target(edge, graph);
         const auto find_source_label = vertex_to_label_map.find(source);
         const auto find_target_label = vertex_to_label_map.find(target);
         // Only populate edge label if source and target label exists.
@@ -123,14 +123,14 @@ edge_to_label_map_t create_edge_to_label_map_from_vertex_to_label_map(
 }
 
 edge_to_label_map_t create_edge_to_label_map_from_vertex_to_label_map_using_max(
-        const GraphType &input_sg,
+        const GraphType &graph,
         const vertex_to_label_map_t &vertex_to_label_map) {
     const auto edge_function = [](const size_t &source_label,
                                   const size_t &target_label) {
         return std::max<size_t>(source_label, target_label);
     };
     return create_edge_to_label_map_from_vertex_to_label_map(
-            input_sg, vertex_to_label_map, edge_function);
+            graph, vertex_to_label_map, edge_function);
 }
 
 } // end namespace SG

@@ -53,7 +53,7 @@ int main(int argc, char *const argv[]) {
     po::variables_map vm;
     try {
         po::store(po::parse_command_line(argc, argv, opt_desc), vm);
-        if (vm.count("help") || argc <= 1) {
+        if (static_cast<bool>(vm.count("help")) || argc <= 1) {
             std::cout << "Basic usage:\n" << opt_desc << "\n";
             return EXIT_SUCCESS;
         }
@@ -77,7 +77,7 @@ int main(int argc, char *const argv[]) {
                   << std::endl;
         return EXIT_SUCCESS;
     }
-    if (input_filename == "" || output_filename == "") {
+    if (input_filename.empty() || output_filename.empty()) {
 
         std::cout << "Provide input_filename and output_filename options"
                   << std::endl;
@@ -107,7 +107,7 @@ int main(int argc, char *const argv[]) {
 
     // Generator
     auto gen = SG::simulated_annealing_generator(input_filename);
-    if(verbose) gen.verbose = verbose;
+    if(verbose) { gen.verbose = verbose; }
     // gen.set_parameters_from_file(input_filename);
     // gen.init_graph_degree(gen.physical_scaling_params.num_vertices);
     // gen.init_graph_vertex_positions();

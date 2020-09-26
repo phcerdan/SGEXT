@@ -122,24 +122,24 @@ class CramerVonMisesUniformDistributionTestFixture : public ::testing::Test {
             c = uniform_counts_value;
         }
         total_counts = std::accumulate(std::begin(histogram.counts),
-                                       std::end(histogram.counts), 0);
+                                       std::end(histogram.counts), 0LU);
     }
     void CreateUniformDistribution() {
         auto histogram_centers = histogram.ComputeBinCenters();
         F_uniform = this->apply_uniform_distro_cdf(a_, b_, histogram_centers);
         const auto total_counts = std::accumulate(
-                std::begin(histogram.counts), std::end(histogram.counts), 0);
+                std::begin(histogram.counts), std::end(histogram.counts), 0LU);
         LUT_uniform = this->LUT(F_uniform, total_counts);
     }
     double
     uniform_distro_cdf(const double &x, const double &a, const double &b) {
-        if (x < a)
+        if (x < a) {
             return 0;
-        else if (x >= b)
-            return 1;
-        else {
-            return (x - a) / (b - a);
         }
+        if (x >= b) {
+            return 1;
+        }
+        return (x - a) / (b - a);
     }
 
     std::vector<double>

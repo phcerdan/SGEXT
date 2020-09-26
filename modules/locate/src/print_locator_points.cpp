@@ -20,14 +20,14 @@
 
 #include "print_locator_points.hpp"
 #include "vtkDataSet.h"
-#include <assert.h>
+#include <cassert>
 #include <iostream>
 
 namespace SG {
 
 void print_locator_points(vtkAbstractPointLocator *locator) {
     auto num_points = locator->GetDataSet()->GetNumberOfPoints();
-    if (!num_points) {
+    if (num_points == 0) {
         std::cout << "point locator is EMPTY" << std::endl;
         return;
     }
@@ -43,7 +43,7 @@ void print_locator_points(vtkAbstractPointLocator *locator) {
 
 void print_points(vtkPoints *points) {
     size_t num_points = points->GetNumberOfPoints();
-    if (!num_points) {
+    if (num_points == 0) {
         std::cout << "points are EMPTY" << std::endl;
         return;
     }
@@ -76,7 +76,7 @@ void print_point_from_id(const vtkIdType id,
 
 void print_point_list(vtkIdList *idList, vtkPoints *points) {
     auto num_ids = idList->GetNumberOfIds();
-    if (!num_ids) {
+    if (num_ids == 0) {
         std::cout << "point list is EMPTY" << std::endl;
         return;
     }
@@ -89,7 +89,7 @@ void print_point_list(vtkIdList *idList, vtkPoints *points) {
 void print_point_list(vtkIdList *idList,
                       vtkAbstractPointLocator *pointLocator) {
     auto num_ids = idList->GetNumberOfIds();
-    if (!num_ids) {
+    if (num_ids == 0) {
         std::cout << "point list is EMPTY" << std::endl;
         return;
     }

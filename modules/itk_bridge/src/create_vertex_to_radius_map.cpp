@@ -27,7 +27,7 @@ VertexToRadiusMap create_vertex_to_radius_map(
         const typename FloatImageType::Pointer &distance_map_image,
         const GraphType &input_graph,
         const bool spatial_nodes_position_are_in_physical_space,
-        const bool verbose) {
+        const bool /*verbose*/) {
     VertexToRadiusMap vertex_to_local_radius_map;
     // Iterate over all nodes
     for (auto [vi, vi_end] = boost::vertices(input_graph); vi != vi_end; vi++) {

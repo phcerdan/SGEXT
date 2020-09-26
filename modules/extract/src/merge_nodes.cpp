@@ -47,8 +47,9 @@ size_t merge_three_connected_nodes(GraphType &sg, bool inPlace) {
                 auto already_selected_to_delete = std::find_if(
                         std::begin(nodes_to_remove), std::end(nodes_to_remove),
                         [&vi](const VertexPair &p) { return p.first == *vi; });
-                if (already_selected_to_delete != std::end(nodes_to_remove))
+                if (already_selected_to_delete != std::end(nodes_to_remove)) {
                     continue;
+                }
             }
             adjacency_iterator neighbor_it, neighbor_end_it;
             std::tie(neighbor_it, neighbor_end_it) =
@@ -81,8 +82,9 @@ size_t merge_three_connected_nodes(GraphType &sg, bool inPlace) {
                 auto degree_second = boost::out_degree(nv.second, sg);
                 // If neighbors have more than degree 3, abort merge
                 // note that sn_current can only have degree 3 as well.
-                if (degree_first != 3 || degree_second != 3)
+                if (degree_first != 3 || degree_second != 3) {
                     continue;
+                }
 
                 // If there are more than one edge connecting the node trio,
                 // abort.
@@ -102,15 +104,19 @@ size_t merge_three_connected_nodes(GraphType &sg, bool inPlace) {
                             auto &ei = out_edges.first;
                             auto &ei_end = out_edges.second;
                             size_t number_of_edges_between_neighbors = 0;
-                            for (; ei != ei_end; ++ei)
-                                if (boost::target(*ei, sg) == *it_other)
+                            for (; ei != ei_end; ++ei) {
+                                if (boost::target(*ei, sg) == *it_other) {
                                     ++number_of_edges_between_neighbors;
-                            if (number_of_edges_between_neighbors > 1)
+                                }
+                            }
+                            if (number_of_edges_between_neighbors > 1) {
                                 node_trio_has_parallel_edges = true;
+                            }
                         }
                     }
-                    if (node_trio_has_parallel_edges)
+                    if (node_trio_has_parallel_edges) {
                         continue;
+                    }
                 }
 
                 auto edge_neighbors_pair = boost::edge(nv.first, nv.second, sg);
@@ -123,8 +129,9 @@ size_t merge_three_connected_nodes(GraphType &sg, bool inPlace) {
                 // If the edge_points are not empty, abort merge
                 if (!(edge_neighbors.edge_points.empty() &&
                       edge_first.edge_points.empty() &&
-                      edge_second.edge_points.empty()))
+                      edge_second.edge_points.empty())) {
                     continue;
+                }
 
                 nodes_to_remove.emplace_back(nv.first, *vi);
                 nodes_to_remove.emplace_back(nv.second, *vi);
@@ -353,8 +360,9 @@ size_t merge_four_connected_nodes(GraphType &sg, bool inPlace) {
                 auto already_selected_to_delete = std::find_if(
                         std::begin(nodes_to_remove), std::end(nodes_to_remove),
                         [&vi](const VertexPair &p) { return p.first == *vi; });
-                if (already_selected_to_delete != std::end(nodes_to_remove))
+                if (already_selected_to_delete != std::end(nodes_to_remove)) {
                     continue;
+                }
             }
             adjacency_iterator neighbor_it, neighbor_end_it;
             std::tie(neighbor_it, neighbor_end_it) =
@@ -385,8 +393,9 @@ size_t merge_four_connected_nodes(GraphType &sg, bool inPlace) {
                 auto degree_second = boost::out_degree(nv.second, sg);
                 // If neighbors have more than degree 3, abort merge
                 // note that sn_current can only have degree 4
-                if (degree_first != 3 || degree_second != 3)
+                if (degree_first != 3 || degree_second != 3) {
                     continue;
+                }
 
                 // If there are more than one edge connecting the node trio,
                 // abort.
@@ -406,15 +415,19 @@ size_t merge_four_connected_nodes(GraphType &sg, bool inPlace) {
                             auto &ei = out_edges.first;
                             auto &ei_end = out_edges.second;
                             size_t number_of_edges_between_neighbors = 0;
-                            for (; ei != ei_end; ++ei)
-                                if (boost::target(*ei, sg) == *it_other)
+                            for (; ei != ei_end; ++ei) {
+                                if (boost::target(*ei, sg) == *it_other) {
                                     ++number_of_edges_between_neighbors;
-                            if (number_of_edges_between_neighbors > 1)
+                                }
+                            }
+                            if (number_of_edges_between_neighbors > 1) {
                                 node_trio_has_parallel_edges = true;
+                            }
                         }
                     }
-                    if (node_trio_has_parallel_edges)
+                    if (node_trio_has_parallel_edges) {
                         continue;
+                    }
                 }
 
                 auto edge_neighbors_pair = boost::edge(nv.first, nv.second, sg);
@@ -427,8 +440,9 @@ size_t merge_four_connected_nodes(GraphType &sg, bool inPlace) {
                 // If the edge_points are not empty, abort merge
                 if (!(edge_neighbors.edge_points.empty() &&
                       edge_first.edge_points.empty() &&
-                      edge_second.edge_points.empty()))
+                      edge_second.edge_points.empty())) {
                     continue;
+                }
 
                 nodes_to_remove.emplace_back(nv.first, *vi);
                 nodes_to_remove.emplace_back(nv.second, *vi);
@@ -504,8 +518,9 @@ size_t merge_two_three_connected_nodes(GraphType &sg, bool inPlace) {
                         [&vi](const VertexTriple &p) {
                             return std::get<0>(p) == *vi;
                         });
-                if (already_selected_to_delete != std::end(nodes_to_remove))
+                if (already_selected_to_delete != std::end(nodes_to_remove)) {
                     continue;
+                }
             }
             adjacency_iterator neighbor_it, neighbor_end_it;
             std::tie(neighbor_it, neighbor_end_it) =
@@ -524,8 +539,9 @@ size_t merge_two_three_connected_nodes(GraphType &sg, bool inPlace) {
                 }
             }
 
-            if (three_vertices_connected.size() == 0)
+            if (three_vertices_connected.empty()) {
                 continue;
+            }
             if (three_vertices_connected.size() > 1) {
                 std::cout << "WARNING: In merge_two_three_connected_nodes "
                              "there are two vertices with degree 3 connected "
@@ -563,13 +579,15 @@ size_t merge_two_three_connected_nodes(GraphType &sg, bool inPlace) {
                     boost::out_edges(connected_vertex_candidate_to_remove, sg);
             for (auto ei = out_edges.first; ei != out_edges.second; ++ei) {
                 auto target = boost::target(*ei, sg);
-                if (target == connected_vertex_candidate_to_remove)
+                if (target == connected_vertex_candidate_to_remove) {
                     continue;
+                }
                 const auto &edge_points = sg[*ei].edge_points;
                 std::vector<double> distances_to_candidate;
                 const auto ep_size = edge_points.size();
-                if (ep_size == 0)
+                if (ep_size == 0) {
                     continue;
+                }
                 if (ep_size == 1) {
                     distances_to_candidate.emplace_back(
                             ArrayUtilities::distance(edge_points[0],
@@ -591,12 +609,11 @@ size_t merge_two_three_connected_nodes(GraphType &sg, bool inPlace) {
                     sqrt(3.0) + 2.0 * std::numeric_limits<double>::epsilon()) {
                     // Not possible for this edge
                     continue;
-                } else {
-                    nodes_to_remove.emplace_back(
-                            connected_vertex_candidate_to_remove, *vi, target);
-                    // symmetry break: choose the first edge that is mergeable.
-                    break;
-                }
+                } // else
+                nodes_to_remove.emplace_back(
+                        connected_vertex_candidate_to_remove, *vi, target);
+                // symmetry break: choose the first edge that is mergeable.
+                break;
             }
         }
     }
@@ -613,27 +630,18 @@ size_t merge_two_three_connected_nodes(GraphType &sg, bool inPlace) {
             auto target = boost::target(*ei, sg);
             if (target == node_to_merge_into) {
                 continue;
-            } else if (target == node_which_edge_does_not_require_add_point) {
+            }
+            if (target == node_which_edge_does_not_require_add_point) {
                 auto &spatial_edge = sg[*ei];
                 boost::add_edge(node_to_merge_into,
                                 node_which_edge_does_not_require_add_point,
                                 spatial_edge, sg);
-                // DEBUG REMOVE
-                // std::cout << "TARGET: " << target << std::endl;
-                // std::cout << "Spatial Edge WITHOUT added point:" <<
-                // std::endl; std::cout << spatial_edge << std::endl;
             } else {
                 auto &spatial_edge = sg[*ei];
                 auto &sn_to_remove = sg[node_to_remove];
                 SG::insert_unique_edge_point_with_distance_order(
                         spatial_edge.edge_points, sn_to_remove.pos);
                 boost::add_edge(node_to_merge_into, target, spatial_edge, sg);
-                // DEBUG REMOVE
-                // std::cout << "TARGET: " << target << std::endl;
-                // std::cout << "Node to be removed:" << std::endl;
-                // std::cout << sn_to_remove << std::endl;
-                // std::cout << "Spatial Edge with added point:" << std::endl;
-                // std::cout << spatial_edge << std::endl;
             }
         }
         // Remove vertex destroys all iterators/descripts

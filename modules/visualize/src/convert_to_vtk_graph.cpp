@@ -31,7 +31,6 @@ GraphVTK convert_to_vtk_graph(const GraphType &sg, const bool & with_edge_points
     GraphVTK output;
     auto &vtk_graph = output.vtk_graph;
 
-    using vertex_descriptor = boost::graph_traits<GraphType>::vertex_descriptor;
     using vertex_iterator = boost::graph_traits<GraphType>::vertex_iterator;
     using edge_iterator = boost::graph_traits<GraphType>::edge_iterator;
 
@@ -52,7 +51,7 @@ GraphVTK convert_to_vtk_graph(const GraphType &sg, const bool & with_edge_points
     for (; ei != ei_end; ++ei) {
         auto source = boost::source(*ei, sg);
         auto target = boost::target(*ei, sg);
-        auto &sg_edge = sg[*ei];
+        const auto &sg_edge = sg[*ei];
         const auto &sg_edge_points = sg_edge.edge_points;
         auto vtk_edge =
                 vtk_graph->AddEdge(vertex_map.at(source), vertex_map.at(target));

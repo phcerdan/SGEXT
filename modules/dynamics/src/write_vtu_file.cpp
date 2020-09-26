@@ -56,6 +56,7 @@ void write_vtu_file(const System *sys, const std::string &file_name) {
     const auto number_of_bonds = unique_bonds.size();
     ugrid->Allocate(number_of_bonds);
     std::vector<vtkIdType> cell_ids;
+    cell_ids.reserve(unique_bonds.size());
     for (const auto &bond : unique_bonds) {
         // This adds cells (Bond adds vtkLines, but it can be overriden by
         // derived classes)
@@ -191,26 +192,26 @@ void read_vtu_point_data(vtkUnstructuredGrid *ugrid, System *sys) {
         memcpy(particles[i].pos.data(), ugrid->GetPoint(i), sizeof(double) * 3);
 
         // particle_id
-        if (particle_id_array) {
+        if (particle_id_array != nullptr) {
             particles[i].id = particle_id_array->GetTuple1(i);
         } else {
             particles[i].id = i;
         }
-        if (acc_array) {
+        if (acc_array != nullptr) {
             memcpy(particles[i].dynamics.acc.data(), acc_array->GetTuple3(i),
                    sizeof(double) * 3);
         }
-        if (vel_array) {
+        if (vel_array != nullptr) {
             memcpy(particles[i].dynamics.vel.data(), vel_array->GetTuple3(i),
                    sizeof(double) * 3);
         }
-        if (mass_array) {
+        if (mass_array != nullptr) {
             particles[i].material.mass = mass_array->GetTuple1(i);
         }
-        if (volume_array) {
+        if (volume_array != nullptr) {
             particles[i].material.volume = volume_array->GetTuple1(i);
         }
-        if (radius_array) {
+        if (radius_array != nullptr) {
             particles[i].material.radius = radius_array->GetTuple1(i);
         }
     }
@@ -247,7 +248,7 @@ void read_vtu_bond_contour_length(vtkUnstructuredGrid *ugrid, System *sys) {
     auto cell_data = ugrid->GetCellData();
     const std::string array_name = "contour_length";
     auto contour_length_array = cell_data->GetArray(array_name.c_str());
-    if (contour_length_array) {
+    if (contour_length_array != nullptr) {
         for (size_t i = 0; i < ncells; ++i) {
             bonds[i] = std::make_shared<BondChain>(
                     bonds[i]->id_a, bonds[i]->id_b,

@@ -32,12 +32,13 @@ void print(const ParticleMaterial &p, std::ostream &os) {
     os << "mass = " << p.mass << std::endl;
 };
 
-void dump_csv_header(const ParticleMaterial &,
+void dump_csv_header(const ParticleMaterial & /*p*/,
                      std::ostream &os,
                      bool add_end_of_line) {
     os << "radius, volume, mass";
-    if (add_end_of_line)
+    if (add_end_of_line) {
         os << std::endl;
+    }
 };
 
 void dump_csv_data(const ParticleMaterial &p,
@@ -46,8 +47,9 @@ void dump_csv_data(const ParticleMaterial &p,
     os << p.radius << ", ";
     os << p.volume << ", ";
     os << p.mass;
-    if (add_end_of_line)
+    if (add_end_of_line) {
         os << std::endl;
+    }
 };
 void dump_csv(const ParticleMaterial &p, std::ostream &os) {
     dump_csv_header(p, os);
@@ -63,13 +65,14 @@ void print(const ParticleDynamicProperties &p, std::ostream &os) {
     os << "acc = " << ArrayUtilities::to_string(p.acc) << std::endl;
     os << "net_force = " << ArrayUtilities::to_string(p.net_force) << std::endl;
 };
-void dump_csv_header(const ParticleDynamicProperties &,
+void dump_csv_header(const ParticleDynamicProperties & /*p*/,
                      std::ostream &os,
                      bool add_end_of_line) {
     os << "vel.x, vel.y, vel.z, acc.x, acc.y, acc.z, net_force.x, net_force.y, "
           "net_force.z";
-    if (add_end_of_line)
+    if (add_end_of_line) {
         os << std::endl;
+    }
 }
 void dump_csv_data(const ParticleDynamicProperties &p,
                    std::ostream &os,
@@ -80,8 +83,9 @@ void dump_csv_data(const ParticleDynamicProperties &p,
     os << ArrayUtilities::to_string(p.acc, comma_separated);
     os << ", ";
     os << ArrayUtilities::to_string(p.net_force, comma_separated);
-    if (add_end_of_line)
+    if (add_end_of_line) {
         os << std::endl;
+    }
 };
 void dump_csv(const ParticleDynamicProperties &p, std::ostream &os) {
     dump_csv_header(p, os);
@@ -115,8 +119,9 @@ void dump_csv_header(const Particle &p,
     dump_csv_header(p.dynamics, os, internal_do_not_add_end_of_line);
     os << ", ";
     dump_csv_header(p.material, os, internal_do_not_add_end_of_line);
-    if (add_end_of_line)
+    if (add_end_of_line) {
         os << std::endl;
+    }
 }
 void dump_csv_data(const Particle &p, std::ostream &os, bool add_end_of_line) {
     const bool comma_separated = true;
@@ -128,8 +133,9 @@ void dump_csv_data(const Particle &p, std::ostream &os, bool add_end_of_line) {
     dump_csv_data(p.dynamics, os, internal_do_not_add_end_of_line);
     os << ", ";
     dump_csv_data(p.material, os, internal_do_not_add_end_of_line);
-    if (add_end_of_line)
+    if (add_end_of_line) {
         os << std::endl;
+    }
 }
 void dump_csv(const Particle &p, std::ostream &os) {
     dump_csv_header(p, os);

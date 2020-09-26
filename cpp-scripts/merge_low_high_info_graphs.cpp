@@ -57,7 +57,7 @@ namespace fs = boost::filesystem;
 void export_graph_merge_low_high_info(
         SG::GraphType
                 &output_g, // write_serialized_graph --graph cannot be const--
-        const std::string folder_path,
+        const std::string & folder_path,
         const fs::path &output_filename_path,
         bool useSerialized,
         bool verbose,
@@ -74,17 +74,19 @@ void export_graph_merge_low_high_info(
                 output_folder_path /
                 fs::path(output_filename_path.string() + ".dot");
         SG::write_graphviz_sg(output_full_path.string(), output_g);
-        if (verbose)
+        if (verbose) {
             std::cout << graph_title + ": graph (graphviz) output stored in: "
                       << output_full_path.string() << std::endl;
+        }
     } else {
         fs::path output_full_path =
                 output_folder_path /
                 fs::path(output_filename_path.string() + ".txt");
         SG::write_serialized_sg(output_full_path.string(), output_g);
-        if (verbose)
+        if (verbose) {
             std::cout << graph_title + ": graph (serialize) output stored in: "
                       << output_full_path.string() << std::endl;
+        }
     }
 };
 
@@ -126,7 +128,7 @@ int main(int argc, char *const argv[]) {
     po::variables_map vm;
     try {
         po::store(po::parse_command_line(argc, argv, opt_desc), vm);
-        if (vm.count("help") || argc <= 1) {
+        if (static_cast<bool>(vm.count("help")) || argc <= 1) {
             std::cout << "Basic usage:\n" << opt_desc << "\n";
             return EXIT_SUCCESS;
         }
@@ -144,8 +146,9 @@ int main(int argc, char *const argv[]) {
         std::cout << "Filename High Info Graph: " << filenameHigh << std::endl;
         std::cout << "Filename Low Info Graph: " << filenameLow << std::endl;
     }
-    bool exportExtendedLowInfoGraph = vm.count("exportExtendedLowInfoGraph");
-    bool exportMergedGraph = vm.count("exportMergedGraph");
+    bool exportExtendedLowInfoGraph = static_cast<bool>(
+            vm.count("exportExtendedLowInfoGraph"));
+    bool exportMergedGraph = static_cast<bool>(vm.count("exportMergedGraph"));
     bool useSerialized = vm["useSerialized"].as<bool>();
     bool computePeninsulas = vm["computePeninsulas"].as<bool>();
 
@@ -273,7 +276,6 @@ int main(int argc, char *const argv[]) {
             graphs_merged, extended_graph_index, high_info_graph_index,
             mergePoints_merged, idMap_merged, radius_touch, verbose);
     auto &merged_g = add_graph_peninsulas_result.graph;
-    auto &octree_merged = add_graph_peninsulas_result.octree;
 
     auto nvertices_merged = boost::num_vertices(merged_g);
     auto nedges_merged = boost::num_edges(merged_g);

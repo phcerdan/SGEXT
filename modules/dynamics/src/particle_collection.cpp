@@ -42,9 +42,8 @@ ParticleCollection::find_particle_and_index(const size_t &id_value) const {
     const auto it = binary_find(id_value);
     if (it != particles.end()) {
         return std::make_pair(it, std::distance(particles.begin(), it));
-    } else {
-        return std::make_pair(it, std::numeric_limits<size_t>::max());
     }
+    return std::make_pair(it, std::numeric_limits<size_t>::max());
 }
 
 std::pair<std::vector<Particle>::iterator, size_t>
@@ -52,18 +51,16 @@ ParticleCollection::find_particle_and_index(const size_t &id_value) {
     const auto it = binary_find(id_value);
     if (it != particles.end()) {
         return std::make_pair(it, std::distance(particles.begin(), it));
-    } else {
-        return std::make_pair(it, std::numeric_limits<size_t>::max());
     }
+    return std::make_pair(it, std::numeric_limits<size_t>::max());
 }
 
 size_t ParticleCollection::find_index(const size_t &id_value) const {
     const auto it = binary_find(id_value);
     if (it != particles.end()) {
         return std::distance(particles.begin(), it);
-    } else {
-        return std::numeric_limits<size_t>::max();
     }
+    return std::numeric_limits<size_t>::max();
 }
 
 void print_end_collection(const ParticleCollection &collection,
@@ -89,23 +86,25 @@ void print(const ParticleCollection &collection, std::ostream &os) {
 void dump_csv_header(const ParticleCollection &all_particles,
                      std::ostream &os,
                      bool add_end_of_line,
-                     bool with_particle_id) {
+                     bool /*with_particle_id*/) {
     const bool internal_do_not_add_end_of_line = false;
     dump_csv_header(all_particles.particles[0], os,
                     internal_do_not_add_end_of_line);
-    if (add_end_of_line)
+    if (add_end_of_line) {
         os << std::endl;
+    }
 }
 void dump_csv_data(const ParticleCollection &all_particles,
                    std::ostream &os,
                    bool add_end_of_line,
-                   bool with_particle_id) {
+                   bool /*with_particle_id*/) {
     const bool internal_add_end_of_line = true;
     for (const auto &particle_neighbors : all_particles.particles) {
         dump_csv_data(particle_neighbors, os, internal_add_end_of_line);
     }
-    if (add_end_of_line)
+    if (add_end_of_line) {
         os << std::endl;
+    }
 }
 void dump_csv(const ParticleCollection &all_particles, std::ostream &os) {
     dump_csv_header(all_particles, os);

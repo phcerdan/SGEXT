@@ -27,7 +27,7 @@ void Integrator::compute_net_forces(System *sys) const {
     for (size_t part_index = 0; part_index < nparts; ++part_index) {
         auto &net_force = sys->all.particles[part_index].dynamics.net_force;
         std::fill(net_force.begin(), net_force.end(), 0.0);
-        for (auto &force_type : force_types) {
+        for (const auto &force_type : force_types) {
             net_force = ArrayUtilities::plus(
                     net_force, force_type->particle_forces[part_index].force);
         };

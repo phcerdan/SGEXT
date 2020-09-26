@@ -131,11 +131,11 @@ void visualize_poly_data(
  *
  * @param poly_data PolyData to write, obtained from reconstruct methods
  * @param filename filename of the output. It should have the prefix vtk or vtu.
- * @param binary_type if true: SetDataModeToBinary is applied
+ * @param is_binary if true: SetDataModeToBinary is applied
  */
 void write_poly_data(vtkPolyData *poly_data,
-                     const std::string filename,
-                     const bool binary_type = false);
+                     const std::string & filename,
+                     bool is_binary = false);
 
 /**
  * Visualize polydata using optionally a lookup table with colors of integer

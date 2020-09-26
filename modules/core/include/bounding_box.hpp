@@ -84,7 +84,7 @@ struct BoundingBox {
     PointType GetCenter() const;
     bool is_point_inside(const PointType &input_point) const;
     /// Check bounds of this box are inside external_bounds/box
-    bool are_bounds_inside(double *external_bounds) const;
+    bool are_bounds_inside(const double *external_bounds) const;
     bool are_bounds_inside(const BoundingBox & external_box) const;
     void Print(double *bounds,
                const std::string &label = "BoundingBox",

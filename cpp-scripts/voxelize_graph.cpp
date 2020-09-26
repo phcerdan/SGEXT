@@ -70,7 +70,7 @@ int main(int argc, char *const argv[]) {
     po::variables_map vm;
     try {
         po::store(po::parse_command_line(argc, argv, opt_desc), vm);
-        if (vm.count("help") || argc <= 1) {
+        if (static_cast<bool>(vm.count("help")) || argc <= 1) {
             std::cout << "Basic usage:\n" << opt_desc << "\n";
             return EXIT_SUCCESS;
         }
@@ -91,7 +91,7 @@ int main(int argc, char *const argv[]) {
     const bool graph_positions_are_in_physical_space =
             !!!vm["graph_positions_are_in_index_space"].as<bool>();
     bool verbose = vm["verbose"].as<bool>();
-    if (vm.count("outputFolder")) {
+    if (static_cast<bool>(vm.count("outputFolder"))) {
         const fs::path output_folder_path{vm["outputFolder"].as<std::string>()};
         if (!fs::exists(output_folder_path)) {
             std::cerr << "output folder doesn't exist : "
@@ -108,11 +108,11 @@ int main(int argc, char *const argv[]) {
     fs::path output_file_path;
     /*-------------- End of parse -----------------------------*/
     // Get filename without extension (and without folders).
-    if (vm.count("outputFolder")) {
+    if (static_cast<bool>(vm.count("outputFolder"))) {
         output_folder_path = vm["outputFolder"].as<std::string>();
     }
 
-    if (vm.count("outputFilename")) {
+    if (static_cast<bool>(vm.count("outputFilename"))) {
         output_file_path = fs::path(vm["outputFilename"].as<std::string>());
         output_full_path =
                 output_folder_path / fs::path(output_file_path.string());
@@ -133,7 +133,7 @@ int main(int argc, char *const argv[]) {
 
     // Read Graph
     const fs::path input_extension = fs::path(filename).extension();
-    const bool is_graphviz_graph = (input_extension == ".dot") ? true : false;
+    const bool is_graphviz_graph = (input_extension == ".dot");
     const auto graph = (is_graphviz_graph) ? SG::read_graphviz_sg(filename)
                                            : SG::read_serialized_sg(filename);
     // Read reference_image

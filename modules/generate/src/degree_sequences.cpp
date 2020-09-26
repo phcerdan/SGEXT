@@ -40,7 +40,7 @@ std::vector<int> generate_degree_sequence_geometric_distribution_bounded(
             if(RNG::rand01() < percentage_of_one_degree_nodes) {
                 rand_degree = 1;
             } else {
-                rand_degree = RNG::random_geometric(x) + min_degree_allowed;
+                rand_degree = RNG::random_geometric(x) + static_cast<int>(min_degree_allowed);
             }
             iteration++;
         } while (static_cast<size_t>(rand_degree) > max_degree_allowed &&

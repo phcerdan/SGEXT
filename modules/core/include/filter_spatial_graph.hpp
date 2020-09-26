@@ -117,11 +117,11 @@ GraphType copy_largest_connected_component(const GraphType &inputGraph);
 
 
 /**
- * Append g_to_add to g_mod in place (g_mod will be modified).
+ * Append g_to_add to g_out in place (g_out will be modified).
  *
- * @param g_mod
+ * @param g_out
  * @param g_to_add
  */
-void append_graph_in_place(GraphType & g_mod, const GraphType & g_to_add);
+void append_graph_in_place(GraphType & g_out, const GraphType & g_to_add);
 } // namespace SG
 #endif
