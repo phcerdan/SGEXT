@@ -32,7 +32,7 @@ class degree_viger_generator {
         alloc(degree_sequence);
     }
 
-    ~degree_viger_generator() { dealloc(); }
+    ~degree_viger_generator() = default;
     /**
      * Bind the graph avoiding multiple edges or self-edges (return
      * false if fail)
@@ -78,8 +78,10 @@ class degree_viger_generator {
     /** Degree sequence of graph */
     std::vector<int> deg_;
     /** The array containing all links */
+    std::unique_ptr<int[]> links_up_;
     int *links_;
     /** The array containing pointers to adjacency list of every vertices */
+    std::unique_ptr<int*[]> neigh_up_;
     int **neigh_;
 
   private:
@@ -100,7 +102,7 @@ class degree_viger_generator {
     bool verify(int mode);
 
     // Backup graph [sizeof(int) bytes per edge]
-    int *backup();
+    std::unique_ptr<int[]> backup();
     // Restore from backup
     void restore(int *back);
     /// Optimal window for the gkantsidis heuristics

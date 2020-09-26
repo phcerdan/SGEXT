@@ -211,7 +211,7 @@ void simulated_annealing_generator::populate_histogram_ete_distances() {
                    std::end(target_cumulative_distro_histo_ete_distances_),
                    std::begin(LUT),
                    [&total_counts = total_counts](const double &x) -> double {
-                       return total_counts * x + 0.5;
+                       return static_cast<double>(total_counts) * x + 0.5;
                    });
     total_counts_ete_distances_ = total_counts;
 }
@@ -230,7 +230,7 @@ void simulated_annealing_generator::populate_histogram_cosines() {
                    std::end(target_cumulative_distro_histo_cosines_),
                    std::begin(LUT),
                    [&total_counts = total_counts](const double &x) -> double {
-                       return total_counts * x + 0.5;
+                       return static_cast<double>(total_counts) * x + 0.5;
                    });
     total_counts_cosines_ = total_counts;
 }
