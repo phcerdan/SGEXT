@@ -52,7 +52,7 @@ struct TreeFixture : public ::testing::Test {
     SG::FloatImageType::Pointer distance_map_image = SG::FloatImageType::New();
     const bool spatial_nodes_position_are_in_physical_space = false;
 
-    void AllocateDistanceMapImage() {
+    void AllocateDistanceMapImage() { //NOLINT
         using RegionType = typename SG::FloatImageType::RegionType;
         typename RegionType::IndexType itk_index;
         itk_index[0] = 0;

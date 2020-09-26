@@ -208,7 +208,7 @@ bool degree_viger_generator::make_connected() {
     int *ffub = buff + MC_BUFF_SIZE;
     edge *edges = (edge *)ffub;
     int *trees = ffub;
-    int *min_ffub = buff + 1 + (MC_BUFF_SIZE % 2 ? 0 : 1);
+    int *min_ffub = buff + 1 + (MC_BUFF_SIZE % 2 ? 0 : 1); //NOLINT
 
     // There will be only one "fatty" component, and trees.
     edge fatty_edge = {-1, -1};
@@ -240,7 +240,7 @@ bool degree_viger_generator::make_connected() {
                 // unsigned char prev_dist = (current_dist-1) & 0x03;
                 int *ww = neigh_[v];
                 int w;
-                for (int k = deg_[v]; k--; ww++) {
+                for (int k = deg_[v]; k--; ww++) { //NOLINT
                     if (dist[w = *ww] == NOT_VISITED) {
                         // we didn't visit *w yet
                         dist[w] = next_dist;
@@ -437,7 +437,7 @@ unsigned long degree_viger_generator::shuffle(unsigned long times,
             type == ShuffleType::BRUTE_FORCE_HEURISTICS) {
             K_int = int(K);
         }
-        unsigned long T_int = (unsigned long)(floor(T));
+        auto T_int = static_cast<unsigned long>(floor(T));
         if (T_int < 1) {
             T_int = 1;
         }
@@ -447,7 +447,7 @@ unsigned long degree_viger_generator::shuffle(unsigned long times,
             cost += (unsigned long)(K_int) * (unsigned long)(T_int);
         }
         // Perform T edge swap attempts
-        for (int i = T_int; i > 0; i--) {
+        for (int i = static_cast<int>(T_int); i > 0; i--) {
             // try one swap
             swaps += (unsigned long)(random_edge_swap(K_int, Kbuff, visited));
             all_swaps++;
@@ -497,7 +497,7 @@ unsigned long degree_viger_generator::shuffle(unsigned long times,
             if (steps < 1) {
                 steps = 1;
             }
-            while (steps--) {
+            while (steps--) { //NOLINT
                 if (ok) {
                     T *= 1.17182818;
                 } else {
@@ -544,7 +544,8 @@ unsigned long degree_viger_generator::shuffle(unsigned long times,
     // Status report
     if (verbose) {
         std::cout << "*** Shuffle Monitor ***" << std::endl;
-        std::cout << " - Average cost : " << cost / double(nb_swaps)
+        std::cout << " - Average cost : "
+                  << static_cast<double>(cost) / static_cast<double>(nb_swaps)
                   << " / validated edge swap" << std::endl;
         std::cout << " - Connectivity tests : " << successes + failures << " ("
                   << successes << " successes, " << failures << " failures)"
@@ -603,7 +604,7 @@ int degree_viger_generator::optimal_window(const bool verbose) {
         double c_low = average_cost(T_low, back.get(), min_cost);
         double c_high = average_cost(T_high, back.get(), min_cost);
         if (c_low < min_cost && c_high < min_cost) {
-            if (try_again--) {
+            if (try_again--) { //NOLINT
                 continue;
             }
             if (verbose) {
@@ -644,7 +645,7 @@ bool bernoulli_param_is_lower(int success, int trials, double param) {
     comb *= pow(param, double(success)) *
             exp(double(trials - success) * log1p(-param));
     double sum = comb;
-    while (success && sum < _TRUST_BERNOULLI_LOWER) {
+    while (success && sum < _TRUST_BERNOULLI_LOWER) { //NOLINT
         comb *= double(success) * (1.0 - param) /
                 (double(trials - success) * param);
         sum += comb;
@@ -673,10 +674,9 @@ degree_viger_generator::average_cost(int T, int *backup, double min_cost) {
     }
     if (successes >= _MIN_SUCCESS_FOR_BERNOULLI_TRUST) {
         return double(trials) / double(successes) *
-               (1.0 + double(arcs_ / 2) / double(T));
-    } else {
-        return 2.0 * min_cost;
+               (1.0 + double(arcs_ / 2) / double(T)); //NOLINT
     }
+    return 2.0 * min_cost;
 }
 
 void degree_viger_generator::restore(int *b) {
@@ -757,7 +757,7 @@ bool degree_viger_generator::try_shuffle(int T, int K, int *backup_graph) {
     auto backup_unique = (backup_graph == nullptr) ? backup() : nullptr;
     int *back = (backup_graph == nullptr) ? backup_unique.release() : backup_graph;
     // perform T edge swap attempts
-    while (T--) {
+    while (T--) { //NOLINT
         random_edge_swap(K, Kbuff, visited);
     }
     // clean
@@ -779,7 +779,7 @@ std::unique_ptr<int[]> degree_viger_generator::backup() {
     auto *br = b.get();
     int *p = links_;
     for (int i = 0; i < num_vertices_; i++) {
-        for (int d = HASH_SIZE(deg_[i]); d--; p++) {
+        for (int d = HASH_SIZE(deg_[i]); d--; p++) { //NOLINT
             if (*p != HASH_NONE && *p > i) {
                 *(br++) = *p;
             }
@@ -852,9 +852,8 @@ bool degree_viger_generator::is_edge(int a, int b) const {
     assert(H_is(neigh_[a], deg_[a], b) == H_is(neigh_[b], deg_[b], a));
     if (deg_[a] < deg_[b]) {
         return H_is(neigh_[a], deg_[a], b);
-    } else {
-        return H_is(neigh_[b], deg_[b], a);
     }
+    return H_is(neigh_[b], deg_[b], a);
 }
 
 bool degree_viger_generator::is_connected() const {
@@ -881,7 +880,7 @@ int degree_viger_generator::depth_search(bool *visited,
         int v = *(--to_visit);
         int *ww = neigh_[v];
         int w;
-        for (int k = HASH_SIZE(deg_[v]); k--; ww++) {
+        for (int k = HASH_SIZE(deg_[v]); k--; ww++) { //NOLINT
             if (HASH_NONE != (w = *ww) && !visited[w]) {
                 visited[w] = true;
                 nb_visited++;
@@ -911,7 +910,7 @@ bool degree_viger_generator::isolated(int v,
         v = *(seen++);
         int *ww = neigh_[v];
         int w;
-        for (int d = HASH_SIZE(deg_[v]); d--; ww++) {
+        for (int d = HASH_SIZE(deg_[v]); d--; ww++) { //NOLINT
             if ((w = *ww) != HASH_NONE && !visited[w]) {
                 if (known == max) {
                     is_isolated = false;

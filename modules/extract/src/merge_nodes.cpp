@@ -399,6 +399,7 @@ size_t merge_four_connected_nodes(GraphType &sg, bool inPlace) {
 
                 // If there are more than one edge connecting the node trio,
                 // abort.
+                // NOLINTNEXTLINE
                 if (false) {
                     bool node_trio_has_parallel_edges = false;
                     std::vector<vertex_descriptor> tri_nodes = {*vi, nv.first,

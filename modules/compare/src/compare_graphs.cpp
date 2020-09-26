@@ -130,6 +130,7 @@ remove_edges_and_nodes_from_high_info_graph(const GraphType &g0,
                     const auto &gdesc_adj0 = gdescs_adj[0];
                     // if it exists, but it is not a vertex
                     if (gdesc_adj0.exist && gdesc_adj0.is_edge) {
+                        // NOLINTNEXTLINE
                         if (true) {
                             std::cout << "Source: v: " << v
                                       << " ; pos: " << g1[v].pos[0] << ", "

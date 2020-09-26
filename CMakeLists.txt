@@ -255,8 +255,8 @@ if(SG_BUILD_TESTING)
       list(APPEND _all_headers "modules/scripts/include/*")
     endif()
     string(REPLACE ";" "," _all_headers_string "${_all_headers}")
-    set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE};-checks=${CLANG_TIDY_CHECKS};-header-filter=${_all_headers_string}"
-      CACHE STRING "" FORCE)
+    set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE};-checks=${CLANG_TIDY_CHECKS};-header-filter=${_all_headers_string}")
+    message(STATUS "Running clang-tidy with command: ${CMAKE_CXX_CLANG_TIDY}")
   endif()
 
   enable_testing()

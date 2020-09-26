@@ -98,6 +98,7 @@ int main(int argc, char *const argv[]) {
     // Get time for the output filename
     std::time_t t = std::time(nullptr);
     char timestr[120];
+    //NOLINTNEXTLINE
     if (std::strftime(timestr, sizeof(timestr), "%Y-%m-%d-%H:%M",
                       std::localtime(&t))) {
         std::cout << timestr << '\n';

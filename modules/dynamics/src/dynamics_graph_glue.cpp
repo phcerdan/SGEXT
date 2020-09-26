@@ -37,7 +37,9 @@ ParticleGraphGlueData particles_from_graph(const GraphType &graph) {
     size_t particle_id = 0;
     for (auto [ui, ui_end] = boost::vertices(graph); ui != ui_end;
          ++ui, ++particle_id) {
-        const Particle particle = {particle_id, graph[*ui].pos};
+        const Particle particle = {particle_id, graph[*ui].pos,
+                                   ParticleDynamicProperties(),
+                                   ParticleMaterial()};
         particles.emplace_back(particle);
         particle_graph_map->operator[](particle_id) = *ui;
         graph_particle_map->operator[](*ui) = particle_id;

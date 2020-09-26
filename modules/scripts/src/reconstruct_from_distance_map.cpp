@@ -474,6 +474,7 @@ void visualize_poly_data_and_graph(vtkPolyData *poly_data,
     pos1[1] = bounds[2] + button_size;
     pos1[2] = bounds[4];
     caption_actor->SetPosition(pos1);
+    // NOLINTNEXTLINE
     caption_actor->SetDisplayPosition(bounds[1] + button_size, bounds[3] + pad);
     caption_actor->SetAttachmentPoint(pos1);
     auto *attach_point = caption_actor->GetAttachmentPointCoordinate();

@@ -369,6 +369,7 @@ TEST_F(GraphPointLocatorMatchingFixture,
     EXPECT_TRUE(closest_id_list->GetNumberOfIds() > 0);
     EXPECT_EQ(closest_id_list->GetId(0), expected_closest_id);
 
+    // NOLINTNEXTLINE
     if (false) {
         auto out_gdescs = SG::closest_existing_descriptors_by_graph(
                 closest_id_list, idMap);
