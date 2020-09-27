@@ -80,7 +80,7 @@ output_file: string
 )delimiter";
 // clang-format on
     m.def("write",
-            [](SG::IUC3P input_image, const std::string & out_file,
+            [](const SG::IUC3P &input_image, const std::string & out_file,
                 const bool & compression) -> void {
                 using WriterType = itk::ImageFileWriter<SG::IUC3>;
                 auto writer = WriterType::New();
@@ -95,7 +95,7 @@ output_file: string
             py::arg("compression") = false
          );
     m.def("write",
-            [](SG::IF3P input_image, const std::string & out_file,
+            [](const SG::IF3P &input_image, const std::string & out_file,
                 const bool & compression) -> void {
                 using WriterType = itk::ImageFileWriter<SG::IF3>;
                 auto writer = WriterType::New();

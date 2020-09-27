@@ -94,8 +94,8 @@ apply_color_to_edges: Bool [True]
 
     m.def(
             "view_poly_data",
-            [](vtkSmartPointer<vtkPolyData> poly_data,
-               vtkSmartPointer<vtkLookupTable> lut,
+            [](vtkSmartPointer<vtkPolyData> &poly_data,
+               vtkSmartPointer<vtkLookupTable> &lut,
                const std::string &win_title, size_t &win_x, size_t &win_y) {
                 return visualize_poly_data(poly_data, lut, win_title, win_x,
                                            win_y);
@@ -125,9 +125,9 @@ win_x,y: int
 
     m.def(
             "view_poly_data_and_graph",
-            [](vtkSmartPointer<vtkPolyData> poly_data,
+            [](vtkSmartPointer<vtkPolyData> &poly_data,
                const GraphType & graph,
-               vtkSmartPointer<vtkLookupTable> lut,
+               vtkSmartPointer<vtkLookupTable> &lut,
                const std::string &win_title, size_t &win_x, size_t &win_y) {
                 return visualize_poly_data_and_graph(poly_data, graph, lut,
                     win_title, win_x, win_y);
@@ -162,7 +162,7 @@ win_x,y: int
 
     m.def(
             "write_poly_data",
-            [](vtkSmartPointer<vtkPolyData> poly_data,
+            [](vtkSmartPointer<vtkPolyData> &poly_data,
                const std::string &filename, const bool is_binary) {
                 return write_poly_data(poly_data, filename, is_binary);
             },
@@ -205,7 +205,7 @@ reference_image: BinaryImageType or FloatImageType
 
     m.def(
             "poly_data_to_binary_image",
-            [](vtkSmartPointer<vtkPolyData> poly_data,
+            [](vtkSmartPointer<vtkPolyData> &poly_data,
                const BinaryImageType::Pointer &reference_image) {
                 return poly_data_to_binary_image(poly_data, reference_image);
             },
@@ -213,7 +213,7 @@ reference_image: BinaryImageType or FloatImageType
             py::arg("reference_image"));
     m.def(
             "poly_data_to_binary_image",
-            [](vtkSmartPointer<vtkPolyData> poly_data,
+            [](vtkSmartPointer<vtkPolyData> &poly_data,
                const FloatImageType::Pointer &reference_image) {
                 return poly_data_to_binary_image(poly_data, reference_image);
             },

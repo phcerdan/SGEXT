@@ -41,7 +41,7 @@ reference_image: Image (binary or float)
     m.def(
             "transform_graph_to_physical_space",
             [](const SG::GraphType &sg,
-               SG::IUC3P input_image) -> SG::GraphType {
+               const SG::IUC3P &input_image) -> SG::GraphType {
                 SG::GraphType output_graph = sg;
                 SG::transform_graph_to_physical_space(output_graph,
                                                       input_image.GetPointer());
@@ -52,7 +52,8 @@ reference_image: Image (binary or float)
     /* ************** FloatImage ****************************/
     m.def(
             "transform_graph_to_physical_space",
-            [](const SG::GraphType &sg, SG::IF3P input_image) -> SG::GraphType {
+            [](const SG::GraphType &sg,
+               const SG::IF3P &input_image) -> SG::GraphType {
                 SG::GraphType output_graph = sg;
                 SG::transform_graph_to_physical_space(output_graph,
                                                       input_image.GetPointer());
@@ -78,7 +79,7 @@ reference_image: Image (binary or float)
     m.def(
             "transform_graph_to_index_space",
             [](const SG::GraphType &sg,
-               SG::IUC3P input_image) -> SG::GraphType {
+               const SG::IUC3P &input_image) -> SG::GraphType {
                 SG::GraphType output_graph = sg;
                 SG::transform_graph_to_index_space(output_graph,
                                                    input_image.GetPointer());
@@ -89,7 +90,8 @@ reference_image: Image (binary or float)
     /* ************** FloatImage ****************************/
     m.def(
             "transform_graph_to_index_space",
-            [](const SG::GraphType &sg, SG::IF3P input_image) -> SG::GraphType {
+            [](const SG::GraphType &sg,
+               const SG::IF3P &input_image) -> SG::GraphType {
                 SG::GraphType output_graph = sg;
                 SG::transform_graph_to_index_space(output_graph,
                                                    input_image.GetPointer());

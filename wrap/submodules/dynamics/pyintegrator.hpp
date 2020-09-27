@@ -77,7 +77,7 @@ struct PyIntegrator : public Integrator {
                 time_step);
     }
 
-    void compute_net_forces(System *sys) {
+    void compute_net_forces(System *sys) const override {
         PYBIND11_OVERLOAD(void,               /* Return type */
                           Integrator,         /* Parent class */
                           compute_net_forces,

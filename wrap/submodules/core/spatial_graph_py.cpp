@@ -22,9 +22,9 @@
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
 
+#include "hash_edge_descriptor.hpp"
 #include "spatial_graph.hpp"
 #include "spatial_graph_utilities.hpp"
-#include "hash_edge_descriptor.hpp"
 
 namespace py = pybind11;
 using namespace SG;
@@ -38,8 +38,8 @@ void init_spatial_graph(py::module &m) {
             .def(py::init())
             .def(py::init([](GraphType::vertex_descriptor s,
                              GraphType::vertex_descriptor t) {
-                return std::unique_ptr<GraphType::edge_descriptor>(
-                        new GraphType::edge_descriptor(s, t, 0));
+                return std::make_unique<GraphType::edge_descriptor>(s, t,
+                                                                    nullptr);
             }))
             // No access to pointer m_property from python for now
             // The pointer in the constructor is confusing,
@@ -54,16 +54,16 @@ void init_spatial_graph(py::module &m) {
                      return (self.m_source == other.m_source) &&
                             (self.m_target == other.m_target);
                  })
-            .def("__repr__", [](const GraphType::edge_descriptor &ed) {
-                return "<edge_descriptor: source: " +
-                       std::to_string(ed.m_source) +
-                       "; target: " + std::to_string(ed.m_target) + " >";
-            })
+            .def("__repr__",
+                 [](const GraphType::edge_descriptor &ed) {
+                     return "<edge_descriptor: source: " +
+                            std::to_string(ed.m_source) +
+                            "; target: " + std::to_string(ed.m_target) + " >";
+                 })
             // Allow using my own edge_hash for dictionaries
             .def("__hash__", [](const GraphType::edge_descriptor &self) {
-                    return edge_hash<GraphType>()(self);
-                    })
-            ;
+                return edge_hash<GraphType>()(self);
+            });
 
     py::class_<graph_descriptor>(mgraph, "graph_descriptor")
             .def_readwrite("exist", &graph_descriptor::exist)
@@ -107,8 +107,8 @@ void init_spatial_graph(py::module &m) {
             .def("edge",
                  [](const GraphType &graph,
                     const GraphType::vertex_descriptor s,
-                    const GraphType::vertex_descriptor t) ->
-                 std::pair<GraphType::edge_descriptor, bool> {
+                    const GraphType::vertex_descriptor t)
+                         -> std::pair<GraphType::edge_descriptor, bool> {
                      return boost::edge(s, t, graph);
                  })
             .def("set_vertex",
