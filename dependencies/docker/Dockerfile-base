@@ -107,7 +107,7 @@ RUN git clone https://gitlab.kitware.com/vtk/vtk.git ${VTK_SRC_FOLDER_NAME} && \
     find ../VTK* -depth -name .git -exec rm -rf '{}' \;
 
 # Install ITKv5 from git
-ENV ITK_GIT_TAG 25b37f9f720693fd328dc38cbd7ec46d54b8501a
+ENV ITK_GIT_TAG v5.1.1
 ENV ITK_BUILD_DIR ${BUILD_PATH}/ITK-build
 ENV ITK_SRC_FOLDER_NAME ITK-src
 ENV ITK_SRC_DIR ${BUILD_PATH}/${ITK_SRC_FOLDER_NAME}
@@ -129,7 +129,7 @@ RUN git clone https://github.com/InsightSoftwareConsortium/ITK.git ${ITK_SRC_FOL
 
 ###################### DGtal #############
 # Install DGtal from git
-ENV DGtal_GIT_TAG 71140534477a3dd41ff8311b9176c76a52ec0b97
+ENV DGtal_GIT_TAG 6900c39000a877e6d75c64cfcb640f0f09ea703f
 ENV DGtal_BUILD_DIR ${BUILD_PATH}/DGtal-build
 ENV DGtal_SRC_FOLDER_NAME DGtal-src
 ENV DGtal_SRC_DIR ${BUILD_PATH}/${DGtal_SRC_FOLDER_NAME}

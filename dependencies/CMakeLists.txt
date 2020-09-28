@@ -298,12 +298,13 @@ if(_compiler_is_gnu AND CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 10.1)
     "Try llvm, or other version of gcc. Issue: https://github.com/DGtal-team/DGtal/issues/1501")
 endif()
 
-set(DGtal_GIT_TAG fix_loadTable_in_windows) # 13-August-2020
+
+set(DGtal_GIT_TAG 6900c39000a877e6d75c64cfcb640f0f09ea703f) # 03-Sep-2020
 message(STATUS "DGtal_VERSION: ${DGtal_GIT_TAG}")
 set(DGtal_BUILD_DIR ${OUTPUT_BUILD_DIR}/DGtal-build)
 set(DGtal_SRC_FOLDER_NAME DGtal-src)
 set(DGtal_SRC_DIR ${OUTPUT_BUILD_DIR}/${DGtal_SRC_FOLDER_NAME})
-set(DGtal_GIT_REPOSITORY "https://github.com/phcerdan/DGtal")
+set(DGtal_GIT_REPOSITORY "https://github.com/DGtal-team/DGtal")
 set(_DGtal_depends ep_boost)
 set(_DGtal_optional_cmake_args)
 if(WITH_ITK)
