@@ -86,7 +86,7 @@ void read_serialized_sg(std::istream &is, GraphType &graph) {
     arch >> graph;
 }
 void read_serialized_sg(const std::string &input_file, GraphType &graph) {
-    std::ifstream ifile(input_file);
+    std::ifstream ifile(input_file, std::fstream::binary | std::fstream::in);
     if(!ifile.is_open()) {
         throw std::runtime_error("Failed to read input_file: " + input_file + ".");
     }
