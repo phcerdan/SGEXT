@@ -3,8 +3,11 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   set(_parallel_stl_extra_libraries)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   set(_compiler_is_gnu ON)
+  set(OLD_CMAKE_FIND_PACKAGE_PREFER_CONFIG ${CMAKE_FIND_PACKAGE_PREFER_CONFIG})
+  set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
   find_package(TBB QUIET) # For c++17 std::execution::par_unseq in gcc
   set(_parallel_stl_extra_libraries ${TBB_LIBRARIES})
+  set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ${OLD_CMAKE_FIND_PACKAGE_PREFER_CONFIG})
 endif()
 
 try_compile(_has_parallel_stl
