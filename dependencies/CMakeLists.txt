@@ -299,7 +299,7 @@ if(_compiler_is_gnu AND CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 10.1)
 endif()
 
 
-set(DGtal_GIT_TAG 6900c39000a877e6d75c64cfcb640f0f09ea703f) # 03-Sep-2020
+set(DGtal_GIT_TAG 7570ead94ddf70413e49732f41c618e743af9a7b) # 06-Oct-2020
 message(STATUS "DGtal_VERSION: ${DGtal_GIT_TAG}")
 set(DGtal_BUILD_DIR ${OUTPUT_BUILD_DIR}/DGtal-build)
 set(DGtal_SRC_FOLDER_NAME DGtal-src)

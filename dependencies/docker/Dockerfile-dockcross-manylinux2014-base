@@ -81,7 +81,7 @@ RUN wget ${BOOST_URL} -O boost_${BOOST_VERSION}.tar.gz && \
 
 ############# DGtal #############
 # Install DGtal from git
-ENV DGtal_GIT_TAG 92ab4d0d62f0e5490f1890efdf904547d17515b9
+ENV DGtal_GIT_TAG 7570ead94ddf70413e49732f41c618e743af9a7b
 ENV DGtal_BUILD_DIR ${BUILD_PATH}/DGtal-build
 ENV DGtal_SRC_FOLDER_NAME DGtal-src
 ENV DGtal_SRC_DIR ${BUILD_PATH}/${DGtal_SRC_FOLDER_NAME}
