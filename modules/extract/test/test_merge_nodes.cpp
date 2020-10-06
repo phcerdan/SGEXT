@@ -220,10 +220,10 @@ TEST_F(ContourLengthCornercase2Fixture, merge_nodes) {
     bool any_edge_removed = remove_extra_edges(sg);
     EXPECT_EQ(any_edge_removed, true);
     EXPECT_EQ(num_vertices(sg), 12);
-    EXPECT_EQ(num_edges(sg), 13);
+    EXPECT_EQ(num_edges(sg), 14);
     SpatialGraph reduced_g = SG::reduce_spatial_graph_via_dfs(sg);
-    EXPECT_EQ(num_vertices(reduced_g), 7);
-    EXPECT_EQ(num_edges(reduced_g), 8);
+    EXPECT_EQ(num_vertices(reduced_g), 8);
+    EXPECT_EQ(num_edges(reduced_g), 10);
     std::cout << "After reduction:" << std::endl;
     SG::print_degrees(reduced_g);
     SG::print_edges(reduced_g);
@@ -236,9 +236,10 @@ TEST_F(ContourLengthCornercase2Fixture, merge_nodes) {
     EXPECT_EQ(nodes_merged, 0);
     // Nodes are not removed but cleared (no edges attached, degree=0)
     // EXPECT_EQ(num_vertices(reduced_g), num_vertices(sg) - 2);
-    EXPECT_EQ(num_vertices(reduced_g), 7);
-    EXPECT_EQ(num_edges(reduced_g), 8);
+    EXPECT_EQ(num_vertices(reduced_g), 8);
+    EXPECT_EQ(num_edges(reduced_g), 10);
     std::cout << "After merge:" << std::endl;
+    EXPECT_EQ(nodes_merged, 0);
     SG::print_degrees(reduced_g);
     SG::print_spatial_edges(reduced_g);
     size_t count1degrees = 0;
@@ -265,7 +266,7 @@ TEST_F(ContourLengthCornercase2Fixture, merge_nodes) {
             count4degrees++;
         }
     }
-    EXPECT_EQ(count4degrees, 1);
+    EXPECT_EQ(count4degrees, 2);
     EXPECT_EQ(count3degrees, 3);
     EXPECT_EQ(count2degrees, 0);
     EXPECT_EQ(count1degrees, 3);

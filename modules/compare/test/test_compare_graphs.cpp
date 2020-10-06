@@ -101,7 +101,8 @@ TEST_F(FixtureCloseGraphs, works) {
     EXPECT_EQ(octree->GetDataSet()->GetNumberOfPoints(), 22);
 }
 
-TEST_F(FixtureCloseGraphs, compare_graphs) {
+// TODO: Revisit compare graphs before enabling it
+TEST_F(FixtureCloseGraphs, DISABLED_compare_graphs) {
     auto &low_info_g = g0;
     auto &high_info_g = moved_g1;
     auto edges_nodes_to_remove =
