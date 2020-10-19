@@ -12,7 +12,7 @@ endif()
 file(MAKE_DIRECTORY ${TBB_INSTALL_DIR})
 file(MAKE_DIRECTORY ${TBB_INSTALL_DIR}/lib)
 
-file(GLOB tbb_so_files ${TBB_SRC_DIR}/build/*/*.so)
+file(GLOB tbb_so_files ${TBB_SRC_DIR}/build/*/*.so*)
 if(NOT tbb_so_files)
   message(FATAL_ERROR "tbb .so libraries not found. Was build successful?")
 endif()

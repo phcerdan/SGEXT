@@ -5,9 +5,15 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   set(_compiler_is_gnu ON)
   set(OLD_CMAKE_FIND_PACKAGE_PREFER_CONFIG ${CMAKE_FIND_PACKAGE_PREFER_CONFIG})
   set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
-  find_package(TBB QUIET) # For c++17 std::execution::par_unseq in gcc
-  set(_parallel_stl_extra_libraries ${TBB_LIBRARIES})
+  set(TBB_FIND_RELEASE_ONLY ON)
+  find_package(TBB QUIET ) # For c++17 std::execution::par_unseq in gcc
+  if(TARGET TBB::tbb)
+    set(_parallel_stl_extra_libraries TBB::tbb)
+  else()
+    set(_parallel_stl_extra_libraries ${TBB_LIBRARIES})
+  endif()
   set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ${OLD_CMAKE_FIND_PACKAGE_PREFER_CONFIG})
+  message(STATUS "TBB_FOUND: ${TBB_FOUND}. tbb_libraries: ${_parallel_stl_extra_libraries}")
 endif()
 
 try_compile(_has_parallel_stl
@@ -113,7 +119,7 @@ set(SG_MODULE_INTERNAL_DEPENDS
   )
 set(_optional_depends "")
 if(_has_parallel_stl AND _compiler_is_gnu)
-  list(APPEND _optional_depends ${TBB_LIBRARIES})
+  list(APPEND _optional_depends ${_parallel_stl_extra_libraries})
 endif()
 set(SG_MODULE_${SG_MODULE_NAME}_DEPENDS
   ${SG_MODULE_INTERNAL_DEPENDS}
