@@ -303,7 +303,7 @@ if(SG_WRAP_PYTHON)
   FetchContent_Declare(
     pybind11
     GIT_REPOSITORY https://github.com/pybind/pybind11
-    GIT_TAG v2.5
+    GIT_TAG v2.6
   )
   FetchContent_GetProperties(pybind11)
   if(NOT pybind11_POPULATED)
@@ -316,7 +316,7 @@ if(SG_WRAP_PYTHON)
   # And then:
   # include(${SGEXT_DIR}/_deps/pybind11-src/tools/pybind11Tools.cmake)
   # to access the same pybind11_add_module CMake function.
-  export(TARGETS pybind11 module
+  export(TARGETS pybind11::pybind11 pybind11::module
     NAMESPACE SGEXT::
     APPEND FILE ${sgext_export_file})
 endif()
