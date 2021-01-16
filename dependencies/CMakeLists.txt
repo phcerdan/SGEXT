@@ -104,7 +104,7 @@ ExternalProject_Add(ep_vtk
 endif()
 
 if(WITH_MODERN_VTK)
-  set(VTK_GIT_TAG e70226e3080a310b39aac4f23ad8d3391bf9ca1a) # 08 Sept 2020
+  set(VTK_GIT_TAG 13c8c85aa8776a43abab71ed887f3ad375f24a22) # 14 January 2021
   message(STATUS "VTK_VERSION: ${VTK_GIT_TAG}")
   set(VTK_BUILD_DIR ${OUTPUT_BUILD_DIR}/VTK-build)
   set(VTK_SRC_FOLDER_NAME VTK-src)
