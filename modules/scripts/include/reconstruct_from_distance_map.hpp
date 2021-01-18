@@ -18,6 +18,9 @@
  *
  * *******************************************************************/
 
+#ifndef RECONSTRUCT_FROM_DISTANCE_MAP_HPP
+#define RECONSTRUCT_FROM_DISTANCE_MAP_HPP
+
 #include "image_types.hpp" // for FloatImageType
 #include "spatial_graph.hpp"
 
@@ -213,3 +216,5 @@ createLookupTable(const size_t max_label,
 
 } // end namespace detail
 } // end namespace SG
+
+#endif
