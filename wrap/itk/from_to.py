@@ -17,11 +17,11 @@ def itk_to_sgext(itk_image):
         raise TypeError("itk_image has dimension {}. Valid type is {}".format(np_array.ndim, 3))
 
     dtype = np_array.dtype
-    valid_dtypes = ["uint8", "float"]
+    valid_dtypes = ["uint8", "float32"]
     if dtype not in valid_dtypes:
         raise TypeError("dtype of the itk_image {} not valid. Valid types are {}".format(dtype, valid_dtypes))
 
-    if dtype == "float":
+    if dtype == "float32":
         sgext_image = _sgext.itk.IF3P()
     elif dtype == "uint8":
         sgext_image = _sgext.itk.IUC3P()
