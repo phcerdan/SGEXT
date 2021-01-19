@@ -5,6 +5,7 @@ set(current_sources_
   thin_py.cpp
   create_distance_map_py.cpp
   reconstruct_from_distance_map_py.cpp
+  render_binary_volume_py.cpp
   )
 
 if(SG_MODULE_ANALYZE)

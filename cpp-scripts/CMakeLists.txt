@@ -87,16 +87,18 @@ if(SG_MODULE_VISUALIZE_WITH_QT AND SG_MODULE_ANALYZE)
     target_link_libraries(visualize_histograms_from_file Qt5::Widgets Qt5::Xml )
 endif()
 
-
-if(${_modern_VTK_available})
+# Because: volumeMapper->SetBlendModeToIsoSurface
+if(_modern_VTK_available)
     if(SG_MODULE_VISUALIZE)
         add_executable(visualize_graph_and_image visualize_graph_and_image.cpp)
         target_link_libraries(visualize_graph_and_image ${_scripts_libs})
-        if(_modern_VTK_available)
-            vtk_module_autoinit(
-                TARGETS visualize_graph_and_image
-                MODULES ${VTK_LIBRARIES})
-        endif()
+
+        add_executable(render_binary_volume render_binary_volume.cpp)
+        target_link_libraries(render_binary_volume ${_scripts_libs})
+
+        vtk_module_autoinit(
+            TARGETS visualize_graph_and_image render_binary_volume
+            MODULES ${VTK_LIBRARIES})
     endif()
 endif()
 

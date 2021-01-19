@@ -49,6 +49,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
 if(SG_MODULE_VISUALIZE)
   list(APPEND SG_MODULE_${SG_MODULE_NAME}_SOURCES
     reconstruct_from_distance_map.cpp
+    render_binary_volume.cpp
     )
 endif()
 

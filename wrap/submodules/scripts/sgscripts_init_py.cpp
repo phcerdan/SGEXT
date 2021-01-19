@@ -32,6 +32,7 @@ void init_morphological_watershed(py::module &);
 #ifdef SG_MODULE_VISUALIZE_ENABLED
 void init_visualize_spatial_graph(py::module &);
 void init_reconstruct_from_distance_map(py::module &);
+void init_render_binary_volume(py::module &);
 #endif
 
 void init_sgscripts(py::module & mparent) {
@@ -48,5 +49,6 @@ void init_sgscripts(py::module & mparent) {
 #ifdef SG_MODULE_VISUALIZE_ENABLED
     init_visualize_spatial_graph(m);
     init_reconstruct_from_distance_map(m);
+    init_render_binary_volume(m);
 #endif
 }
