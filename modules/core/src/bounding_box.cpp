@@ -98,9 +98,9 @@ BoundingBox::BuildEnclosingBox(const std::vector<double *> &bounds_vector) {
     double xMin = std::numeric_limits<double>::max();
     double yMin = std::numeric_limits<double>::max();
     double zMin = std::numeric_limits<double>::max();
-    double xMax = std::numeric_limits<double>::min();
-    double yMax = std::numeric_limits<double>::min();
-    double zMax = std::numeric_limits<double>::min();
+    double xMax = std::numeric_limits<double>::lowest();
+    double yMax = std::numeric_limits<double>::lowest();
+    double zMax = std::numeric_limits<double>::lowest();
 
     for (const auto &bounds : bounds_vector) {
         xMin = bounds[0] < xMin ? bounds[0] : xMin;
@@ -119,9 +119,9 @@ BoundingBox BoundingBox::BuildEnclosingBox(
     double xMin = std::numeric_limits<double>::max();
     double yMin = std::numeric_limits<double>::max();
     double zMin = std::numeric_limits<double>::max();
-    double xMax = std::numeric_limits<double>::min();
-    double yMax = std::numeric_limits<double>::min();
-    double zMax = std::numeric_limits<double>::min();
+    double xMax = std::numeric_limits<double>::lowest();
+    double yMax = std::numeric_limits<double>::lowest();
+    double zMax = std::numeric_limits<double>::lowest();
 
     for (const auto &box : bounding_box_vector) {
         xMin = box.ini[0] < xMin ? box.ini[0] : xMin;
