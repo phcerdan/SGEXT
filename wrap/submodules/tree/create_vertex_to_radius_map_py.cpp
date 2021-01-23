@@ -27,14 +27,24 @@ using namespace SG;
 
 void init_create_vertex_to_radius_map(py::module &m) {
 
-    m.def("create_vertex_to_radius_map", &create_vertex_to_radius_map,
-          R"(
-Create a vertex to local radius map from a distance map and a graph.
+    m.def("create_vertex_to_radius_map", [](
+          const typename FloatImageType::Pointer & distance_map_image,
+          const GraphType & input_graph,
+          const bool spatial_nodes_position_are_in_physical_space,
+          const bool verbose
+          ){
+            return create_vertex_to_radius_map(
+                distance_map_image,
+                input_graph,
+                spatial_nodes_position_are_in_physical_space,
+                verbose);
+          },
+R"(Create a vertex to local radius map from a distance map and a graph.
 
 It can be used in tree_generation.
 
 Parameters:
----------
+----------
 distance_map_image: FloatImageType
   sgext image obtained from a binary image.
   See sgext.scripts.create_distance_map_io to obtain the distance map image.

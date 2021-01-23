@@ -38,6 +38,10 @@ target_link_libraries(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY}
   )
 add_dependencies(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} ${SG_MODULE_INTERNAL_DEPENDS})
 
+if(SG_BUILD_TESTING)
+  add_subdirectory(test)
+endif()
+
 install(TARGETS ${SG_MODULE_${SG_MODULE_NAME}_LIBRARY}
         EXPORT SGEXTTargets
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime
