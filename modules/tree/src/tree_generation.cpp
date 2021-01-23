@@ -21,6 +21,7 @@
 #include "tree_generation.hpp"
 #include "create_vertex_to_radius_map.hpp"
 #include "tree_generation_visitor.hpp"
+#include "filter_spatial_graph.hpp"
 #include <fstream>
 #include <iostream>
 
@@ -44,13 +45,6 @@ tree_generation(const GraphType &graph,
     const auto vertex_to_radius_map = create_vertex_to_radius_map(
             distance_map_image, graph,
             spatial_nodes_position_are_in_physical_space, verbose);
-    const auto max_radius_element = std::max_element(
-            std::cbegin(vertex_to_radius_map), std::cend(vertex_to_radius_map),
-            [](const std::pair<GraphType::vertex_descriptor, double> &lhs,
-               const std::pair<GraphType::vertex_descriptor, double> &rhs) {
-                return lhs.second < rhs.second;
-            });
-
     // Manage roots
     if(verbose) {
         std::cout << "Provided input_roots: [ ";
@@ -62,14 +56,38 @@ tree_generation(const GraphType &graph,
 
     std::vector<vertex_descriptor> final_root_nodes;
     if(input_roots.empty()) {
-        const auto vertex_with_largest_radius = max_radius_element->first;
-        if (verbose) {
-            std::cout << "vertex_with_largest_radius: "
-                << vertex_with_largest_radius
-                << " with radius: " << max_radius_element->second
-                << std::endl;
+        const auto component_graphs = SG::filter_component_graphs(graph);
+        const auto num_of_components = component_graphs.size();
+        if(verbose) {
+            std::cout << "vertices_with_largest_radius per graph component "
+                "(graph componentes where largest radius is 1 are ignored):" << std::endl;
         }
-        final_root_nodes.push_back(vertex_with_largest_radius);
+        for (size_t comp_index = 0; comp_index < num_of_components; comp_index++) {
+            const auto & comp_graph  = component_graphs[comp_index];
+            const auto comp_vertex_to_radius_map = create_vertex_to_radius_map(
+                    distance_map_image, comp_graph,
+                    spatial_nodes_position_are_in_physical_space, verbose);
+            using vertex_radius_pair = std::pair<GraphType::vertex_descriptor, double>;
+            const auto max_radius_element = std::max_element(
+                    std::cbegin(comp_vertex_to_radius_map), std::cend(comp_vertex_to_radius_map),
+                    [](const vertex_radius_pair &lhs, const vertex_radius_pair &rhs) {
+                        return lhs.second < rhs.second;
+                    });
+
+            const auto vertex_with_largest_radius = max_radius_element->first;
+            const auto & largest_radius_per_component = max_radius_element->second;
+            if(largest_radius_per_component > 1.0) {
+                final_root_nodes.push_back(vertex_with_largest_radius);
+                if (verbose) {
+                    std::cout << " - component_index: " << comp_index
+                        << " -> vertex_with_largest_radius: "
+                        << vertex_with_largest_radius
+                        << " with radius: "
+                        << largest_radius_per_component
+                        << std::endl;
+                }
+            }
+        }
     } else {
         // TODO: If multiple roots, we should check that they belong to
         // disconnected_components. See SG::filter_component_graph O(E+V)
@@ -133,13 +151,17 @@ tree_generation(const GraphType &graph,
 
     // Print anomalies
     if (verbose) {
-        std::cout << "Printing anomalies where target_radius / source_radius > "
-                     "1.0:"
-                  << std::endl;
+        std::cout << "Anomalies:" << std::endl;
+        std::cout << "vertex : radius" << std::endl;
         for (const auto &vertex_anomaly : visitor.m_vertex_anomalies) {
             std::cout << vertex_anomaly.first << ": " << vertex_anomaly.second
                       << std::endl;
         }
+        std::cout << "Anomalies vertex list:" << std::endl;
+        for (const auto &vertex_anomaly : visitor.m_vertex_anomalies) {
+            std::cout << vertex_anomaly.first << ", ";
+        }
+        std::cout << std::endl;
     }
     return vertex_to_generation_map;
 }
