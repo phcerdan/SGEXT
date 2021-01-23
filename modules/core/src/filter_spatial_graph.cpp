@@ -123,7 +123,7 @@ std::vector<ComponentGraphType> filter_component_graphs(
 std::vector<ComponentGraphType>
 filter_component_graphs(const GraphType &inputGraph) {
     std::unordered_map<GraphType::vertex_descriptor, int> components_map;
-    auto num_of_components = boost::connected_components(
+    const auto num_of_components = boost::connected_components(
             inputGraph, boost::make_assoc_property_map(components_map));
     return filter_component_graphs(inputGraph, num_of_components,
                                    components_map);
