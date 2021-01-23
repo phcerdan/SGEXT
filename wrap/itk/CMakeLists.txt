@@ -9,6 +9,7 @@ set(current_sources_
   resample_image_py.cpp
   voxelize_graph_py.cpp
   morphological_watershed_py.cpp
+  segmentation_functions_py.cpp
   )
 set(module_name_ ${CMAKE_CURRENT_SOURCE_DIR})
 list(TRANSFORM current_sources_ PREPEND "${module_name_}/")

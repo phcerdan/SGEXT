@@ -25,12 +25,16 @@ void init_itk_image(py::module &);
 void init_itk_image_io(py::module &);
 void init_itk_view_image(py::module &);
 void init_transform_to_physical_point_with_itk(py::module &);
+void init_segmentation_functions(py::module &);
 
 void init_sgitk(py::module & mparent) {
     auto m = mparent.def_submodule("itk");
-    m.doc() = "ITK wrapping of image "; // optional module docstring
+    m.doc() = "ITK wrapping for images types: BinaryImageType (uchar) and FloatImageType (float32).";
     init_itk_image(m);
     init_itk_image_io(m);
     init_itk_view_image(m);
     init_transform_to_physical_point_with_itk(m);
+    auto msegmentation = m.def_submodule("segmentation");
+    msegmentation.doc() = "Some segmentation methods using ITK";
+    init_segmentation_functions(msegmentation);
 }

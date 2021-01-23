@@ -108,6 +108,12 @@ if(SG_REQUIRES_ITK)
     ITKImageGrid
     ITKImageIntensity
     ITKImageStatistics
+    # from segmentation_functions
+    ITKDistanceMap
+    ITKImageGradient
+    ITKLevelSets
+    ITKThresholding
+    ITKRegionGrowing
     ${ITKVtkGlueModule}
     ${ITKImageIOModule}
     )

@@ -22,6 +22,7 @@ set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
   voxelize_graph.cpp
   morphological_watershed.cpp
   create_vertex_to_radius_map.cpp
+  segmentation_functions.cpp
   )
 
 list(TRANSFORM SG_MODULE_${SG_MODULE_NAME}_SOURCES PREPEND "src/")
