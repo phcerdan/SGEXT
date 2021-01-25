@@ -27,6 +27,8 @@ export CMAKE_GENERATOR=Ninja
 
 # macos:
 if [[ $OSTYPE == darwin* ]]; then
+  # To find ninja and modern cmake from pip
+  export PATH="/Library/Frameworks/Python.framework/Versions/2.7/bin:$PATH"
   export CMAKE_OS_VARIABLES="\
   -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=10.9 \
   -DCMAKE_OSX_ARCHITECTURES:STRING=x86_64 \
