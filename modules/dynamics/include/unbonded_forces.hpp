@@ -22,7 +22,7 @@
 #define SG_UNBONDED_FORCES_HPP
 
 #include "array_utilities.hpp"
-#include <math.h>
+#include <cmath>
 
 namespace SG {
 

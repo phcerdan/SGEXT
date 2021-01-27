@@ -48,9 +48,17 @@ stages:
         runVersion: 'latest'
         artifact: DEPENDENCIES_BUILD_DIR_MACOS
         path: $(DEPENDENCIES_BUILD_DIR)
+
+    - script: sudo xcode-select -switch /Applications/Xcode_12.3.app
+      displayName: "Select Xcode version"
+
+    - script: xcodebuild -version
+      displayName: "Xcode version"
+
     - task: UsePythonVersion@0
       inputs:
         versionSpec: '$(python.version)'
+
     - task: Bash@3
       inputs:
         filePath: '$(Build.SourcesDirectory)/deploy/deploy_macos_one_python.sh'

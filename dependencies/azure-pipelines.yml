@@ -37,6 +37,12 @@ stages:
     displayName: 'BuildDependencies'
     timeoutInMinutes: 0
     steps:
+    - script: sudo xcode-select -switch /Applications/Xcode_12.3.app
+      displayName: "Select Xcode version"
+
+    - script: xcodebuild -version
+      displayName: "Xcode version"
+
     - script: |
         mkdir $DEPENDENCIES_BUILD_DIR
         echo $DEPENDENCIES_BUILD_DIR
