@@ -206,7 +206,8 @@ void simulated_annealing_generator::populate_histogram_ete_distances() {
     LUT.resize(histo_ete_distances_.bins);
     const auto total_counts =
             std::accumulate(std::begin(histo_ete_distances_.counts),
-                            std::end(histo_ete_distances_.counts), 0LU);
+                            std::end(histo_ete_distances_.counts),
+                            static_cast<size_t>(0));
     std::transform(std::begin(target_cumulative_distro_histo_ete_distances_),
                    std::end(target_cumulative_distro_histo_ete_distances_),
                    std::begin(LUT),
@@ -225,7 +226,8 @@ void simulated_annealing_generator::populate_histogram_cosines() {
     LUT.resize(histo_cosines_.bins);
     const auto total_counts =
             std::accumulate(std::begin(histo_cosines_.counts),
-                            std::end(histo_cosines_.counts), 0LU);
+                            std::end(histo_cosines_.counts),
+                            static_cast<size_t>(0));
     std::transform(std::begin(target_cumulative_distro_histo_cosines_),
                    std::end(target_cumulative_distro_histo_cosines_),
                    std::begin(LUT),
@@ -269,7 +271,9 @@ void simulated_annealing_generator::engine(const bool &reset_steps) {
     /****** For reporting progress **********/
     const double log_size =
             std::log10(transition_params.MAX_ENGINE_ITERATIONS) - 2;
-    const size_t report_every = log_size > 0 ? std::pow(10, log_size) : 1;
+    const size_t report_every = log_size > 0 ?
+        static_cast<size_t>(std::pow(10, log_size)) :
+        1;
     size_t progress_count = 0;
     /****/
     const double energy_initial = compute_energy();
@@ -510,7 +514,8 @@ void simulated_annealing_generator::
     const auto &distro = target_cumulative_distro_histo_ete_distances_;
     auto target_bins = distro;
     const size_t N = std::accumulate(std::begin(histo.counts),
-                                     std::end(histo.counts), 0.0);
+                                     std::end(histo.counts),
+                                     static_cast<size_t>(0));
     for (size_t i = 0; i < std::size(distro); i++) {
         const auto t = distro[i];
         const double diff = (i == 0) ? t : t - distro[i - 1];
@@ -525,7 +530,8 @@ void simulated_annealing_generator::print_histo_and_target_distribution_cosines(
     const auto &distro = target_cumulative_distro_histo_cosines_;
     auto target_bins = distro;
     const size_t N = std::accumulate(std::begin(histo.counts),
-                                     std::end(histo.counts), 0.0);
+                                     std::end(histo.counts),
+                                     static_cast<size_t>(0));
     for (size_t i = 0; i < std::size(distro); i++) {
         const auto t = distro[i];
         const double diff = (i == 0) ? t : t - distro[i - 1];

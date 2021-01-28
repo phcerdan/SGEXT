@@ -157,7 +157,7 @@ int degree_viger_generator::max_degree() const {
 }
 
 void degree_viger_generator::alloc(const std::vector<int> &degree_sequence) {
-    num_vertices_ = std::size(degree_sequence);
+    num_vertices_ = static_cast<int>(std::size(degree_sequence));
     arcs_ = std::accumulate(std::begin(degree_sequence),
                             std::end(degree_sequence), 0);
     assert(arcs_ % 2 == 0); // arcs must be even

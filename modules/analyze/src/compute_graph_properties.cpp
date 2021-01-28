@@ -27,7 +27,7 @@ std::vector<unsigned int> compute_degrees(const SG::GraphType &sg) {
     std::vector<unsigned int> degrees;
     const auto verts = boost::vertices(sg);
     for (auto vi = verts.first; vi != verts.second; ++vi) {
-        degrees.push_back(boost::degree(*vi, sg));
+        degrees.push_back(static_cast<unsigned int>(boost::degree(*vi, sg)));
     }
     return degrees;
 }
