@@ -21,7 +21,7 @@ macro(SG_add_gtests)
       ${SG_MODULE_${SG_MODULE_NAME}_TEST_SYSTEM_INCLUDE_DIRS})
     gtest_discover_tests(
       ${test_name}
-      TEST_PREFIX ${SG_MODULE_NAME}||${test_name}||
+      TEST_PREFIX ${SG_MODULE_NAME}__${test_name}__
       PROPERTIES LABELS ${SG_MODULE_NAME}
       )
     if(${ARGC} GREATER 2)
