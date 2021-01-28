@@ -35,7 +35,8 @@ histo::Histo<double> read_histogram(std::istream &is) {
     histo::Histo<double> histo;
     std::string line;
     std::istringstream ss;
-    double num;
+    double input_break;
+    size_t input_count;
     // Header, ignore
     std::getline(is, line);
     std::string delim_first = "# ";
@@ -51,15 +52,15 @@ histo::Histo<double> read_histogram(std::istream &is) {
     std::getline(is, line);
     ss.clear();
     ss.str(line);
-    while (ss >> num) {
-        histo.counts.push_back(num);
+    while (ss >> input_count) {
+        histo.counts.push_back(input_count);
     }
     // Breaks, store
     std::getline(is, line);
     ss.clear();
     ss.str(line);
-    while (ss >> num) {
-        histo.breaks.push_back(num);
+    while (ss >> input_break) {
+        histo.breaks.push_back(input_break);
     }
 
     // Complete histogram:
