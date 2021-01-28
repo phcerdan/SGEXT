@@ -70,10 +70,10 @@ enum breaks_method {
  */
 template <typename PRECI = double>
 std::vector<PRECI> GenerateBreaksFromRangeAndBins(
-        const PRECI &low, const PRECI &upper, const unsigned long int &bins) {
+        const PRECI &low, const PRECI &upper, const size_t &bins) {
     std::vector<PRECI> breaks(bins + 1);
     PRECI width = (upper - low) / static_cast<PRECI>(bins);
-    for (unsigned long int i = 0; i != bins + 1; i++) {
+    for (size_t i = 0; i != bins + 1; i++) {
         breaks[i] = low + i * width;
     }
     return breaks;
@@ -82,7 +82,7 @@ std::vector<PRECI> GenerateBreaksFromRangeAndBins(
 template <typename PRECI = double>
 std::vector<PRECI>
 GenerateBreaksFromRangeAndBins(const std::pair<PRECI, PRECI> &range_low_upper,
-                               const unsigned long int &bins) {
+                               const size_t &bins) {
     auto low = range_low_upper.first;
     auto upper = range_low_upper.second;
     return GenerateBreaksFromRangeAndBins<PRECI>(low, upper, bins);
@@ -173,7 +173,7 @@ bool isequalthan(const TData &v1, const TData &v2) {
  * @tparam PRECI It should be equal to T, except when T is int.
  * @tparam PRECI_INTEGER int type for counts data member.
  */
-template <typename PRECI = double, typename PRECI_INTEGER = unsigned long int>
+template <typename PRECI = double, typename PRECI_INTEGER = size_t>
 struct Histo {
     using BreaksType = std::vector<PRECI>;
     using RangeType = std::pair<PRECI, PRECI>;
@@ -185,7 +185,7 @@ struct Histo {
      *  size.breaks = size.counts + 1. */
     BreaksType breaks;
     /** breaks.size() - 1 */
-    unsigned long int bins{0};
+    size_t bins{0};
     /** int vector holding the counts for each breaks interval.*/
     CountsType counts;
     /** name/description of the histogram */
@@ -333,12 +333,11 @@ struct Histo {
      * @return Index of counts
      */
     template <typename TData>
-    unsigned long int IndexFromValue(const TData &value) const {
+    size_t IndexFromValue(const TData &value) const {
         // We could use this with a custom comparator:
         // typename std::vector<T>::iterator low =
         // std::lower_bound(breaks.begin(), breaks.end(), value);
-        unsigned long int lo{0}, hi{bins},
-                newb; // include right border in the last bin.
+        size_t lo{0}, hi{bins}, newb; // include right border in the last bin.
         if (value >= breaks[lo] &&
             (value < breaks[hi] ||
              histo::isequalthan<PRECI>(value, breaks[hi]))) {
@@ -387,7 +386,7 @@ struct Histo {
      *
      * @param index of counts
      */
-    void Increase(const unsigned long int &index) {
+    void Increase(const size_t &index) {
         if (counts[index] == std::numeric_limits<PRECI_INTEGER>::max())
             throw histo_error("Increase has exceded PRECI_INTEGER."
                               " Index: " +
@@ -399,7 +398,7 @@ struct Histo {
     /** @brief Decrease count by one, checking if it goes negative.
      * @param index of counts.
      */
-    void Decrease(const unsigned long int &index) {
+    void Decrease(const size_t &index) {
         if (counts[index] <= 0)
             throw histo_error("Decrease has reached negative value."
                               " Index: " +
@@ -412,7 +411,7 @@ struct Histo {
      * @param index of counts.
      * @param v value to set.
      */
-    void SetCount(const unsigned long int &index, const PRECI_INTEGER &v) {
+    void SetCount(const size_t &index, const PRECI_INTEGER &v) {
         if (index > bins)
             throw histo_error("Index is out of bounds in SetCount"
                               " Index: " +
@@ -480,7 +479,7 @@ struct Histo {
                               "Equidistant breaks");
         }
 
-        unsigned long int nbins = input_breaks.size() - 1;
+        size_t nbins = input_breaks.size() - 1;
         PRECI width = input_breaks[1] - input_breaks[0];
         // diff_low is > 0 when it does not reach range, and < 0 when it goes
         // beyond.
@@ -550,7 +549,7 @@ struct Histo {
     };
     void ShrinkOrExpandBreaks(BreaksType &input_breaks,
                               const PRECI &d) const {
-        unsigned long int i{0};
+        size_t i{0};
         for (auto &v : input_breaks) {
             v = v + i * d;
             i++;
@@ -572,9 +571,10 @@ struct Histo {
         // cbrt is cubic root
         PRECI width =
                 3.5 * sqrt(sigma) / std::cbrt(static_cast<PRECI>(data.size()));
-        this->bins = std::ceil((rang.second - rang.first) / width);
+        this->bins = static_cast<size_t>(
+            std::ceil((rang.second - rang.first) / width));
         this->breaks.resize(bins + 1);
-        for (unsigned long int i = 0; i != bins + 1; i++) {
+        for (size_t i = 0; i != bins + 1; i++) {
             this->breaks[i] = this->range.first + i * width;
         }
         // std::cout << "Non balanced breaks" << std::endl;
@@ -597,7 +597,7 @@ struct Histo {
     };
 };
 
-template <typename PRECI = double, typename PRECI_INTEGER = unsigned long int>
+template <typename PRECI = double, typename PRECI_INTEGER = size_t>
 double
 Mean(const Histo<PRECI, PRECI_INTEGER> &input_histo) {
   const auto bin_centers = input_histo.ComputeBinCenters();
@@ -622,7 +622,7 @@ Mean(const Histo<PRECI, PRECI_INTEGER> &input_histo) {
  *
  * @return histogram normalized with float counts.
  */
-template <typename PRECI = double, typename PRECI_INTEGER = unsigned long int>
+template <typename PRECI = double, typename PRECI_INTEGER = size_t>
 Histo<PRECI, PRECI>
 NormalizeByArea(const Histo<PRECI, PRECI_INTEGER> &input_histo) {
     // compute the area of each bin

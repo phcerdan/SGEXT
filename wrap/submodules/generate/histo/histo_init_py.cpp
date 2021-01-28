@@ -34,11 +34,11 @@ void init_histo(py::module & mparent) {
 
     // Free functions
     m.def("generate_breaks_from_range_and_bins",
-            py::overload_cast<const double&, const double&, const unsigned long int&>(
+            py::overload_cast<const double&, const double&, const size_t&>(
             &histo::GenerateBreaksFromRangeAndBins<double>),
             py::arg("low"), py::arg("upper"), py::arg("bins"));
     m.def("generate_breaks_from_range_and_bins",
-            py::overload_cast<const std::pair<double, double> &, const unsigned long int&>(
+            py::overload_cast<const std::pair<double, double> &, const size_t&>(
             &histo::GenerateBreaksFromRangeAndBins<double>),
             py::arg("range"), py::arg("bins"));
     m.def("generate_breaks_from_range_and_width",
