@@ -224,6 +224,9 @@ if ( APPLE )
       cxxflags=-std=c++${CMAKE_CXX_STANDARD}
       cxxflags=-stdlib=libc++
       cxxflags=-mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}
+      # Solves: ld: warning: direct access in function ... from file ... to global weak symbol
+      # Needed because we are building with link=static
+      cxxflags=-fvisibility=hidden
       linkflags=-stdlib=libc++
       )
   endif()

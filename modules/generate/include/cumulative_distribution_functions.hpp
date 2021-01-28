@@ -24,7 +24,7 @@
 #include <algorithm>
 #include <boost/math/constants/constants.hpp> // for pi...
 #include <functional>                         // std::function
-#include <math.h>                             // erf
+#include <cmath>                              // erf
 
 #ifdef WITH_PARALLEL_STL
 #include <execution>                          // std::execution::par_unseq
