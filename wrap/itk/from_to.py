@@ -43,21 +43,12 @@ def sgext_to_itk(sgext_image):
     # Populate the image pixels
     itk_image = _itk.GetImageFromArray(sgext_image.to_pyarray())
     # Populate metadata (origin, spacing, direction)
-    PixelType = _itk.F
-    Dimension = 3
-    PointType = _itk.Point[PixelType, Dimension]
 
     sgext_origin = sgext_image.origin()
-    origin = PointType()
     sgext_spacing = sgext_image.spacing()
-    spacing = PointType()
 
-    for d in range(Dimension):
-        origin[d] = sgext_origin[d]
-        spacing[d] = sgext_spacing[d]
-
-    itk_image.SetOrigin(origin)
-    itk_image.SetSpacing(spacing)
+    itk_image.SetOrigin([sgext_origin[0], sgext_origin[1], sgext_origin[2]])
+    itk_image.SetSpacing([sgext_spacing[0], sgext_spacing[1], sgext_spacing[2]])
     # direction_matrix = _itk.GetVnlMatrixFromArray(sgext_image.direction())
     itk_image.SetDirection(sgext_image.direction())
 
