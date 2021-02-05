@@ -21,6 +21,7 @@ set(all_modules_python_sources
 
 set(_pure_python_files
   from_to.py
+  utils.py
   )
 
 # Copy pure python at configure time

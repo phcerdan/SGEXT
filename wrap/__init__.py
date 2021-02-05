@@ -1,6 +1,7 @@
 from ._sgext import *
 
 from . import from_to
+from . import utils
 
 # Create sggen alias for tree submodule. Use it with: sgext.sggen
 import sys as _sys
