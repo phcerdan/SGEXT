@@ -11,7 +11,11 @@ if(SG_MODULE_LOCATE AND SG_BUILD_TESTING_INTERACTIVE)
   list(APPEND SG_MODULE_${SG_MODULE_NAME}_TEST_DEPENDS SGLocate)
 endif()
 if(SG_BUILD_TESTING_INTERACTIVE)
-  set(_with_interactive_tests test_visualize_spatial_graph.cpp)
+  set(_with_interactive_tests
+    test_visualize_spatial_graph.cpp
+    test_visualize_with_label_image.cpp
+    )
+  list(APPEND SG_MODULE_${SG_MODULE_NAME}_TEST_DEPENDS FixtureImagesFolder)
 endif()
 set(SG_MODULE_${SG_MODULE_NAME}_TESTS
   test_convert_to_vtk_unstructured_grid.cpp

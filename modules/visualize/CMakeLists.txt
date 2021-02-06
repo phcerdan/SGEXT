@@ -36,6 +36,8 @@ set(SG_MODULE_${SG_MODULE_NAME}_SOURCES
     visualize_object.cpp
     visualize_spatial_graph.cpp
     vtkInteractorStyleTrackballCameraGraph.cpp
+    sgextImagePlaneWidget.cpp
+    visualize_with_label_image.cpp
     ${modern_vtk_sources}
     )
 list(TRANSFORM SG_MODULE_${SG_MODULE_NAME}_SOURCES PREPEND "src/")
