@@ -147,7 +147,7 @@ class TestGraph(unittest.TestCase):
         self.assertEqual(len(graph.spatial_edge(ed_).edge_points), 2)
 
         v0 = graph.spatial_node(0)
-        print(v0)
+        v0.pos = arr0
         self.assertAlmostEqual(v0.pos[0], arr0[0])
         e0 = graph.spatial_edge(ed)
         print(e0)
