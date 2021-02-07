@@ -31,14 +31,14 @@ stages:
     timeoutInMinutes: 0
     strategy:
       matrix:
-        Python35:
-          python.version: '3.5'
         Python36:
           python.version: '3.6'
         Python37:
           python.version: '3.7'
         Python38:
           python.version: '3.8'
+        Python39:
+          python.version: '3.9'
     steps:
     - task: DownloadPipelineArtifact@2
       inputs:
@@ -82,14 +82,14 @@ stages:
     timeoutInMinutes: 0
     strategy:
       matrix:
-        Python35:
-          python.version: '3.5'
         Python36:
           python.version: '3.6'
         Python37:
           python.version: '3.7'
         Python38:
           python.version: '3.8'
+        Python39:
+          python.version: '3.9'
     steps:
     - task: DownloadPipelineArtifact@2
       inputs:
