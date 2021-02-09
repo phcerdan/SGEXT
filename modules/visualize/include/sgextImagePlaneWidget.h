@@ -159,6 +159,9 @@ public:
   std::vector<double> CurrentImageValueForCursorDisplay;
   std::vector<std::string> ImagesNamesForCursorDisplay;
 
+  // Make text actor public
+  using vtkImagePlaneWidget::TextActor;
+
 protected:
   sgextImagePlaneWidget() = default;
   ~sgextImagePlaneWidget() override = default;

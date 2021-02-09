@@ -57,9 +57,7 @@ TEST(visualize_with_label_image, works) {
     auto label_image = thresholder->GetOutput();
 
     const double label_opacity = 0.8;
-    // input is float
-    SG::view_image_with_label(reader_dmap->GetOutput(), label_image,
-                              label_opacity);
+
     // input is binary
     SG::view_image_with_label(reader_input->GetOutput(), label_image,
                               label_opacity);

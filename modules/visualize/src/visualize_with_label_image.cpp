@@ -25,6 +25,8 @@
 #include <vtkNamedColors.h>
 #include <vtkPlane.h>
 #include <vtkProperty.h>
+#include <vtkTextActor.h>
+#include <vtkTextProperty.h>
 #include <vtkTexture.h>
 #include <vtkWindowLevelLookupTable.h>
 
@@ -216,6 +218,14 @@ create_slice_planes(vtkImageData *blendImage, // Assume RGBA already
         slice_planes[i]->GetSelectedPlaneProperty()->RenderLinesAsTubesOn();
         // All selected planes have white outline
         slice_planes[i]->GetSelectedPlaneProperty()->SetColor(1., 1., 1.);
+
+        vtkCoordinate *coord =
+                slice_planes[i]->TextActor->GetPositionCoordinate();
+        coord->SetCoordinateSystemToNormalizedViewport();
+        coord->SetValue(.01, .99);
+        slice_planes[i]
+                ->TextActor->GetTextProperty()
+                ->SetVerticalJustificationToTop();
 
         // Passthrough (input is already RGBA)
         slice_planes[i]->GetColorMap()->SetLookupTable(nullptr);

@@ -22,16 +22,21 @@
 #define VISUALIZE_WITH_LABEL_IMAGE_HPP
 
 #include "sgextImagePlaneWidget.h"
+#include "visualize_common.hpp"
 
+#include <vtkButtonWidget.h>
 #include <vtkCamera.h>
+#include <vtkCaptionActor2D.h>
 #include <vtkCellPicker.h>
 #include <vtkImageBlend.h>
 #include <vtkImageData.h>
 #include <vtkInteractorStyleRubberBand3D.h>
+#include <vtkNamedColors.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderer.h>
 #include <vtkSmartPointer.h>
+#include <vtkTexturedButtonRepresentation2D.h>
 
 #include <itkImage.h>
 #include <itkImageToVTKImageFilter.h>
@@ -77,6 +82,70 @@ create_slice_planes(vtkImageData *blendImage, // Assume RGBA already
                             &imagesForCursorDisplay,
                     const std::vector<std::string> &namesForCursorDisplay,
                     vtkSmartPointer<vtkCellPicker> picker_shared = nullptr);
+
+/**
+ * button_callback for view_image_with_label.
+ * Updates the blender opacity when button is pressed, and change the text.
+ * Because the blender and the planes are not connected via pipelines, we
+ * need to update the planes manually.
+ */
+struct DisableBlendButtonCallbackCommand : public vtkCommand {
+    static DisableBlendButtonCallbackCommand *New() {
+        return new DisableBlendButtonCallbackCommand;
+    }
+
+    DisableBlendButtonCallbackCommand() = default;
+
+    void SetCaptionActor(vtkCaptionActor2D *input_caption_actor) {
+        caption_actor = input_caption_actor;
+    }
+    void SetBlender(vtkImageBlend *input_blender) { blender = input_blender; }
+    void SetBlenderLabelOpacity(const double *input_blender_label_opacity) {
+        blender_label_opacity = input_blender_label_opacity;
+    }
+    void SetPlanes(const std::array<vtkSmartPointer<sgextImagePlaneWidget>, 3>
+                           &input_planes) {
+        planes = input_planes;
+    }
+
+    void Execute(vtkObject *caller,
+                 unsigned long /*eventId*/,
+                 void * /*callData*/) override {
+        if (!blender)
+            throw std::runtime_error("Missing blender");
+        if (!blender_label_opacity)
+            throw std::runtime_error("Missing blender_label_opacity");
+        if (!caption_actor)
+            throw std::runtime_error("Missing caption_actor");
+        for (auto &plane : planes) {
+            if (!plane)
+                throw std::runtime_error("Missing planes");
+        }
+
+        auto *buttonWidget = reinterpret_cast<vtkButtonWidget *>(caller);
+        auto *rep = reinterpret_cast<vtkTexturedButtonRepresentation2D *>(
+                buttonWidget->GetRepresentation());
+        auto state = rep->GetState();
+        if (state != 0) {
+            caption_actor->SetCaption("Blender: ON");
+            blender->SetOpacity(1, *blender_label_opacity);
+
+        } else {
+            caption_actor->SetCaption("Blender: OFF");
+            blender->SetOpacity(1, 0.);
+        }
+        blender->Update();
+        for (auto &plane : planes) {
+            auto slice_position = plane->GetSlicePosition();
+            plane->SetInputData(blender->GetOutput());
+            plane->SetSlicePosition(slice_position);
+        }
+    }
+    vtkCaptionActor2D *caption_actor{nullptr};
+    vtkImageBlend *blender{nullptr};
+    const double *blender_label_opacity{nullptr};
+    std::array<vtkSmartPointer<sgextImagePlaneWidget>, 3> planes;
+};
 
 /**
  * view_image_with_label is used to visualize any image (float) and
@@ -155,18 +224,45 @@ void view_image_with_label(
             create_slice_planes(blender->GetOutput(), renderWindowInteractor,
                                 inputImages, namesForCursorDisplay);
 
-    // Flip camera because VTK-ITK different corner for origin.
-    double pos[3];
-    double vup[3];
+    /** Create button to show without blend **/
+    auto namedColors = vtkSmartPointer<vtkNamedColors>::New();
+    unsigned char color_off[4];
+    namedColors->GetColor("DarkRed", color_off);
+    unsigned char color_on[4];
+    namedColors->GetColor("DarkGreen", color_on);
+    auto button_texture_off = create_texture_for_button(color_off);
+    auto button_texture_on = create_texture_for_button(color_on);
+    const double button_size = 30.0;
+    auto button_bounds = create_bounds_for_button(button_size);
+    auto button_rep = create_on_off_representation_for_button(
+            button_texture_off, button_texture_on, button_bounds);
+    button_rep->SetState(1); // Starts on
+
+    // Create an actor for the text
+    const double pad = 0.5;
+    const std::string caption_init = "Blender: ON";
+    auto caption_actor =
+            create_caption_actor_for_button(button_size, caption_init, pad);
+
+    renderer->AddViewProp(caption_actor);
+
+    auto button_callback =
+            vtkSmartPointer<DisableBlendButtonCallbackCommand>::New();
+    button_callback->SetBlender(blender);
+    button_callback->SetBlenderLabelOpacity(&label_opacity);
+    button_callback->SetCaptionActor(caption_actor);
+    button_callback->SetPlanes(slice_planes);
+
+    auto button_widget = vtkSmartPointer<vtkButtonWidget>::New();
+    button_widget->SetInteractor(renderWindowInteractor);
+    button_widget->SetRepresentation(button_rep);
+    button_widget->AddObserver(vtkCommand::StateChangedEvent, button_callback);
+    button_widget->SetPriority(1.0); // So, it is always clickable
+    button_widget->On();
+
     vtkCamera *cam = renderer->GetActiveCamera();
-    cam->GetPosition(pos);
-    cam->GetViewUp(vup);
-    for (unsigned int i = 0; i < 3; ++i) {
-        pos[i] = -pos[i];
-        vup[i] = -vup[i];
-    }
-    cam->SetPosition(pos);
-    cam->SetViewUp(vup);
+    // Flip camera because VTK-ITK different direction of Y-axis.
+    flip_camera(cam);
     cam->Azimuth(35);
 
     renderer->ResetCamera();
