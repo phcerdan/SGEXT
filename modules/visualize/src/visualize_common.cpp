@@ -19,11 +19,14 @@
  * *******************************************************************/
 
 #include "visualize_common.hpp"
+
+#include <vtkButtonWidget.h>
 #include <vtkCellArray.h>
 #include <vtkCubeSource.h>
 #include <vtkGlyph3DMapper.h>
 #include <vtkPolyData.h>
 #include <vtkProperty.h>
+#include <vtkRenderWindowInteractor.h>
 #include <vtkTextActor.h>
 #include <vtkTextProperty.h>
 
@@ -154,5 +157,19 @@ create_caption_actor_for_button(
     caption_actor->GetTextActor()->SetTextScaleModeToNone();
     return caption_actor;
 }
+
+void toggleTexturedButtonCallbackFunction(
+            vtkObject* caller,
+            long unsigned int /*eventId*/,
+            void* clientData /* button_widget */,
+            void* /* callData*/ )
+{
+    auto * iren = static_cast<vtkRenderWindowInteractor*>(caller);
+    auto * button_widget = static_cast<vtkButtonWidget*>(clientData);
+    if(iren->GetKeyCode() == 's' || iren->GetKeyCode() == 'S') {
+        static_cast<vtkTexturedButtonRepresentation2D*>(button_widget->GetRepresentation())->NextState();
+        button_widget->InvokeEvent(vtkCommand::StateChangedEvent, nullptr);
+        }
+    };
 
 } // namespace SG

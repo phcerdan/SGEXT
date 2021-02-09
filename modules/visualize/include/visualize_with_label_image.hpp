@@ -26,6 +26,7 @@
 
 #include <vtkButtonWidget.h>
 #include <vtkCamera.h>
+#include <vtkCallbackCommand.h>
 #include <vtkCaptionActor2D.h>
 #include <vtkCellPicker.h>
 #include <vtkImageBlend.h>
@@ -259,6 +260,12 @@ void view_image_with_label(
     button_widget->AddObserver(vtkCommand::StateChangedEvent, button_callback);
     button_widget->SetPriority(1.0); // So, it is always clickable
     button_widget->On();
+
+    // Press "s" to toggle button, using SG::toggleTexturedButtonCallbackFunction.
+    auto button_keypress_callback = vtkSmartPointer<vtkCallbackCommand>::New();
+    button_keypress_callback->SetClientData(button_widget.GetPointer());
+    button_keypress_callback->SetCallback(SG::toggleTexturedButtonCallbackFunction);
+    renderWindowInteractor->AddObserver(vtkCommand::KeyPressEvent, button_keypress_callback);
 
     vtkCamera *cam = renderer->GetActiveCamera();
     // Flip camera because VTK-ITK different direction of Y-axis.

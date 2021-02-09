@@ -77,5 +77,31 @@ create_caption_actor_for_button(
         const std::string & caption_init = "Off|On",
         const double pad = 3);
 
+
+/**
+ * Callback. Press "s" to toggle textured button.
+ * To be used through vtkCallbackCommand.
+ *
+ * SetClientData of vtkCallbackCommand must be set to an instance of
+ * button_widget, with a representation of type vtkTexturedButtonRepresentation2D.
+ *
+ * Example:
+ *
+    auto button_keypress_callback = vtkSmartPointer<vtkCallbackCommand>::New();
+    button_keypress_callback->SetClientData(button_widget.GetPointer());
+    button_keypress_callback->SetCallback(toggleTexturedButtonCallbackFunction);
+    renderWindowInteractor->AddObserver(vtkCommand::KeyPressEvent, button_keypress_callback);
+ *
+ * @param caller a RenderWindowInteractor*
+ * @param eventId unused
+ * @param clientData a button_widget*
+ * @param callData unused
+ */
+void toggleTexturedButtonCallbackFunction(
+            vtkObject* caller /* renderWindowInteractor* */,
+            long unsigned int eventId /*unused */,
+            void* clientData /* button_widget */,
+            void* callData /*unused*/ );
+
 } // namespace SG
 #endif

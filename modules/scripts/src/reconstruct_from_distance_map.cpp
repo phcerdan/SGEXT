@@ -22,10 +22,12 @@
 #include "visualize_common.hpp"
 // for visualize_poly_data_and_graph
 #include "convert_to_vtk_unstructured_grid.hpp"
+
 #include <itkCastImageFilter.h>
 #include <itkVTKImageToImageFilter.h>
 #include <vtkActor2D.h>
 #include <vtkButtonWidget.h>
+#include <vtkCallbackCommand.h>
 #include <vtkCaptionActor2D.h>
 #include <vtkDataSetMapper.h>
 #include <vtkImageData.h>
@@ -436,6 +438,12 @@ void visualize_poly_data_and_graph(vtkPolyData *poly_data,
     button_widget->SetRepresentation(button_rep);
     button_widget->AddObserver(vtkCommand::StateChangedEvent, button_callback);
     button_widget->On();
+
+    // Press "s" to toggle button, using SG::toggleTexturedButtonCallbackFunction.
+    auto button_keypress_callback = vtkSmartPointer<vtkCallbackCommand>::New();
+    button_keypress_callback->SetClientData(button_widget.GetPointer());
+    button_keypress_callback->SetCallback(SG::toggleTexturedButtonCallbackFunction);
+    renderWindowInteractor->AddObserver(vtkCommand::KeyPressEvent, button_keypress_callback);
 
     renderWindow->Render();
     renderWindowInteractor->Initialize();
