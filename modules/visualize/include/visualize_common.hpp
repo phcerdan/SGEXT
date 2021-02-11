@@ -54,7 +54,7 @@ vtkSmartPointer<vtkActor> create_actor_visualize_points_as_cubes(
  * Create an image texture representing an ON/OFF button.
  *
  * @param color of the circular button (background will be always transparent)
- * @param dimensions std::array with dimensions of the button (default to 60,60)
+ * @param dimensions std::array with the resolution of the texture (default to 60,60)
  *
  * @return vtkImageData
  */
@@ -62,15 +62,42 @@ vtkSmartPointer<vtkImageData>
 create_texture_for_button(unsigned char color[4],
                           const std::array<int, 2> &dimensions = {{60, 60}});
 
+/**
+ * Create bounds defining the size of the button.
+ *
+ * @param button_size
+ *
+ * @return button_bounds
+ */
 std::array<double, 6>
 create_bounds_for_button(const double button_size);
 
+/**
+ * Create a textured button with two states and two textures associated
+ * @see create_texture_for_button for generating the textures.
+ *
+ * @param texture_off texture associated to the off state.
+ * @param texture_on texture associated to the on state.
+ * @param button_bounds bounds @see create_bounds_for_button
+ *
+ * @return button_rep
+ */
 vtkSmartPointer<vtkTexturedButtonRepresentation2D>
 create_on_off_representation_for_button(
         vtkImageData *texture_off,
         vtkImageData *texture_on,
         std::array<double, 6> & button_bounds);
 
+/**
+ * Create a caption_actor with some text.
+ *
+ * It assumes the button of that size is located in the left-down corner.
+ *
+ * @param button_size
+ * @param caption_init
+ *
+ * @return caption_actor with label
+ */
 vtkSmartPointer<vtkCaptionActor2D>
 create_caption_actor_for_button(
         const double button_size = 30.0,
