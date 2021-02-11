@@ -105,7 +105,6 @@ vtkSmartPointer<vtkImageBlend> blend_images_for_view(
         {
             const double annotated_value = 0;
             const int index = 0;
-            auto color = colorSeries->GetColorRepeating(index);
             lookup_table_label->SetAnnotation(annotated_value,
                                               std::to_string(annotated_value));
             lookup_table_label->SetTableValue(index, 0, 0, 0, 0.0);

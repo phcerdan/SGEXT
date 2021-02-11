@@ -103,13 +103,8 @@ struct SpatialGraphDifferenceVisitor : public boost::default_dfs_visitor {
                       << ". Degree:" << degree << std::endl;
         }
         // Check if current node exist in the result graph already.
-        vertex_descriptor sg_vertex_descriptor;
-        bool sg_vertex_exists = false;
-        auto vertex_search = m_vertex_map.find(u);
-        if (vertex_search != m_vertex_map.end()) {
-            sg_vertex_exists = true;
-            sg_vertex_descriptor = vertex_search->second;
-        }
+        const bool sg_vertex_exists =
+          (m_vertex_map.find(u) != m_vertex_map.end()) ? true : false;
         // Add new vertex if it doesn't exist in substraend graph
         // If it exists, it might still be added if an edge needs it when
         // processing edges

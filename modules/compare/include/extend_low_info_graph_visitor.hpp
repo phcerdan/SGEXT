@@ -189,13 +189,8 @@ struct ExtendLowInfoGraphVisitor : public boost::default_dfs_visitor {
                 std::cout << "PROCESSING low info u: " << u << std::endl;
             // Check if vertex has been added to the m_result_sg (Check
             // VertexMap)
-            vertex_descriptor sg_vertex_descriptor;
-            bool sg_vertex_exists = false;
-            auto vertex_search = m_vertex_map.find(u);
-            if (vertex_search != m_vertex_map.end()) {
-                sg_vertex_exists = true;
-                sg_vertex_descriptor = vertex_search->second;
-            }
+            const bool sg_vertex_exists =
+              (m_vertex_map.find(u) != m_vertex_map.end()) ?  true : false;
             if (sg_vertex_exists) {
                 if (m_verbose) {
                     std::cout << "ALREADY ADDED u->m_vertex_map[u]: " << u

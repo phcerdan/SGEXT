@@ -107,13 +107,14 @@ TEST_F(sg_clusters, collapse_clusters) {
             verbose);
     auto collapsed_graph = SG::collapse_clusters(g, cluster_label_map, verbose);
     EXPECT_EQ( boost::num_vertices(collapsed_graph), 3);
-    // There is one parallel edge between clusters:
-    //    o
-    //   /
-    //  o    cluster label: 1
-    // / \
-    // \ /
-    //  o    cluster label: 0
+    /* There is one parallel edge between clusters:
+     *    o
+     *   /
+     *  o    cluster label: 1
+     * / \
+     * \ /
+     *  o    cluster label: 0
+     */
     EXPECT_EQ( boost::num_edges(collapsed_graph), 3);
     SG::print_degrees(collapsed_graph);
     SG::print_edges(collapsed_graph);
@@ -133,13 +134,14 @@ TEST_F(sg_clusters, collapse_clusters_and_remove_larger_parallel_edges) {
     auto collapsed_graph_with_no_parallel_edges =
         SG::remove_parallel_edges(collapsed_graph);
     EXPECT_EQ( boost::num_vertices(collapsed_graph_with_no_parallel_edges), 3);
-    // There is one parallel edge between clusters:
-    //    o
-    //   /
-    //  o    cluster label: 1
-    //   \
-    //   /
-    //  o    cluster label: 0
+    /* There is one parallel edge between clusters:
+     *    o
+     *   /
+     *  o    cluster label: 1
+     *   \
+     *   /
+     *  o    cluster label: 0
+     */
     EXPECT_EQ( boost::num_edges(collapsed_graph_with_no_parallel_edges), 2);
     SG::print_degrees(collapsed_graph_with_no_parallel_edges);
     SG::print_edges(collapsed_graph_with_no_parallel_edges);

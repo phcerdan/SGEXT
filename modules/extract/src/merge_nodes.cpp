@@ -558,21 +558,23 @@ size_t merge_two_three_connected_nodes(GraphType &sg, bool inPlace) {
                     three_vertices_connected[0];
             const auto sn_candidate = sg[three_vertices_connected[0]];
 
-            // Check if the edge points of the three vertices are able to be
-            // merged
-            //
-            // Not possible, it will generate duplicated edge_points if merged
-            // \  /
-            //  \/
-            //  |
-            //  /\
-            // /  \
-            // Possible: not duplicated edge points when merged
-            // \   /    \    /
-            //  \_/      \  /
-            //  |         \/
-            //  /\        /\
-            // /  \      /  \
+            /* Check if the edge points of the three vertices are able to be
+             * merged
+             *
+             * Not possible, it will generate duplicated edge_points if merged
+             * \  /
+             *  \/
+             *  |
+             *  /\
+             * /  \
+             * Possible: not duplicated edge points when merged
+             * \   /    \    /
+             *  \_/      \  /
+             *  |         \/
+             *  /\        /\
+             * /  \      /  \
+             *
+             */
 
             // std::vector<std::pair<vertex_descriptor, vertex_descriptor>>
             // outgoing_edges;
