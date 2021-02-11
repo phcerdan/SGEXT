@@ -30,7 +30,7 @@ void init_segmentation_functions(py::module &m) {
     /********************** min_max_values ***************************/
 
     const std::string min_max_values_docs =
-R"(Compute min and max values from input image.
+            R"(Compute min and max values from input image.
 
 Parameters:
 -----------
@@ -41,25 +41,30 @@ Returns:
 -------
 [min_value, max_value]
 )";
-    m.def("min_max_values", [](const BinaryImageType::Pointer & input) {
-          return min_max_values<BinaryImageType>(input);
-        }, min_max_values_docs.c_str(),
-          py::arg("input"));
-    m.def("min_max_values", [](const FloatImageType::Pointer & input) {
-          return min_max_values<FloatImageType>(input);
-        }, min_max_values_docs.c_str(),
-          py::arg("input"));
+    m.def(
+            "min_max_values",
+            [](const BinaryImageType::Pointer &input) {
+                return min_max_values<BinaryImageType>(input);
+            },
+            min_max_values_docs.c_str(), py::arg("input"));
+    m.def(
+            "min_max_values",
+            [](const FloatImageType::Pointer &input) {
+                return min_max_values<FloatImageType>(input);
+            },
+            min_max_values_docs.c_str(), py::arg("input"));
 
     /*************** threshold_image **********************************/
-    m.def("threshold_image",
-            [](const FloatImageType::Pointer & input,
+    m.def(
+            "threshold_image",
+            [](const FloatImageType::Pointer &input,
                const FloatImageType::PixelType &lower_threshold,
                const FloatImageType::PixelType &upper_threshold,
                const FloatImageType::PixelType &outside_value) {
-          return threshold_image<FloatImageType>(input,
-                  lower_threshold, upper_threshold, outside_value);
-        },
-R"(Returns an image of the same type than input image with the pixels
+                return threshold_image<FloatImageType>(
+                        input, lower_threshold, upper_threshold, outside_value);
+            },
+            R"(Returns an image of the same type than input image with the pixels
 outside of the range [lower_threshold, upper_threshold] set to outside_value.
 
 Parameters:
@@ -84,22 +89,26 @@ outside_value: Float
 Returns:
 --------
 FloatImageType (same type than input)
-)", py::arg("input"),
-    py::arg("lower_threshold") = itk::NumericTraits<FloatImageType::PixelType>::lowest(),
-    py::arg("upper_threshold") = itk::NumericTraits<FloatImageType::PixelType>::max(),
-    py::arg("outside_value") = itk::NumericTraits<FloatImageType::PixelType>::lowest()
-    );
+)",
+            py::arg("input"),
+            py::arg("lower_threshold") =
+                    itk::NumericTraits<FloatImageType::PixelType>::lowest(),
+            py::arg("upper_threshold") =
+                    itk::NumericTraits<FloatImageType::PixelType>::max(),
+            py::arg("outside_value") =
+                    itk::NumericTraits<FloatImageType::PixelType>::lowest());
 
     /*************** binarize_with_threshold **************************/
 
-    m.def("binarize_with_threshold",
-            [](const FloatImageType::Pointer & input,
+    m.def(
+            "binarize_with_threshold",
+            [](const FloatImageType::Pointer &input,
                const FloatImageType::PixelType &lower_threshold,
                const FloatImageType::PixelType &upper_threshold) {
-          return binarize_with_threshold<FloatImageType>(input,
-                  lower_threshold, upper_threshold);
-        },
-R"(Binarize input image using a lower and upper threshold.
+                return binarize_with_threshold<FloatImageType>(
+                        input, lower_threshold, upper_threshold);
+            },
+            R"(Binarize input image using a lower and upper threshold.
 
 Parameters:
 -----------
@@ -117,18 +126,22 @@ upper_threshold: Float
 Returns:
 --------
 BinaryImageType
-)", py::arg("input"),
-    py::arg("lower_threshold") = itk::NumericTraits<FloatImageType::PixelType>::lowest(),
-    py::arg("upper_threshold") = itk::NumericTraits<FloatImageType::PixelType>::max()
-    );
+)",
+            py::arg("input"),
+            py::arg("lower_threshold") =
+                    itk::NumericTraits<FloatImageType::PixelType>::lowest(),
+            py::arg("upper_threshold") =
+                    itk::NumericTraits<FloatImageType::PixelType>::max());
 
     /*************** binarize_with_threshold_percentage ***************/
 
-    m.def("binarize_with_percentage",
-            [](const FloatImageType::Pointer & input, const double percentage) {
-          return binarize_with_percentage<FloatImageType>(input, percentage);
-        },
-R"(Binarize input image using a percentage to set the lower_threshold.
+    m.def(
+            "binarize_with_percentage",
+            [](const FloatImageType::Pointer &input, const double percentage) {
+                return binarize_with_percentage<FloatImageType>(input,
+                                                                percentage);
+            },
+            R"(Binarize input image using a percentage to set the lower_threshold.
 
 We understand as a safe binarization, one which does not include false positives.
 The lower the input percentage the less pixels will be included (safer the binarization).
@@ -154,22 +167,23 @@ percentage: Float
 Returns:
 --------
 BinaryImageType
-)", py::arg("input"), py::arg("percentage") = 0.05);
+)",
+            py::arg("input"), py::arg("percentage") = 0.05);
 
     /*************** binarize_with_region_growing ***************/
 
-    m.def("binarize_with_region_growing",
-            [](const FloatImageType::Pointer & input,
-               const BinaryImageType::Pointer & binary_init,
+    m.def(
+            "binarize_with_region_growing",
+            [](const FloatImageType::Pointer &input,
+               const BinaryImageType::Pointer &binary_init,
                const FloatImageType::PixelType &lower_threshold,
                const FloatImageType::PixelType &upper_threshold,
-               const std::string & connectivity_str) {
-          return binarize_with_region_growing(
-                  input.GetPointer(),
-                  binary_init.GetPointer(),
-                  lower_threshold, upper_threshold, connectivity_str);
+               const std::string &connectivity_str) {
+                return binarize_with_region_growing(
+                        input.GetPointer(), binary_init.GetPointer(),
+                        lower_threshold, upper_threshold, connectivity_str);
             },
-R"(Binarize input image using region growing from an initial binary image with seeds.
+            R"(Binarize input image using region growing from an initial binary image with seeds.
 
 Parameters:
 -----------
@@ -193,72 +207,87 @@ connectivity: str
 Returns:
 --------
 BinaryImageType with the improved binarization using region growing.
-)", py::arg("input"),
-    py::arg("binary_init"),
-    py::arg("lower_threshold"),
-    py::arg("upper_threshold") = itk::NumericTraits<FloatImageType::PixelType>::max(),
-    py::arg("connectivity") = "26");
+)",
+            py::arg("input"), py::arg("binary_init"),
+            py::arg("lower_threshold"),
+            py::arg("upper_threshold") =
+                    itk::NumericTraits<FloatImageType::PixelType>::max(),
+            py::arg("connectivity") = "26");
 
     /*************** binarize_with_level_set ***************/
 
-    py::class_<binarize_with_level_set_parameters>(m, "binarize_with_level_set_parameters")
-        .def(py::init())
-        .def_readwrite("gradient_sigma",
-                &binarize_with_level_set_parameters::gradient_sigma)
-        .def_readwrite("sigmoid_alpha",
-                &binarize_with_level_set_parameters::sigmoid_alpha)
-        .def_readwrite("level_set_propagation_scaling",
-                &binarize_with_level_set_parameters::level_set_propagation_scaling)
-        .def_readwrite("level_set_curvature_scaling",
-                &binarize_with_level_set_parameters::level_set_curvature_scaling)
-        .def_readwrite("level_set_advection_scaling",
-                &binarize_with_level_set_parameters::level_set_advection_scaling)
-        .def_readwrite("level_set_maximum_RMS_error",
-                &binarize_with_level_set_parameters::level_set_maximum_RMS_error)
-        .def_readwrite("level_set_iterations",
-                &binarize_with_level_set_parameters::level_set_iterations)
-        .def_readwrite("binary_upper_threshold",
-                &binarize_with_level_set_parameters::binary_upper_threshold)
-        .def_readwrite("binary_inside_value",
-                &binarize_with_level_set_parameters::binary_inside_value)
-        .def("__str__", [](const binarize_with_level_set_parameters & self) {
-            std::stringstream os;
-            print_binarize_with_level_set_parameters(self, os);
-            return os.str();
-        });
+    py::class_<binarize_with_level_set_parameters>(
+            m, "binarize_with_level_set_parameters")
+            .def(py::init())
+            .def_readwrite("gradient_sigma",
+                           &binarize_with_level_set_parameters::gradient_sigma)
+            .def_readwrite("sigmoid_alpha",
+                           &binarize_with_level_set_parameters::sigmoid_alpha)
+            .def_readwrite("level_set_propagation_scaling",
+                           &binarize_with_level_set_parameters::
+                                   level_set_propagation_scaling)
+            .def_readwrite("level_set_curvature_scaling",
+                           &binarize_with_level_set_parameters::
+                                   level_set_curvature_scaling)
+            .def_readwrite("level_set_advection_scaling",
+                           &binarize_with_level_set_parameters::
+                                   level_set_advection_scaling)
+            .def_readwrite("level_set_maximum_RMS_error",
+                           &binarize_with_level_set_parameters::
+                                   level_set_maximum_RMS_error)
+            .def_readwrite(
+                    "level_set_iterations",
+                    &binarize_with_level_set_parameters::level_set_iterations)
+            .def_readwrite(
+                    "binary_upper_threshold",
+                    &binarize_with_level_set_parameters::binary_upper_threshold)
+            .def_readwrite(
+                    "binary_inside_value",
+                    &binarize_with_level_set_parameters::binary_inside_value)
+            .def("__str__", [](const binarize_with_level_set_parameters &self) {
+                std::stringstream os;
+                print_binarize_with_level_set_parameters(self, os);
+                return os.str();
+            });
 
-    py::class_<binarize_with_level_set_output>(m, "binarize_with_level_set_output")
-        .def(py::init())
-        .def_readwrite("parameters",
-                &binarize_with_level_set_output::parameters)
-        .def_readwrite("output_binary_image",
-                &binarize_with_level_set_output::output_binary_image)
-        .def_readwrite("gradient_image", &binarize_with_level_set_output::gradient_image)
-        .def_readwrite("sigmoid_image", &binarize_with_level_set_output::sigmoid_image)
-        .def_readwrite("level_set_image", &binarize_with_level_set_output::level_set_image)
-        .def("__str__", [](const binarize_with_level_set_output & self) {
-            std::stringstream os;
-            auto parameters_py = py::cast(self.parameters);
-            os << "parameters: " << std::endl;
-            os << parameters_py.attr("__repr__")();
-            os << " ---" << std::endl;
-            os << "output_binary_image: " << self.output_binary_image << std::endl;
-            os << "gradient_image: " << self.gradient_image << std::endl;
-            os << "sigmoid_image: " << self.sigmoid_image << std::endl;
-            os << "level_set_image: " << self.level_set_image << std::endl;
-            return os.str();
-        });
+    py::class_<binarize_with_level_set_output>(m,
+                                               "binarize_with_level_set_output")
+            .def(py::init())
+            .def_readwrite("parameters",
+                           &binarize_with_level_set_output::parameters)
+            .def_readwrite("output_binary_image",
+                           &binarize_with_level_set_output::output_binary_image)
+            .def_readwrite("gradient_image",
+                           &binarize_with_level_set_output::gradient_image)
+            .def_readwrite("sigmoid_image",
+                           &binarize_with_level_set_output::sigmoid_image)
+            .def_readwrite("level_set_image",
+                           &binarize_with_level_set_output::level_set_image)
+            .def("__str__", [](const binarize_with_level_set_output &self) {
+                std::stringstream os;
+                auto parameters_py = py::cast(self.parameters);
+                os << "parameters: " << std::endl;
+                os << parameters_py.attr("__repr__")();
+                os << " ---" << std::endl;
+                os << "output_binary_image: " << self.output_binary_image
+                   << std::endl;
+                os << "gradient_image: " << self.gradient_image << std::endl;
+                os << "sigmoid_image: " << self.sigmoid_image << std::endl;
+                os << "level_set_image: " << self.level_set_image << std::endl;
+                return os.str();
+            });
 
-    m.def("binarize_with_level_set",
-            [](const FloatImageType::Pointer & input,
-               const BinaryImageType::Pointer & binary_init,
-               const binarize_with_level_set_parameters & input_parameters,
+    m.def(
+            "binarize_with_level_set",
+            [](const FloatImageType::Pointer &input,
+               const BinaryImageType::Pointer &binary_init,
+               const binarize_with_level_set_parameters &input_parameters,
                const bool save_intermediate_results) {
-          return binarize_with_level_set(
-                  input.GetPointer(), binary_init.GetPointer(),
-                  input_parameters, save_intermediate_results);
+                return binarize_with_level_set(
+                        input.GetPointer(), binary_init.GetPointer(),
+                        input_parameters, save_intermediate_results);
             },
-R"(Binarize input image using level sets.
+            R"(Binarize input image using level sets.
 
 Use a mini-pipeline and GeodesicActiveContourLevelSetImageFilter
 to improve the input initial binarization using level sets.
@@ -284,34 +313,40 @@ Returns:
 --------
 BinaryImageType with the improved binarization using level sets.
 
-)", py::arg("input"), py::arg("binary_init"),
-    py::arg("parameters") = binarize_with_level_set_parameters(),
-    py::arg("save_intermediate_results") = false);
-
+)",
+            py::arg("input"), py::arg("binary_init"),
+            py::arg("parameters") = binarize_with_level_set_parameters(),
+            py::arg("save_intermediate_results") = false);
 
     /*************** connected_components ****************/
-    py::class_<ConnectedComponentsOutput>(m, "connected_components_output",
-        R"(Struct holding the result of connected_components.)")
-        .def(py::init())
-        .def_readwrite("label_image", &ConnectedComponentsOutput::label_image)
-        .def_readwrite("number_of_labels", &ConnectedComponentsOutput::number_of_labels)
-        .def_readwrite("size_of_labels", &ConnectedComponentsOutput::size_of_labels)
-        .def("__str__", [](const ConnectedComponentsOutput &self) {
-            std::stringstream os;
-            os << "number_of_labels: " << self.number_of_labels << std::endl;
-            os << "size_of_labels:\n  ";
-            for(const auto & s : self.size_of_labels) {
-                os << s << ", ";
-            }
-            os << std::endl;
-            return os.str();
-        }
-        );
+    py::class_<ConnectedComponentsOutput>(
+            m, "connected_components_output",
+            R"(Struct holding the result of connected_components.)")
+            .def(py::init())
+            .def_readwrite("label_image",
+                           &ConnectedComponentsOutput::label_image)
+            .def_readwrite("number_of_labels",
+                           &ConnectedComponentsOutput::number_of_labels)
+            .def_readwrite("size_of_labels",
+                           &ConnectedComponentsOutput::size_of_labels)
+            .def("__str__", [](const ConnectedComponentsOutput &self) {
+                std::stringstream os;
+                os << "number_of_labels: " << self.number_of_labels
+                   << std::endl;
+                os << "size_of_labels:\n  ";
+                for (const auto &s : self.size_of_labels) {
+                    os << s << ", ";
+                }
+                os << std::endl;
+                return os.str();
+            });
 
-    m.def("connected_components", [](const BinaryImageType::Pointer & input) {
-                return  connected_components(input.GetPointer());
-        },
-R"(Compute the number of connected componentes of input image and label them
+    m.def(
+            "connected_components",
+            [](const BinaryImageType::Pointer &input) {
+                return connected_components(input.GetPointer());
+            },
+            R"(Compute the number of connected componentes of input image and label them
 from 0 to N (where N is the total number_of_labels).
 
 Label/Value 0 is the background
@@ -334,13 +369,15 @@ Returns:
 --------
 connected_components_output: object holding the label_image and information
 about the number of labels and the size of them.
-)", py::arg("input"));
+)",
+            py::arg("input"));
 
-    m.def("extract_a_label", [](const BinaryImageType::Pointer & input,
-                                const size_t & label) {
-                return  extract_a_label(input.GetPointer(), label);
-        },
-R"(Extract a particular label from a binary (labeled) image.
+    m.def(
+            "extract_a_label",
+            [](const BinaryImageType::Pointer &input, const size_t &label) {
+                return extract_a_label(input.GetPointer(), label);
+            },
+            R"(Extract a particular label from a binary (labeled) image.
 
 Usually used in conjunction with the output of connected_components.
 
@@ -350,5 +387,6 @@ input: BinaryImageType
     input binary image with labels (from 1 to 255)
 label: int
     particular label (from 1 to 255) to extract.
-)", py::arg("input"), py::arg("label"));
+)",
+            py::arg("input"), py::arg("label"));
 }

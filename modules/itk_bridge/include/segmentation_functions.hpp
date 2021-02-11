@@ -44,11 +44,9 @@ namespace SG {
  *
  * @return pair(min, max)
  */
-template<typename AnyImageType>
-std::pair<typename AnyImageType::PixelType,
-          typename AnyImageType::PixelType>
-min_max_values(
-        const AnyImageType * any_input_image) {
+template <typename AnyImageType>
+std::pair<typename AnyImageType::PixelType, typename AnyImageType::PixelType>
+min_max_values(const AnyImageType *any_input_image) {
     // Compute the min and max of input image
     using MinMaxFilter = itk::MinimumMaximumImageFilter<AnyImageType>;
     auto min_max_filter = MinMaxFilter::New();
@@ -67,33 +65,31 @@ min_max_values(
  *
  * @tparam AnyImageType any itk::Image
  * @param any_input_image input image
- * @param lower_threshold pixels with value lower than this will be set to ::lowest()
- *   Defaults to the lowest value for the pixel type.
- * @param upper_threshold pixels with value greater than this will be set to ::lowest()
- *   Defaults to the maximum of the pixel type.
- * @param outside_value  set the value of the pixels outside the threshold to this value.
- *   Defaults to the lowest of the pixel type.
- *   It might be useful to set it to the already min value of the image
+ * @param lower_threshold pixels with value lower than this will be set to
+ * ::lowest() Defaults to the lowest value for the pixel type.
+ * @param upper_threshold pixels with value greater than this will be set to
+ * ::lowest() Defaults to the maximum of the pixel type.
+ * @param outside_value  set the value of the pixels outside the threshold to
+ * this value. Defaults to the lowest of the pixel type. It might be useful to
+ * set it to the already min value of the image
  *   @see min_max_values
  *
  * @return image of the same type than input image
  */
-template<typename AnyImageType>
-typename AnyImageType::Pointer
-threshold_image(
-        const AnyImageType * any_input_image,
+template <typename AnyImageType>
+typename AnyImageType::Pointer threshold_image(
+        const AnyImageType *any_input_image,
         const typename AnyImageType::PixelType &lower_threshold =
-            itk::NumericTraits<typename AnyImageType::PixelType>::lowest(),
+                itk::NumericTraits<typename AnyImageType::PixelType>::lowest(),
         const typename AnyImageType::PixelType &upper_threshold =
-            itk::NumericTraits<typename AnyImageType::PixelType>::max(),
-        const typename AnyImageType::PixelType &outside_value =
-            itk::NumericTraits<typename AnyImageType::PixelType>::lowest()
-            ) {
+                itk::NumericTraits<typename AnyImageType::PixelType>::max(),
+        const typename AnyImageType::PixelType &outside_value = itk::
+                NumericTraits<typename AnyImageType::PixelType>::lowest()) {
     using ThresholdFilter = itk::ThresholdImageFilter<AnyImageType>;
     auto threshold_filter = ThresholdFilter::New();
     threshold_filter->SetInput(any_input_image);
     // The default OutsideValue is ::Zero(), but prefer lowest()
-    threshold_filter->SetOutsideValue( outside_value );
+    threshold_filter->SetOutsideValue(outside_value);
     threshold_filter->ThresholdOutside(lower_threshold, upper_threshold);
     threshold_filter->Update();
     return threshold_filter->GetOutput();
@@ -111,16 +107,15 @@ threshold_image(
  *
  * @return  binarized image
  */
-template<typename AnyImageType>
-BinaryImageType::Pointer
-binarize_with_threshold(
-        const AnyImageType * any_input_image,
+template <typename AnyImageType>
+BinaryImageType::Pointer binarize_with_threshold(
+        const AnyImageType *any_input_image,
         const typename AnyImageType::PixelType &lower_threshold =
-            itk::NumericTraits<typename AnyImageType::PixelType>::lowest(),
+                itk::NumericTraits<typename AnyImageType::PixelType>::lowest(),
         const typename AnyImageType::PixelType &upper_threshold =
-            itk::NumericTraits<typename AnyImageType::PixelType>::max()) {
+                itk::NumericTraits<typename AnyImageType::PixelType>::max()) {
     using BinaryThresholdFilter =
-        itk::BinaryThresholdImageFilter<AnyImageType, BinaryImageType>;
+            itk::BinaryThresholdImageFilter<AnyImageType, BinaryImageType>;
     auto binary_filter = BinaryThresholdFilter::New();
     binary_filter->SetInput(any_input_image);
     binary_filter->SetLowerThreshold(lower_threshold);
@@ -143,8 +138,8 @@ struct ConnectedComponentsOutput {
     size_t number_of_labels;
     /**
      * The size of each labeled object by the number of pixels.
-     * size_of_labels[0] corresponds to label 1 (the label with the largest object)
-     * the number of background pixels (label 0) is not computed.
+     * size_of_labels[0] corresponds to label 1 (the label with the largest
+     * object) the number of background pixels (label 0) is not computed.
      */
     std::vector<size_t> size_of_labels;
 };
@@ -171,26 +166,28 @@ struct ConnectedComponentsOutput {
  * about the number of labels and the size of them.
  */
 ConnectedComponentsOutput
-connected_components(const BinaryImageType * input_binary_image);
+connected_components(const BinaryImageType *input_binary_image);
 
-BinaryImageType::Pointer
-/**
- * Extract a particular label from a binary (labeled) image.
- * Usually used in conjunction with the output of @connected_components.
- *
- * @param input_label_image input binary image but with labels (from 0 to 255)
- * @param label particular label (from 0 to 255) to extract.
- */
-extract_a_label(const BinaryImageType * input_label_image,
-                const size_t &label);
+BinaryImageType::
+        Pointer
+        /**
+         * Extract a particular label from a binary (labeled) image.
+         * Usually used in conjunction with the output of @connected_components.
+         *
+         * @param input_label_image input binary image but with labels (from 0
+         * to 255)
+         * @param label particular label (from 0 to 255) to extract.
+         */
+        extract_a_label(const BinaryImageType *input_label_image,
+                        const size_t &label);
 
 /**
  * Binarize input image using a percentage to set the lower_threshold.
  *
- * We understand as a safe binarization, one which does not include false positives.
- * The lower the input percentage the less pixels will be included (safer the binarization).
- * A percentage 0.2 indicates that 20% of the pixels (with highest value) will
- * be considered as ON pixels.
+ * We understand as a safe binarization, one which does not include false
+ * positives. The lower the input percentage the less pixels will be included
+ * (safer the binarization). A percentage 0.2 indicates that 20% of the pixels
+ * (with highest value) will be considered as ON pixels.
  *
  * With percentage = 0.0, only the max_value of the image will be ON.
  * With percentage = 1.0, the returned binary image would have all its pixels ON
@@ -208,29 +205,28 @@ extract_a_label(const BinaryImageType * input_label_image,
  *
  * @return binary image
  */
-template<typename AnyImageType>
+template <typename AnyImageType>
 BinaryImageType::Pointer
-binarize_with_percentage(
-        const AnyImageType * any_input_image,
-        const double percentage = 0.05) {
+binarize_with_percentage(const AnyImageType *any_input_image,
+                         const double percentage = 0.05) {
 
-    if(percentage < 0.0 || percentage > 1.0) {
-        throw std::runtime_error(
-                "percentage has to be in the range: [0.0, 1.0]. Actual value: "
-                + std::to_string(percentage));
+    if (percentage < 0.0 || percentage > 1.0) {
+        throw std::runtime_error("percentage has to be in the range: [0.0, "
+                                 "1.0]. Actual value: " +
+                                 std::to_string(percentage));
     }
 
     const auto min_max = min_max_values<AnyImageType>(any_input_image);
-    const auto & min_value = min_max.first;
-    const auto & max_value = min_max.second;
+    const auto &min_value = min_max.first;
+    const auto &max_value = min_max.second;
 
     // Compute the lower_threshold using max, min and percentage.
-    const double lower_threshold = min_value +
-        (max_value - min_value) * (1.0-percentage);
+    const double lower_threshold =
+            min_value + (max_value - min_value) * (1.0 - percentage);
     // upper_threshold is the max value by default in the following filter
 
     using BinaryThresholdFilter =
-        itk::BinaryThresholdImageFilter<AnyImageType, BinaryImageType>;
+            itk::BinaryThresholdImageFilter<AnyImageType, BinaryImageType>;
     auto binary_filter = BinaryThresholdFilter::New();
     binary_filter->SetInput(any_input_image);
     binary_filter->SetLowerThreshold(lower_threshold);
@@ -239,7 +235,8 @@ binarize_with_percentage(
 }
 
 /**
- * Binarize input image using region growing from an initial binary image with seeds.
+ * Binarize input image using region growing from an initial binary image with
+ * seeds.
  *
  * @tparam AnyImageType any itk::Image
  * @param any_input_image input image to binarize
@@ -247,47 +244,51 @@ binarize_with_percentage(
  * @param lower_threshold lower threshold
  * @param upper_threshold upper threshold (defaults to max value of image)
  * @param connectivity_str neighbor connectivity for the growing.
- *   Options:"26" (full connectivity) or "6" (face connectivity).  Defaults to "26"
+ *   Options:"26" (full connectivity) or "6" (face connectivity).  Defaults to
+ * "26"
  *
  * @return  binarized image after region growing
  */
-template<typename AnyImageType>
-BinaryImageType::Pointer
-binarize_with_region_growing(
-        const AnyImageType * any_input_image,
-        const BinaryImageType * binary_image_with_seeds,
+template <typename AnyImageType>
+BinaryImageType::Pointer binarize_with_region_growing(
+        const AnyImageType *any_input_image,
+        const BinaryImageType *binary_image_with_seeds,
         const typename AnyImageType::PixelType &lower_threshold,
         const typename AnyImageType::PixelType &upper_threshold =
-          itk::NumericTraits<typename AnyImageType::PixelType>::max(),
+                itk::NumericTraits<typename AnyImageType::PixelType>::max(),
         const std::string &connectivity_str = "26" // or "6"
-        ) {
+) {
     if (connectivity_str != "26" && connectivity_str != "6") {
-        throw std::runtime_error("Invalid connectivity_str (" + connectivity_str +
+        throw std::runtime_error(
+                "Invalid connectivity_str (" + connectivity_str +
                 "). Valid values are: \"26\" (full) and \"6\" (face).");
     }
     using ConnectedFilterType =
-        itk::ConnectedThresholdImageFilter< AnyImageType, BinaryImageType >;
+            itk::ConnectedThresholdImageFilter<AnyImageType, BinaryImageType>;
     auto connected_threshold = ConnectedFilterType::New();
-    connected_threshold->SetInput( any_input_image );
-    connected_threshold->SetLower( lower_threshold );
-    connected_threshold->SetUpper( upper_threshold );
-    connected_threshold->SetReplaceValue( 255 );
-    auto connectivity = (connectivity_str == "26") ?
-        itk::ConnectedThresholdImageFilterEnums::Connectivity::FullConnectivity:
-        itk::ConnectedThresholdImageFilterEnums::Connectivity::FaceConnectivity;
+    connected_threshold->SetInput(any_input_image);
+    connected_threshold->SetLower(lower_threshold);
+    connected_threshold->SetUpper(upper_threshold);
+    connected_threshold->SetReplaceValue(255);
+    auto connectivity = (connectivity_str == "26")
+                                ? itk::ConnectedThresholdImageFilterEnums::
+                                          Connectivity::FullConnectivity
+                                : itk::ConnectedThresholdImageFilterEnums::
+                                          Connectivity::FaceConnectivity;
     connected_threshold->SetConnectivity(connectivity);
     // Set seeds from binary image
-    using OutputIteratorType = itk::ImageRegionConstIteratorWithIndex< BinaryImageType >;
-    OutputIteratorType it( binary_image_with_seeds, binary_image_with_seeds->GetLargestPossibleRegion() );
+    using OutputIteratorType =
+            itk::ImageRegionConstIteratorWithIndex<BinaryImageType>;
+    OutputIteratorType it(binary_image_with_seeds,
+                          binary_image_with_seeds->GetLargestPossibleRegion());
     for (it.GoToBegin(); !it.IsAtEnd(); ++it) {
-        if (it.Get() > itk::NumericTraits< BinaryImageType::PixelType >::Zero) {
-            connected_threshold->AddSeed( it.GetIndex() );
+        if (it.Get() > itk::NumericTraits<BinaryImageType::PixelType>::Zero) {
+            connected_threshold->AddSeed(it.GetIndex());
         }
     }
     connected_threshold->Update();
     return connected_threshold->GetOutput();
 }
-
 
 /**
  * Input parameters for the @see binarize_with_level_set pipeline
@@ -306,7 +307,7 @@ struct binarize_with_level_set_parameters {
     BinaryImageType::PixelType binary_inside_value = 255;
 };
 void print_binarize_with_level_set_parameters(
-        const binarize_with_level_set_parameters & parameters, std::ostream & os);
+        const binarize_with_level_set_parameters &parameters, std::ostream &os);
 
 /**
  * Output of @see binarize_with_level_set
@@ -347,46 +348,43 @@ struct binarize_with_level_set_output {
  * @return struct storing the resulting binarization, input parameters
  * and optionally, images from intermediate filters of the pipeline.
  */
-binarize_with_level_set_output
-binarize_with_level_set(
-        const FloatImageType * input_float_image,
-        const BinaryImageType * binary_image_safe,
-        const binarize_with_level_set_parameters & input_parameters =
-            binarize_with_level_set_parameters(),
+binarize_with_level_set_output binarize_with_level_set(
+        const FloatImageType *input_float_image,
+        const BinaryImageType *binary_image_safe,
+        const binarize_with_level_set_parameters &input_parameters =
+                binarize_with_level_set_parameters(),
         const bool save_intermediate_results = false);
 
 // Explicitly instantiated in segmentation_functions.cpp
-extern template std::pair<BinaryImageType::PixelType, BinaryImageType::PixelType>
-min_max_values<BinaryImageType>(const BinaryImageType*);
+extern template std::pair<BinaryImageType::PixelType,
+                          BinaryImageType::PixelType>
+min_max_values<BinaryImageType>(const BinaryImageType *);
 extern template std::pair<FloatImageType::PixelType, FloatImageType::PixelType>
-min_max_values<FloatImageType>(const FloatImageType*);
+min_max_values<FloatImageType>(const FloatImageType *);
 
-extern template FloatImageType::Pointer
-threshold_image<FloatImageType>(
-        const FloatImageType * any_input_image,
+extern template FloatImageType::Pointer threshold_image<FloatImageType>(
+        const FloatImageType *any_input_image,
         const FloatImageType::PixelType &lower_threshold,
         const FloatImageType::PixelType &upper_threshold,
         const FloatImageType::PixelType &outside_value);
 
 extern template BinaryImageType::Pointer
 binarize_with_threshold<FloatImageType>(
-        const FloatImageType * any_input_image,
+        const FloatImageType *any_input_image,
         const FloatImageType::PixelType &lower_threshold,
         const FloatImageType::PixelType &upper_threshold);
 
 extern template BinaryImageType::Pointer
-binarize_with_percentage<FloatImageType>(
-        const FloatImageType * any_input_image,
-        const double percentage);
+binarize_with_percentage<FloatImageType>(const FloatImageType *any_input_image,
+                                         const double percentage);
 
 extern template BinaryImageType::Pointer
 binarize_with_region_growing<FloatImageType>(
-        const FloatImageType * any_input_image,
-        const BinaryImageType * binary_image_with_seeds,
+        const FloatImageType *any_input_image,
+        const BinaryImageType *binary_image_with_seeds,
         const FloatImageType::PixelType &lower_threshold,
         const FloatImageType::PixelType &upper_threshold,
         const std::string &connectivity_str);
-
 
 } // end namespace SG
 #endif
