@@ -139,8 +139,7 @@ create_on_off_representation_for_button(
 vtkSmartPointer<vtkCaptionActor2D>
 create_caption_actor_for_button(
         const double button_size,
-        const std::string & caption_init,
-        const double pad)
+        const std::string & caption_init)
 {
     auto caption_actor = vtkSmartPointer<vtkCaptionActor2D>::New();
     caption_actor->SetCaption(caption_init.c_str());

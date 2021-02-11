@@ -59,7 +59,7 @@ TEST(visualize_with_label_image, works) {
     const double label_opacity = 0.8;
 
     // input is binary
-    SG::view_image_with_label(reader_input->GetOutput(), label_image,
+    SG::view_image_with_label(input_image, label_image,
                               label_opacity);
 }
 

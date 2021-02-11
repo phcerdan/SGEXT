@@ -240,10 +240,9 @@ void view_image_with_label(
     button_rep->SetState(1); // Starts on
 
     // Create an actor for the text
-    const double pad = 0.5;
     const std::string caption_init = "Blender: ON";
     auto caption_actor =
-            create_caption_actor_for_button(button_size, caption_init, pad);
+            create_caption_actor_for_button(button_size, caption_init);
 
     renderer->AddViewProp(caption_actor);
 

@@ -420,10 +420,9 @@ void visualize_poly_data_and_graph(vtkPolyData *poly_data,
             button_texture_off, button_texture_on, button_bounds);
 
     // Create an actor for the text
-    const double pad = 3;
     const std::string caption_off = "Show Id's: OFF";
     auto caption_actor = create_caption_actor_for_button(button_border_margin,
-                                                         caption_off, pad);
+                                                         caption_off);
 
     renderer->AddViewProp(caption_actor);
 

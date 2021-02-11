@@ -38,7 +38,8 @@ void init_render_binary_volume(py::module &m) {
            const size_t & winWidth,
            const size_t & winHeight
            ) {
-        auto volume_actor = SG::volume_actor_for_binary_image(binary_image, label);
+        auto volume_actor =
+            SG::volume_actor_for_binary_image(binary_image, label, opacity);
         // Render the actor with VTK window
         vtkNew<vtkRenderer> renderer ;
         vtkNew<vtkRenderWindow> renderWindow ;
