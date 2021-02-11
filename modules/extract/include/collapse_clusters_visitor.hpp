@@ -101,7 +101,8 @@ struct CollapseClustersGraphVisitor : public boost::default_dfs_visitor {
      * Set the boolean reference to false at copy (needed to stop function).
      */
     CollapseClustersGraphVisitor(const CollapseClustersGraphVisitor &other)
-            : m_sg_out(other.m_sg_out), m_vertex_map(other.m_vertex_map),
+            : boost::default_dfs_visitor(other), m_sg_out(other.m_sg_out),
+              m_vertex_map(other.m_vertex_map),
               m_edge_added_map(other.m_edge_added_map),
               m_cluster_label_map(other.m_cluster_label_map),
               m_verbose(other.m_verbose) {}

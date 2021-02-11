@@ -99,8 +99,8 @@ struct ReduceGraphVisitor : public boost::default_dfs_visitor {
      * Set the boolean reference to false at copy (needed to stop function).
      */
     ReduceGraphVisitor(const ReduceGraphVisitor &other)
-            : m_sg(other.m_sg), m_color_map(other.m_color_map),
-              m_vertex_map(other.m_vertex_map),
+            : boost::default_dfs_visitor(other), m_sg(other.m_sg),
+              m_color_map(other.m_color_map), m_vertex_map(other.m_vertex_map),
               m_is_not_loop(other.m_is_not_loop), m_verbose(other.m_verbose) {
         m_is_not_loop = false;
     }

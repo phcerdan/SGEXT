@@ -144,7 +144,8 @@ struct DetectClustersGraphVisitor : public boost::default_bfs_visitor {
      * DFS visit and search takes a copy of the visitor.
      */
     DetectClustersGraphVisitor(const DetectClustersGraphVisitor &other)
-            : m_vertex_to_cluster_map(other.m_vertex_to_cluster_map),
+            : boost::default_bfs_visitor(other),
+              m_vertex_to_cluster_map(other.m_vertex_to_cluster_map),
               m_cluster_edge_condition(other.m_cluster_edge_condition),
               m_verbose(other.m_verbose){};
 

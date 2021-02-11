@@ -122,7 +122,8 @@ struct TreeGenerationVisitor : public boost::default_bfs_visitor {
     // Copy constructor. The breadth_first_search takes a copy of the input
     // visitor.
     TreeGenerationVisitor(const TreeGenerationVisitor<SpatialGraph> &other)
-            : m_vertex_to_generation_map(other.m_vertex_to_generation_map),
+            : boost::default_bfs_visitor(other),
+              m_vertex_to_generation_map(other.m_vertex_to_generation_map),
               m_distance_map_image(other.m_distance_map_image),
               m_vertex_to_local_radius_map(other.m_vertex_to_local_radius_map),
               m_vertex_to_distance_from_root_map(
