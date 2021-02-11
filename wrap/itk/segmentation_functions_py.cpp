@@ -201,10 +201,62 @@ BinaryImageType with the improved binarization using region growing.
 
     /*************** binarize_with_level_set ***************/
 
+    py::class_<binarize_with_level_set_parameters>(m, "binarize_with_level_set_parameters")
+        .def(py::init())
+        .def_readwrite("gradient_sigma",
+                &binarize_with_level_set_parameters::gradient_sigma)
+        .def_readwrite("sigmoid_alpha",
+                &binarize_with_level_set_parameters::sigmoid_alpha)
+        .def_readwrite("level_set_propagation_scaling",
+                &binarize_with_level_set_parameters::level_set_propagation_scaling)
+        .def_readwrite("level_set_curvature_scaling",
+                &binarize_with_level_set_parameters::level_set_curvature_scaling)
+        .def_readwrite("level_set_advection_scaling",
+                &binarize_with_level_set_parameters::level_set_advection_scaling)
+        .def_readwrite("level_set_maximum_RMS_error",
+                &binarize_with_level_set_parameters::level_set_maximum_RMS_error)
+        .def_readwrite("level_set_iterations",
+                &binarize_with_level_set_parameters::level_set_iterations)
+        .def_readwrite("binary_upper_threshold",
+                &binarize_with_level_set_parameters::binary_upper_threshold)
+        .def_readwrite("binary_inside_value",
+                &binarize_with_level_set_parameters::binary_inside_value)
+        .def("__str__", [](const binarize_with_level_set_parameters & self) {
+            std::stringstream os;
+            print_binarize_with_level_set_parameters(self, os);
+            return os.str();
+        });
+
+    py::class_<binarize_with_level_set_output>(m, "binarize_with_level_set_output")
+        .def(py::init())
+        .def_readwrite("parameters",
+                &binarize_with_level_set_output::parameters)
+        .def_readwrite("output_binary_image",
+                &binarize_with_level_set_output::output_binary_image)
+        .def_readwrite("gradient_image", &binarize_with_level_set_output::gradient_image)
+        .def_readwrite("sigmoid_image", &binarize_with_level_set_output::sigmoid_image)
+        .def_readwrite("level_set_image", &binarize_with_level_set_output::level_set_image)
+        .def("__str__", [](const binarize_with_level_set_output & self) {
+            std::stringstream os;
+            auto parameters_py = py::cast(self.parameters);
+            os << "parameters: " << std::endl;
+            os << parameters_py.attr("__repr__")();
+            os << " ---" << std::endl;
+            os << "output_binary_image: " << self.output_binary_image << std::endl;
+            os << "gradient_image: " << self.gradient_image << std::endl;
+            os << "sigmoid_image: " << self.sigmoid_image << std::endl;
+            os << "level_set_image: " << self.level_set_image << std::endl;
+            return os.str();
+        });
+
     m.def("binarize_with_level_set",
             [](const FloatImageType::Pointer & input,
-               const BinaryImageType::Pointer & binary_init) {
-          return binarize_with_level_set(input.GetPointer(), binary_init.GetPointer());
+               const BinaryImageType::Pointer & binary_init,
+               const binarize_with_level_set_parameters & input_parameters,
+               const bool save_intermediate_results) {
+          return binarize_with_level_set(
+                  input.GetPointer(), binary_init.GetPointer(),
+                  input_parameters, save_intermediate_results);
             },
 R"(Binarize input image using level sets.
 
@@ -221,10 +273,20 @@ input: FloatImageType
 binary_init: BinaryImageType
     BinaryImage with seeds (i.e a safe binary image with no false positives).
 
+parameters: binarize_with_level_set_parameters
+    input parameters. Default to a reasonable set.
+
+save_intermediate_results: Bool
+    store intermediate images from the pipeline in the output.
+    useful to tweak input parameters.
+
 Returns:
 --------
 BinaryImageType with the improved binarization using level sets.
-)", py::arg("input"), py::arg("binary_init"));
+
+)", py::arg("input"), py::arg("binary_init"),
+    py::arg("parameters") = binarize_with_level_set_parameters(),
+    py::arg("save_intermediate_results") = false);
 
 
     /*************** connected_components ****************/
@@ -289,6 +351,4 @@ input: BinaryImageType
 label: int
     particular label (from 1 to 255) to extract.
 )", py::arg("input"), py::arg("label"));
-
-
 }

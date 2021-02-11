@@ -31,17 +31,40 @@
 
 namespace SG {
 
-BinaryImageType::Pointer
+void print_binarize_with_level_set_parameters(
+        const binarize_with_level_set_parameters & self, std::ostream & os) {
+    os << "gradient_sigma: " << self.gradient_sigma << std::endl;
+    os << "sigmoid_alpha: " << self.sigmoid_alpha << std::endl;
+    os << "level_set_propagation_scaling: " << self.level_set_propagation_scaling << std::endl;
+    os << "level_set_curvature_scaling: " << self.level_set_curvature_scaling << std::endl;
+    os << "level_set_advection_scaling: " << self.level_set_advection_scaling << std::endl;
+    os << "level_set_maximum_RMS_error: " << self.level_set_maximum_RMS_error << std::endl;
+    os << "level_set_iterations: " << self.level_set_iterations << std::endl;
+    os << "binary_upper_threshold: " << self.binary_upper_threshold << std::endl;
+    // uchar is a non-printable ASCII character, cast it before
+    os << "binary_inside_value: " << static_cast<unsigned int>(self.binary_inside_value) << std::endl;
+}
+
+binarize_with_level_set_output
 binarize_with_level_set(
         const FloatImageType * input_float_image,
-        const BinaryImageType * binary_image_safe) {
+        const BinaryImageType * binary_image_safe,
+        const binarize_with_level_set_parameters & input_parameters,
+        const bool save_intermediate_results) {
+    binarize_with_level_set_output output_struct;
+    // Returns the input parameters.
+    // By default gradient_sigma is modified (depends on input image)
+    output_struct.parameters = input_parameters; // copy
+    auto & parameters = output_struct.parameters; // alias
+    if (parameters.gradient_sigma == -999) {
+        parameters.gradient_sigma = 0.5 * input_float_image->GetSpacing()[0];
+    }
 
     using GradientFilterType =
         itk::GradientMagnitudeRecursiveGaussianImageFilter< FloatImageType, FloatImageType >;
     GradientFilterType::Pointer gradient_filter = GradientFilterType::New();
     gradient_filter->SetInput(input_float_image);
-    const double gradient_sigma = 0.5 * input_float_image->GetSpacing()[0];
-    gradient_filter->SetSigma(gradient_sigma);
+    gradient_filter->SetSigma(parameters.gradient_sigma);
     gradient_filter->Update();
 
     using GradientThresholdFilterType = itk::OtsuMultipleThresholdsImageFilter<FloatImageType, BinaryImageType>;
@@ -50,43 +73,62 @@ binarize_with_level_set(
     gradient_threshold_filter->SetNumberOfThresholds(2);
     gradient_threshold_filter->Update();
 
-    using SigmoidFilterType = itk::SigmoidImageFilter< FloatImageType, FloatImageType >;
+    using DoubleImageType = itk::Image<double, 3>;
+
+    using SigmoidFilterType = itk::SigmoidImageFilter< FloatImageType, DoubleImageType >;
     SigmoidFilterType::Pointer sigmoid_filter = SigmoidFilterType::New();
     sigmoid_filter->SetOutputMinimum(0.0);
     sigmoid_filter->SetOutputMaximum(1.0);
-    sigmoid_filter->SetAlpha(-0.5);
+    sigmoid_filter->SetAlpha(parameters.sigmoid_alpha);
     sigmoid_filter->SetBeta(gradient_threshold_filter->GetThresholds()[0]);
     sigmoid_filter->SetInput(gradient_filter->GetOutput());
 
     // Use input safe binarization as initial guess
-
-    using DistFiltType = itk::SignedMaurerDistanceMapImageFilter<BinaryImageType, FloatImageType>;
+    using DistFiltType = itk::SignedMaurerDistanceMapImageFilter<BinaryImageType, DoubleImageType>;
     DistFiltType::Pointer distFilt = DistFiltType::New();
     distFilt->SetInput(binary_image_safe);
     distFilt->Update();
 
     // Level-set evolution
     using LevelSetFilterType =
-        itk::GeodesicActiveContourLevelSetImageFilter< FloatImageType, FloatImageType >;
+        itk::GeodesicActiveContourLevelSetImageFilter< DoubleImageType, DoubleImageType, double>;
     LevelSetFilterType::Pointer level_set_filter = LevelSetFilterType::New();
-    level_set_filter->SetPropagationScaling(1.0);
-    level_set_filter->SetCurvatureScaling(1.0);
-    level_set_filter->SetAdvectionScaling(1.0);
-    level_set_filter->SetMaximumRMSError(0.02);
-    level_set_filter->SetNumberOfIterations(20);
+    level_set_filter->SetPropagationScaling(parameters.level_set_propagation_scaling);
+    level_set_filter->SetCurvatureScaling(parameters.level_set_curvature_scaling);
+    level_set_filter->SetAdvectionScaling(parameters.level_set_advection_scaling);
+    level_set_filter->SetMaximumRMSError(parameters.level_set_maximum_RMS_error);
+    level_set_filter->SetNumberOfIterations(parameters.level_set_iterations);
     level_set_filter->SetInput(distFilt->GetOutput());
     level_set_filter->SetFeatureImage(sigmoid_filter->GetOutput());
 
-    using LevelSetThresholdFilterType = itk::BinaryThresholdImageFilter<FloatImageType, BinaryImageType>;
+    // The output of level set fitler type is a double image to avoid nans
+    using LevelSetThresholdFilterType = itk::BinaryThresholdImageFilter<DoubleImageType, BinaryImageType>;
     LevelSetThresholdFilterType::Pointer level_set_threshold_filter = LevelSetThresholdFilterType::New();
-    level_set_threshold_filter->SetLowerThreshold(-1*itk::NumericTraits<FloatImageType::PixelType>::max());
-    level_set_threshold_filter->SetUpperThreshold(0.0);
+    level_set_threshold_filter->SetLowerThreshold(-1*itk::NumericTraits<DoubleImageType::PixelType>::max());
+    level_set_threshold_filter->SetUpperThreshold(parameters.binary_upper_threshold);
     level_set_threshold_filter->SetOutsideValue(0);
-    level_set_threshold_filter->SetInsideValue(255);
+    level_set_threshold_filter->SetInsideValue(parameters.binary_inside_value);
     level_set_threshold_filter->SetInput(level_set_filter->GetOutput());
     level_set_threshold_filter->Update();
 
-    return level_set_threshold_filter->GetOutput();
+    output_struct.output_binary_image = level_set_threshold_filter->GetOutput();
+
+    if (save_intermediate_results) {
+        output_struct.gradient_image = gradient_filter->GetOutput();
+
+        using CastDoubleToFloatFilterType = itk::CastImageFilter<DoubleImageType, FloatImageType>;
+        auto cast_sigmoid = CastDoubleToFloatFilterType::New();
+        cast_sigmoid->SetInput(sigmoid_filter->GetOutput());
+        cast_sigmoid->Update();
+        output_struct.sigmoid_image = cast_sigmoid->GetOutput();
+
+        auto cast_level_set = CastDoubleToFloatFilterType::New();
+        cast_level_set->SetInput(level_set_filter->GetOutput());
+        cast_level_set->Update();
+        output_struct.level_set_image= cast_level_set->GetOutput();
+    }
+
+    return output_struct;
 }
 
 ConnectedComponentsOutput

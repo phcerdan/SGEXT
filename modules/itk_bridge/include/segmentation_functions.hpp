@@ -139,9 +139,7 @@ struct ConnectedComponentsOutput {
      * label 1 is the biggest object in number of pixels, etc.
      */
     BinaryImageType::Pointer label_image;
-    /**
-     * The number of disconnected objects/labels
-     */
+    /** The number of disconnected objects/labels */
     size_t number_of_labels;
     /**
      * The size of each labeled object by the number of pixels.
@@ -290,6 +288,42 @@ binarize_with_region_growing(
     return connected_threshold->GetOutput();
 }
 
+
+/**
+ * Input parameters for the @see binarize_with_level_set pipeline
+ */
+struct binarize_with_level_set_parameters {
+    /** If gradient_sigma is -999, then  the gradient_sigma used is:
+     *  0.5 * input_image.GetSpacing()[0] */
+    double gradient_sigma = -999;
+    double sigmoid_alpha = -0.5;
+    double level_set_propagation_scaling = 1.0;
+    double level_set_curvature_scaling = 1.0;
+    double level_set_advection_scaling = 1.0;
+    double level_set_maximum_RMS_error = 0.02;
+    unsigned int level_set_iterations = 20;
+    FloatImageType::PixelType binary_upper_threshold = 1.41;
+    BinaryImageType::PixelType binary_inside_value = 255;
+};
+void print_binarize_with_level_set_parameters(
+        const binarize_with_level_set_parameters & parameters, std::ostream & os);
+
+/**
+ * Output of @see binarize_with_level_set
+ */
+struct binarize_with_level_set_output {
+    /// input parameters @see binarize_with_level_set_parameters
+    binarize_with_level_set_parameters parameters;
+    /// output binary image after level set
+    BinaryImageType::Pointer output_binary_image;
+    /// gradient image of the input float image. (might be null
+    FloatImageType::Pointer gradient_image;
+    /// sigmoid after gradient
+    FloatImageType::Pointer sigmoid_image;
+    /// level set using sigmoid and signed distance from input binary image.
+    FloatImageType::Pointer level_set_image;
+};
+
 /**
  * Binarize input image using level sets.
  *
@@ -297,16 +331,29 @@ binarize_with_region_growing(
  * to improve the input initial binarization using level sets.
  * The initial binarization should not contain false positives.
  * Use @see binarize_with_threshold_percentage with a low percentage for this.
+ * Pipeline:
+ *  gradient (from float_image). Parameters: gradient_sigma
+ *  sigmoid (from gradient). Parameters: sigmoid_alpha
+ *  signed distance (from binary_image_safe)
+ *  level_set from (sigmoid and signed and distance)
+ *  output from thresholding the level_set. Parameters: binary_upper_threshold
  *
  * @param input_float_image input image to binarize
  * @param binary_image_safe safe binarization (shoudn't contain false positives)
+ * @param input_parameters parameters for all the filters of the pipeline
+ * @param save_intermediate_results if true, the output will store
+ * images from the intermediate filters.
  *
- * @return resulting binarization
+ * @return struct storing the resulting binarization, input parameters
+ * and optionally, images from intermediate filters of the pipeline.
  */
-BinaryImageType::Pointer
+binarize_with_level_set_output
 binarize_with_level_set(
         const FloatImageType * input_float_image,
-        const BinaryImageType * binary_image_safe);
+        const BinaryImageType * binary_image_safe,
+        const binarize_with_level_set_parameters & input_parameters =
+            binarize_with_level_set_parameters(),
+        const bool save_intermediate_results = false);
 
 // Explicitly instantiated in segmentation_functions.cpp
 extern template std::pair<BinaryImageType::PixelType, BinaryImageType::PixelType>
