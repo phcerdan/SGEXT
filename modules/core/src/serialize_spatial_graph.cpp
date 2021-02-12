@@ -31,7 +31,7 @@ void write_serialized_graph(GraphType &sg, const std::string &absolute_path) {
     out.open(absolute_path.c_str());
     boost::archive::text_oarchive arch(out);
     arch << sg;
-};
+}
 
 GraphType read_serialized_graph(const std::string &absolute_path) {
     GraphType sg;
@@ -40,5 +40,5 @@ GraphType read_serialized_graph(const std::string &absolute_path) {
     boost::archive::text_iarchive arch(in);
     arch >> sg;
     return sg;
-};
+}
 } // namespace SG

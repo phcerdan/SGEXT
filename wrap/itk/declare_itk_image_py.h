@@ -54,7 +54,7 @@ inline auto np_array_ptr_after_check_dim_and_shape(
                 std::to_string(buf.shape[0]) + " ].");
     }
     return buf.ptr;
-};
+}
 
 template <typename TImagePointer>
 inline void set_region(
@@ -85,7 +85,7 @@ inline void set_region(
     RegionType itk_region(itk_index, itk_size);
     img->SetRegions(itk_region);
     img->Allocate();
-};
+}
 
 template <typename TImagePointer>
 inline std::pair<typename TImagePointer::ObjectType::PixelType,
@@ -101,7 +101,7 @@ min_max(TImagePointer &img) {
     min_max_values.first = min_max_filter->GetMinimum();
     min_max_values.second = min_max_filter->GetMaximum();
     return min_max_values;
-};
+}
 
 template <typename TImagePointer>
 void declare_itk_image_ptr(pybind11::module &m, const std::string &typestr) {

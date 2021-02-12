@@ -55,7 +55,7 @@ create_graph_from_degree_sequence(const std::vector<int> &degree_sequence) {
 
     const GraphType graph = convert_degree_viger_generator_to_graph_type(gh);
     return graph;
-};
+}
 
 GraphType convert_degree_viger_generator_to_graph_type(
         const degree_viger_generator &gen) {

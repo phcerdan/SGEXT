@@ -55,7 +55,7 @@ void PairBondForce::compute() {
         // change sign of bond_force for the F_{b,a}
         force_on_b = ArrayUtilities::minus(force_on_b, half_bond_force);
     }
-};
+}
 
 void PairBondForce::only_apply_to_bonds_with_tags(
         const System *sys, const BondProperties::tags_t &in_tags) {
@@ -131,4 +131,4 @@ ParticleRandomForceCompute::ParticleRandomForceCompute(
     };
 }
 
-}; // namespace SG
+} // namespace SG

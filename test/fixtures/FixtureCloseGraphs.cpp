@@ -28,7 +28,7 @@ void FixtureCloseGraphs::CreateMovedG0() {
     pos = ArrayUtilities::plus(pos, this->disturbance);
   };
   SG::operate_in_graph_pos(moved_g0, func_plus);
-};
+}
 
 void FixtureCloseGraphs::CreateMovedG1() {
   this->CreateG1();
@@ -37,10 +37,10 @@ void FixtureCloseGraphs::CreateMovedG1() {
     pos = ArrayUtilities::plus(pos, this->disturbance);
   };
   SG::operate_in_graph_pos(moved_g1, func_plus);
-};
+}
 
 void FixtureCloseGraphs::SetUp() {
   this->CreateMovedG0();
   this->CreateMovedG1();
   // this->CreateMovedGR();
-};
+}

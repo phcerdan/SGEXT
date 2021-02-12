@@ -57,7 +57,7 @@ FilteredGraphType filter_by_bounding_box_no_copy(const BoundingBox &box,
     };
 
     return FilteredGraphType(g, edge_lambda, vertex_lambda);
-};
+}
 
 GraphType filter_by_bounding_box(const BoundingBox &box, const GraphType &g) {
     auto filtered_view = filter_by_bounding_box_no_copy(box, g);
@@ -65,7 +65,7 @@ GraphType filter_by_bounding_box(const BoundingBox &box, const GraphType &g) {
     GraphType out_filtered_graph;
     boost::copy_graph(filtered_view, out_filtered_graph);
     return out_filtered_graph;
-};
+}
 
 FilteredGraphType
 filter_by_sets_no_copy(const EdgeDescriptorUnorderedSet &remove_edges,
@@ -92,7 +92,7 @@ GraphType filter_by_sets(const EdgeDescriptorUnorderedSet &remove_edges,
     GraphType out_filtered_graph;
     boost::copy_graph(filtered_view, out_filtered_graph);
     return out_filtered_graph;
-};
+}
 
 std::vector<ComponentGraphType> filter_component_graphs(
         const GraphType &inputGraph,

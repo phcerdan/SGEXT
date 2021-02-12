@@ -140,7 +140,7 @@ public:
    */
   static sgextImagePlaneWidget* New();
 
-  vtkTypeMacro(sgextImagePlaneWidget, vtkImagePlaneWidget);
+  vtkTypeMacro(sgextImagePlaneWidget, vtkImagePlaneWidget)
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
   // Only ManageTextDisplay and UpdateDiscreteCursor are modified.

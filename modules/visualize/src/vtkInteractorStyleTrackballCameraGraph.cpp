@@ -5,7 +5,7 @@
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRendererCollection.h>
 
-vtkStandardNewMacro(vtkInteractorStyleTrackballCameraGraph);
+vtkStandardNewMacro(vtkInteractorStyleTrackballCameraGraph)
 
 void vtkInteractorStyleTrackballCameraGraph::OnChar() {
     switch (this->Interactor->GetKeyCode()) {

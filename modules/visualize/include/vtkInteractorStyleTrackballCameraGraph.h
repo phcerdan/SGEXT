@@ -5,7 +5,7 @@ class vtkInteractorStyleTrackballCameraGraph
 public:
   static vtkInteractorStyleTrackballCameraGraph* New();
   vtkTypeMacro(vtkInteractorStyleTrackballCameraGraph,
-               vtkInteractorStyleTrackballCamera);
+               vtkInteractorStyleTrackballCamera)
 
   virtual void OnChar() override;
 };

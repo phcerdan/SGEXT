@@ -73,6 +73,6 @@ GraphType spatial_graph_difference(const GraphType &minuend_sg,
 
     boost::depth_first_search(minuend_sg, vis, propColorMap);
     return diff_sg;
-}; // namespace SG
+}
 
 } // end namespace SG

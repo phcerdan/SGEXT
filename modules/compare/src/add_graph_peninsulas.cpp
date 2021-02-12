@@ -180,6 +180,6 @@ AddGraphPeninsulasResult add_graph_peninsulas(
     }
 
     return AddGraphPeninsulasResult{result_sg, octree};
-};
+}
 
 } // end namespace SG

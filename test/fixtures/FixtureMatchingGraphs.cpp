@@ -59,7 +59,7 @@ void FixtureMatchingGraphs::CreateG0() {
   SG::SpatialEdge se_p0dl3;
   se_p0dl3.edge_points.insert(std::end(se_p0dl3.edge_points), {dl1, dl2});
   add_edge(0, 3, se_p0dl3, g0);
-};
+}
 
 void FixtureMatchingGraphs::CreateG1() {
   using boost::add_edge;
@@ -121,7 +121,7 @@ void FixtureMatchingGraphs::CreateG1() {
   se_dl2_dr2.edge_points.insert(std::end(se_dl2_dr2.edge_points),
                                 {dl2_dr2_1, dl2_dr2_2, dl2_dr2_3});
   add_edge(5, 4, se_dl2_dr2, g1);
-};
+}
 
 void FixtureMatchingGraphs::CreateGR() {
   using boost::add_edge;
@@ -164,10 +164,10 @@ void FixtureMatchingGraphs::CreateGR() {
   SG::SpatialEdge se_p0dl3;
   se_p0dl3.edge_points.insert(std::end(se_p0dl3.edge_points), {dl1, dl2});
   add_edge(0, 3, se_p0dl3, gR);
-};
+}
 
 void FixtureMatchingGraphs::SetUp() {
   this->CreateG0();
   this->CreateG1();
   this->CreateGR();
-};
+}

@@ -82,6 +82,6 @@ GraphType extend_low_info_graph_via_dfs(
     }
 
     return result_sg;
-};
+}
 
 } // end namespace SG

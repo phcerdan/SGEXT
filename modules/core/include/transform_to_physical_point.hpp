@@ -94,7 +94,7 @@ transform_graph_to_physical_space(SG::GraphAL &sg,
                     ep, origin, spacing, direction);
         }
     }
-};
+}
 
 template <typename TImage>
 SG::PointType
@@ -123,7 +123,7 @@ index_array_to_physical_space_array(const SG::PointType &input_array,
         ret[i] = physical_point[i];
     }
     return ret;
-};
+}
 
 template <typename TImage>
 SG::PointType
@@ -152,7 +152,7 @@ physical_space_array_to_index_array(const SG::PointType &input_array,
         ret[i] = index_point[i];
     }
     return ret;
-};
+}
 
 template <typename TImage>
 void transform_graph_to_physical_space(SG::GraphAL &sg,
@@ -170,7 +170,7 @@ void transform_graph_to_physical_space(SG::GraphAL &sg,
             ep = index_array_to_physical_space_array(ep, itk_image);
         }
     }
-};
+}
 
 template <typename TImage>
 void transform_graph_to_index_space(SG::GraphAL &sg, const TImage *itk_image) {
@@ -187,7 +187,7 @@ void transform_graph_to_index_space(SG::GraphAL &sg, const TImage *itk_image) {
             ep = physical_space_array_to_index_array(ep, itk_image);
         }
     }
-};
+}
 
 } // namespace SG
 #endif

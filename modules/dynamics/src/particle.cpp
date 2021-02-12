@@ -30,7 +30,7 @@ void print(const ParticleMaterial &p, std::ostream &os) {
     os << "radius = " << p.radius << std::endl;
     os << "volume = " << p.volume << std::endl;
     os << "mass = " << p.mass << std::endl;
-};
+}
 
 void dump_csv_header(const ParticleMaterial & /*p*/,
                      std::ostream &os,
@@ -39,7 +39,7 @@ void dump_csv_header(const ParticleMaterial & /*p*/,
     if (add_end_of_line) {
         os << std::endl;
     }
-};
+}
 
 void dump_csv_data(const ParticleMaterial &p,
                    std::ostream &os,
@@ -50,11 +50,11 @@ void dump_csv_data(const ParticleMaterial &p,
     if (add_end_of_line) {
         os << std::endl;
     }
-};
+}
 void dump_csv(const ParticleMaterial &p, std::ostream &os) {
     dump_csv_header(p, os);
     dump_csv_data(p, os);
-};
+}
 
 /**************************************/
 /****** ParticleDynamicProperties *****/
@@ -64,7 +64,7 @@ void print(const ParticleDynamicProperties &p, std::ostream &os) {
     os << "vel = " << ArrayUtilities::to_string(p.vel) << std::endl;
     os << "acc = " << ArrayUtilities::to_string(p.acc) << std::endl;
     os << "net_force = " << ArrayUtilities::to_string(p.net_force) << std::endl;
-};
+}
 void dump_csv_header(const ParticleDynamicProperties & /*p*/,
                      std::ostream &os,
                      bool add_end_of_line) {
@@ -86,11 +86,11 @@ void dump_csv_data(const ParticleDynamicProperties &p,
     if (add_end_of_line) {
         os << std::endl;
     }
-};
+}
 void dump_csv(const ParticleDynamicProperties &p, std::ostream &os) {
     dump_csv_header(p, os);
     dump_csv_data(p, os);
-};
+}
 
 /**************************************/
 /******* Particle *********************/
@@ -104,11 +104,11 @@ void print(const Particle &p, std::ostream &os) {
     print_id_pos(p, os);
     print(p.dynamics, os);
     print(p.material, os);
-};
+}
 void print_trajectory(const Particle &p, std::ostream &os) {
     print_id_pos(p, os);
     print(p.dynamics, os);
-};
+}
 
 void dump_csv_header(const Particle &p,
                      std::ostream &os,

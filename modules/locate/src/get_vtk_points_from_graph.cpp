@@ -89,7 +89,7 @@ PointsIdMapPair get_vtk_points_from_graph(const GraphType &sg) {
 #endif
 
     return std::make_pair(points, idMap);
-};
+}
 
 void append_new_graph_points(
         PointsIdMapPair &new_graph_point_map_pair,
@@ -160,7 +160,7 @@ void append_new_graph_points(
         }
         assert(graph_descriptors.size() == number_of_previous_graphs + 1);
     }
-};
+}
 
 MergePointsIdMapPair get_vtk_points_from_graphs(
         const std::vector<std::reference_wrapper<const GraphType>> &graphs,
@@ -212,6 +212,6 @@ MergePointsIdMapPair get_vtk_points_from_graphs(
     }
 
     return std::make_pair(mergePoints, unique_id_map);
-};
+}
 
 } // namespace SG

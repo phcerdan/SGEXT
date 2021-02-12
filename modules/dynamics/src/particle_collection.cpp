@@ -26,7 +26,7 @@ namespace SG {
 void ParticleCollection::sort() {
     std::sort(std::begin(particles), std::end(particles));
     sorted = true;
-};
+}
 
 std::vector<Particle>::iterator
 ParticleCollection::binary_find(const size_t &id_value) {

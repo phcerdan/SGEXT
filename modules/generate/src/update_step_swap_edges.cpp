@@ -15,7 +15,7 @@ void update_step_swap_edges::randomize(const GraphType &graph,
                                        bool &randomized_flag) const {
     selected_edges = this->select_two_valid_edges(graph);
     randomized_flag = true;
-};
+}
 
 void update_step_swap_edges::perform(
         // in/out parameters

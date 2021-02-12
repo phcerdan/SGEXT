@@ -169,7 +169,7 @@ inline double force_extension_wlc_petrosyan(const double & relative_extension,
                                             const double &kT) {
     return kT / l_persistence *
            force_extension_wlc_petrosyan_normalized(relative_extension);
-};
+}
 
 /**
  * Instead of the force given the extension, the inverse, it returns the
@@ -186,7 +186,7 @@ inline double extension_force_wlc_petrosyan(const double &normalized_force) {
     return four_thirds - four_thirds / sqrt(f + 1) -
            10 * exp_f / (sqrt(f) * (exp_f - 1) * (exp_f - 1)) +
            std::pow(f, 1.62) / (3.55 + 3.8 * std::pow(f, 2.2));
-};
+}
 
 /**
  * Based on article:
@@ -215,6 +215,6 @@ inline double force_extension_wlc_marko_siggia(const double &z_extension,
     const double relative_extension = z_extension / l_contour;
     return kT / l_persistence *
            force_extension_wlc_marko_siggia_normalized(relative_extension);
-};
-}; // namespace SG
+}
+} // namespace SG
 #endif

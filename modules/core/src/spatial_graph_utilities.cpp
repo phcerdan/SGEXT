@@ -108,6 +108,6 @@ get_adjacent_vertices_positions(const GraphType::vertex_descriptor target_node,
         adjacent_vertices_positions.neighbours_positions.push_back(g[vd].pos);
     }
     return adjacent_vertices_positions;
-};
+}
 
 } // namespace SG

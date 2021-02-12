@@ -224,7 +224,7 @@ convert_to_vtk_unstructured_grid(const GraphType &sg) {
     write_ete_distances_to_vtk_unstructured_grid(sg, ugrid);
     write_contour_lengths_to_vtk_unstructured_grid(sg, ugrid);
     return ugrid;
-};
+}
 
 vtkSmartPointer<vtkUnstructuredGrid>
 convert_to_vtk_unstructured_grid_with_edge_points(const GraphType &sg) {

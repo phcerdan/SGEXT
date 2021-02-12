@@ -50,7 +50,7 @@
 #include "vtkTextActor.h"
 #include "vtkTextProperty.h"
 
-vtkStandardNewMacro(sgextImagePlaneWidget);
+vtkStandardNewMacro(sgextImagePlaneWidget)
 
 //------------------------------------------------------------------------------
 void sgextImagePlaneWidget::PrintSelf(ostream& os, vtkIndent indent)

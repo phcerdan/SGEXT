@@ -69,7 +69,7 @@ TEST_F(FixtureMatchingGraphs, compare_graphs) {
     EXPECT_EQ(boost::num_vertices(g1), 6);
     EXPECT_EQ(boost::num_vertices(filtered_graph), boost::num_vertices(g1));
     EXPECT_EQ(boost::num_edges(filtered_graph), boost::num_edges(g1) - 1);
-};
+}
 
 TEST_F(FixtureCloseGraphs, works) {
     // FixtureCloseGraphs applies a small shift to all positions of g1
@@ -128,4 +128,4 @@ TEST_F(FixtureCloseGraphs, DISABLED_compare_graphs) {
               boost::num_vertices(high_info_g));
     EXPECT_EQ(boost::num_edges(filtered_graph),
               boost::num_edges(high_info_g) - 1);
-};
+}

@@ -166,9 +166,10 @@ void toggleTexturedButtonCallbackFunction(
     auto * iren = static_cast<vtkRenderWindowInteractor*>(caller);
     auto * button_widget = static_cast<vtkButtonWidget*>(clientData);
     if(iren->GetKeyCode() == 's' || iren->GetKeyCode() == 'S') {
-        static_cast<vtkTexturedButtonRepresentation2D*>(button_widget->GetRepresentation())->NextState();
+        static_cast<vtkTexturedButtonRepresentation2D*>(
+                button_widget->GetRepresentation())->NextState();
         button_widget->InvokeEvent(vtkCommand::StateChangedEvent, nullptr);
-        }
-    };
+    }
+}
 
 } // namespace SG

@@ -79,5 +79,5 @@ ParticleGraphGlueData particles_from_graph(const GraphType &graph) {
     }
 
     return glue_data;
-};
+}
 } // namespace SG

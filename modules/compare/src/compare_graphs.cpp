@@ -229,7 +229,7 @@ remove_edges_and_nodes_from_high_info_graph(const GraphType &g0,
     }
 
     return std::make_pair(remove_edges, remove_nodes);
-};
+}
 
 GraphType compare_low_and_high_info_graphs(const GraphType &g0,
                                            const GraphType &g1,

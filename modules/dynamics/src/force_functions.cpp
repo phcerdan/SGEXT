@@ -60,5 +60,5 @@ ArrayUtilities::Array3D force_function_wlc_petrosyan(const SG::Particle &a,
     // F_{a,b}
     return ArrayUtilities::product_scalar(d_ete_vector,
                                           force_modulo / d_ete_modulo);
-};
+}
 } // end namespace SG

@@ -33,6 +33,6 @@ namespace pybind11 { namespace detail {
     };
 }}
 
-PYBIND11_DECLARE_HOLDER_TYPE(VtkType, vtkSmartPointer<VtkType>);
+PYBIND11_DECLARE_HOLDER_TYPE(VtkType, vtkSmartPointer<VtkType>)
 
 #endif

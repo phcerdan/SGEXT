@@ -22,7 +22,7 @@
 
 // TODO Workaround vtk_module_autoinit not working for test files.
 #include <vtkAutoInit.h>
-VTK_MODULE_INIT(vtkRenderingOpenGL2);
+VTK_MODULE_INIT(vtkRenderingOpenGL2)
 
 TEST_F(sg_3D, visualize_spatial_graph) { SG::visualize_spatial_graph(g); }
 

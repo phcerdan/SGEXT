@@ -46,14 +46,14 @@ namespace SG {
 template <typename TFuncPos>
 void operate_in_node_pos(SpatialNode &node, TFuncPos func) {
     func(node.pos);
-};
+}
 
 template <typename TFuncPos>
 void operate_in_edge_points_pos(SpatialEdge &edge, TFuncPos func) {
     for (auto &ep : edge.edge_points) {
         func(ep);
     }
-};
+}
 
 template <typename TFuncPos>
 void operate_in_graph_pos(GraphType &sg, TFuncPos func) {
@@ -65,7 +65,7 @@ void operate_in_graph_pos(GraphType &sg, TFuncPos func) {
     for (auto ei = edges.first; ei != edges.second; ++ei) {
         operate_in_edge_points_pos(sg[*ei], func);
     }
-};
+}
 } // namespace SG
 
 #endif

@@ -28,7 +28,7 @@ void BondCollection::sort() {
               [](const std::shared_ptr<Bond> &a,
                  const std::shared_ptr<Bond> &b) { return *a < *b; });
     sorted = true;
-};
+}
 
 BondCollection::bond_vector_t::const_iterator
 BondCollection::find_bond(const Bond &bond) const {
@@ -38,17 +38,17 @@ BondCollection::bond_vector_t::const_iterator
 BondCollection::find_bond(size_t bond_id_a, size_t bond_id_b) const {
     return binary_find_bond(std::cbegin(bonds), std::cend(bonds),
                             Bond(bond_id_a, bond_id_b));
-};
+}
 BondCollection::bond_vector_t
 BondCollection::find_all_bonds_with_id(size_t bond_id_any) {
     return find_all_bonds_with_id(std::begin(bonds), std::end(bonds),
                                   bond_id_any);
-};
+}
 BondCollection::bond_vector_t
 BondCollection::find_all_bonds_with_id(size_t bond_id_any) const {
     return find_all_bonds_with_id(std::begin(bonds), std::end(bonds),
                                   bond_id_any);
-};
+}
 
 void print(const BondCollection &collection,
            std::ostream &os,

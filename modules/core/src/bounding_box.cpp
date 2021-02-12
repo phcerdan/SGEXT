@@ -25,7 +25,7 @@
 namespace SG {
 
 BoundingBox::BoundingBox(const PointType &input_ini, const PointType &input_end)
-        : ini(input_ini), end(input_end){};
+        : ini(input_ini), end(input_end){}
 
 BoundingBox::BoundingBox(const PointType &center,
                          const std::array<size_t, 3> &radius,
@@ -34,12 +34,12 @@ BoundingBox::BoundingBox(const PointType &center,
         ini[i] = center[i] - radius[i];
         end[i] = center[i] + radius[i];
     }
-};
+}
 BoundingBox::BoundingBox(const PointType &center, size_t radius)
         : BoundingBox::BoundingBox(
                   center,
                   std::array<size_t, 3>{{radius, radius, radius}},
-                  true){};
+                  true){}
 
 /**
  * VTK interface
@@ -51,7 +51,7 @@ BoundingBox::BoundingBox(const PointType &center, size_t radius)
  * [5] //zmax
  * @param bounds[6]
  */
-BoundingBox::BoundingBox(const double bounds[6]) { this->SetBounds(bounds); };
+BoundingBox::BoundingBox(const double bounds[6]) { this->SetBounds(bounds); }
 
 BoundingBox::BoundingBox(double xMin,
                          double xMax,
@@ -60,7 +60,7 @@ BoundingBox::BoundingBox(double xMin,
                          double zMin,
                          double zMax) {
     this->SetBounds(xMin, xMax, yMin, yMax, zMin, zMax);
-};
+}
 
 void BoundingBox::SetBounds(double xMin,
                             double xMax,

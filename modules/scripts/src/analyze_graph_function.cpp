@@ -530,7 +530,7 @@ GraphType analyze_graph_function(
     }
 
     return reduced_g;
-};
+}
 
 GraphType analyze_graph_function_io(
         const std::string & filename,
@@ -579,5 +579,5 @@ GraphType analyze_graph_function_io(
             verbose,
             visualize);
 
-};
+}
 } // end namespace SG

@@ -31,7 +31,7 @@ void print(const ParticleNeighbors &particle_neighbors, std::ostream &os) {
         os << neigh << ", ";
     }
     os << " }" << std::endl;
-};
+}
 
 void dump_csv_header(const ParticleNeighbors &/*particle_neighbors*/,
                      std::ostream &os,

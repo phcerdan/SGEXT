@@ -98,13 +98,13 @@ void print(const Bond &bonded_pair, std::ostream &os, bool add_end_of_line) {
     if (add_end_of_line) {
         os << std::endl;
     }
-};
+}
 
 void sort(Bond &bonded_pair) {
     if (bonded_pair.id_a > bonded_pair.id_b) {
         std::swap(bonded_pair.id_a, bonded_pair.id_b);
     }
-};
+}
 
 void print(const BondChain &bonded_pair,
            std::ostream &os,
@@ -114,7 +114,7 @@ void print(const BondChain &bonded_pair,
     if (add_end_of_line) {
         os << std::endl;
     }
-};
+}
 
 #ifdef SG_USING_VTK
 vtkIdType

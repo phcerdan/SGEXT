@@ -69,7 +69,7 @@ std::vector<double> cosine_directors_from_connected_edges(
         }
     }
     return cosine_directors;
-};
+}
 
 std::vector<double> cosine_directors_between_edges_and_target_edge(
         const std::vector<VectorType> &outgoing_edges,

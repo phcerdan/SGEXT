@@ -127,7 +127,7 @@ vtkSmartPointer<vtkIdList> graph_closest_n_points_locator(
     //     std::cerr << "WARNING: Graph descriptor not filled for some graph" <<
     //     std::endl;
     // return out_gdescs;
-};
+}
 
 vtkSmartPointer<vtkIdList> graph_closest_points_by_radius_locator(
         const PointType &queryPoint,
@@ -179,5 +179,5 @@ vtkSmartPointer<vtkIdList> graph_closest_points_by_radius_locator(
     //     std::cerr << "WARNING: Graph descriptor not filled for some graph" <<
     //     std::endl;
     // return out_gdescs;
-};
+}
 } // namespace SG

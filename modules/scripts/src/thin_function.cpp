@@ -404,5 +404,5 @@ BinaryImageType::Pointer thin_function_io(const std::string &filename,
 
   return thin_image;
 
-};
+}
 } // end namespace SG

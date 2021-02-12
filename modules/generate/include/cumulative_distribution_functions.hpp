@@ -139,7 +139,7 @@ cumulative_distribution_lognormal(const double &x,
                                   const double &log_std_deviation) {
     return 0.5 * std::erfc(-(std::log(x) - log_mean) /
                            (sqrt(2.) * log_std_deviation));
-};
+}
 
 inline double distribution_truncated_power_series_3(const double &x,
                                                     const double &b1,
@@ -150,14 +150,14 @@ inline double distribution_truncated_power_series_3(const double &x,
     const double z3 = z * z * z;
     const double z5 = z3 * z * z;
     return b1 * z + b2 * z3 + b3 * z5;
-};
+}
 inline double cumulative_distribution_truncated_power_series_3(
         const double &x, const double &b1, const double &b2, const double &b3) {
     // const double b3= -(3/32.) * (-1 + 2*b1 + 4*b2);
     return (-(1 / 12.) * (-3 + x) * (1 + x) *
             (6 * b1 + 3 * b2 * (5 + (-2 + x) * x) +
              2 * b3 * (7 + (-4 + x) * x) * (3 + x * x)));
-};
+}
 
 template <typename TArrayType1, typename TArrayType2>
 void apply_distro(const TArrayType1 &X,

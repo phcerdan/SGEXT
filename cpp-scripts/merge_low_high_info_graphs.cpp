@@ -88,7 +88,7 @@ void export_graph_merge_low_high_info(
                       << output_full_path.string() << std::endl;
         }
     }
-};
+}
 
 int main(int argc, char *const argv[]) {
     /*-------------- Parse command line -----------------------------*/

@@ -97,7 +97,7 @@ struct BoundingBox {
 
 inline bool is_inside(const PointType &input, const BoundingBox &box) {
     return box.is_point_inside(input);
-};
+}
 
 } // namespace SG
 

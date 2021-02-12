@@ -39,7 +39,7 @@ void init_itk_view_image(py::module &m) {
             py::arg("win_title") = SG::defaults::view_image_win_title,
             py::arg("win_width") = SG::defaults::view_image_win_width,
             py::arg("win_height") = SG::defaults::view_image_win_height
-         );
+        );
 
     declare_itk_view_image<SG::IF3>(m, "float (IF3)");
     declare_itk_view_image<SG::IUC3>(m, "unsigned char (IUC3)");

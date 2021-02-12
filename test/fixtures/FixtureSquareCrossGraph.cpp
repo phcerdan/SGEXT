@@ -62,7 +62,7 @@ void FixtureSquareCrossGraph::CreateSquare() {
   SG::SpatialEdge e14;
   e14.edge_points.insert(std::end(e14.edge_points), {ep14});
   add_edge(0, 3, e14, g_square);
-};
+}
 
 /*
  *    1   2
@@ -113,7 +113,7 @@ void FixtureSquareCrossGraph::CreateCross() {
   e04.edge_points.insert(std::end(e04.edge_points), {ep04});
   add_edge(0, 4, e04, g_cross);
 
-};
+}
 
 /*
  *    1   2
@@ -196,10 +196,10 @@ void FixtureSquareCrossGraph::CreateSquareCross() {
   e04.edge_points.insert(std::end(e04.edge_points), {ep04});
   add_edge(0, 4, e04, g_square_cross);
 
-};
+}
 
 void FixtureSquareCrossGraph::SetUp() {
   this->CreateSquare();
   this->CreateCross();
   this->CreateSquareCross();
-};
+}

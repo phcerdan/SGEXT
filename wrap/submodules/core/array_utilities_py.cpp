@@ -40,4 +40,4 @@ void init_array3d(py::module &m) {
     marray.def("cos_director", &cos_director);
     marray.def("to_string", &ArrayUtilities::to_string);
     marray.def("negate", &ArrayUtilities::negate);
-};
+}

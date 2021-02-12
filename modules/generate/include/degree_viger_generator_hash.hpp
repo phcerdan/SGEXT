@@ -46,12 +46,12 @@ namespace generator {
 inline unsigned long int rand_int31() {
     // 0x7FFFFFFFUL is the 32 bits (4 bytes) max number: 1111111111111111...
     return (unsigned long int)(RNG::rand01() * 0x7FFFFFFFUL);
-};
+}
 inline int my_random() { return rand_int31(); }
 
 static constexpr int HASH_NONE = -1;
 static constexpr int HASH_MIN_SIZE = 100;
-inline constexpr bool IS_HASH(const int x) { return (x > HASH_MIN_SIZE); };
+inline constexpr bool IS_HASH(const int x) { return (x > HASH_MIN_SIZE); }
 inline constexpr int HASH_EXPAND(int x) {
     x += x;
     x |= x >> 1;
@@ -60,7 +60,7 @@ inline constexpr int HASH_EXPAND(int x) {
     x |= x >> 8;
     x |= x >> 16;
     return x + 1;
-};
+}
 
 inline constexpr int HASH_KEY(const int x, const int size) {
     return (x * 2198737) & ((size)-1);
@@ -72,13 +72,13 @@ inline constexpr int HASH_REKEY(const int k, const int s) {
         return s - 1;
     else
         return k - 1;
-};
+}
 inline constexpr int HASH_SIZE(const int x) {
     if (IS_HASH(x))
         return HASH_EXPAND(x);
     else
         return x;
-};
+}
 
 inline int HASH_PAIR_KEY(const int x, const int y, const int size) {
     return HASH_KEY(x * 1434879443 + y, size);

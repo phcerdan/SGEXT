@@ -64,7 +64,7 @@ void IntegratorTwoStep::update(unsigned int /* time_step */) {
                       << std::endl;
         }
     }
-};
+}
 
 void VerletVelocitiesIntegratorMethod::integrateStepOne() {
     // perform the first half step of velocity verlet
@@ -104,4 +104,4 @@ void VerletVelocitiesIntegratorMethod::integrateStepTwo() {
                 ArrayUtilities::product_scalar(acceleration, deltaT * 0.5));
     }
 }
-}; // namespace SG
+} // namespace SG
