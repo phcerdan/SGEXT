@@ -77,7 +77,7 @@ std::vector<PRECI> GenerateBreaksFromRangeAndBins(
         breaks[i] = low + i * width;
     }
     return breaks;
-};
+}
 /** @brief @sa GenerateBreaksFromRangeAndBins() */
 template <typename PRECI = double>
 std::vector<PRECI>
@@ -86,7 +86,7 @@ GenerateBreaksFromRangeAndBins(const std::pair<PRECI, PRECI> &range_low_upper,
     auto low = range_low_upper.first;
     auto upper = range_low_upper.second;
     return GenerateBreaksFromRangeAndBins<PRECI>(low, upper, bins);
-};
+}
 
 /**
  *
@@ -113,7 +113,7 @@ std::vector<PRECI> GenerateBreaksFromRangeAndWidth(const PRECI &low,
         br += width;
     }
     return breaks;
-};
+}
 
 /** @brief @sa GenerateBreaksFromRangeAndWidth() */
 template <typename PRECI = double>
@@ -123,7 +123,7 @@ GenerateBreaksFromRangeAndWidth(const std::pair<PRECI, PRECI> &range_low_upper,
     auto low = range_low_upper.first;
     auto upper = range_low_upper.second;
     return GenerateBreaksFromRangeAndWidth<PRECI>(low, upper, width);
-};
+}
 /** @} */
 
 /** Exception class for  Histo */
@@ -209,7 +209,7 @@ struct Histo {
         bins = static_cast<decltype(bins)>(breaks.size() - 1);
         ResetCounts();
         FillCounts(data);
-    };
+    }
 
     /**
      * @brief Constructor with fixed input range.
@@ -226,7 +226,7 @@ struct Histo {
         bins = static_cast<decltype(bins)>(breaks.size() - 1);
         ResetCounts();
         FillCounts(data);
-    };
+    }
     /**
      * @brief Constructor that accepts a vector of breaks.
      * You can use @sa histo::GenerateBreaksFromRangeAndBins
@@ -245,7 +245,7 @@ struct Histo {
         bins = static_cast<decltype(bins)>(breaks.size() - 1);
         ResetCounts();
         FillCounts(data);
-    };
+    }
 
     /********* PUBLIC METHODS ***********/
     BreaksType ComputeBinCenters() const {
@@ -354,7 +354,7 @@ struct Histo {
         }
 
         return lo;
-    };
+    }
 
     /** @brief Resize counts and reset value to zero. */
     void ResetCounts() {
@@ -377,7 +377,7 @@ struct Histo {
             counts[IndexFromValue(v)]++;
         }
         return counts;
-    };
+    }
 
     /** \defgroup CountsManipulation Counts Safe Manipulation */
     /** @{
@@ -454,7 +454,7 @@ struct Histo {
             throw histo_error("CalculateBreaks: No Valid Method selected to "
                               "calculate breaks.");
         }
-    };
+    }
 
     bool
     CheckBreaksAreEquidistant(const BreaksType &input_breaks) const {
@@ -594,7 +594,7 @@ struct Histo {
         // << breaks[bins]  << std::endl; std::for_each(std::begin(breaks),
         // std::end(breaks), [](const T& v) {std::cout<<v <<std::endl;});
         return this->breaks;
-    };
+    }
 };
 
 template <typename PRECI = double, typename PRECI_INTEGER = size_t>
