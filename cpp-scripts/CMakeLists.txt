@@ -13,6 +13,7 @@ set(_scripts_targets
 
 set(_scripts_targets_visualize # Using VTK
     visualize_graph_and_image
+    visualize_with_label_image
     )
 
 set(_scripts_targets_visualize_using_qt # Using Qt (DGtal or VTK)
@@ -98,6 +99,16 @@ if(_modern_VTK_available)
 
         vtk_module_autoinit(
             TARGETS visualize_graph_and_image render_binary_volume
+            MODULES ${VTK_LIBRARIES})
+    endif()
+endif()
+
+if(SG_MODULE_VISUALIZE)
+    add_executable(view_image_with_label visualize_image_with_label.cpp)
+    target_link_libraries(view_image_with_label ${_scripts_libs})
+    if(_modern_VTK_available)
+        vtk_module_autoinit(
+            TARGETS view_image_with_label
             MODULES ${VTK_LIBRARIES})
     endif()
 endif()
