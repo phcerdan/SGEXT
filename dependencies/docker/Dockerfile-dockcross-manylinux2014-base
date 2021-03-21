@@ -34,7 +34,8 @@ RUN git clone --single-branch https://gitlab.kitware.com/vtk/vtk.git ${VTK_SRC_F
 
 ############# ITK ##############
 # Install ITKv5 release from git
-ENV ITK_GIT_TAG f4fbfed6f676c4ae8c0d77bda052a9699a39b76e
+# More modern than: v5.2rc03
+ENV ITK_GIT_TAG 87451e3de3acb2903c1d46b99ff5f03d324e02bb
 ENV ITK_BUILD_DIR ${BUILD_PATH}/ITK-build
 ENV ITK_SRC_FOLDER_NAME ITK-src
 ENV ITK_SRC_DIR ${BUILD_PATH}/${ITK_SRC_FOLDER_NAME}

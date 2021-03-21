@@ -107,7 +107,8 @@ RUN git clone https://gitlab.kitware.com/vtk/vtk.git ${VTK_SRC_FOLDER_NAME} && \
     find ../VTK* -depth -name .git -exec rm -rf '{}' \;
 
 # Install ITKv5 from git
-ENV ITK_GIT_TAG v5.1.1
+# More modern than v5.2rc03
+ENV ITK_GIT_TAG 87451e3de3acb2903c1d46b99ff5f03d324e02bb
 ENV ITK_BUILD_DIR ${BUILD_PATH}/ITK-build
 ENV ITK_SRC_FOLDER_NAME ITK-src
 ENV ITK_SRC_DIR ${BUILD_PATH}/${ITK_SRC_FOLDER_NAME}

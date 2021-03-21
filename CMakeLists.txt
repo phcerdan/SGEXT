@@ -76,7 +76,7 @@ find_package(Boost COMPONENTS
 message(STATUS "Boost_VERSION: ${Boost_VERSION}")
 message(STATUS "Boost_INCLUDE_DIR: ${Boost_INCLUDE_DIR}")
 
-find_package(DGtal REQUIRED 1.1)
+find_package(DGtal 1.1 REQUIRED)
 message(STATUS "DGtal version: ${DGtal_VERSION}")
 message(STATUS "DGtal_DIR: ${DGtal_DIR}")
 

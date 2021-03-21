@@ -141,7 +141,7 @@ endif()
 ################### ITK #######################
 #################################################
 if(WITH_ITK)
-  set(ITK_GIT_TAG v5.1.1) # Release 10 Aug 2020
+  set(ITK_GIT_TAG 87451e3de3acb2903c1d46b99ff5f03d324e02bb) # Master 22 March 2021 (close to 5.2rc03)
   message(STATUS "ITK_VERSION: ${ITK_GIT_TAG}")
   set(ITK_BUILD_DIR ${OUTPUT_BUILD_DIR}/ITK-build)
   set(ITK_SRC_FOLDER_NAME ITK-src)

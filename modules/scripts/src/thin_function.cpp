@@ -63,6 +63,12 @@
 #include <DGtal/io/viewers/Viewer3D.h>
 #endif
 
+namespace itk{
+    namespace Experimental{
+        // Workaround to allow using things that may be either in itk or in itk::Experimental.
+    }
+}
+
 namespace SG {
 
 BinaryImageType::Pointer thin_function(
@@ -364,13 +370,17 @@ BinaryImageType::Pointer thin_function_io(const std::string &filename,
         output_folder_path / fs::path(output_file_path.string() + ".sdp");
     std::ofstream out;
     out.open(output_full_path.string().c_str());
-    const auto range =
-      itk::Experimental::IndexRange<BinaryImageDimension, false>(
-          thin_image->GetLargestPossibleRegion());
-    for(const auto& index : range) {
-      if (thin_image->GetPixel(index) > 0) {
-        out << index[0] << " " << index[1] << " " << index[2] << std::endl;
-      }
+    {
+        // workaround IndexRange exists in itk::Experimental:: since 5.0, and in itk:: since 5.2.
+        using namespace itk;
+        using namespace itk::Experimental;
+        const auto range = IndexRange<BinaryImageDimension, false>(
+                thin_image->GetLargestPossibleRegion());
+        for(const auto& index : range) {
+            if (thin_image->GetPixel(index) > 0) {
+                out << index[0] << " " << index[1] << " " << index[2] << std::endl;
+            }
+        }
     }
   }
 
