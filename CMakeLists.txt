@@ -67,11 +67,23 @@ if(NOT CMAKE_CXX_STANDARD)
     endif()
 endif()
 
+set(Boost_REQUIRED_COMPONENTS
+    program_options
+    filesystem
+    graph
+    serialization)
+if(EMSCRIPTEN)
+  message(WARNING "Boost_DIR: ${Boost_DIR}")
+  file(GLOB comp_folder "${Boost_DIR}/../boost_headers*")
+  set(boost_headers_DIR ${comp_folder})
+  foreach(comp ${Boost_REQUIRED_COMPONENTS})
+    file(GLOB comp_folder "${Boost_DIR}/../boost_${comp}*")
+    set(boost_${comp}_DIR ${comp_folder})
+    message(WARNING "boost_${comp}_dir: ${_boost_${comp}_dir}")
+  endforeach()
+endif()
 find_package(Boost COMPONENTS
-        program_options
-        filesystem
-        graph
-        serialization
+        ${Boost_REQUIRED_COMPONENTES}
         REQUIRED)
 message(STATUS "Boost_VERSION: ${Boost_VERSION}")
 message(STATUS "Boost_INCLUDE_DIR: ${Boost_INCLUDE_DIR}")

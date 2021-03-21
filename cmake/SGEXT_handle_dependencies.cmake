@@ -8,6 +8,12 @@
 message(STATUS "Setting dependencies if DEPENDENCIES_BUILD_DIR is set")
 message(STATUS "DEPENDENCIES_BUILD_DIR: ${DEPENDENCIES_BUILD_DIR}")
 
+message(WARNING "BEFORE: ${DEPENDENCIES_BUILD_DIR}")
+if(NOT DEPENDENCIES_BUILD_DIR STREQUAL "" AND NOT IS_ABSOLUTE ${DEPENDENCIES_BUILD_DIR})
+  get_filename_component(DEPENDENCIES_BUILD_DIR ${DEPENDENCIES_BUILD_DIR} ABSOLUTE CACHE)
+endif()
+message(WARNING "AFTER: ${DEPENDENCIES_BUILD_DIR}")
+
 set(_dependencies_vtk_build ${DEPENDENCIES_BUILD_DIR}/VTK-build)
 set(_dependencies_itk_build ${DEPENDENCIES_BUILD_DIR}/ITK-build)
 set(_dependencies_boost_build ${DEPENDENCIES_BUILD_DIR}/boost-build)
