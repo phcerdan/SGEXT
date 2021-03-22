@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.13.2)
 project(sgext-dependencies)
 
+cmake_policy(SET CMP0057 NEW) #CMP0057 allow IN_LIST inside ifs()
+
 # Download/build and optionally install 3rd party dependencies of SGEXT
 include(ExternalProject)
 
@@ -180,7 +182,7 @@ endif()
 ################### BOOST #######################
 #################################################
 set(BOOST_VERSION_MAJOR 1)
-set(BOOST_VERSION_MINOR 72)
+set(BOOST_VERSION_MINOR 75)
 set(BOOST_VERSION_PATCH 0)
 set(BOOST_VERSION "${BOOST_VERSION_MAJOR}_${BOOST_VERSION_MINOR}_${BOOST_VERSION_PATCH}")
 set(BOOST_VERSION_DOTS "${BOOST_VERSION_MAJOR}.${BOOST_VERSION_MINOR}.${BOOST_VERSION_PATCH}")
@@ -302,7 +304,7 @@ if(_compiler_is_gnu AND CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 10.1)
 endif()
 
 
-set(DGtal_GIT_TAG 7570ead94ddf70413e49732f41c618e743af9a7b) # 06-Oct-2020
+set(DGtal_GIT_TAG b888d821b4595564a8343e67c4a244774316e02a) # 25-Feb-2021
 message(STATUS "DGtal_VERSION: ${DGtal_GIT_TAG}")
 set(DGtal_BUILD_DIR ${OUTPUT_BUILD_DIR}/DGtal-build)
 set(DGtal_SRC_FOLDER_NAME DGtal-src)
