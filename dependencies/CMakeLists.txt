@@ -353,6 +353,7 @@ ExternalProject_Add(ep_dgtal
       -DBUILD_EXAMPLES:BOOL=OFF
       -DCMAKE_FIND_PACKAGE_PREFER_CONFIG:BOOL=ON
       -DBoost_DIR=${BOOST_BUILD_DIR}/lib/cmake/Boost-${BOOST_VERSION_DOTS}
+      -DDGTAL_CONFIG_HINTS:BOOL=OFF
       ${_propagate_build_type}
       ${_DGtal_optional_cmake_args}
       ${_cmake_os_flags}
