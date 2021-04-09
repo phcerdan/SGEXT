@@ -18,8 +18,8 @@
  *
  * *******************************************************************/
 
-#ifndef SCRIPTS_TYPES_HPP
-#define SCRIPTS_TYPES_HPP
+#ifndef SGEXT_IMAGE_TYPES_HPP
+#define SGEXT_IMAGE_TYPES_HPP
 
 #include "itkImage.h"
 
