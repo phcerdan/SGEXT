@@ -25,6 +25,12 @@ if(@SG_REQUIRES_VTK@) # if(${SG_REQUIRES_VTK})
     REQUIRED
     )
 endif()
+# TBB is optionally used in modules/generate, only for GNU
+if(@SG_REQUIRES_TBB@) # if(${SG_REQUIRES_TBB})
+  set(OLD_CMAKE_FIND_PACKAGE_PREFER_CONFIG ${CMAKE_FIND_PACKAGE_PREFER_CONFIG})
+  find_dependency(TBB)
+  set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ${OLD_CMAKE_FIND_PACKAGE_PREFER_CONFIG})
+endif()
 
 get_filename_component(SGEXT_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
 if(NOT TARGET SGCore)

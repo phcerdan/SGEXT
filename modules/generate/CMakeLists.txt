@@ -121,6 +121,7 @@ set(SG_MODULE_INTERNAL_DEPENDS
   )
 set(_optional_depends "")
 if(_has_parallel_stl AND _compiler_is_gnu)
+  set(SG_REQUIRES_TBB TRUE PARENT_SCOPE)
   list(APPEND _optional_depends ${_parallel_stl_extra_libraries})
 endif()
 set(SG_MODULE_${SG_MODULE_NAME}_DEPENDS
