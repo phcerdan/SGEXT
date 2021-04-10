@@ -1,3 +1,4 @@
+include(GoogleTest)
 # Minimum requirement is a list of cpp:
 # set(SG_MODULE_${SG_MODULE_NAME}_TESTS
 #  test_get_vtk_points_from_graph.cpp

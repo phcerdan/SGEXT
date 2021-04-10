@@ -273,7 +273,6 @@ if(SG_BUILD_TESTING)
 
   enable_testing()
   set(GTEST_LIBRARIES gtest gtest_main gmock)
-  include(GoogleTest)
   #############################################################################
   # Fetch GTest
   include(FetchContent)
