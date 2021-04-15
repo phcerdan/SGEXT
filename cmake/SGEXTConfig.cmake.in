@@ -11,6 +11,7 @@ if(@SG_REQUIRES_ITK@) #if(${SG_REQUIRES_ITK})
   find_dependency(ITK REQUIRED COMPONENTS
     @itk_components@
     CONFIG)
+  include(${ITK_USE_FILE})
 endif()
 if(@SG_MODULE_VISUALIZE_WITH_QT@) #if (${SG_MODULE_VISUALIZE_WITH_QT})
   find_dependency(Qt5 REQUIRED
