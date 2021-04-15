@@ -26,6 +26,7 @@ endif()
 
 option(WITH_VTK "Build VTK, ITK will use it too, if WITH_ITK is enabled" ON)
 option(WITH_MODERN_VTK "Build VTK9, ITK will use it too, if WITH_ITK is enabled" OFF)
+option(USE_EXTERNAL_VTK "Do not install VTK here, but assume VTK_DIR is provided for other dependencies" OFF)
 if(WITH_MODERN_VTK AND WITH_VTK)
   message(FATAL_ERROR "WITH_MODERN_VTK and WITH_VTK are both ON. Choose only one.")
 endif()
@@ -46,6 +47,16 @@ message(STATUS "WITH_OPENMP: ${WITH_OPENMP}")
 message(STATUS "WITH_TBB: ${WITH_TBB}")
 message(STATUS "WITH_QT5: ${WITH_QT5}")
 
+if(USE_EXTERNAL_VTK AND (WITH_VTK OR WITH_MODERN_VTK))
+  message(FATAL_ERROR "USE_EXTERNAL_VTK is ON, but either WITH_VTK or WITH_MODERN_VTK is also ON. "
+    "Either set USE_EXTERNAL_VTK to OFF or set WITH_VTK AND WITH_MODERN_VTK to OFF")
+endif()
+if(USE_EXTERNAL_VTK AND NOT VTK_DIR)
+  message(FATAL_ERROR "USE_EXTERNAL_VTK=ON requires providing a VTK_DIR")
+endif()
+if(USE_EXTERNAL_VTK)
+  set(VTK_BUILD_DIR ${VTK_DIR})
+endif()
 
 if(APPLE)
   set(_cmake_os_flags
@@ -149,7 +160,7 @@ if(WITH_ITK)
   set(ITK_SRC_FOLDER_NAME ITK-src)
   set(ITK_SRC_DIR ${OUTPUT_BUILD_DIR}/${ITK_SRC_FOLDER_NAME})
   set(ITK_GIT_REPOSITORY "https://github.com/InsightSoftwareConsortium/ITK.git")
-  if(WITH_VTK OR WITH_MODERN_VTK)
+  if(WITH_VTK OR WITH_MODERN_VTK OR USE_EXTERNAL_VTK)
     set(_ITK_depends ep_vtk)
     set(_ITK_optional_cmake_args
       -DModule_ITKVtkGlue:BOOL=ON
