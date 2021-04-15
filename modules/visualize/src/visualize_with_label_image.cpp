@@ -32,6 +32,41 @@
 
 namespace SG {
 
+vtkSmartPointer<vtkImageMapToColors> vtkImage_to_rgba_filter(vtkImageData* input_image)
+{
+    double range_first[2];
+    input_image->GetScalarRange(range_first);
+    const double &min_intensity = range_first[0];
+    const double &max_intensity = range_first[1];
+    const double window = max_intensity - min_intensity;
+    const double level = min_intensity + window / 2;
+
+    auto window_level_lookup_input =
+            vtkSmartPointer<vtkWindowLevelLookupTable>::New();
+    window_level_lookup_input->SetWindow(window);
+    window_level_lookup_input->SetLevel(level);
+    window_level_lookup_input->Build();
+    // If the min of the image is equal to min of the type, make it transparent
+    // (background).
+    if (min_intensity == input_image->GetScalarTypeMin()) {
+        window_level_lookup_input->SetTableValue(min_intensity, 0, 0, 0, 0);
+    }
+
+    // Output directly a RGBA.
+    auto image_map_to_colors_input =
+            vtkSmartPointer<vtkImageMapToColors>::New();
+    image_map_to_colors_input->SetInputData(input_image);
+    image_map_to_colors_input->SetLookupTable(window_level_lookup_input);
+    image_map_to_colors_input->SetOutputFormatToRGBA();
+    image_map_to_colors_input->Update();
+    return image_map_to_colors_input;
+}
+
+vtkSmartPointer<vtkImageData> vtkImage_to_rgba(vtkImageData* input_image) {
+    auto filter = vtkImage_to_rgba_filter(input_image);
+    return filter->GetOutput();
+}
+
 vtkSmartPointer<vtkImageBlend> blend_images_for_view(
         const std::vector<vtkSmartPointer<vtkImageData>> inputImages,
         const double label_opacity) {
@@ -43,34 +78,8 @@ vtkSmartPointer<vtkImageBlend> blend_images_for_view(
     }
     auto blender = vtkSmartPointer<vtkImageBlend>::New();
 
-    auto &image = inputImages[0];
-    double range_first[2];
-    image->GetScalarRange(range_first);
-    const double &min_intensity = range_first[0];
-    const double &max_intensity = range_first[1];
-    const double window = max_intensity - min_intensity;
-    const double level = min_intensity + window / 2;
-
-    // Blend two input images
-    // https://slicer.readthedocs.io/en/latest/developer_guide/mrml_overview.html#slice-view-pipeline
-    auto window_level_lookup_input =
-            vtkSmartPointer<vtkWindowLevelLookupTable>::New();
-    window_level_lookup_input->SetWindow(window);
-    window_level_lookup_input->SetLevel(level);
-    window_level_lookup_input->Build();
-    // If the min of the image is equal to min of the type, make it transparent
-    // (background).
-    if (min_intensity == image->GetScalarTypeMin()) {
-        window_level_lookup_input->SetTableValue(min_intensity, 0, 0, 0, 0);
-    }
-
-    // Output directly a RGBA.
-    auto image_map_to_colors_input =
-            vtkSmartPointer<vtkImageMapToColors>::New();
-    image_map_to_colors_input->SetInputData(image);
-    image_map_to_colors_input->SetLookupTable(window_level_lookup_input);
-    image_map_to_colors_input->SetOutputFormatToRGBA();
-    image_map_to_colors_input->Update();
+    auto &first_image = inputImages[0];
+    auto image_map_to_colors_input = vtkImage_to_rgba_filter(first_image);
 
     // std::cout << "input MapToColor #components " <<
     // image_map_to_colors_input->GetOutput()->GetNumberOfScalarComponents() <<

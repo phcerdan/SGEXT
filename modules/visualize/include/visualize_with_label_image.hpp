@@ -30,6 +30,7 @@
 #include <vtkCaptionActor2D.h>
 #include <vtkCellPicker.h>
 #include <vtkImageBlend.h>
+#include <vtkImageMapToColors.h>
 #include <vtkImageData.h>
 #include <vtkInteractorStyleRubberBand3D.h>
 #include <vtkNamedColors.h>
@@ -43,6 +44,31 @@
 #include <itkImageToVTKImageFilter.h>
 
 namespace SG {
+
+/**
+ * Return a filter of type vtkImageMapToColors, which outputs
+ * is a rgba vtkImageData from the input image.
+ *
+ * @param input_image input image to transform to rgba
+ *
+ * @return vtkImageMapToColors (the filter)
+ *
+ * @sa vtkImage_to_rgba_filter
+ */
+vtkSmartPointer<vtkImageData> vtkImage_to_rgba(vtkImageData* input_image);
+
+/**
+ * Return a filter of type vtkImageMapToColors, which outputs
+ * is a rgba vtkImageData from the input image.
+ *
+ * @param input_image input image to transform to rgba
+ *
+ * @return vtkImageMapToColors (the filter)
+ *
+ * Note: This is provided because @blend_images_for_view needs an GetInputConnection.
+ * For general use, you might prefer @sa vtkImage_to_rgba.
+ */
+vtkSmartPointer<vtkImageMapToColors> vtkImage_to_rgba_filter(vtkImageData* input_image);
 
 /**
  * Blend images, used in @see view_image_with_label
