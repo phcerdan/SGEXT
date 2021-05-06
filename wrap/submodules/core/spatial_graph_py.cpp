@@ -96,9 +96,9 @@ void init_spatial_graph(py::module &m) {
                      return "spatial_graph:\n" + os.str();
                  })
             .def("spatial_node",
-                 [](const GraphType &graph, const size_t &n) -> SpatialNode {
+                 [](GraphType &graph, const size_t &n) -> SpatialNode& {
                      return graph[n];
-                 })
+                 }, py::return_value_policy::reference)
             .def("spatial_edge",
                  [](const GraphType &graph,
                     const GraphType::edge_descriptor &ed) -> SpatialEdge {
