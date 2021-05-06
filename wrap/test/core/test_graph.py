@@ -164,8 +164,9 @@ class TestGraph(unittest.TestCase):
         self.assertEqual(len(ref.edge_points), 2)
         ref.edge_points = []
         self.assertEqual(len(ref.edge_points), 0)
-        # edge_points of the graph is unmodified. To modify use the set_edge function
-        self.assertEqual(len(graph.spatial_edge(ed).edge_points), 2)
+        # The edge in the graph is already modified, no need to use set_edge.
+        self.assertEqual(len(graph.spatial_edge(ed).edge_points), 0)
+        # But we test the set_edge interface anyway:
         graph.set_edge(ed, ref)
         self.assertEqual(len(graph.spatial_edge(ed).edge_points), 0)
         print("end test_spatial_graph_vertex_edge")

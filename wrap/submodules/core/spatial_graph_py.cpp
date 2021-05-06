@@ -100,10 +100,10 @@ void init_spatial_graph(py::module &m) {
                      return graph[n];
                  }, py::return_value_policy::reference)
             .def("spatial_edge",
-                 [](const GraphType &graph,
-                    const GraphType::edge_descriptor &ed) -> SpatialEdge {
+                 [](GraphType &graph,
+                    const GraphType::edge_descriptor &ed) -> SpatialEdge& {
                      return graph[ed];
-                 })
+                 }, py::return_value_policy::reference)
             .def("edge",
                  [](const GraphType &graph,
                     const GraphType::vertex_descriptor s,
