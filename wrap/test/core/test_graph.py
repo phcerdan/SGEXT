@@ -155,10 +155,8 @@ class TestGraph(unittest.TestCase):
 
         # mutable test vertex
         graph.spatial_node(0).pos = arr1
-        self.assertNotAlmostEqual(graph.spatial_node(0).pos[0], arr1[0])
         v0 = graph.spatial_node(0)
         v0.pos = arr1
-        graph.set_vertex(0, v0)
         self.assertAlmostEqual(graph.spatial_node(0).pos[0], arr1[0])
 
         # mutable test edge
@@ -166,8 +164,9 @@ class TestGraph(unittest.TestCase):
         self.assertEqual(len(ref.edge_points), 2)
         ref.edge_points = []
         self.assertEqual(len(ref.edge_points), 0)
-        # edge_points of the graph is unmodified. To modify use the set_edge function
-        self.assertEqual(len(graph.spatial_edge(ed).edge_points), 2)
+        # The edge in the graph is already modified, no need to use set_edge.
+        self.assertEqual(len(graph.spatial_edge(ed).edge_points), 0)
+        # But we test the set_edge interface anyway:
         graph.set_edge(ed, ref)
         self.assertEqual(len(graph.spatial_edge(ed).edge_points), 0)
         print("end test_spatial_graph_vertex_edge")
@@ -178,11 +177,9 @@ class TestGraph(unittest.TestCase):
         arr0 = [0,0,0]
         v0 = graph.spatial_node(0)
         v0.pos = arr0
-        graph.set_vertex(0, v0)
         arr3 = [3,3,3]
         v1 = graph.spatial_node(1)
         v1.pos = arr3
-        graph.set_vertex(1, v1)
         arr1 = [1,1,1]
         arr2 = [2,2,2]
         se2 = core.spatial_edge()
