@@ -109,6 +109,11 @@ BinaryImageType::Pointer thin_function(
         "tables_folder should point to the folder "
         "where DGtal tables are: i.e simplicity_table26_6.zlib");
   }
+  // Display warning if distance map image is provided but select type is not dmax.
+  if(verbose && distance_map_image && skel_select_type != SkelSelectType::dmax) {
+    std::cout << "Warning: Distance Map image is provided, but the select "
+      "type is not 'dmax'. The distance map won't be used." << std::endl;
+  }
 
   // Convert to DGtal Container
   using Domain = DGtal::Z3i::Domain;
