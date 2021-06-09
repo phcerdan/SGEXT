@@ -145,10 +145,9 @@ install(TARGETS _sgext
   RUNTIME DESTINATION ${CMAKE_INSTALL_PYTHONLIBDIR} COMPONENT runtime
   LIBRARY DESTINATION ${CMAKE_INSTALL_PYTHONLIBDIR} COMPONENT runtime
   ARCHIVE DESTINATION ${CMAKE_INSTALL_PYTHONLIBDIR} COMPONENT development)
-# export _sgext to the build tree
-export(TARGETS _sgext
-  NAMESPACE SGEXT::
-  APPEND FILE ${sgext_export_file})
+
+# Append to _targets_to_export in the PARENT_SCOPE.
+set(_targets_to_export ${_targets_to_export} _sgext PARENT_SCOPE)
 
 if(SG_BUILD_TESTING)
   add_subdirectory(test)

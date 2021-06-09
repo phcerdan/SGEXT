@@ -195,6 +195,8 @@ if(SG_REQUIRES_VTK)
 endif()
 
 set(sgext_export_file "${PROJECT_BINARY_DIR}/SGEXTTargets.cmake")
+# _targets_to_export holds all the targets that will exported to the build tree with export(TARGETS
+set(_targets_to_export)
 
 set(HISTO_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/histo/include
         CACHE PATH "histo include directory")
@@ -214,10 +216,8 @@ install(TARGETS histo
   EXPORT SGEXTTargets
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-# export to the build tree
-export(TARGETS histo
-  NAMESPACE SGEXT::
-  APPEND FILE ${sgext_export_file})
+# Append to _targets_to_export for export to the build tree
+set(_targets_to_export ${_targets_to_export} histo)
 
 if(SG_BUILD_TESTING)
   if(SG_BUILD_ENABLE_VALGRIND)
@@ -321,9 +321,7 @@ if(SG_WRAP_PYTHON)
   # And then:
   # include(${SGEXT_DIR}/_deps/pybind11-src/tools/pybind11Tools.cmake)
   # to access the same pybind11_add_module CMake function.
-  export(TARGETS pybind11::pybind11 pybind11::module
-    NAMESPACE SGEXT::
-    APPEND FILE ${sgext_export_file})
+  set(_targets_to_export ${_targets_to_export} pybind11::pybind11 pybind11::module pybind11_headers)
 endif()
 
 set(SG_LIBRARIES)
@@ -377,6 +375,12 @@ install (EXPORT SGEXTTargets
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/SGEXTConfig.cmake
               ${CMAKE_CURRENT_BINARY_DIR}/SGEXTConfigVersion.cmake
               DESTINATION ${install_cmake_dir} )
+
+# Export to build tree
+list(REMOVE_DUPLICATES _targets_to_export)
+export(TARGETS ${_targets_to_export}
+       NAMESPACE SGEXT::
+       FILE ${sgext_export_file})
 
 include(CMakePackageConfigHelpers)
 

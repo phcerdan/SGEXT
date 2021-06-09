@@ -58,10 +58,8 @@ install(TARGETS PERMCore
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT development
   )
 
-# export to the build tree
-export(TARGETS PERMCore
-  NAMESPACE SGEXT::
-  APPEND FILE ${sgext_export_file})
+# Append to _targets_to_export in the PARENT_SCOPE.
+set(_targets_to_export ${_targets_to_export} PERMCore PARENT_SCOPE)
 
 # # Use FLANN for collision detector (kd-tree)
 # option(FLANN_BUILD_C_BINDINGS "Build C bindings" OFF)
@@ -175,10 +173,8 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sgext
   PATTERN "*.txt" EXCLUDE)
 
-# export to the build tree
-export( TARGETS ${SG_MODULE_${SG_MODULE_NAME}_LIBRARY}
-  NAMESPACE SGEXT::
-  APPEND FILE ${sgext_export_file})
+# Append to _targets_to_export in the PARENT_SCOPE.
+set(_targets_to_export ${_targets_to_export} ${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} PARENT_SCOPE)
 
 if(SG_BUILD_CLI)
   add_subdirectory(bin)
