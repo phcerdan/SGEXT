@@ -31,16 +31,18 @@ using namespace SG;
 
 void init_spatial_graph(py::module &m) {
     auto mgraph = m.def_submodule("graph");
+    mgraph.doc() = "Graph submodule with graph related function and classes";
     // py::class_<GraphType::vertex_descriptor>(mgraph, "vertex_descriptor")
     //         .def(py::init());
     // TODO probably missing something wrappable in vertex_descriptor
     py::class_<GraphType::edge_descriptor>(mgraph, "edge_descriptor")
-            .def(py::init())
+            .def(py::init(), R"(Default constructor)")
             .def(py::init([](GraphType::vertex_descriptor s,
                              GraphType::vertex_descriptor t) {
                 return std::make_unique<GraphType::edge_descriptor>(s, t,
                                                                     nullptr);
-            }))
+            }), py::arg("source"), py::arg("target"),
+                R"(Constructor from source and target vertex descriptors)")
             // No access to pointer m_property from python for now
             // The pointer in the constructor is confusing,
             // use a lambda and ignore SpatialEdge for descriptors...
@@ -79,8 +81,9 @@ void init_spatial_graph(py::module &m) {
                 return os.str();
             });
     py::class_<GraphType>(m, "spatial_graph")
-            .def(py::init())
-            .def(py::init<size_t>())
+            .def(py::init(), R"(Default constructor, empty graph)")
+            .def(py::init<size_t>(),py::arg("num_vertices"),
+                    R"(Constructor with number of vertices of the graph)")
             .def("__repr__",
                  [](const GraphType &graph) {
                      return "spatial_graph:\n num_vertices: " +
@@ -98,47 +101,68 @@ void init_spatial_graph(py::module &m) {
             .def("spatial_node",
                  [](GraphType &graph, const size_t &n) -> SpatialNode& {
                      return graph[n];
-                 }, py::return_value_policy::reference)
+                 }, py::return_value_policy::reference,
+                 R"(Return the spatial_node associated to vertex n.)")
             .def("spatial_edge",
                  [](GraphType &graph,
                     const GraphType::edge_descriptor &ed) -> SpatialEdge& {
                      return graph[ed];
-                 }, py::return_value_policy::reference)
+                 }, py::return_value_policy::reference,
+                 R"(Return spatial edge from edge descriptor)")
             .def("edge",
                  [](const GraphType &graph,
                     const GraphType::vertex_descriptor s,
                     const GraphType::vertex_descriptor t)
                          -> std::pair<GraphType::edge_descriptor, bool> {
                      return boost::edge(s, t, graph);
-                 })
+                 }, py::arg("source"), py::arg("target"),
+R"(
+Parameters
+----------
+source: vertex_descriptor
+    source vertex
+target: vertex_descriptor
+    target vertex
+
+Returns
+-------
+edge_descriptor
+    edge connecting source and target vertices
+bool
+    true if edge exists in graph, false otherwise
+)")
             .def("set_vertex",
                  [](GraphType &graph, const size_t &n,
-                    const SpatialNode &sn) -> void { graph[n] = sn; })
+                    const SpatialNode &sn) -> void { graph[n] = sn; },
+                 py::arg("vertex"), py::arg("mesh_graph_node"),
+                 R"(Set the mesh_graph_node of input vertex.)")
             .def("set_edge",
                  [](GraphType &graph, const GraphType::edge_descriptor &ed,
-                    const SpatialEdge &se) -> void { graph[ed] = se; })
+                    const SpatialEdge &se) -> void { graph[ed] = se; },
+                 py::arg("edge"), py::arg("spatial_edge"),
+                 R"(Set the spatial edge of input edge.)")
             .def("num_vertices",
                  [](const GraphType &graph) -> size_t {
                      return boost::num_vertices(graph);
-                 })
+                 }, R"(Returns number of vertices of the graph.)")
             .def("num_edges",
                  [](const GraphType &graph) -> size_t {
                      return boost::num_edges(graph);
-                 })
+                 }, R"(Returns number of edges of the graph.)")
             .def("num_edge_points",
                  [](const GraphType &graph) -> size_t {
                      return SG::num_edge_points(graph);
-                 })
+                 }, R"(Returns the sum of edge points from all edges.)")
             .def("source",
                  [](const GraphType &graph,
                     const GraphType::edge_descriptor &u) {
                      return boost::source(u, graph);
-                 })
+                 }, py::arg("edge"), R"(Returns source vertex of input edge.)")
             .def("target",
                  [](const GraphType &graph,
                     const GraphType::edge_descriptor &u) {
                      return boost::target(u, graph);
-                 })
+                 }, py::arg("edge"), R"(Returns target vertex of input edge.)")
             .def("out_edges",
                  [](const GraphType &graph, size_t u) {
                      std::vector<GraphType::edge_descriptor> edge_descriptors;
@@ -147,12 +171,24 @@ void init_spatial_graph(py::module &m) {
                          edge_descriptors.push_back(*ei);
                      }
                      return edge_descriptors;
-                 })
+                 }, py::arg("vertex"),
+                 R"(Returns tuple with all the out edges of input vertex.)")
+            .def("adjacent_vertices",
+                 [](const GraphType &graph, size_t u) {
+                 std::vector<GraphType::vertex_descriptor> vertex_descriptors;
+                 for (auto [vi, vi_end] = boost::adjacent_vertices(u, graph);
+                         vi != vi_end; ++vi) {
+                     vertex_descriptors.push_back(*vi);
+                 }
+                 return vertex_descriptors;
+                 }, py::arg("vertex"),
+                 R"(Return tuple with neighbors of input vertex)")
             .def("add_edge",
                  [](GraphType &graph, size_t u, size_t v,
                     const SpatialEdge &se) {
                      return boost::add_edge(u, v, se, graph);
-                 })
+                 }, py::arg("source"), py::arg("target"), py::arg("spatial_edge"),
+        R"(Add edge from source to target vertices with the input spatial edge.)")
             .def("vertices",
                  [](GraphType &graph) {
                      std::vector<size_t> vertices_descriptors;
@@ -161,7 +197,7 @@ void init_spatial_graph(py::module &m) {
                          vertices_descriptors.push_back(*vi);
                      }
                      return vertices_descriptors;
-                 })
+                 }, R"(Returns a tuple with all vertices of the graph.)")
             .def("edges", [](GraphType &graph) {
                 std::vector<GraphType::edge_descriptor> edges_descriptors;
                 for (auto [ei, ei_end] = boost::edges(graph); ei != ei_end;
@@ -169,44 +205,80 @@ void init_spatial_graph(py::module &m) {
                     edges_descriptors.push_back(*ei);
                 }
                 return edges_descriptors;
-            });
+              }, R"(Returns a tuple with all edges of the graph.)"
+            );
 
     // return type: Not wrapped
     // .def_readwrite("edges", &GraphType::m_edges);
 
-    mgraph.def("num_edge_points", &num_edge_points<GraphType>);
+    mgraph.def("num_edge_points", &num_edge_points<GraphType>,
+            R"(Returns the sum of edge points from all edges.)");
     mgraph.def("add_edge",
                [](size_t u, size_t v, const SpatialEdge &se, GraphType &graph) {
                    return boost::add_edge(u, v, se, graph);
-               });
+               }, py::arg("source"), py::arg("target"),
+                  py::arg("spatial_edge"), py::arg("graph"),
+        R"(Add edge from source to target vertices with the input spatial edge.)"
+               );
     mgraph.def("source",
                [](const GraphType::edge_descriptor &u, const GraphType &graph) {
                    return boost::source(u, graph);
-               });
+               }, py::arg("edge"), py::arg("graph"),
+               R"(Return source vertex of input edge of given graph.)"
+               );
     mgraph.def("target",
                [](const GraphType::edge_descriptor &u, const GraphType &graph) {
                    return boost::target(u, graph);
-               });
+               }, py::arg("edge"), py::arg("graph"),
+               R"(Return source vertex of input edge of given graph.)"
+               );
     mgraph.def("vertices", [](GraphType &graph) {
         std::vector<size_t> vertices_descriptors;
         for (auto [vi, vi_end] = boost::vertices(graph); vi != vi_end; vi++) {
             vertices_descriptors.push_back(*vi);
         }
         return vertices_descriptors;
-    });
+    }, py::arg("graph"), R"(Returns a tuple with all the vertices of the graph.)"
+    );
     mgraph.def("edges", [](GraphType &graph) {
         std::vector<GraphType::edge_descriptor> edges_descriptors;
         for (auto [ei, ei_end] = boost::edges(graph); ei != ei_end; ei++) {
             edges_descriptors.push_back(*ei);
         }
         return edges_descriptors;
-    });
+    }, py::arg("graph"), R"(Returns a tuple with all edges of the graph.)"
+    );
     mgraph.def("out_edges", [](size_t u, const GraphType &graph) {
         std::vector<GraphType::edge_descriptor> edge_descriptors;
         for (auto [ei, ei_end] = out_edges(u, graph); ei != ei_end; ++ei) {
             edge_descriptors.push_back(*ei);
         }
         return edge_descriptors;
-    });
-    mgraph.def("get_all_points", &get_all_points);
+    }, py::arg("vertex"), py::arg("graph"),
+    R"(Return tuple with output edges of input vertex)"
+    );
+    mgraph.def("adjacent_vertices", [](size_t u, const GraphType &graph) {
+            std::vector<GraphType::vertex_descriptor> vertex_descriptors;
+            for (auto [vi, vi_end] = boost::adjacent_vertices(u, graph);
+                    vi != vi_end; ++vi) {
+            vertex_descriptors.push_back(*vi);
+            }
+            return vertex_descriptors;
+        }, py::arg("vertex"), py::arg("graph"),
+        R"(Return tuple with neighbors of input vertex.)"
+    );
+    mgraph.def("get_all_points", &get_all_points,
+R"(
+Returns
+-------
+[Array3D]
+    Tuple with all the spatial points of the graph.
+    Includes position of vertices and position of edge points.
+[graph_descriptor]
+    Tuple with all the graph_descriptor associated to the spatial points.
+    Associating each spatial point from the first tuple with the graph.
+    It categorizes the point into a vertex, or an edge.
+)"
+    );
+
 }
