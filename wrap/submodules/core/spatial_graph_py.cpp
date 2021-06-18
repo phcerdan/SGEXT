@@ -25,6 +25,10 @@
 #include "hash_edge_descriptor.hpp"
 #include "spatial_graph.hpp"
 #include "spatial_graph_utilities.hpp"
+// For pickle
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/graph/adj_list_serialize.hpp>
 
 namespace py = pybind11;
 using namespace SG;
@@ -98,6 +102,23 @@ void init_spatial_graph(py::module &m) {
                      print_spatial_edges(graph, os);
                      return "spatial_graph:\n" + os.str();
                  })
+            // For pickle support (copy.deepcopy) define getstate and setstate
+            .def(py::pickle(
+                // getstate: equivalent to write graph to file
+                [](const GraphType & graph) -> std::string {
+                std::ostringstream os;
+                boost::archive::text_oarchive arch(os);
+                arch << graph;
+                return os.str();
+                },
+                // setstate: equivalent to read graph from file
+                [](const std::string & serialized_str) -> GraphType {
+                std::istringstream os(serialized_str);
+                boost::archive::text_iarchive arch(os);
+                GraphType graph;
+                arch >> graph;
+                return graph;
+                }))
             .def("spatial_node",
                  [](GraphType &graph, const size_t &n) -> SpatialNode& {
                      return graph[n];

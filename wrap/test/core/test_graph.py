@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from sgext import core
 import unittest
+import copy
 
 class TestGraph(unittest.TestCase):
     def test_spatial_node(self):
@@ -83,6 +84,21 @@ class TestGraph(unittest.TestCase):
         self.assertEqual(graph.num_edge_points(), 2)
         print(graph)
         print("end test_spatial_graph")
+
+    def test_pickle(self):
+        graph = core.spatial_graph(2)
+        graph.spatial_node(0).pos = [1,2,3]
+        se2 = core.spatial_edge()
+        arr0 = [0,0,0]
+        arr1 = [1,1,1]
+        se2.edge_points = [arr0, arr1];
+        core.graph.add_edge(0,1, se2, graph)
+
+        gc = copy.deepcopy(graph)
+        self.assertEqual(graph.num_vertices(), gc.num_vertices())
+        self.assertEqual(graph.num_edges(), gc.num_edges())
+        self.assertEqual(graph.num_edge_points(), gc.num_edge_points())
+
 
     def test_spatial_graph_source_target(self):
         print("test_spatial_graph_source_target")
