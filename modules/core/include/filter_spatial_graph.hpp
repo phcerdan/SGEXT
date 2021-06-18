@@ -105,7 +105,7 @@ std::vector<ComponentGraphType> filter_component_graphs(
  * Create a new graph holding the largest component of the input graph.
  *
  * If you want to work with filtered_graph, use @sa filter_component_graphs
- * Pleae note that after the copy, the returned graph won't share verted or
+ * Please note that after the copy, the returned graph won't share vertex or
  * edge indices with the original graph. Use the filtered_graph interface
  * if you need them.
  *
