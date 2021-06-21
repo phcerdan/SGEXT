@@ -162,6 +162,24 @@ void visualize_poly_data_and_graph(
 /*****************************************************************************/
 
 namespace detail {
+
+/**
+ * Returns pair, the first boolean indicates if the image is isotropic,
+ * the second, give a value for the spacing.
+ *
+ * In the non isotropic case, this value corresponds to the mean of the min
+ * and max value of the spacing.
+ *
+ * @param distance_map_image
+ *
+ * @return pair: true|false, spacing_value
+ */
+std::pair<bool, double> checkIsotropy(const FloatImageType *distance_map_image);
+const std::string isotropyWarning =
+R"(WARNING: The image is not isotropic:
+The distance map provided works on voxel space, so it ignores image spacing.
+The mean of max and min spacing is used as radius, but consider resample the image to isotropic.)";
+
 /**
  * Create a sphere source with center given by the input_point and radius
  * given by pixel of that position in the distance map.
@@ -180,13 +198,21 @@ namespace detail {
  *  into account image spacing (false for DGtal, maybe true if computed via ITK)
  *  @ref create_distance_map
  *
+ * @param radius_multiplier The factor to multiply the radius.
+ *  Only used when distance_map_image_use_image_spacing is false.
+ *  Use checkIsotropic to check for isotropy and to get a radius for this parameter.
+ *  If the image is isotropic for sure, you can use:
+ *  distance_map_image->GetSpacing()[0]
+ *  @ref checkIsotropy
+ *
  * @return a sphereSource
  */
 vtkSmartPointer<vtkSphereSource>
 createSphereSource(const ArrayUtilities::Array3D &input_point,
                    FloatImageType *distance_map_image,
                    const bool spatial_nodes_position_are_in_physical_space,
-                   const bool distance_map_image_use_image_spacing);
+                   const bool distance_map_image_use_image_spacing,
+                   const double radius_multiplier);
 /**
  * Associate an integer array to the sphere cell data. Used to color the spheres
  * based on the label.

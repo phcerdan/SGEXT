@@ -79,6 +79,14 @@ ReconstructOutput reconstruct_from_distance_map(
             vtkSmartPointer<vtkAppendPolyData>::New();
     const bool vertex_to_label_map_provided = !vertex_to_label_map.empty();
 
+    const auto isotropic_spacing_pair = detail::checkIsotropy(distance_map_image);
+    const auto & is_isotropic = isotropic_spacing_pair.first;
+    const auto & radius_multiplier = isotropic_spacing_pair.second;
+    if(!distance_map_image_use_image_spacing && !is_isotropic) {
+        std::cerr << detail::isotropyWarning << std::endl;
+        std::cerr << "radius_multiplier: " << radius_multiplier << std::endl;
+    }
+
     GraphType::edge_iterator ei, ei_end;
     std::tie(ei, ei_end) = boost::edges(input_sg);
     for (; ei != ei_end; ++ei) {
@@ -89,7 +97,8 @@ ReconstructOutput reconstruct_from_distance_map(
             auto sphereSource = detail::createSphereSource(
                     input_sg[source].pos, distance_map_image,
                     spatial_nodes_position_are_in_physical_space,
-                    distance_map_image_use_image_spacing);
+                    distance_map_image_use_image_spacing,
+                    radius_multiplier);
             if (vertex_to_label_map_provided) {
                 const auto found = vertex_to_label_map.find(source);
                 size_t color_label = std::numeric_limits<int>::max();
@@ -105,7 +114,8 @@ ReconstructOutput reconstruct_from_distance_map(
             auto sphereSource = detail::createSphereSource(
                     input_sg[target].pos, distance_map_image,
                     spatial_nodes_position_are_in_physical_space,
-                    distance_map_image_use_image_spacing);
+                    distance_map_image_use_image_spacing,
+                    radius_multiplier);
             if (vertex_to_label_map_provided) {
                 const auto found = vertex_to_label_map.find(target);
                 size_t color_label = std::numeric_limits<int>::max();
@@ -125,7 +135,8 @@ ReconstructOutput reconstruct_from_distance_map(
             auto sphereSource = detail::createSphereSource(
                     ep, distance_map_image,
                     spatial_nodes_position_are_in_physical_space,
-                    distance_map_image_use_image_spacing);
+                    distance_map_image_use_image_spacing,
+                    radius_multiplier);
             if (vertex_to_label_map_provided) {
                 const auto found_source = vertex_to_label_map.find(source);
                 const auto found_target = vertex_to_label_map.find(target);
@@ -490,11 +501,26 @@ void applyColorToSphere(vtkSphereSource *sphereSource,
     sphereData->GetCellData()->SetScalars(colors);
 }
 
+std::pair<bool, double> checkIsotropy(const FloatImageType *distance_map_image) {
+    const auto & dmap_spacing = distance_map_image->GetSpacing();
+    const auto min_max_spacing_pair = std::minmax_element(
+            dmap_spacing.Begin(), dmap_spacing.End());
+
+    const auto & min_sp = *min_max_spacing_pair.first;
+    const auto & max_sp = *min_max_spacing_pair.second;
+    if (itk::Math::FloatAlmostEqual(min_sp, max_sp)) {
+        return std::make_pair(true, max_sp);
+    } else {
+        return std::make_pair(false, (min_sp + max_sp)/2.0);
+    }
+}
+
 vtkSmartPointer<vtkSphereSource>
 createSphereSource(const ArrayUtilities::Array3D &input_point,
                    FloatImageType *distance_map_image,
                    const bool spatial_nodes_position_are_in_physical_space,
-                   const bool distance_map_image_use_image_spacing) {
+                   const bool distance_map_image_use_image_spacing,
+                   const double radius_multiplier) {
 
     vtkSmartPointer<vtkSphereSource> sphereSource =
             vtkSmartPointer<vtkSphereSource>::New();
@@ -535,10 +561,10 @@ createSphereSource(const ArrayUtilities::Array3D &input_point,
     if (distance_map_image_use_image_spacing) {
         sphereSource->SetRadius(dmap_value);
     } else {
-        // TODO: We have to assume that the spacing is isotropic. Raise
-        // warning if not.
-        const double radius = dmap_value * distance_map_image->GetSpacing()[0];
-        sphereSource->SetRadius(radius);
+        // Use checkIsotropic to get the radius multiplier.
+        // Only works reliable if image is isotropic, a warning is raised
+        // in the function calling createSphereSource if not.
+        sphereSource->SetRadius(dmap_value * radius_multiplier);
     }
 
     // sphereSource->SetThetaResolution(100);
