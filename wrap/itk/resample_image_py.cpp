@@ -19,6 +19,7 @@
  * *******************************************************************/
 
 #include "pybind11_common.h"
+#include "sgitk_common_py.hpp" // For IUC3, etc.
 
 #include "resample_image_function.hpp"
 
@@ -49,4 +50,36 @@ verbose: bool
             )delimiter",
           py::arg("input"), py::arg("shrink_factor"),
           py::arg("verbose") = false);
+
+    py::enum_<SG::Interpolator>(m, "Interpolator",
+  R"(Interpolator used in resample.
+wise will use nearest_neighbor for binary and label images.
+and linear for float types.)")
+      .value("wise", Interpolator::wise)
+      .value("linear", Interpolator::linear)
+      .value("nearest_neighbor", Interpolator::nearest_neighbor);
+
+    const std::string make_isotropic_docs =
+R"(Resample the input image to be isotropic using the smaller spacing.
+
+Parameters
+----------
+input: BinaryImageType | FloatImageType
+  input binary image
+
+interpolator: Interpolator
+  Defaults to wise, that will choose Interpolator::nearest_neighbor
+  for binary images, and Interpolator::linear for FloatImageType.
+        )";
+
+    m.def("make_isotropic",
+        py::overload_cast< const IUC3P &, const Interpolator &>(
+          &SG::make_isotropic<IUC3>),
+        make_isotropic_docs.c_str(),
+        py::arg("input"), py::arg("interpolator") = Interpolator::wise);
+    m.def("make_isotropic",
+        py::overload_cast< const IF3P &, const Interpolator &>(
+          &SG::make_isotropic<IF3>),
+        make_isotropic_docs.c_str(),
+        py::arg("input"), py::arg("interpolator") = Interpolator::wise);
 }

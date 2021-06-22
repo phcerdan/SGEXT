@@ -7,6 +7,7 @@ set(_scripts_targets
     merge_low_high_info_graphs
     fill_holes_binary
     resample_image
+    make_isotropic
     graph_to_vtp
     voxelize_graph
     )
@@ -40,6 +41,9 @@ endif()
 
 add_executable(resample_image resample_image.cpp)
 target_link_libraries(resample_image ${_scripts_libs})
+
+add_executable(make_isotropic make_isotropic.cpp)
+target_link_libraries(make_isotropic ${_scripts_libs})
 
 add_executable(voxelize_graph voxelize_graph.cpp)
 target_link_libraries(voxelize_graph ${_scripts_libs})

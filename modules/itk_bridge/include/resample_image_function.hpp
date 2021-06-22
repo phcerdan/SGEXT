@@ -22,6 +22,11 @@
 #define SG_RESAMPLE_IMAGE_FUNCTION_HPP
 
 #include "image_types.hpp"
+#include <itkIdentityTransform.h>
+#include <itkImageDuplicator.h>
+#include <itkLinearInterpolateImageFunction.h>
+#include <itkNearestNeighborInterpolateImageFunction.h>
+#include <itkResampleImageFilter.h>
 
 namespace SG {
 /**
@@ -44,6 +49,81 @@ BinaryImageType::Pointer
 resample_image_function(const BinaryImageType::Pointer &input,
                          const double &shrink_factor,
                          bool verbose);
+
+enum class Interpolator {
+    wise,
+    linear,
+    nearest_neighbor
+};
+
+template<typename TImage>
+typename TImage::Pointer make_isotropic(
+        const typename TImage::Pointer &input,
+        const Interpolator & interpolator_method = Interpolator::wise
+        ) {
+    const auto & original_spacing = input->GetSpacing();
+    const bool is_already_isotropic =
+        std::all_of(original_spacing.Begin(), original_spacing.End(),
+            [&original_spacing](const auto &a) {
+            return itk::Math::FloatAlmostEqual(a, original_spacing[0]);
+            });
+    if (is_already_isotropic) {
+        // Return a copy of input, for consistency
+        using DuplicatorType = itk::ImageDuplicator<TImage>;
+        auto duplicator = DuplicatorType::New();
+        duplicator->SetInputImage(input);
+        duplicator->Update();
+        return duplicator->GetOutput();
+    }
+
+    const auto original_size = input->GetLargestPossibleRegion().GetSize();
+    auto min_spacing = *std::min_element(original_spacing.Begin(), original_spacing.End());
+    auto new_spacing = decltype(original_spacing)(min_spacing);
+    auto new_size = decltype(original_size)();
+    for(size_t dim = 0; dim < TImage::ImageDimension; ++dim) {
+        new_size[dim] = original_size[dim] * original_spacing[dim] / min_spacing;
+    }
+
+    using TransformType =
+            itk::IdentityTransform<double, TImage::ImageDimension>;
+    auto transform = TransformType::New();
+    transform->SetIdentity();
+
+    using ResampleFilter = itk::ResampleImageFilter<TImage, TImage>;
+    auto resampler = ResampleFilter::New();
+    resampler->SetInput(input);
+    resampler->SetTransform(transform);
+    resampler->SetDefaultPixelValue(0);
+    resampler->SetOutputOrigin(input->GetOrigin());
+    resampler->SetOutputDirection(input->GetDirection());
+    resampler->SetOutputSpacing(new_spacing);
+    resampler->SetSize(new_size);
+
+    // Handle interpolator, if wise (default, automatic), choose nearest_neighbor
+    // for binary images and linear for anything else.
+    using InterpolatorTypeLinear =
+            itk::LinearInterpolateImageFunction<TImage, double>;
+    using InterpolatorTypeNearest =
+            itk::NearestNeighborInterpolateImageFunction<TImage, double>;
+
+    if(interpolator_method == Interpolator::wise) {
+        if constexpr(std::is_same<TImage, BinaryImageType>()) {
+            resampler->SetInterpolator(InterpolatorTypeNearest::New());
+        } else {
+            resampler->SetInterpolator(InterpolatorTypeLinear::New());
+        }
+    } else {
+        if(interpolator_method == Interpolator::nearest_neighbor) {
+            resampler->SetInterpolator(InterpolatorTypeNearest::New());
+        } else {
+            resampler->SetInterpolator(InterpolatorTypeLinear::New());
+        }
+    }
+
+    resampler->Update();
+
+    return resampler->GetOutput();
+}
 } // namespace SG
 
 #endif
