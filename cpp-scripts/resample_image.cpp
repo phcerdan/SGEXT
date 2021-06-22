@@ -45,6 +45,9 @@ int main(int argc, char *const argv[]) {
                            "between (0, 1) upsamples.");
     opt_desc.add_options()("verbose,v", po::bool_switch()->default_value(false),
                            "verbose output");
+    opt_desc.add_options()("nocompress",
+                           po::bool_switch()->default_value(false),
+                           "Do not use compression to write output.");
     opt_desc.add_options()("outputFolder,o",
                            po::value<std::string>()->required(),
                            "Folder to export the resulting binary image.");
@@ -67,7 +70,8 @@ int main(int argc, char *const argv[]) {
     // Parse options
     std::string filename = vm["input"].as<std::string>();
     double shrink_factor = vm["shrink_factor"].as<double>();
-    bool verbose = vm["verbose"].as<bool>();
+    const bool verbose = vm["verbose"].as<bool>();
+    const bool nocompress = vm["nocompress"].as<bool>();
     if (static_cast<bool>(vm.count("outputFolder"))) {
         const fs::path output_folder_path{vm["outputFolder"].as<std::string>()};
         if (!fs::exists(output_folder_path)) {
@@ -126,7 +130,11 @@ int main(int argc, char *const argv[]) {
     try {
         writer->SetFileName(output_full_path.string().c_str());
         writer->SetInput(resampled_image);
-        writer->UseCompressionOn();
+        if(nocompress) {
+            writer->UseCompressionOff();
+        } else {
+            writer->UseCompressionOn();
+        }
         writer->Update();
     } catch (itk::ExceptionObject &e) {
         std::cerr << "Failure writing file: " << output_full_path.string()
