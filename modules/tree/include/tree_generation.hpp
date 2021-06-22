@@ -29,6 +29,29 @@
 namespace SG {
 
 /**
+ * Parameters to mark nodes/edges as anomalies in tree_generation_visitor
+ */
+struct AnomalyParameters {
+    /**
+     *  Number of edge points to consider an edge short
+     *  Used for aneurysms for example -- depends heavily on data --
+     */
+    size_t num_edge_points_for_short = 20;
+    /**
+     * Radio (diameter) parameter. This factor is multiplied
+     * with the tree_generation parameter:
+     * decrease_radius_ratio_to_increase_generation, to mark it as an anomaly.
+     */
+    double decrease_radius_ratio_factor = 1.;
+};
+
+inline void print(const AnomalyParameters & parameters, std::ostream &os) {
+        os << "num_edge_points_for_short: " << parameters.num_edge_points_for_short << "\n";
+        os << "decrease_radius_ratio_factor: " << parameters.decrease_radius_ratio_factor;
+        os << std::endl;
+}
+
+/**
  * Associate to each node of the graph a generation based on the branching of
  * the tree. Generation = 0 is associated to the root node. An end node of the
  * first branching will have generation 1.
@@ -85,6 +108,7 @@ namespace SG {
  *
  * @return A map vertex to generation
  */
+
 using VertexGenerationMap =
         std::unordered_map<GraphType::vertex_descriptor, size_t>;
 VertexGenerationMap tree_generation(
@@ -99,6 +123,7 @@ VertexGenerationMap tree_generation(
         std::vector<GraphType::vertex_descriptor>(),
         const VertexGenerationMap &input_fixed_generation_map =
                 VertexGenerationMap(),
+        const AnomalyParameters &anomaly_parameters = AnomalyParameters(),
         const bool verbose = false);
 
 /**

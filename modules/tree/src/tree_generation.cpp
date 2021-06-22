@@ -37,6 +37,7 @@ tree_generation(const GraphType &graph,
                 const size_t &num_of_edge_points_to_compute_angle,
                 const std::vector<GraphType::vertex_descriptor> &input_roots,
                 const VertexGenerationMap &input_fixed_generation_map,
+                const AnomalyParameters &anomaly_parameters,
                 const bool verbose) {
     using vertex_descriptor = GraphType::vertex_descriptor;
     // Start the visit at the root
@@ -124,7 +125,11 @@ tree_generation(const GraphType &graph,
                           input_fix_generation.second << std::endl;
         }
     }
-    // Store anomalies, targets with bigger radius than its source.
+
+    // Store anomalies satisfying all the following points:
+    // - targets with bigger radius than source,
+    // - end points (degree 1)
+    // - number of edge points is lesser than:
     TreeGenerationVisitor<GraphType>::VertexAnomalies vertex_anomalies;
     // Start the visit from root
     TreeGenerationVisitor<GraphType> visitor(
@@ -134,7 +139,9 @@ tree_generation(const GraphType &graph,
             keep_generation_if_angle_less_than,
             increase_generation_if_angle_greater_than,
             num_of_edge_points_to_compute_angle,
-            spatial_nodes_position_are_in_physical_space, vertex_anomalies,
+            spatial_nodes_position_are_in_physical_space,
+            vertex_anomalies,
+            anomaly_parameters,
             verbose);
 
     using ColorMap = std::map<vertex_descriptor, boost::default_color_type>;

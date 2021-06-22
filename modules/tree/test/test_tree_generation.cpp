@@ -184,6 +184,7 @@ TEST_F(TreeFixture, tree_generation) {
     const size_t num_of_edge_points_to_compute_angle = 5;
     const std::vector<SG::GraphType::vertex_descriptor> input_roots;
     const SG::VertexGenerationMap input_fix_generation_map;
+    const SG::AnomalyParameters anomaly_parameters;
     const bool verbose = true;
     const auto vertex_generation_map =
             SG::tree_generation(g0, distance_map_image,
@@ -193,7 +194,9 @@ TEST_F(TreeFixture, tree_generation) {
                                 increase_generation_if_angle_greater_than,
                                 num_of_edge_points_to_compute_angle,
                                 input_roots,
-                                input_fix_generation_map, verbose);
+                                input_fix_generation_map,
+                                anomaly_parameters,
+                                verbose);
     const std::unordered_map<GraphType::vertex_descriptor, size_t>
             expected_vertex_generation_map({
                     {0, 1}, // root
@@ -223,6 +226,7 @@ TEST_F(TreeFixture, tree_generation_with_input_fixture_map) {
     const double increase_generation_if_angle_greater_than = 40;
     const size_t num_of_edge_points_to_compute_angle = 5;
     const std::vector<SG::GraphType::vertex_descriptor> input_roots;
+    const SG::AnomalyParameters anomaly_parameters;
     const bool verbose = true;
 
     const std::string input_fix_generation_map_file =
@@ -240,7 +244,9 @@ TEST_F(TreeFixture, tree_generation_with_input_fixture_map) {
                                 increase_generation_if_angle_greater_than,
                                 num_of_edge_points_to_compute_angle,
                                 input_roots,
-                                input_fix_generation_map, verbose);
+                                input_fix_generation_map,
+                                anomaly_parameters,
+                                verbose);
     std::unordered_map<GraphType::vertex_descriptor, size_t>
             expected_vertex_generation_map({
                     {0, 1}, // root
@@ -293,6 +299,7 @@ TEST_F(TreeFixtureMultipleComponents, tree_generation_with_multiple_components) 
     const double increase_generation_if_angle_greater_than = 40;
     const size_t num_of_edge_points_to_compute_angle = 5;
     const std::vector<SG::GraphType::vertex_descriptor> input_roots = {0,10};
+    const SG::AnomalyParameters anomaly_parameters;
     const bool verbose = true;
 
     const std::string input_fix_generation_map_file =
@@ -310,7 +317,9 @@ TEST_F(TreeFixtureMultipleComponents, tree_generation_with_multiple_components) 
                                 increase_generation_if_angle_greater_than,
                                 num_of_edge_points_to_compute_angle,
                                 input_roots,
-                                input_fix_generation_map, verbose);
+                                input_fix_generation_map,
+                                anomaly_parameters,
+                                verbose);
     std::unordered_map<GraphType::vertex_descriptor, size_t>
             expected_vertex_generation_map({
                     {0, 1}, // root

@@ -27,6 +27,25 @@ using namespace SG;
 
 void init_tree_generation(py::module &m) {
 
+  py::class_<AnomalyParameters>(m, "AnomalyParameters",
+R"(Parameters to mark nodes/edges as anomalies in tree_generation_visitor)")
+    .def(py::init())
+    .def_readwrite("num_edge_points_for_short",
+        &AnomalyParameters::num_edge_points_for_short,
+R"(Number of edge points to consider an edge short
+Used for aneurysms for example -- depends heavily on data --
+)")
+    .def_readwrite("decrease_radius_ratio_factor", &AnomalyParameters::decrease_radius_ratio_factor,
+R"(Radio (diameter) parameter. This factor is multiplied
+with the tree_generation parameter:
+decrease_radius_ratio_to_increase_generation, to mark it as an anomaly.
+)")
+    .def("__repr__", [](const AnomalyParameters &self) {
+        std::stringstream os;
+        SG::print(self, os);
+        return os.str();
+      });
+
     m.def("tree_generation", &tree_generation,
           R"(
 Associate to each node of the graph a generation based on the branching of
@@ -95,6 +114,7 @@ verbose: Bool [False]
           py::arg("num_of_edge_points_to_compute_angle") = 5,
           py::arg("input_roots") = std::vector<GraphType::vertex_descriptor>(),
           py::arg("input_fixed_generation_map") = SG::VertexGenerationMap(),
+          py::arg("anomaly_parameters") = SG::AnomalyParameters(),
           py::arg("verbose") = false);
 
     /*********************************************/

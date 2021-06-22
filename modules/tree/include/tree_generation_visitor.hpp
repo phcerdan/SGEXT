@@ -24,6 +24,7 @@
 #include "array_utilities.hpp"
 #include "rng.hpp"           // for RNG::pi
 #include "image_types.hpp" // for FloatImageType
+#include "tree_generation.hpp" // for AnomalyParameters
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/breadth_first_search.hpp>
@@ -35,6 +36,7 @@
 #include <unordered_map>
 
 namespace SG {
+
 
 /**
  * Use BFS (Breadth first search/visitor) to compute generations of a tree-like
@@ -101,6 +103,7 @@ struct TreeGenerationVisitor : public boost::default_bfs_visitor {
             const size_t &num_of_edge_points_to_compute_angle = 5,
             const bool &spatial_nodes_position_are_in_physical_space = false,
             VertexAnomalies &vertex_anomalies = VertexAnomalies(),
+            const AnomalyParameters &anomaly_parameters = AnomalyParameters(),
             const bool &verbose = false)
             : m_vertex_to_generation_map(vertex_to_generation_map),
               m_distance_map_image(distance_map_image),
@@ -117,7 +120,9 @@ struct TreeGenerationVisitor : public boost::default_bfs_visitor {
                       num_of_edge_points_to_compute_angle),
               m_spatial_nodes_position_are_in_physical_space(
                       spatial_nodes_position_are_in_physical_space),
-              m_vertex_anomalies(vertex_anomalies), m_verbose(verbose) {}
+              m_vertex_anomalies(vertex_anomalies),
+              m_anomaly_parameters(anomaly_parameters),
+              m_verbose(verbose) {}
 
     // Copy constructor. The breadth_first_search takes a copy of the input
     // visitor.
@@ -139,6 +144,7 @@ struct TreeGenerationVisitor : public boost::default_bfs_visitor {
               m_spatial_nodes_position_are_in_physical_space(
                       other.m_spatial_nodes_position_are_in_physical_space),
               m_vertex_anomalies(other.m_vertex_anomalies),
+              m_anomaly_parameters(other.m_anomaly_parameters),
               m_vertex_already_increased(other.m_vertex_already_increased),
               m_verbose(other.m_verbose){};
 
@@ -197,6 +203,11 @@ struct TreeGenerationVisitor : public boost::default_bfs_visitor {
      * radius is greater than the source radius.
      */
     VertexAnomalies &m_vertex_anomalies;
+
+    /**
+     * Parameters to mark nodes/edges as anomalies
+     */
+    const AnomalyParameters &m_anomaly_parameters;
 
     /**
      * Internal map to check if a vertex has been already increased. Used
@@ -929,10 +940,12 @@ struct TreeGenerationVisitor : public boost::default_bfs_visitor {
         // }
         // We consider an anomaly if target has similar radius than source
         // and it is a short branch.
-        if (decrease_ratio <= m_decrease_radius_ratio_to_increase_generation &&
-            input_sg[e].edge_points.size() < 20 &&
+        if (decrease_ratio <=
+             m_decrease_radius_ratio_to_increase_generation *
+             m_anomaly_parameters.decrease_radius_ratio_factor &&
+            input_sg[e].edge_points.size() <= m_anomaly_parameters.num_edge_points_for_short &&
             boost::degree(target, input_sg) == 1) {
-            m_vertex_anomalies[target] = 1.;
+            m_vertex_anomalies[target] = radius_ratio;
         }
 
         /* *****************************************************************/

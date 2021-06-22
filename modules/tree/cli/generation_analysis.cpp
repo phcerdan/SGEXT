@@ -125,6 +125,22 @@ Warning: This is not an index, but a count.)");
   The algorithm won't modify the generation on those vertex.
   Empty by default.)");
 
+    opt_desc.add_options()(
+            "anomaly_num_edge_points_for_short",
+            po::value<size_t>()->default_value(20),
+R"(AnomalyParameters:
+Number of edge points to consider an edge short
+Used for aneurysms for example -- depends heavily on data --.)");
+
+    opt_desc.add_options()(
+            "anomaly_decrease_radius_ratio_factor",
+            po::value<double>()->default_value(1.0),
+R"(AnomalyParameters:
+Radio (diameter) parameter. This factor is multiplied
+with the tree_generation parameter:
+decrease_radius_ratio_to_increase_generation, to mark it as an anomaly.
+)");
+
     po::variables_map vm;
     try {
         po::store(po::parse_command_line(argc, argv, opt_desc), vm);
@@ -164,6 +180,11 @@ Warning: This is not an index, but a count.)");
             vm["input_roots"].as<std::vector<size_t>>();
     const std::string input_fixed_generation_map_file =
             vm["input_fixed_generation_map_file"].as<std::string>();
+    // AnomalyParameters
+    const size_t anomaly_num_edge_points_for_short =
+            vm["anomaly_num_edge_points_for_short"].as<size_t>();
+    const double anomaly_decrease_radius_ratio_factor =
+            vm["anomaly_decrease_radius_ratio_factor"].as<double>();
 
     /* ************ Validation ************/
 
@@ -223,6 +244,12 @@ Warning: This is not an index, but a count.)");
                     : SG::read_vertex_to_generation_map(
                               input_fixed_generation_map_path.string());
 
+    // Create AnomalyParameters struct from input parameters
+    const auto anomaly_parameters = SG::AnomalyParameters({
+        anomaly_num_edge_points_for_short,
+        anomaly_decrease_radius_ratio_factor
+        });
+
     /* ******** Execute tree_generation *************/
 
     const auto vertex_to_generation_map =
@@ -233,7 +260,9 @@ Warning: This is not an index, but a count.)");
                                 increase_generation_if_angle_greater_than,
                                 num_of_edge_points_to_compute_angle,
                                 input_roots,
-                                input_fixed_generation_map, verbose);
+                                input_fixed_generation_map,
+                                anomaly_parameters,
+                                verbose);
 
     /* ******** Write Output ***************/
     const std::string parameters_append =
