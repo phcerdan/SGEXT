@@ -466,7 +466,7 @@ void write_poly_data(vtkPolyData *poly_data,
     const std::string file_ext =
             itksys::SystemTools::GetFilenameLastExtension(filename);
 
-    if (file_ext == ".vtk" || file_ext == ".vtu") {
+    if (file_ext == ".vtk" || file_ext == ".vtu" || file_ext == ".vtp") {
         vtkNew<vtkXMLPolyDataWriter> vtkMeshWriter;
         vtkMeshWriter->SetInputData(poly_data);
         vtkMeshWriter->SetFileName(filename.c_str());
@@ -485,7 +485,7 @@ void write_poly_data(vtkPolyData *poly_data,
     //   }
     else {
         throw std::runtime_error("Unrecognized output file extension: " +
-                                 file_ext + ". Use .vtk or .vtu.");
+                                 file_ext + ". Use .vtk or .vtu or .vtp.");
     }
 }
 
