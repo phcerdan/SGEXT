@@ -14,7 +14,7 @@ if(POLICY CMP0077)
 endif()
 
 project(SGEXT
-  VERSION 0.9.15
+  VERSION 0.9.16
   LANGUAGES CXX C)
 message(STATUS "SGEXT version: ${SGEXT_VERSION}")
 
