@@ -25,11 +25,7 @@ else()
 endif()
 
 option(WITH_VTK "Build VTK, ITK will use it too, if WITH_ITK is enabled" ON)
-option(WITH_MODERN_VTK "Build VTK9, ITK will use it too, if WITH_ITK is enabled" OFF)
 option(USE_EXTERNAL_VTK "Do not install VTK here, but assume VTK_DIR is provided for other dependencies" OFF)
-if(WITH_MODERN_VTK AND WITH_VTK)
-  message(FATAL_ERROR "WITH_MODERN_VTK and WITH_VTK are both ON. Choose only one.")
-endif()
 option(WITH_ITK "Build ITK, DGtal will use it too." ON)
 option(WITH_OPENMP "Build DGtal with OPENMP support." OFF)
 option(WITH_TBB "Build TBB. Only for Linux (gcc). Needed for gcc for include <execution> (stl_parallel)." ON)
@@ -41,15 +37,14 @@ mark_as_advanced(ZLIB_FORCE_STATIC)
 message(STATUS "OUTPUT_BUILD_DIR: ${OUTPUT_BUILD_DIR}")
 message(STATUS "NUM_CORES: ${NUM_CORES}")
 message(STATUS "WITH_VTK: ${WITH_VTK}")
-message(STATUS "WITH_MODERN_VTK: ${WITH_MODERN_VTK}")
 message(STATUS "WITH_ITK: ${WITH_ITK}")
 message(STATUS "WITH_OPENMP: ${WITH_OPENMP}")
 message(STATUS "WITH_TBB: ${WITH_TBB}")
 message(STATUS "WITH_QT5: ${WITH_QT5}")
 
-if(USE_EXTERNAL_VTK AND (WITH_VTK OR WITH_MODERN_VTK))
-  message(FATAL_ERROR "USE_EXTERNAL_VTK is ON, but either WITH_VTK or WITH_MODERN_VTK is also ON. "
-    "Either set USE_EXTERNAL_VTK to OFF or set WITH_VTK AND WITH_MODERN_VTK to OFF")
+if(USE_EXTERNAL_VTK AND (WITH_VTK))
+  message(FATAL_ERROR "USE_EXTERNAL_VTK is ON, but either WITH_VTK is also ON. "
+    "Either set USE_EXTERNAL_VTK to OFF or set WITH_VTK to OFF")
 endif()
 if(USE_EXTERNAL_VTK AND NOT VTK_DIR)
   message(FATAL_ERROR "USE_EXTERNAL_VTK=ON requires providing a VTK_DIR")
@@ -79,55 +74,18 @@ endif()
 ##################################################
 ##################### VTK #######################
 ##################################################
-if(WITH_VTK)
-  # set(VTK_GIT_TAG v8.2.0)
-  set(VTK_VERSION_MAJOR 8)
-  set(VTK_VERSION_MINOR 2)
-  set(VTK_VERSION_PATCH 0)
-  set(VTK_VERSION_DOTS "${VTK_VERSION_MAJOR}.${VTK_VERSION_MINOR}.${VTK_VERSION_PATCH}")
-  message(STATUS "VTK_VERSION: ${VTK_VERSION_DOTS}")
-  set(VTK_URL "https://github.com/Kitware/VTK/archive/v${VTK_VERSION_DOTS}.zip")
-  set(VTK_URL_MD5 79db2378c57b7ad5b378929f0c5b4212)
-  set(VTK_BUILD_DIR ${OUTPUT_BUILD_DIR}/VTK-build)
-  set(VTK_SRC_FOLDER_NAME VTK-src)
-  set(VTK_SRC_DIR ${OUTPUT_BUILD_DIR}/${VTK_SRC_FOLDER_NAME})
-  if(WITH_QT5)
-    set(_extra_qt5_options
-      -DModule_vtkGUISupportQt=ON
-      )
-  endif()
-ExternalProject_Add(ep_vtk
-  URL ${VTK_URL}
-  URL_MD5 ${VTK_URL_MD5}
-  CMAKE_GENERATOR ${CMAKE_GENERATOR}
-  SOURCE_DIR ${VTK_SRC_DIR}
-  BINARY_DIR ${VTK_BUILD_DIR}
-  CMAKE_ARGS
-  -DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}
-  -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
-  -DBUILD_SHARED_LIBS:BOOL=OFF
-  -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
-  -DBUILD_TESTING:BOOL=OFF
-  -DBUILD_EXAMPLES:BOOL=OFF
-  ${_propagate_build_type}
-  ${_extra_qt5_options}
-  ${_cmake_os_flags}
-  INSTALL_COMMAND ""
-  )
+# Install VTKv9 from master
+set(VTK_GIT_TAG 5221d3ad458e106390aefe47f390be6cdee1318b) # 1 July 2021
+message(STATUS "VTK_VERSION: ${VTK_GIT_TAG}")
+set(VTK_BUILD_DIR ${OUTPUT_BUILD_DIR}/VTK-build)
+set(VTK_SRC_FOLDER_NAME VTK-src)
+set(VTK_SRC_DIR ${OUTPUT_BUILD_DIR}/${VTK_SRC_FOLDER_NAME})
+set(VTK_GIT_REPOSITORY "https://github.com/Kitware/VTK.git")
+if(WITH_QT5)
+  set(_extra_qt5_options
+    -DModule_vtkGUISupportQt=ON
+    )
 endif()
-
-if(WITH_MODERN_VTK)
-  set(VTK_GIT_TAG 13c8c85aa8776a43abab71ed887f3ad375f24a22) # 14 January 2021
-  message(STATUS "VTK_VERSION: ${VTK_GIT_TAG}")
-  set(VTK_BUILD_DIR ${OUTPUT_BUILD_DIR}/VTK-build)
-  set(VTK_SRC_FOLDER_NAME VTK-src)
-  set(VTK_SRC_DIR ${OUTPUT_BUILD_DIR}/${VTK_SRC_FOLDER_NAME})
-  set(VTK_GIT_REPOSITORY "https://github.com/Kitware/VTK.git")
-  if(WITH_QT5)
-    set(_extra_qt5_options
-      -DModule_vtkGUISupportQt=ON
-      )
-  endif()
 ExternalProject_Add(ep_vtk
   GIT_REPOSITORY ${VTK_GIT_REPOSITORY}
   GIT_TAG ${VTK_GIT_TAG}
@@ -148,19 +106,18 @@ ExternalProject_Add(ep_vtk
   ${_cmake_os_flags}
   INSTALL_COMMAND ""
   )
-endif()
 
 #################################################
 ################### ITK #######################
 #################################################
 if(WITH_ITK)
-  set(ITK_GIT_TAG 87451e3de3acb2903c1d46b99ff5f03d324e02bb) # Master 22 March 2021 (close to 5.2rc03)
+  set(ITK_GIT_TAG c6f4685638ea8c78457fd186d930a605a0a093cc) # Master Jul 1 2021 (fix gcc11)
   message(STATUS "ITK_VERSION: ${ITK_GIT_TAG}")
   set(ITK_BUILD_DIR ${OUTPUT_BUILD_DIR}/ITK-build)
   set(ITK_SRC_FOLDER_NAME ITK-src)
   set(ITK_SRC_DIR ${OUTPUT_BUILD_DIR}/${ITK_SRC_FOLDER_NAME})
   set(ITK_GIT_REPOSITORY "https://github.com/InsightSoftwareConsortium/ITK.git")
-  if(WITH_VTK OR WITH_MODERN_VTK OR USE_EXTERNAL_VTK)
+  if(WITH_VTK OR USE_EXTERNAL_VTK)
     set(_ITK_depends ep_vtk)
     set(_ITK_optional_cmake_args
       -DModule_ITKVtkGlue:BOOL=ON

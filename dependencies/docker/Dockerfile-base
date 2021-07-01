@@ -85,8 +85,9 @@ RUN git config --global advice.detachedHead false
 #     chmod +x $BUILD_PATH/miniconda/bin/python
 # ENV PATH $BUILD_PATH/miniconda/bin:${PATH}
 
-# Install VTKv8 latest release
-ENV VTK_GIT_TAG v8.2.0
+# Install VTKv9 from master
+# Jul 1 2021
+ENV VTK_GIT_TAG 5221d3ad458e106390aefe47f390be6cdee1318b
 ENV VTK_BUILD_DIR ${BUILD_PATH}/VTK-build
 ENV VTK_SRC_FOLDER_NAME VTK-src
 ENV VTK_SRC_DIR ${BUILD_PATH}/${VTK_SRC_FOLDER_NAME}
@@ -107,8 +108,8 @@ RUN git clone https://gitlab.kitware.com/vtk/vtk.git ${VTK_SRC_FOLDER_NAME} && \
     find ../VTK* -depth -name .git -exec rm -rf '{}' \;
 
 # Install ITKv5 from git
-# More modern than v5.2rc03
-ENV ITK_GIT_TAG 87451e3de3acb2903c1d46b99ff5f03d324e02bb
+# More modern than v5.2rc03. Fix gcc11
+ENV ITK_GIT_TAG c6f4685638ea8c78457fd186d930a605a0a093cc
 ENV ITK_BUILD_DIR ${BUILD_PATH}/ITK-build
 ENV ITK_SRC_FOLDER_NAME ITK-src
 ENV ITK_SRC_DIR ${BUILD_PATH}/${ITK_SRC_FOLDER_NAME}
