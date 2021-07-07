@@ -227,7 +227,12 @@ bool
                 }
                 return edges_descriptors;
               }, R"(Returns a tuple with all edges of the graph.)"
-            );
+            )
+            .def("add_vertex",
+                 [](GraphType &graph, const SpatialNode &sn) {
+                    return boost::add_vertex(sn, graph);
+                 }, py::arg("spatial_node") = SpatialNode(),
+                 R"(Add a vertex to the graph. A SpatialNode can be optionally provided)");
 
     // return type: Not wrapped
     // .def_readwrite("edges", &GraphType::m_edges);
@@ -241,6 +246,12 @@ bool
                   py::arg("spatial_edge"), py::arg("graph"),
         R"(Add edge from source to target vertices with the input spatial edge.)"
                );
+    mgraph.def("add_vertex",
+                 [](const SpatialNode &sn, GraphType &graph) {
+                    return boost::add_vertex(sn, graph);
+                 }, py::arg("spatial_node") = SpatialNode(), py::arg("graph"),
+                 R"(Add a vertex to the graph. A SpatialNode can be optionally provided)"
+                 );
     mgraph.def("source",
                [](const GraphType::edge_descriptor &u, const GraphType &graph) {
                    return boost::source(u, graph);
