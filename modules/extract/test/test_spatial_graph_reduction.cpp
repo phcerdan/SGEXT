@@ -239,7 +239,7 @@ struct sg_easy_centered : public SpatialGraphBaseFixture {
 struct sg_extra_connected_junctions : public SpatialGraphBaseFixture {
     sg_extra_connected_junctions() {
         using boost::add_edge;
-        this->g = GraphType(6);
+        this->g = GraphType(7);
         // Add edge with an associated SpatialEdge at construction.
         SG::PointType n3{{0, 3, 0}};
         SG::PointType n2{{0, 2, 0}};

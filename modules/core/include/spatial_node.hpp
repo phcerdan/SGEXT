@@ -36,7 +36,7 @@ struct SpatialNode {
     /// Use Array to store the position.
     using PointType = ArrayUtilities::Array3D;
     /** Position of node. */
-    PointType pos;
+    PointType pos = PointType{};
 };
 
 /* Stream operators */
