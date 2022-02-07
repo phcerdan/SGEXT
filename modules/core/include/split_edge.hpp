@@ -63,7 +63,7 @@ split_edge(const PointType &pos,
         auto index_ep = std::distance(std::begin(ep), found_it);
         return split_edge(index_ep, ed, graph);
     } else {
-        SplitEdge<SpatialGraphType> splitEdge;
+        SplitEdge<SpatialGraphType> splitEdge{};
         splitEdge.point_exist_in_edge = false;
         return splitEdge;
     }
@@ -85,7 +85,7 @@ split_edge(const size_t edge_point_index,
                            std::to_string(edge_point_index) +
                            ") is too large for the input edge_descriptor");
     }
-    SplitEdge<SpatialGraphType> splitEdge;
+    SplitEdge<SpatialGraphType> splitEdge{};
     splitEdge.point_exist_in_edge = true;
     splitEdge.edge_point_index = edge_point_index;
 

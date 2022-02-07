@@ -103,7 +103,7 @@ AddGraphPeninsulasResult add_graph_peninsulas(
         }
 
         // Locate the touching point
-        GraphType::vertex_descriptor already_added_vertex;
+        GraphType::vertex_descriptor already_added_vertex{};
         SplitEdge<GraphType> splitEdge;
         if (touching_descriptors[comp_graph_index].size() == 1) {
             const auto &touching_extended_descriptor =
