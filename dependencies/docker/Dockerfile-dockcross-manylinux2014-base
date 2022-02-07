@@ -59,7 +59,7 @@ RUN git clone --single-branch https://github.com/InsightSoftwareConsortium/ITK.g
 
 ############# BOOST ##############
 ENV BOOST_VERSION_MAJOR=1
-ENV BOOST_VERSION_MINOR=75
+ENV BOOST_VERSION_MINOR=78
 ENV BOOST_VERSION_PATCH=0
 ENV BOOST_VERSION ${BOOST_VERSION_MAJOR}_${BOOST_VERSION_MINOR}_${BOOST_VERSION_PATCH}
 ENV BOOST_VERSION_DOTS ${BOOST_VERSION_MAJOR}.${BOOST_VERSION_MINOR}.${BOOST_VERSION_PATCH}
@@ -69,7 +69,7 @@ ENV BOOST_BUILD_DIR ${BUILD_PATH}/boost-build
 ENV BOOST_CMAKE_CONFIG_FOLDER ${BOOST_BUILD_DIR}/lib/cmake/Boost-${BOOST_VERSION_DOTS}
 ENV BOOST_GIT_REPOSITORY https://github.com/boostorg/boost
 ENV BOOST_GIT_TAG boost-${BOOST_VERSION_DOTS}
-ENV BOOST_URL "https://sourceforge.net/projects/boost/files/boost/${BOOST_VERSION_DOTS}/boost_${BOOST_VERSION}.tar.gz/download"
+ENV BOOST_URL "https://boostorg.jfrog.io/artifactory/main/release/${BOOST_VERSION_DOTS}/source/boost_${BOOST_VERSION}.tar.gz"
 WORKDIR $BUILD_PATH
 RUN wget ${BOOST_URL} -O boost_${BOOST_VERSION}.tar.gz && \
     mkdir ${BOOST_SRC_DIR} && \

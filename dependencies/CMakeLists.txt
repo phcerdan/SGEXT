@@ -150,15 +150,15 @@ endif()
 ################### BOOST #######################
 #################################################
 set(BOOST_VERSION_MAJOR 1)
-set(BOOST_VERSION_MINOR 75)
+set(BOOST_VERSION_MINOR 78)
 set(BOOST_VERSION_PATCH 0)
 set(BOOST_VERSION "${BOOST_VERSION_MAJOR}_${BOOST_VERSION_MINOR}_${BOOST_VERSION_PATCH}")
 set(BOOST_VERSION_DOTS "${BOOST_VERSION_MAJOR}.${BOOST_VERSION_MINOR}.${BOOST_VERSION_PATCH}")
 message(STATUS "BOOST_VERSION: ${BOOST_VERSION_DOTS}")
 set(BOOST_GIT_REPOSITORY "https://github.com/boostorg/boost")
 set(BOOST_GIT_TAG "boost-${BOOST_VERSION_DOTS}")
-set(BOOST_URL "https://sourceforge.net/projects/boost/files/boost/${BOOST_VERSION_DOTS}/boost_${BOOST_VERSION}.tar.gz/download")
-set(BOOST_URL_HASH SHA256=c66e88d5786f2ca4dbebb14e06b566fb642a1a6947ad8cc9091f9f445134143f)
+set(BOOST_URL "https://boostorg.jfrog.io/artifactory/main/release/${BOOST_VERSION_DOTS}/source/boost_${BOOST_VERSION}.tar.gz")
+set(BOOST_URL_HASH SHA256=94ced8b72956591c4775ae2207a9763d3600b30d9d7446562c552f0a14a63be7)
 
 # SGEXT_CMAKE_BUILD_TYPE always exists (even in MultiConfig)
 string(TOLOWER ${SGEXT_CMAKE_BUILD_TYPE} _boost_variant)
