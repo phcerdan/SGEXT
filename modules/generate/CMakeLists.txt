@@ -24,7 +24,13 @@ try_compile(_has_parallel_stl
   LINK_LIBRARIES  ${_parallel_stl_extra_libraries}
   )
 
-if(_has_parallel_stl)
+set(_enable_tbb FALSE)
+if(_has_parallel_stl AND _compiler_is_gnu AND TBB_FOUND)
+  set(_enable_tbb TRUE)
+  message(STATUS "tbb enabled")
+endif()
+
+if(_enable_tbb)
   message(STATUS "module generate -- stl header <execution> is available.")
   if(_compiler_is_gnu)
     message(STATUS "Using TBB from ${TBB_INCLUDE_DIR}")
@@ -118,7 +124,7 @@ set(SG_MODULE_INTERNAL_DEPENDS
   PERMCore # From perm-montecarlo
   )
 set(_optional_depends "")
-if(_has_parallel_stl AND _compiler_is_gnu)
+if(_enable_tbb)
   set(SG_REQUIRES_TBB TRUE PARENT_SCOPE)
   list(APPEND _optional_depends ${_parallel_stl_extra_libraries})
 endif()
@@ -149,7 +155,7 @@ target_include_directories(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} PUBLIC
 
 if(_has_parallel_stl)
   target_compile_definitions(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} PUBLIC -DWITH_PARALLEL_STL)
-  if(_compiler_is_gnu)
+  if(_enable_tbb)
     target_include_directories(${SG_MODULE_${SG_MODULE_NAME}_LIBRARY} PUBLIC ${TBB_INCLUDE_DIR})
   endif()
 endif()
