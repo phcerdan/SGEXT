@@ -1,1 +1,1 @@
-scikit-build
+scikit-build>=0.16.4
