@@ -323,7 +323,7 @@ if(SG_WRAP_PYTHON)
   # But not to the install tree.
   # External modules can link to SGEXT::pybind11 or SGEXT::module (only from the build tree)
   # And then:
-  # include(${SGEXT_DIR}/_deps/pybind11-src/tools/pybind11Tools.cmake)
+  # include(${SGEXT_DIR}/_deps/pybind11-src/tools/pybind11NewTools.cmake)
   # to access the same pybind11_add_module CMake function.
   set(_targets_to_export ${_targets_to_export} pybind11::pybind11 pybind11::module pybind11_headers)
 endif()

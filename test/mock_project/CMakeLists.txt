@@ -19,7 +19,7 @@ if(SGEXT_WITH_WRAP)
   # Inlude the macro pybind11_add_module (needs SGEXT from a build tree)
 
   list(APPEND CMAKE_MODULE_PATH "${SGEXT_DIR}/_deps/pybind11-src/tools")
-  include(${SGEXT_DIR}/_deps/pybind11-src/tools/pybind11Tools.cmake)
+  include(${SGEXT_DIR}/_deps/pybind11-src/tools/pybind11NewTools.cmake)
   pybind11_add_module(_mock
     SHARED
     mock_module_py.cpp # Where module is added
