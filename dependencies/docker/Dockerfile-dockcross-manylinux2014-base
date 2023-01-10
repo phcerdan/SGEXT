@@ -13,7 +13,7 @@ ENV SGEXT_CMAKE_BUILD_TYPE Release
 RUN gosu root yum install -y libXt-devel mesa-libGL-devel
 # Install VTKv9 from master
 # Jul 1 2021
-ENV VTK_GIT_TAG 5221d3ad458e106390aefe47f390be6cdee1318b
+ENV VTK_GIT_TAG v9.2.5
 ENV VTK_BUILD_DIR ${BUILD_PATH}/VTK-build
 ENV VTK_SRC_FOLDER_NAME VTK-src
 ENV VTK_SRC_DIR ${BUILD_PATH}/${VTK_SRC_FOLDER_NAME}
@@ -35,8 +35,7 @@ RUN git clone --single-branch https://gitlab.kitware.com/vtk/vtk.git ${VTK_SRC_F
 
 ############# ITK ##############
 # Install ITKv5 release from git
-# More modern than: v5.2rc03, fix gcc11
-ENV ITK_GIT_TAG c6f4685638ea8c78457fd186d930a605a0a093cc
+ENV ITK_GIT_TAG v5.3.0
 ENV ITK_BUILD_DIR ${BUILD_PATH}/ITK-build
 ENV ITK_SRC_FOLDER_NAME ITK-src
 ENV ITK_SRC_DIR ${BUILD_PATH}/${ITK_SRC_FOLDER_NAME}

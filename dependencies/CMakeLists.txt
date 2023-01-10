@@ -1,7 +1,13 @@
 cmake_minimum_required(VERSION 3.13.2)
 project(sgext-dependencies)
 
-cmake_policy(SET CMP0057 NEW) #CMP0057 allow IN_LIST inside ifs()
+if(POLICY CMP0057)
+  cmake_policy(SET CMP0057 NEW) #CMP0057 allow IN_LIST inside ifs()
+endif()
+# ExternalProject warning related to DOWNLOAD_EXTRACT_TIMESTAMP
+if(POLICY CMP0135)
+  cmake_policy(SET CMP0135 NEW)
+endif()
 
 # Download/build and optionally install 3rd party dependencies of SGEXT
 include(ExternalProject)
@@ -75,7 +81,7 @@ endif()
 ##################### VTK #######################
 ##################################################
 # Install VTKv9 from master
-set(VTK_GIT_TAG 5221d3ad458e106390aefe47f390be6cdee1318b) # 1 July 2021
+set(VTK_GIT_TAG v9.2.5) # 10 Jan 2023
 message(STATUS "VTK_VERSION: ${VTK_GIT_TAG}")
 set(VTK_BUILD_DIR ${OUTPUT_BUILD_DIR}/VTK-build)
 set(VTK_SRC_FOLDER_NAME VTK-src)
@@ -111,7 +117,7 @@ ExternalProject_Add(ep_vtk
 ################### ITK #######################
 #################################################
 if(WITH_ITK)
-  set(ITK_GIT_TAG c6f4685638ea8c78457fd186d930a605a0a093cc) # Master Jul 1 2021 (fix gcc11)
+  set(ITK_GIT_TAG v5.3.0) # 10 Jan 2023
   message(STATUS "ITK_VERSION: ${ITK_GIT_TAG}")
   set(ITK_BUILD_DIR ${OUTPUT_BUILD_DIR}/ITK-build)
   set(ITK_SRC_FOLDER_NAME ITK-src)
