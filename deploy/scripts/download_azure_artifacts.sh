@@ -11,7 +11,7 @@ base_command="\
   --organization=https://dev.azure.com/phcerdan \
   --project sgext \
   --run-id ${run_id}"
-artifact_names=("MacOSWheel3.6" "MacOSWheel3.7" "MacOSWheel3.8" "MacOSWheel3.9" "MacOSWheel3.10" "MacOSWheel3.11" "WindowsWheel3.6" "WindowsWheel3.7" "WindowsWheel3.8" "WindowsWheel3.9" "WindowsWheel3.10" "WindowsWheel3.11")
+artifact_names=("MacOSWheel3.7" "MacOSWheel3.8" "MacOSWheel3.9" "MacOSWheel3.10" "MacOSWheel3.11" "WindowsWheel3.7" "WindowsWheel3.8" "WindowsWheel3.9" "WindowsWheel3.10" "WindowsWheel3.11")
 # Linux
 linux_wheels_name=LinuxWheels
 linux_command="$base_command --path /tmp --artifact-name ${linux_wheels_name}"
