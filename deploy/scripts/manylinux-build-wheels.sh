@@ -27,6 +27,15 @@ for PYBIN in "${PYBINARIES[@]}"; do
     echo "PYTHON_EXECUTABLE:${PYTHON_EXECUTABLE}"
     echo "PYTHON_INCLUDE_DIR:${PYTHON_INCLUDE_DIR}"
 
+    if [[ -e /work/deploy/requirements-deploy.txt ]]; then
+      ${PYBIN}/pip install --upgrade -r /work/deploy/requirements-deploy.txt
+    elif [[ -e ${deploy_dir}/requirements-deploy.txt ]]; then
+      ${PYBIN}/pip install --upgrade -r ${deploy_dir}/requirements-deploy.txt
+    else
+        echo "requirements-deploy file not found. Need to update pip. Exiting" 1>&2
+        exit 1
+    fi
+
     # TODO: Switch BOOST_ROOT to these two when CMake is at least 3.15 and remove Boost_ROOT
     # -DCMAKE_FIND_PACKAGE_PREFER_CONFIG:BOOL=ON \
     # -DBoost_DIR:STRING=${BOOST_CMAKE_CONFIG_FOLDER} \
