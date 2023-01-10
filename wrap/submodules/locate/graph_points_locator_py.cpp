@@ -63,7 +63,7 @@ void init_graph_points_locator(py::module &m) {
             .def("delete_id", &vtkIdList::DeleteId)
             .def("intersect_with",
                  [](vtkIdList &this_id_list, vtkIdList &other_id_list) {
-                     return this_id_list.IntersectWith(other_id_list);
+                     return this_id_list.IntersectWith(&other_id_list);
                  })
             .def("get_number_of_ids", &vtkIdList::GetNumberOfIds);
 
