@@ -13,7 +13,7 @@ source "${script_dir}/manylinux-build-common.sh"
 echo "BOOST_BUILD_DIR: ${BOOST_BUILD_DIR}"
 echo "DGtal_BUILD_DIR: ${DGtal_BUILD_DIR}"
 echo "ITK_BUILD_DIR: ${ITK_BUILD_DIR}"
-# echo "VTK_BUILD_DIR: ${VTK_BUILD_DIR}"
+echo "VTK_BUILD_DIR: ${VTK_BUILD_DIR}"
 
 deploy_dir=${script_dir}/..
 pushd ${deploy_dir}
