@@ -10,6 +10,7 @@ echo "In deploy script: DEPENDENCIES_BUILD_DIR $DEPENDENCIES_BUILD_DIR"
 echo ""
 echo "$(python --version)"
 
+python -m pip install --upgrade pip
 python -m pip install cmake
 python -m pip install ninja
 python -m pip install delocate

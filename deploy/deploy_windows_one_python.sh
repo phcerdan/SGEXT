@@ -15,6 +15,7 @@ echo "pwd: $(pwd)"
 echo "script_dir: $script_dir"
 echo "$(python --version)"
 
+python -m pip install --upgrade pip
 python -m pip install cmake
 python -m pip install ninja
 python -m pip install -r ${script_dir}/requirements-deploy.txt

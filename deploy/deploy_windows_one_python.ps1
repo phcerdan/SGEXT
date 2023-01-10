@@ -5,6 +5,7 @@ echo "$(python --version)"
 
 cd $PSScriptRoot
 
+python -m pip install --upgrade pip
 python -m pip install cmake
 python -m pip install ninja
 python -m pip install -r $PSScriptRoot/requirements-deploy.txt
