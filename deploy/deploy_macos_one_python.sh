@@ -35,7 +35,7 @@ python setup.py bdist_wheel --build-type Release -G Ninja -- \
   || exit 1
   # ${PYBIN}/python setup.py clean
 
-export DEPENDENCIES_LD_LIBRARY_PATH="${DEPENDENCIES_BUILD_DIR}/VTK-build/lib:${DEPENDENCIES_BUILD_DIR}/boost-build/lib:${DEPENDENCIES_BUILD_DIR}/DGtal-build/src"
+export DEPENDENCIES_LD_LIBRARY_PATH="${DEPENDENCIES_BUILD_DIR}/VTK-build/lib:${DEPENDENCIES_BUILD_DIR}/boost-build/lib:${DEPENDENCIES_BUILD_DIR}/DGtal-build"
 
 DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:${DEPENDENCIES_LD_LIBRARY_PATH} delocate-listdeps $PWD/dist/*.whl # lists library dependencies
 DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:${DEPENDENCIES_LD_LIBRARY_PATH} delocate-wheel $PWD/dist/*.whl # copies library dependencies into wheel

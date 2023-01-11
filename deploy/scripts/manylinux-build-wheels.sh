@@ -61,7 +61,7 @@ done
 
 # auditwheel will bundle shared libraries in the wheel,
 # but they have to be found first using LD_LIBRARY_PATH
-export DEPENDENCIES_LD_LIBRARY_PATH="/work/VTK-build/lib64:/work/VTK-build/lib:/work/boost-build/lib:/work/DGtal-build/src"
+export DEPENDENCIES_LD_LIBRARY_PATH="/work/VTK-build/lib64:/work/VTK-build/lib:/work/boost-build/lib:/work/DGtal-build"
 # This step will fixup the wheel switching from 'linux' to 'manylinux2014' tag and include third party libraries
 for whl in dist/*linux_$(uname -p).whl; do
     LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${DEPENDENCIES_LD_LIBRARY_PATH} auditwheel repair ${whl} -w /work/dist/
