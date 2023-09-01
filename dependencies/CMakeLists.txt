@@ -340,33 +340,27 @@ ExternalProject_Add(ep_dgtal
 ##################################################
 if(WITH_TBB)
   if(UNIX AND NOT APPLE AND NOT _compiler_is_clang)
-    set(TBB_VERSION "2020.2")
+    set(TBB_VERSION "2021.10.0")
     message(STATUS "TBB_VERSION: ${TBB_VERSION}")
-    set(TBB_URL "https://github.com/intel/tbb/archive/v${TBB_VERSION}.tar.gz")
-    set(TBB_URL_MD5 5af6f6c2a24c2043e62e47205e273b1f)
-    set(TBB_BUILD_DIR ${OUTPUT_BUILD_DIR}/tbb-build)
-    set(TBB_SRC_FOLDER_NAME tbb-src)
+    set(TBB_URL "https://github.com/oneapi-src/oneTBB/archive/v${TBB_VERSION}/onetbb-${TBB_VERSION}.tar.gz")
+    set(TBB_URL_MD5 2caf55b3d35b53edccb33ecaf0f23402)
+    set(TBB_BUILD_DIR ${OUTPUT_BUILD_DIR}/onetbb-build)
+    set(TBB_SRC_FOLDER_NAME onetbb-src)
     set(TBB_SRC_DIR ${OUTPUT_BUILD_DIR}/${TBB_SRC_FOLDER_NAME})
-    set(TBB_MAKE_PROGRAM make) # In windows, if needed, might be changed to gmake
-    ExternalProject_Add(ep_tbb
+    ExternalProject_Add(ep_onetbb
       URL ${TBB_URL}
-      URL_MD5 ${TBB_URL_MD5}
       SOURCE_DIR ${TBB_SRC_DIR}
-      BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ""
-      BUILD_COMMAND
-      ${TBB_MAKE_PROGRAM} -j${NUM_CORES}
+      BINARY_DIR ${TBB_BUILD_DIR}
+      URL_HASH MD5=${TBB_URL_MD5}
+      CMAKE_ARGS
+        -DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}
+        -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
+        -DBUILD_SHARED_LIBS:BOOL=OFF
+        -DTBB_STRICT:BOOL=OFF
+        ${_propagate_build_type}
+        ${_cmake_os_flags}
       INSTALL_COMMAND ""
-      )
-    # This is the pseudo-install command but post-build instead
-    add_custom_command(TARGET ep_tbb
-    POST_BUILD
-    COMMAND
-      ${CMAKE_COMMAND}
-      -DTBB_SRC_DIR=${TBB_SRC_DIR}
-      -DTBB_INSTALL_DIR=${TBB_BUILD_DIR}
-      -P ${CMAKE_CURRENT_SOURCE_DIR}/install_tbb_from_build_folder.cmake
-      )
+    )
   else()
     message(WARNING "Not installing TBB for your platform (only needed in linux for gcc)")
   endif()

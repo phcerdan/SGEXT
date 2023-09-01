@@ -2,10 +2,10 @@ set -x
 
 # Following Arch package:
 # https://git.archlinux.org/svntogit/packages.git/tree/trunk/PKGBUILD?h=packages/intel-tbb
-tbb_pkgver="2020.2"
-tbb_pkgrel="1"
-tbb_url="https://github.com/intel/tbb/archive/v$tbb_pkgver.tar.gz"
-tbb_tar_file="tbb.tar.gz"
+tbb_pkgname="onetbb"
+tbb_pkgver="2021.10.0"
+tbb_url="https://github.com/oneapi-src/oneTBB/archive/v$tbb_pkgver/$tbb_pkgname-$tbb_pkgver.tar.gz"
+tbb_tar_file="onetbb.tar.gz"
 work_directory="/tmp"
 source_folder="oneTBB-$tbb_pkgver"
 make_j="12"
