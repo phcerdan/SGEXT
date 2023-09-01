@@ -25,7 +25,7 @@ set(_scripts_targets_visualize_using_qt # Using Qt (DGtal or VTK)
 set(_Boost_components Boost::program_options Boost::filesystem)
 set(_scripts_libs
     SGScripts
-    Boost::program_options
+    ${_Boost_components}
     )
 
 if(SG_MODULE_LOCATE)
