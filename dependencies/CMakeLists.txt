@@ -81,7 +81,7 @@ endif()
 ##################### VTK #######################
 ##################################################
 # Install VTKv9 from master
-set(VTK_GIT_TAG v9.2.5) # 10 Jan 2023
+set(VTK_GIT_TAG v9.3.0.rc1) # August 2023
 message(STATUS "VTK_VERSION: ${VTK_GIT_TAG}")
 set(VTK_BUILD_DIR ${OUTPUT_BUILD_DIR}/VTK-build)
 set(VTK_SRC_FOLDER_NAME VTK-src)
@@ -104,8 +104,7 @@ ExternalProject_Add(ep_vtk
   -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
   -DBUILD_SHARED_LIBS:BOOL=OFF
   -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
-  -DBUILD_TESTING:BOOL=OFF
-  -DBUILD_EXAMPLES:BOOL=OFF
+  -DVTK_BUILD_TESTING:BOOL=OFF
   -DVTK_MODULE_ENABLE_VTK_RenderingContextOpenGL2:STRING=WANT
   ${_propagate_build_type}
   ${_extra_qt5_options}
@@ -117,7 +116,7 @@ ExternalProject_Add(ep_vtk
 ################### ITK #######################
 #################################################
 if(WITH_ITK)
-  set(ITK_GIT_TAG v5.3.0) # 10 Jan 2023
+  set(ITK_GIT_TAG v5.4rc01) # 28 Jul 2023
   message(STATUS "ITK_VERSION: ${ITK_GIT_TAG}")
   set(ITK_BUILD_DIR ${OUTPUT_BUILD_DIR}/ITK-build)
   set(ITK_SRC_FOLDER_NAME ITK-src)
@@ -156,7 +155,7 @@ endif()
 ################### BOOST #######################
 #################################################
 set(BOOST_VERSION_MAJOR 1)
-set(BOOST_VERSION_MINOR 78)
+set(BOOST_VERSION_MINOR 83)
 set(BOOST_VERSION_PATCH 0)
 set(BOOST_VERSION "${BOOST_VERSION_MAJOR}_${BOOST_VERSION_MINOR}_${BOOST_VERSION_PATCH}")
 set(BOOST_VERSION_DOTS "${BOOST_VERSION_MAJOR}.${BOOST_VERSION_MINOR}.${BOOST_VERSION_PATCH}")
@@ -164,7 +163,7 @@ message(STATUS "BOOST_VERSION: ${BOOST_VERSION_DOTS}")
 set(BOOST_GIT_REPOSITORY "https://github.com/boostorg/boost")
 set(BOOST_GIT_TAG "boost-${BOOST_VERSION_DOTS}")
 set(BOOST_URL "https://boostorg.jfrog.io/artifactory/main/release/${BOOST_VERSION_DOTS}/source/boost_${BOOST_VERSION}.tar.gz")
-set(BOOST_URL_HASH SHA256=94ced8b72956591c4775ae2207a9763d3600b30d9d7446562c552f0a14a63be7)
+set(BOOST_URL_HASH SHA256=c0685b68dd44cc46574cce86c4e17c0f611b15e195be9848dfd0769a0a207628)
 
 # SGEXT_CMAKE_BUILD_TYPE always exists (even in MultiConfig)
 string(TOLOWER ${SGEXT_CMAKE_BUILD_TYPE} _boost_variant)
