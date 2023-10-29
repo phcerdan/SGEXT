@@ -67,19 +67,27 @@ Parameters
 input: BinaryImageType | FloatImageType
   input binary image
 
+standardize_axis: bool
+  if True, the output image will have an identity direction matrix.
+  Default to False
+
 interpolator: Interpolator
   Defaults to wise, that will choose Interpolator::nearest_neighbor
   for binary images, and Interpolator::linear for FloatImageType.
         )";
 
     m.def("make_isotropic",
-        py::overload_cast< const IUC3P &, const Interpolator &>(
+        py::overload_cast< const IUC3P &, const bool, const Interpolator &>(
           &SG::make_isotropic<IUC3>),
         make_isotropic_docs.c_str(),
-        py::arg("input"), py::arg("interpolator") = Interpolator::wise);
+          py::arg("input"),
+          py::arg("standardize_axis") = false,
+          py::arg("interpolator") = Interpolator::wise);
     m.def("make_isotropic",
-        py::overload_cast< const IF3P &, const Interpolator &>(
+        py::overload_cast< const IF3P &, const bool, const Interpolator &>(
           &SG::make_isotropic<IF3>),
         make_isotropic_docs.c_str(),
-        py::arg("input"), py::arg("interpolator") = Interpolator::wise);
+          py::arg("input"),
+          py::arg("standardize_axis") = false,
+          py::arg("interpolator") = Interpolator::wise);
 }

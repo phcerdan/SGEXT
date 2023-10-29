@@ -40,12 +40,15 @@ int main(int argc, char *const argv[]) {
     opt_desc.add_options()("help,h", "display this message.");
     opt_desc.add_options()("input,i", po::value<std::string>()->required(),
                            "Input image.");
-    opt_desc.add_options()("interpolator",
-            po::value<std::string>()->default_value("wise"),
-R"(Interpolator for resampler. Options: wise, linear, nearest_neighbor.
+    opt_desc.add_options()(
+            "interpolator", po::value<std::string>()->default_value("wise"),
+            R"(Interpolator for resampler. Options: wise, linear, nearest_neighbor.
 wise: [default] It will use "nearest_neighbor" for binary and label images.
       And "linear" for the rest of image types.
       )");
+    opt_desc.add_options()("standardize_axis,s",
+                           po::bool_switch()->default_value(false),
+                           "Standardize direction matrix to diagonal RAS.");
     opt_desc.add_options()("nocompress",
                            po::bool_switch()->default_value(false),
                            "Do not use compression to write output.");
@@ -75,7 +78,9 @@ wise: [default] It will use "nearest_neighbor" for binary and label images.
     std::string filename = vm["input"].as<std::string>();
     const bool verbose = vm["verbose"].as<bool>();
     const bool nocompress = vm["nocompress"].as<bool>();
-    const std::string interpolator_string = vm["interpolator"].as<std::string>();
+    const bool standardize_axis = vm["standardize_axis"].as<bool>();
+    const std::string interpolator_string =
+            vm["interpolator"].as<std::string>();
     if (static_cast<bool>(vm.count("outputFolder"))) {
         const fs::path output_folder_path{vm["outputFolder"].as<std::string>()};
         if (!fs::exists(output_folder_path)) {
@@ -115,8 +120,21 @@ wise: [default] It will use "nearest_neighbor" for binary and label images.
         std::cout << "output_full_path: " << output_full_path.string()
                   << std::endl;
     }
-    // Read file (any type?, only for 3D binary for now)
-    using PixelType = unsigned char;
+
+    // Get the pixel type from IO factory
+    using IOFactoryType = itk::ImageIOFactory;
+    auto io = IOFactoryType::CreateImageIO(filename.c_str(),
+                                           IOFactoryType::ReadMode);
+    io->SetFileName(filename);
+    io->ReadImageInformation();
+    const auto pixel_type = io->GetComponentType();
+    const auto pixel_type_str = io->GetComponentTypeAsString(pixel_type);
+    if (verbose) {
+        std::cout << "Pixel type: " << pixel_type_str << std::endl;
+    }
+
+    // Read file (any type?, only for 3D float for now)
+    using PixelType = float;
     const unsigned int Dim = 3;
     using ImageType = itk::Image<PixelType, Dim>;
     using ReaderType = itk::ImageFileReader<ImageType>;
@@ -125,24 +143,26 @@ wise: [default] It will use "nearest_neighbor" for binary and label images.
     reader->Update();
 
     SG::Interpolator interpolator;
-    if(interpolator_string == "wise") {
+    if (interpolator_string == "wise") {
         interpolator = SG::Interpolator::wise;
-    } else if(interpolator_string == "linear") {
+    } else if (interpolator_string == "linear") {
         interpolator = SG::Interpolator::linear;
-    } else if(interpolator_string == "nearest_neighbor") {
+    } else if (interpolator_string == "nearest_neighbor") {
         interpolator = SG::Interpolator::nearest_neighbor;
     } else {
-        throw std::runtime_error("invalid interpolator: " + interpolator_string);
+        throw std::runtime_error("invalid interpolator: " +
+                                 interpolator_string);
     }
 
-    auto resampled_image = SG::make_isotropic<ImageType>(reader->GetOutput(), interpolator);
+    auto resampled_image = SG::make_isotropic<ImageType>(
+            reader->GetOutput(), standardize_axis, interpolator);
 
     using WriterType = itk::ImageFileWriter<ImageType>;
     auto writer = WriterType::New();
     try {
         writer->SetFileName(output_full_path.string().c_str());
         writer->SetInput(resampled_image);
-        if(nocompress) {
+        if (nocompress) {
             writer->UseCompressionOff();
         } else {
             writer->UseCompressionOn();
@@ -159,7 +179,5 @@ wise: [default] It will use "nearest_neighbor" for binary and label images.
         std::cout << "Output: " << output_full_path.string() << std::endl;
     }
 
-
     // Write result
-
 }
