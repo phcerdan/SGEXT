@@ -19,6 +19,7 @@
  * *******************************************************************/
 
 #include "resample_image_function.hpp"
+#include "image_types.hpp"
 #include <iostream>
 // ITK
 #include <itkImageFileReader.h>
@@ -57,7 +58,8 @@ wise: [default] It will use "nearest_neighbor" for binary and label images.
                            "Folder to export the resulting binary image.");
     opt_desc.add_options()("outputFilename,e", po::value<std::string>(),
                            "FileName of the output (needs outputFolder).");
-
+    opt_desc.add_options()("is_binary", po::bool_switch()->default_value(false),
+                           "The input image is binary. If not set, will be read as float.");
     opt_desc.add_options()("verbose,v", po::bool_switch()->default_value(false),
                            "verbose output.");
 
@@ -79,6 +81,7 @@ wise: [default] It will use "nearest_neighbor" for binary and label images.
     const bool verbose = vm["verbose"].as<bool>();
     const bool nocompress = vm["nocompress"].as<bool>();
     const bool standardize_axis = vm["standardize_axis"].as<bool>();
+    const bool is_binary = vm["is_binary"].as<bool>();
     const std::string interpolator_string =
             vm["interpolator"].as<std::string>();
     if (static_cast<bool>(vm.count("outputFolder"))) {
@@ -121,27 +124,6 @@ wise: [default] It will use "nearest_neighbor" for binary and label images.
                   << std::endl;
     }
 
-    // Get the pixel type from IO factory
-    using IOFactoryType = itk::ImageIOFactory;
-    auto io = IOFactoryType::CreateImageIO(filename.c_str(),
-                                           IOFactoryType::ReadMode);
-    io->SetFileName(filename);
-    io->ReadImageInformation();
-    const auto pixel_type = io->GetComponentType();
-    const auto pixel_type_str = io->GetComponentTypeAsString(pixel_type);
-    if (verbose) {
-        std::cout << "Pixel type: " << pixel_type_str << std::endl;
-    }
-
-    // Read file (any type?, only for 3D float for now)
-    using PixelType = float;
-    const unsigned int Dim = 3;
-    using ImageType = itk::Image<PixelType, Dim>;
-    using ReaderType = itk::ImageFileReader<ImageType>;
-    auto reader = ReaderType::New();
-    reader->SetFileName(filename);
-    reader->Update();
-
     SG::Interpolator interpolator;
     if (interpolator_string == "wise") {
         interpolator = SG::Interpolator::wise;
@@ -154,30 +136,65 @@ wise: [default] It will use "nearest_neighbor" for binary and label images.
                                  interpolator_string);
     }
 
-    auto resampled_image = SG::make_isotropic<ImageType>(
-            reader->GetOutput(), standardize_axis, interpolator);
 
-    using WriterType = itk::ImageFileWriter<ImageType>;
-    auto writer = WriterType::New();
-    try {
-        writer->SetFileName(output_full_path.string().c_str());
-        writer->SetInput(resampled_image);
-        if (nocompress) {
-            writer->UseCompressionOff();
-        } else {
-            writer->UseCompressionOn();
+    if (is_binary) {
+        using ImageType = SG::BinaryImageType;
+        using ReaderType = itk::ImageFileReader<ImageType>;
+        auto reader = ReaderType::New();
+        reader->SetFileName(filename);
+        reader->Update();
+
+        auto resampled_image = SG::make_isotropic<ImageType>(
+                reader->GetOutput(), standardize_axis, interpolator);
+
+        using WriterType = itk::ImageFileWriter<ImageType>;
+        auto writer = WriterType::New();
+        try {
+            writer->SetFileName(output_full_path.string().c_str());
+            writer->SetInput(resampled_image);
+            if (nocompress) {
+                writer->UseCompressionOff();
+            } else {
+                writer->UseCompressionOn();
+            }
+            writer->Update();
+        } catch (itk::ExceptionObject &e) {
+            std::cerr << "Failure writing file: " << output_full_path.string()
+                      << std::endl;
+            std::cerr << e.what() << std::endl;
+            throw e;
         }
-        writer->Update();
-    } catch (itk::ExceptionObject &e) {
-        std::cerr << "Failure writing file: " << output_full_path.string()
-                  << std::endl;
-        std::cerr << e.what() << std::endl;
-        throw e;
+    } else {
+        using ImageType = SG::FloatImageType;
+        using ReaderType = itk::ImageFileReader<ImageType>;
+        auto reader = ReaderType::New();
+        reader->SetFileName(filename);
+        reader->Update();
+
+        auto resampled_image = SG::make_isotropic<ImageType>(
+                reader->GetOutput(), standardize_axis, interpolator);
+
+        using WriterType = itk::ImageFileWriter<ImageType>;
+        auto writer = WriterType::New();
+        try {
+            writer->SetFileName(output_full_path.string().c_str());
+            writer->SetInput(resampled_image);
+            if (nocompress) {
+                writer->UseCompressionOff();
+            } else {
+                writer->UseCompressionOn();
+            }
+            writer->Update();
+        } catch (itk::ExceptionObject &e) {
+            std::cerr << "Failure writing file: " << output_full_path.string()
+                      << std::endl;
+            std::cerr << e.what() << std::endl;
+            throw e;
+        }
     }
+
     if (verbose) {
         std::cout << "make_isotropic finished." << std::endl;
         std::cout << "Output: " << output_full_path.string() << std::endl;
     }
-
-    // Write result
 }
