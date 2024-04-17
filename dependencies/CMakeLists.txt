@@ -277,12 +277,12 @@ if(_compiler_is_gnu AND CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 10.1)
 endif()
 
 
-set(DGtal_GIT_TAG b888d821b4595564a8343e67c4a244774316e02a) # 25-Feb-2021
+set(DGtal_GIT_TAG 819b4b803f9c3d566e1bf83f1371fdc1e33fd67b) # DGtal 1.2 with patches
 message(STATUS "DGtal_VERSION: ${DGtal_GIT_TAG}")
 set(DGtal_BUILD_DIR ${OUTPUT_BUILD_DIR}/DGtal-build)
 set(DGtal_SRC_FOLDER_NAME DGtal-src)
 set(DGtal_SRC_DIR ${OUTPUT_BUILD_DIR}/${DGtal_SRC_FOLDER_NAME})
-set(DGtal_GIT_REPOSITORY "https://github.com/DGtal-team/DGtal")
+set(DGtal_GIT_REPOSITORY "https://github.com/phcerdan/DGtal")
 set(_DGtal_depends ep_boost)
 set(_DGtal_optional_cmake_args)
 if(WITH_ITK)
