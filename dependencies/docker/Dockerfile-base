@@ -65,8 +65,8 @@ WORKDIR $BUILD_PATH
 
 # Install modern cmake (to system)
 ENV CMAKE_VERSION_MAJOR 3
-ENV CMAKE_VERSION_MINOR 15
-ENV CMAKE_VERSION_PATCH 2
+ENV CMAKE_VERSION_MINOR 16
+ENV CMAKE_VERSION_PATCH 3
 ENV CMAKE_VERSION ${CMAKE_VERSION_MAJOR}.${CMAKE_VERSION_MINOR}.${CMAKE_VERSION_PATCH}
 RUN wget -qO- "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-Linux-x86_64.tar.gz" \
     | tar --strip-components=1 -xz -C /usr/local
