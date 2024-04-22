@@ -46,10 +46,10 @@ RUN apt-get update && \
 
 # Update to g++-9, needs software-properties-common for add-apt-repository
 # And add intel for modern tbb
-RUN wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
-	apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
-    sh -c 'echo deb https://apt.repos.intel.com/tbb all main > /etc/apt/sources.list.d/intel-tbb.list' && \
-    # wget https://apt.repos.intel.com/setup/intelproducts.list -O /etc/apt/sources.list.d/intelproducts.list && \
+RUN wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB && \
+	apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB && \
+    sh -c 'echo deb https://apt.repos.intel.com/oneapi all main > /etc/apt/sources.list.d/oneAPI.list' && \
+    wget https://apt.repos.intel.com/setup/intelproducts.list -O /etc/apt/sources.list.d/intelproducts.list && \
     add-apt-repository ppa:ubuntu-toolchain-r/test && \
     apt-get update && \
     apt-get install -y g++-9 \
@@ -65,8 +65,8 @@ WORKDIR $BUILD_PATH
 
 # Install modern cmake (to system)
 ENV CMAKE_VERSION_MAJOR 3
-ENV CMAKE_VERSION_MINOR 15
-ENV CMAKE_VERSION_PATCH 2
+ENV CMAKE_VERSION_MINOR 16
+ENV CMAKE_VERSION_PATCH 3
 ENV CMAKE_VERSION ${CMAKE_VERSION_MAJOR}.${CMAKE_VERSION_MINOR}.${CMAKE_VERSION_PATCH}
 RUN wget -qO- "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-Linux-x86_64.tar.gz" \
     | tar --strip-components=1 -xz -C /usr/local
