@@ -155,7 +155,7 @@ endif()
 ################### BOOST #######################
 #################################################
 set(BOOST_VERSION_MAJOR 1)
-set(BOOST_VERSION_MINOR 83)
+set(BOOST_VERSION_MINOR 85)
 set(BOOST_VERSION_PATCH 0)
 set(BOOST_VERSION "${BOOST_VERSION_MAJOR}_${BOOST_VERSION_MINOR}_${BOOST_VERSION_PATCH}")
 set(BOOST_VERSION_DOTS "${BOOST_VERSION_MAJOR}.${BOOST_VERSION_MINOR}.${BOOST_VERSION_PATCH}")
@@ -163,7 +163,7 @@ message(STATUS "BOOST_VERSION: ${BOOST_VERSION_DOTS}")
 set(BOOST_GIT_REPOSITORY "https://github.com/boostorg/boost")
 set(BOOST_GIT_TAG "boost-${BOOST_VERSION_DOTS}")
 set(BOOST_URL "https://boostorg.jfrog.io/artifactory/main/release/${BOOST_VERSION_DOTS}/source/boost_${BOOST_VERSION}.tar.gz")
-set(BOOST_URL_HASH SHA256=c0685b68dd44cc46574cce86c4e17c0f611b15e195be9848dfd0769a0a207628)
+set(BOOST_URL_HASH SHA256=be0d91732d5b0cc6fbb275c7939974457e79b54d6f07ce2e3dfdd68bef883b0b)
 
 # SGEXT_CMAKE_BUILD_TYPE always exists (even in MultiConfig)
 string(TOLOWER ${SGEXT_CMAKE_BUILD_TYPE} _boost_variant)
@@ -277,12 +277,12 @@ if(_compiler_is_gnu AND CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 10.1)
 endif()
 
 
-set(DGtal_GIT_TAG b888d821b4595564a8343e67c4a244774316e02a) # 25-Feb-2021
+set(DGtal_GIT_TAG 819b4b803f9c3d566e1bf83f1371fdc1e33fd67b) # DGtal 1.2 with patches
 message(STATUS "DGtal_VERSION: ${DGtal_GIT_TAG}")
 set(DGtal_BUILD_DIR ${OUTPUT_BUILD_DIR}/DGtal-build)
 set(DGtal_SRC_FOLDER_NAME DGtal-src)
 set(DGtal_SRC_DIR ${OUTPUT_BUILD_DIR}/${DGtal_SRC_FOLDER_NAME})
-set(DGtal_GIT_REPOSITORY "https://github.com/DGtal-team/DGtal")
+set(DGtal_GIT_REPOSITORY "https://github.com/phcerdan/DGtal")
 set(_DGtal_depends ep_boost)
 set(_DGtal_optional_cmake_args)
 if(WITH_ITK)
