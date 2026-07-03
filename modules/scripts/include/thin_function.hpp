@@ -49,7 +49,7 @@ inline std::string to_string(const SkelType & skel_en) {
     switch(skel_en)
     {
         case SkelType::end: return "end"; break;
-        case SkelType::ultimate: return "ultimate"; break;
+        case SkelType::ultimate: return "ulti"; break;
         case SkelType::isthmus1: return "isthmus1"; break;
         case SkelType::isthmus: return "isthmus"; break;
         default:
@@ -58,7 +58,7 @@ inline std::string to_string(const SkelType & skel_en) {
 }
 inline SkelType skel_string_to_enum(const std::string & skel_string) {
     if(skel_string == "end") return SkelType::end;
-    if(skel_string == "ultimate") return SkelType::ultimate;
+    if(skel_string == "ulti") return SkelType::ultimate;
     if(skel_string == "isthmus1") return SkelType::isthmus1;
     if(skel_string == "isthmus") return SkelType::isthmus;
     // for compatibility with thin_script: 1isthmus
